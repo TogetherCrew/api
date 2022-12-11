@@ -1,0 +1,107 @@
+components:
+  # ********Schemes********
+  schemas:
+    # ********User********
+    User:
+      description: See [Discord User Structure](https://discord.com/developers/docs/resources/user#user-object-user-structure) for more information
+      type: object
+      properties:
+        id:
+          type: string
+        discordId:
+          type: string
+          format: Snowflake
+        email:
+          type: string
+          format: email
+        verified:
+          type: boolean
+        avatar:
+          type: string
+          format: Hash
+      required:
+        - discordId
+      example:
+        id: 5ebac534954b54139806c112
+        discordId: "681946187490000900"
+        email: "email@yahoo.com"
+        avatar: "947f3e19e6e36a2679c6fe854b79a615"
+        verified: true
+
+    # ********Guild********
+    Guild:
+      type: object
+      description: See [Discord Guild Structure](https://discord.com/developers/docs/resources/guild#guild-object-guild-structure) for more information
+      properties:
+        id:
+          type: string
+        guildId:
+          type: string
+          format: Snowflake
+        ownerId:
+          type: string
+          format: Snowflake
+        name:
+          type: string
+        period:
+          type: string
+          format: date-time             
+        selectedChannels:
+          type: array
+          items:
+            type: object
+            properties:
+              channelId:
+                type: string
+                format: Snowflake
+              channelName:
+                type: string
+          
+      required:
+        - guildId
+        - ownerId
+      example:
+        id: 5ebac534954b54139806c112
+        guildId: "1048535753103261706"
+        ownerId: "681946187490000900"
+        name: "guildname"
+        period: Thu Dec 08 2022 11:49:12 GMT+0400
+        selectedChannels: [{
+          channelId: "1048535753103261706",
+          channelName: "channelName"
+        }]
+
+    # ********Token********
+    Token:
+      type: object
+      properties:
+        id:
+          type: string
+        token:
+          type: string
+        user:
+          type: string
+          format: Snowflake
+        type:
+          type: string
+          enum: [access, refresh,discord_access,discord_refresh ]
+        expires:
+          type: string
+          format: date-time
+        blacklisted:
+          type: boolean
+          default: false
+      required:
+        - token
+        - user
+        - type
+        - expires
+
+    # ********Error********
+    Error:
+      type: object
+      properties:
+        code:
+          type: number
+        message:
+          type: string

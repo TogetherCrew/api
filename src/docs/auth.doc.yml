@@ -1,0 +1,91 @@
+paths:
+  /api/v1/auth/login:
+    get:
+      tags:
+        - [Auth]
+      summary: Login using discord oauth2
+      description: See [Discord oauth2](https://discord.com/developers/docs/topics/oauth2#oauth2) for more information
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: "#/components/schemas/User"
+                  guild:
+                    $ref: "#/components/schemas/Guild"
+                  tokens:
+                    type: object
+                    properties:
+                      access:
+                        $ref: "#/components/schemas/Token"
+                      refresh:
+                        $ref: "#/components/schemas/Token"
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+
+
+  /api/v1/auth/refresh-tokens:
+    post:
+      tags:
+        - [Auth]
+      summary: refresh auth tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                refreshToken:
+              example:
+                refreshToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWJhYzUzNDk1NGI1NDEzOTgwNmMxMTIiLCJpYXQiOjE1ODkyOTg0ODQsImV4cCI6MTU4OTMwMDI4NH0.m1U63blB0MLej_WfB7yC2FTMnCziif9X8yzwDEfJXAg
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tokens:
+                    type: object
+                    properties:
+                      access:
+                        $ref: "#/components/schemas/Token"
+                      refresh:
+                        $ref: "#/components/schemas/Token"
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+  /api/v1/auth/logout:
+    post:
+      tags:
+        - [Auth]
+      summary: logout user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                refreshToken:
+              example:
+                refreshToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWJhYzUzNDk1NGI1NDEzOTgwNmMxMTIiLCJpYXQiOjE1ODkyOTg0ODQsImV4cCI6MTU4OTMwMDI4NH0.m1U63blB0MLej_WfB7yC2FTMnCziif9X8yzwDEfJXAg
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          description: Not found
+          $ref: "#/components/responses/NotFound"
