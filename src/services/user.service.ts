@@ -1,8 +1,6 @@
 import fetch from 'node-fetch';
 import { Snowflake } from 'discord.js';
-import { User } from '../models';
-import { IUser } from '../interfaces/User.interface';
-import { IDiscordUser } from '../interfaces/Discord.interface';
+import { IDiscordUser, IUser, User } from 'tc-dbcomm';
 
 /**
  * Create user base on discord profile

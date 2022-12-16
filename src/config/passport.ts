@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import passportJwt from 'passport-jwt'
 import config from './index';
 import { tokenTypes } from './tokens';
-import { User } from '../models';
+import { User } from 'tc-dbcomm';
 
 interface VerifiedCallback {
     (error: any, user?: any, info?: any): void;

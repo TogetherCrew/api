@@ -1,5 +1,4 @@
-import { User } from '../../../src/models';
-import { IUser } from '../../../src/interfaces/User.interface'
+import { User, IUser } from 'tc-dbcomm';
 
 describe('User model', () => {
     describe('User validation', () => {

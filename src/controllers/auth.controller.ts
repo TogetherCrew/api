@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import config from '../config';
 import { scopes, permissions } from '../config/dicord'
 import { userService, authService, tokenService, guildService } from '../services';
-import { IDiscordUser, IDiscordOathBotCallback } from '../interfaces/Discord.interface';
+import { IDiscordUser, IDiscordOathBotCallback } from 'tc-dbcomm';
 import { catchAsync, ApiError } from "../utils";
 
 const login = catchAsync(async function (req: Request, res: Response) {

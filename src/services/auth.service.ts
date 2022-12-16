@@ -1,13 +1,11 @@
 import fetch from 'node-fetch';
 import httpStatus from 'http-status';
 import config from '../config';
-import { IDiscordOathBotCallback } from '../interfaces/Discord.interface';
 import tokenService from './token.service';
 import userService from './user.service';
 import { tokenTypes } from '../config/tokens';
 import { ApiError } from '../utils';
-import { Token } from '../models';
-
+import { Token, IDiscordOathBotCallback } from 'tc-dbcomm';
 /**
  * exchange code with access token
  * @param {string} code

@@ -2,13 +2,11 @@ import jwt from 'jsonwebtoken';
 import moment from 'moment';
 import { Snowflake } from 'discord.js';
 import httpStatus from 'http-status';
-import { Token } from '../models';
 import config from '../config';
 import { tokenTypes } from '../config/tokens';
 import { ApiError } from '../utils';
-import { IToken, } from '../interfaces/Token.interface';
-import { IDiscordOathBotCallback } from '../interfaces/Discord.interface';
 import authService from './auth.service';
+import { IDiscordOathBotCallback, IToken, Token } from 'tc-dbcomm';
 
 /**
  * Generate token

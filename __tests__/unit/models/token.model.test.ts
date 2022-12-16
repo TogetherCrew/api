@@ -1,5 +1,5 @@
-import { Token } from '../../../src/models';
-import { IToken } from '../../../src/interfaces/Token.interface'
+import { Token, IToken } from 'tc-dbcomm';
+
 import moment from "moment";
 
 describe('Token model', () => {

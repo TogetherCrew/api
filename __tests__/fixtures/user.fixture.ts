@@ -1,5 +1,6 @@
 import { Types } from "mongoose"
-import { User } from "../../src/models";
+import { User } from 'tc-dbcomm';
+
 
 export const userOne = {
     _id: new Types.ObjectId(),

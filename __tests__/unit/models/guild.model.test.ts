@@ -1,5 +1,5 @@
-import { Guild } from '../../../src/models';
-import { IGuild } from '../../../src/interfaces/Guild.interface'
+import { Guild, IGuild } from 'tc-dbcomm';
+
 import moment from "moment";
 
 describe('Guild model', () => {

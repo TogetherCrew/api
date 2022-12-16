@@ -5,12 +5,10 @@ import app from '../../src/app';
 import config from '../../src/config';
 import { tokenService } from '../../src/services';
 import setupTestDB from '../utils/setupTestDB';
-import { User, Token, Guild } from '../../src/models';
 import { tokenTypes } from '../../src/config/tokens';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { authService, userService } from '../../src/services';
-import { IUser } from "../../src/interfaces/User.interface";
-import { IGuild } from '../../src/interfaces/Guild.interface';
+import { User, Token, Guild, IUser, IGuild } from 'tc-dbcomm';
 
 setupTestDB();
 

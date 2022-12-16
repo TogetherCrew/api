@@ -1,6 +1,5 @@
 import { Snowflake } from 'discord.js';
-import { Guild } from '../models';
-import { IDiscordGuild } from '../interfaces/Discord.interface';
+import { Guild, IDiscordGuild } from 'tc-dbcomm';
 
 /**
  * Create guild base on discord guild
