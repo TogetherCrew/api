@@ -1,0 +1,72 @@
+components:
+  # ********Responses********
+  responses:
+      # ********400********
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: number
+              message:
+                type: string
+          example:
+            code: 400
+            message: Bad Request
+    # ********401********
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: number
+              message:
+                type: string
+          example:
+            code: 401
+            message: Please authenticate
+
+    # ********403********
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: number
+              message:
+                type: string
+          example:
+            code: 403
+            message: Forbidden
+    # ********404********
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: number
+              message:
+                type: string
+          example:
+            code: 404
+            message: Not found
+
+
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
