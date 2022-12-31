@@ -37,8 +37,24 @@ async function getUserByDiscordId(discordId: Snowflake): Promise<IUser | null> {
     return user;
 }
 
+/**
+ * Get user guilds
+ * @param {String} accessToken
+ * @returns {Promise<Array<IDiscordGuild>>}
+ */
+async function getCurrentUserGuilds(accessToken: string) {
+    const response = await fetch('https://discord.com/api/users/@me/guilds', {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${accessToken}` }
+    });
+    return response.json();
+}
+
+
+
 export default {
     createUser,
     getUserFromDiscordAPI,
-    getUserByDiscordId
+    getUserByDiscordId,
+    getCurrentUserGuilds
 }
