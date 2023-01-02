@@ -1,5 +1,5 @@
 import httpStatus from 'http-status';
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import config from '../config';
 import { scopes, permissions } from '../config/dicord'
 import { userService, authService, tokenService, guildService } from '../services';
@@ -10,7 +10,7 @@ const login = catchAsync(async function (req: Request, res: Response) {
     res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI}&response_type=code&scope=${scopes.bot}&permissions=${permissions.ViewChannels}`);
 });
 
-const callback = catchAsync(async function (req: Request, res: Response) {
+const callback = catchAsync(async function (req: Request, res: Response, next: NextFunction) {
     const code = req.query.code as string;
     if (!code) {
         throw new ApiError(httpStatus.FORBIDDEN, req.query.error_description as string);
@@ -30,8 +30,7 @@ const callback = catchAsync(async function (req: Request, res: Response) {
         const tokens = await tokenService.generateAuthTokens(user.discordId);
         res.status(httpStatus.OK).send({ user, guild, tokens });
     } catch (err) {
-        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Faild to login");
-
+        next(err)
     }
 
 });

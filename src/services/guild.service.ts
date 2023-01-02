@@ -1,6 +1,10 @@
+import fetch from 'node-fetch';
 import { Snowflake } from 'discord.js';
 import config from '../config';
 import { Guild, IDiscordGuild } from 'tc-dbcomm';
+import { IGuildUpdateBody } from '../interfaces/guild.interface'
+import { ApiError } from '../utils';
+import httpStatus = require('http-status');
 
 /**
  * Create guild base on discord guild
@@ -39,8 +43,26 @@ async function getGuildChannels(guildId: string) {
     return response.json();
 }
 
+/**
+ * update guild by Id
+ * @param {Snowflake} guildId
+ * @param {Snowflake} userDiscordId
+ * @param {IGuildUpdateBody} updateBody
+ * @returns {Promise<IGuild>}
+ */
+async function updateGuildByGuildId(guildId: Snowflake, userDiscordId: Snowflake, updateBody: IGuildUpdateBody) {
+    const guild = await Guild.findOne({ guildId, user: userDiscordId });
+    if (!guild) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    }
+    Object.assign(guild, updateBody);
+    await guild.save();
+    return guild;
+}
+
 export default {
     createGuild,
     getGuildByGuildId,
-    getGuildChannels
+    getGuildChannels,
+    updateGuildByGuildId
 }
