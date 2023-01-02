@@ -1,6 +1,9 @@
 import fetch from 'node-fetch';
 import { Snowflake } from 'discord.js';
 import { IDiscordUser, IUser, User } from 'tc-dbcomm';
+import { ApiError } from '../utils';
+import httpStatus = require('http-status');
+import { IUserUpdateBody } from '../interfaces/user.interface';
 
 /**
  * Create user base on discord profile
@@ -51,10 +54,33 @@ async function getCurrentUserGuilds(accessToken: string) {
 }
 
 
+/**
+ * update user by discordId
+ * @param {Snowflake} discordId
+ * @param {IGuildUpdateBody} updateBody
+ * @returns {Promise<IGuild>}
+ */
+async function updateUserByDiscordId(discordId: Snowflake, updateBody: IUserUpdateBody) {
+    const user = await User.findOne({ discordId });
+    if (!user) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+    }
+    if (updateBody.email && (await User.findOne({ email: updateBody.email, discordId: { $ne: discordId } }))) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+    }
+
+
+    Object.assign(user, updateBody);
+    await user.save();
+    return user;
+}
+
+
 
 export default {
     createUser,
     getUserFromDiscordAPI,
     getUserByDiscordId,
-    getCurrentUserGuilds
+    getCurrentUserGuilds,
+    updateUserByDiscordId
 }

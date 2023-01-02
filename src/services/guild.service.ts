@@ -44,7 +44,7 @@ async function getGuildChannels(guildId: string) {
 }
 
 /**
- * update guild by Id
+ * update guild by guildId
  * @param {Snowflake} guildId
  * @param {Snowflake} userDiscordId
  * @param {IGuildUpdateBody} updateBody
@@ -59,6 +59,7 @@ async function updateGuildByGuildId(guildId: Snowflake, userDiscordId: Snowflake
     await guild.save();
     return guild;
 }
+
 
 export default {
     createGuild,

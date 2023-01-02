@@ -12,10 +12,15 @@ const getGuildsWithAdminRole = catchAsync(async function (req: IAuthRequest, res
     res.send(guildsWithAdminRole)
 });
 
+const updateUser = catchAsync(async function (req: IAuthRequest, res: Response) {
+    const user = await userService.updateUserByDiscordId(req.user.discordId, req.body);
+    res.send(user);
+});
 
 
 export default {
     getGuildsWithAdminRole,
+    updateUser
 
 }
 
