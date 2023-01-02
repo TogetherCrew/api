@@ -1,4 +1,5 @@
 import { Snowflake } from 'discord.js';
+import config from '../config';
 import { Guild, IDiscordGuild } from 'tc-dbcomm';
 
 /**
@@ -15,7 +16,6 @@ async function createGuild(data: IDiscordGuild, discordId: Snowflake) {
     });
 }
 
-
 /**
  * Get guild by guildId
  * @param {Snowflake} guildId
@@ -26,8 +26,21 @@ async function getGuildByGuildId(guildId: Snowflake) {
     return user;
 }
 
+/**
+ * Get guild channels
+ * @param {Snowflake} guildId
+ * @returns {Promise<Array<IDiscordGuild>>}
+ */
+async function getGuildChannels(guildId: string) {
+    const response = await fetch(`https://discord.com/api/guilds/${guildId}/channels`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bot ${config.discord.botToken}` }
+    });
+    return response.json();
+}
 
 export default {
     createGuild,
-    getGuildByGuildId
+    getGuildByGuildId,
+    getGuildChannels
 }
