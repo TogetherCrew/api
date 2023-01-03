@@ -62,17 +62,30 @@ async function getGuildChannels(guildId: string) {
 async function updateGuildByGuildId(guildId: Snowflake, userDiscordId: Snowflake, updateBody: IGuildUpdateBody) {
     const guild = await Guild.findOne({ guildId, user: userDiscordId });
     if (!guild) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Guild not found');
     }
     Object.assign(guild, updateBody);
     await guild.save();
     return guild;
 }
 
+/**
+ * check if our bot is added to guild
+ * @param {Snowflake} guildId
+ * @param {Snowflake} userDiscordId
+ * @returns {Boolean}
+ */
+async function isBotAddedToGuild(guildId: Snowflake, userDiscordId: Snowflake) {
+    const guild = await Guild.findOne({ guildId, user: userDiscordId });
+    return guild ? true : false
+}
+
+
 
 export default {
     createGuild,
     getGuildByGuildId,
     getGuildChannels,
-    updateGuildByGuildId
+    updateGuildByGuildId,
+    isBotAddedToGuild
 }

@@ -1,3 +1,7 @@
+import { Guild } from "tc-dbcomm";
+import { userOne } from "./user.fixture";
+import { Types } from "mongoose"
+
 export const discordResponseGuildOne = {
     id: "681946187490000901",
     name: "guildOne",
@@ -20,4 +24,15 @@ export const discordResponseGuildTwo = {
         "APPLICATION_COMMAND_PREMISSION_V2"
     ],
     Permission_new: "1071698529857"
+};
+
+export const guildOne = {
+    _id: new Types.ObjectId(),
+    guildId: "681946187490000903",
+    user: userOne.discordId,
+    name: 'guildOne'
+}
+
+export const insertGuilds = async function <Type>(guilds: Array<Type>) {
+    await Guild.insertMany(guilds.map((guild) => (guild)));
 };

@@ -107,8 +107,4 @@ describe('User routes', () => {
         });
     })
 
-
-
-
-
 });
