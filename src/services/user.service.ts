@@ -23,11 +23,20 @@ async function createUser(data: IDiscordUser): Promise<IUser> {
  * @returns {Promise<IDiscordUser>}
  */
 async function getUserFromDiscordAPI(accessToken: string): Promise<IDiscordUser> {
-    const response = await fetch('https://discord.com/api/users/@me', {
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${accessToken}` }
-    });
-    return response.json();
+    try {
+        const response = await fetch('https://discord.com/api/users/@me', {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        const json = await response.json();
+        // Note: {message: '401: Unauthorized', code:0} means that we have not access to user
+        if (json.message) {
+            throw new Error();
+        }
+        return json;
+    } catch (err) {
+        throw new ApiError(httpStatus.UNAUTHORIZED, 'Can not fetch user');
+    }
 }
 
 /**
@@ -46,11 +55,20 @@ async function getUserByDiscordId(discordId: Snowflake): Promise<IUser | null> {
  * @returns {Promise<Array<IDiscordGuild>>}
  */
 async function getCurrentUserGuilds(accessToken: string) {
-    const response = await fetch('https://discord.com/api/users/@me/guilds', {
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${accessToken}` }
-    });
-    return response.json();
+    try {
+        const response = await fetch('https://discord.com/api/users/@me/guilds', {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        const json = await response.json();
+        // Note: {message: '401: Unauthorized', code:0} means that we have not access to guild
+        if (json.message) {
+            throw new Error();
+        }
+        return json;
+    } catch (err) {
+        throw new ApiError(httpStatus.UNAUTHORIZED, 'Can not fetch guilds');
+    }
 }
 
 

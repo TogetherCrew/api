@@ -36,11 +36,20 @@ async function getGuildByGuildId(guildId: Snowflake) {
  * @returns {Promise<Array<IDiscordGuild>>}
  */
 async function getGuildChannels(guildId: string) {
-    const response = await fetch(`https://discord.com/api/guilds/${guildId}/channels`, {
-        method: 'GET',
-        headers: { 'Authorization': `Bot ${config.discord.botToken}` }
-    });
-    return response.json();
+    try {
+        const response = await fetch(`https://discord.com/api/guilds/${guildId}/channels`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bot ${config.discord.botToken}` }
+        });
+        const json = await response.json();
+        // Note: {message: '401: Unauthorized', code:0} means that we have not access to guild channels
+        if (json.message) {
+            throw new Error();
+        }
+        return json;
+    } catch (err) {
+        throw new ApiError(httpStatus.UNAUTHORIZED, 'Can not fetch guild channels');
+    }
 }
 
 /**
