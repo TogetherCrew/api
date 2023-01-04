@@ -35,7 +35,7 @@ async function getUserFromDiscordAPI(accessToken: string): Promise<IDiscordUser>
         }
         return json;
     } catch (err) {
-        throw new ApiError(httpStatus.UNAUTHORIZED, 'Can not fetch user');
+        throw new ApiError(590, 'Can not fetch from discord API');
     }
 }
 
@@ -67,7 +67,7 @@ async function getCurrentUserGuilds(accessToken: string) {
         }
         return json;
     } catch (err) {
-        throw new ApiError(httpStatus.UNAUTHORIZED, 'Can not fetch guilds');
+        throw new ApiError(590, 'Can not fetch from discord API');
     }
 }
 

@@ -12,20 +12,29 @@ import { Token, IDiscordOathBotCallback } from 'tc-dbcomm';
  * @returns {Promise<IDiscordOathBotCallback>}
  */
 async function exchangeCode(code: string): Promise<IDiscordOathBotCallback> {
-    const data = {
-        client_id: config.discord.clientId,
-        client_secret: config.discord.clientSecret,
-        grant_type: 'authorization_code',
-        redirect_uri: config.discord.callbackURI,
-        code
-    };
+    try {
+        const data = {
+            client_id: config.discord.clientId,
+            client_secret: config.discord.clientSecret,
+            grant_type: 'authorization_code',
+            redirect_uri: config.discord.callbackURI,
+            code
+        };
 
-    const response = await fetch('https://discord.com/api/oauth2/token', {
-        method: 'POST',
-        body: new URLSearchParams(data),
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    })
-    return response.json();
+        const response = await fetch('https://discord.com/api/oauth2/token', {
+            method: 'POST',
+            body: new URLSearchParams(data),
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        })
+        const json = await response.json();
+        // Note: {message: '401: Unauthorized', code:0} means that we have not discord auth tokens
+        if (json.message) {
+            throw new Error();
+        }
+        return json;
+    } catch (err) {
+        throw new ApiError(590, 'Can not fetch from discord API');
+    }
 }
 
 /**
@@ -54,7 +63,7 @@ async function refreshDiscordAuth(refreshToken: string): Promise<IDiscordOathBot
         }
         return json;
     } catch (err) {
-        throw new ApiError(httpStatus.UNAUTHORIZED, 'Can not fetch guilds');
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Can not fetch from discord API');
     }
 }
 
@@ -88,7 +97,7 @@ async function refreshAuth(refreshToken: string) {
         await refreshTokenDoc.remove();
         return tokenService.generateAuthTokens(user.discordId);
     } catch (error) {
-        throw new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate');
+        throw new ApiError(590, 'Please authenticate');
     }
 }
 

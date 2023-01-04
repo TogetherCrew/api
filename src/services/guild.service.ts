@@ -48,7 +48,7 @@ async function getGuildChannels(guildId: string) {
         }
         return json;
     } catch (err) {
-        throw new ApiError(httpStatus.UNAUTHORIZED, 'Can not fetch guild channels');
+        throw new ApiError(590, 'Can not fetch from discord API');
     }
 }
 
