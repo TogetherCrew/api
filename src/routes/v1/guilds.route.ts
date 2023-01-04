@@ -11,3 +11,4 @@ router.patch('/:guildId', auth(), validate(guildValidation.updateGuild), guildCo
 
 
 export default router;
+
