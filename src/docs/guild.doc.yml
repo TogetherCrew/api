@@ -1,5 +1,5 @@
 paths:
-  /api/v1/users/{guildId}/channels:
+  /api/v1/guilds/{guildId}/channels:
     get:
       tags:
         - [Guild]
@@ -52,7 +52,6 @@ paths:
                     flags: 0
                     parent_id: "80351110224678914"
                     Permission_overwrites: []
-              
         "400":
           description: Bad Request
           $ref: "#/components/responses/BadRequest"
@@ -62,7 +61,7 @@ paths:
         "590":
           description: Can not fetch from discord API
           $ref: "#/components/responses/Can_Not_Fetch_From_Discord_API"
-  /api/v1/users/{guildId}:
+  /api/v1/guilds/{guildId}:
     patch:
       tags:
         - [Guild]
@@ -76,6 +75,33 @@ paths:
           schema:
             type: string
           description: Guild Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                period:
+                  type: string
+                  format: date-time             
+                selectedChannels:
+                   type: array
+                   items:
+                     type: object
+                     properties:
+                      channelId:
+                        type: string
+                        format: Snowflake
+                      channelName:
+                        type: string
+                        required:
+              example:
+                period: Thu Dec 08 2022 11:49:12 GMT+0400
+                selectedChannels: [{
+                  channelId: "1048535753103261706",
+                  channelName: "channelName"
+                }]
       responses:
         "200":
           description: OK

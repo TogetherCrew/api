@@ -97,7 +97,7 @@ async function refreshAuth(refreshToken: string) {
         await refreshTokenDoc.remove();
         return tokenService.generateAuthTokens(user.discordId);
     } catch (error) {
-        throw new ApiError(590, 'Please authenticate');
+        throw new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate');
     }
 }
 

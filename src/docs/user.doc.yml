@@ -63,10 +63,13 @@ paths:
           application/json:
             schema:
               type: object
-              required:
+              properties:
                 email:
+                  type: string
+                  format: email
               example:
                 email: some@yahoo.com
+
       responses:
         "200":
           description: OK
