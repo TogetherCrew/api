@@ -1,4 +1,4 @@
-import ApiError from "./Apierror";
+import ApiError from "./ApiError";
 import catchAsync from "./catchAsync";
 import pick from './pick';
 
