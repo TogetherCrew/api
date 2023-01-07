@@ -1,10 +1,9 @@
 import express from "express"
 import docsRoute from './docs.route';
 import authRoute from './auth.route';
-import userRoute from './users.route';
-import guildRoute from './guilds.route';
+import guildsRoute from './guilds.route';
+import usersRoute from './users.route'
 
-import config from "../../config";
 const router = express.Router();
 
 const defaultRoutes = [
@@ -17,31 +16,19 @@ const defaultRoutes = [
         route: authRoute,
     },
     {
-        path: '/users',
-        route: userRoute,
+        path: '/guilds',
+        route: guildsRoute,
     },
     {
-        path: '/guilds',
-        route: guildRoute,
+        path: '/users',
+        route: usersRoute,
     }
 ];
 
-const devRoutes = [
-    // routes available only in development mode
-    {
-        path: '/docs',
-        route: docsRoute,
-    },
-];
+
 
 defaultRoutes.forEach((route) => {
     router.use(route.path, route.route);
 });
-
-if (config.env === 'development') {
-    devRoutes.forEach((route) => {
-        router.use(route.path, route.route);
-    });
-}
 
 export default router;

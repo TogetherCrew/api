@@ -6,6 +6,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node ./lib/index.js",
+    "postbuild": "npm run copy-files",
+    "copy-files": "copyfiles -u 1 src/**/*.yml lib",
     "dev": "env-cmd -f ./src/config/dev.env nodemon ./src/index.ts",
     "test": "env-cmd -f ./src/config/test.env jest  --watch  --detectOpenHandles --runInBand"
   },
@@ -14,6 +16,7 @@
   "dependencies": {
     "babel-jest": "^29.3.1",
     "compression": "^1.7.4",
+    "copyfiles": "^2.4.1",
     "cors": "^2.8.5",
     "discord.js": "^14.7.1",
     "express": "^4.18.2",
