@@ -4,7 +4,11 @@ const envVarsSchema = Joi.object()
     .keys({
         NODE_ENV: Joi.string().valid('production', 'development', 'test').required(),
         PORT: Joi.number().default(3000),
-        MONGODB_URL: Joi.string().required().description('Mongo DB url'),
+        DB_HOST: Joi.string().required().description('Mongo DB url'),
+        DB_PORT: Joi.string().required().description('Mongo DB port'),
+        DB_USER: Joi.string().required().description('Mongo DB username'),
+        DB_PASSWORD: Joi.string().required().description('Mongo DB password'),
+        DB_NAME: Joi.string().required().description('Mongo DB name'),
         DISCROD_CLIENT_ID: Joi.string().required().description('Discord clinet id'),
         DISCORD_CLIENT_SECRET: Joi.string().required().description('Discord clinet secret'),
         Discord_Callback_URI: Joi.string().required().description('Discord callback uri'),
@@ -27,7 +31,7 @@ export default {
     env: envVars.NODE_ENV,
     port: envVars.PORT,
     mongoose: {
-        url: envVars.MONGODB_URL + (envVars.NODE_ENV === 'test' ? '-test' : '')
+        url: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}/${envVars.DB_NAME}`
     },
     discord: {
         clientId: envVars.DISCROD_CLIENT_ID,
