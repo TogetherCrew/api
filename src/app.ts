@@ -38,10 +38,6 @@ app.get('/', (req, res) => {
     res.status(200).sendFile(path.join(__dirname, '../', '/statics/index.html'));
 });
 
-app.get('/login', (req, res) => {
-    res.send(req.query)
-});
-
 // send back a 404 error for any unknown api request
 app.use((req, res, next) => {
     next(new ApiError(httpStatus.NOT_FOUND, 'Not found'));

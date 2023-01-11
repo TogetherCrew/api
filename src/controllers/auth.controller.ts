@@ -1,5 +1,5 @@
 import httpStatus from 'http-status';
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import config from '../config';
 import { scopes, permissions } from '../config/dicord'
 import { userService, authService, tokenService, guildService } from '../services';
@@ -13,14 +13,13 @@ const login = catchAsync(async function (req: Request, res: Response) {
 
 const callback = catchAsync(async function (req: Request, res: Response) {
     const code = req.query.code as string;
-    if (!code) {
-        throw new Error();
-    }
     try {
+        if (!code) {
+            throw new Error();
+        }
         const discordOathCallback: IDiscordOathBotCallback = await authService.exchangeCode(code);
         const discordUser: IDiscordUser = await userService.getUserFromDiscordAPI(discordOathCallback.access_token);
         let user = await userService.getUserByDiscordId(discordUser.id);
-        console.log(1)
         if (!user) {
             user = await userService.createUser(discordUser);
         }
@@ -28,20 +27,20 @@ const callback = catchAsync(async function (req: Request, res: Response) {
         if (!guild) {
             guild = await guildService.createGuild(discordOathCallback.guild, user.discordId);
         }
-        console.log(3)
         tokenService.saveDiscordAuth(user.discordId, discordOathCallback);
-        console.log(2)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tokens: any = await tokenService.generateAuthTokens(user.discordId);
         const query = querystring.stringify({
             "isSuccessful": true,
-            "accessToken": tokens.access,
-            "refreshToken": tokens.refresh,
+            "accessToken": tokens.access.token,
+            "accessExp": tokens.access.expires.toString(),
+            "refreshToken": tokens.refresh.token,
+            "refreshExp": tokens.refresh.expires.toString(),
             "guildId": guild.guildId,
+            "guildName": guild.name
         });
         res.redirect('http://localhost:3000/login?' + query);
     } catch (err) {
-        console.log(err)
         const query = querystring.stringify({
             "isSuccessful": false
         });
