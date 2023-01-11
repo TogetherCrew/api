@@ -4,7 +4,8 @@ const scopes = {
 };
 
 const permissions = {
-    ViewChannels: "1024"
+    ViewChannels: 0x400,
+    manageServer: 0x20
 }
 
 export {

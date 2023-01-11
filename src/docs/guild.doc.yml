@@ -1,0 +1,122 @@
+paths:
+  /api/v1/guilds/{guildId}/channels:
+    get:
+      tags:
+        - [Guild]
+      summary: Get guild's channels by guildId
+      description: Used [this](https://discord.com/developers/docs/resources/user#get-current-user-guilds) Discord API to get user's guilds
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: guildId
+          required: true
+          schema:
+            type: string
+          description: Guild Id
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  type: object
+                  properties: 
+                    id: 
+                      type: string
+                      format: Snowflake
+                    guild_id: 
+                      type: Snowflake
+                    type: 
+                      type: number
+                    name: 
+                      type: string
+                    position: 
+                      type: number
+                    flags: 
+                      type: number
+                    parent_id: 
+                      type: Snowflake
+                    Permission_overwrites: 
+                      type: array
+                      items:
+                       type: string
+                  example:
+                    id: "80351110224678912"
+                    guild_id: "80351110224678913"
+                    type: 4
+                    name: "channel B"
+                    position: 0
+                    flags: 0
+                    parent_id: "80351110224678914"
+                    Permission_overwrites: []
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "590":
+          description: Can not fetch from discord API
+          $ref: "#/components/responses/Can_Not_Fetch_From_Discord_API"
+  /api/v1/guilds/{guildId}:
+    patch:
+      tags:
+        - [Guild]
+      summary: Update guild by guildId
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: guildId
+          required: true
+          schema:
+            type: string
+          description: Guild Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                period:
+                  type: string
+                  format: date-time             
+                selectedChannels:
+                   type: array
+                   items:
+                     type: object
+                     properties:
+                      channelId:
+                        type: string
+                        format: Snowflake
+                      channelName:
+                        type: string
+                        required:
+              example:
+                period: Thu Dec 08 2022 11:49:12 GMT+0400
+                selectedChannels: [{
+                  channelId: "1048535753103261706",
+                  channelName: "channelName"
+                }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#/components/schemas/Guild"
+              
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "590":
+          description: Can not fetch from discord API
+          $ref: "#/components/responses/Can_Not_Fetch_From_Discord_API"
