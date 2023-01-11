@@ -33,6 +33,7 @@ async function exchangeCode(code: string): Promise<IDiscordOathBotCallback> {
         }
         return json;
     } catch (err) {
+        console.log(err)
         throw new ApiError(590, 'Can not fetch from discord API');
     }
 }
