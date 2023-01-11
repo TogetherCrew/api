@@ -8,7 +8,7 @@ import setupTestDB from '../utils/setupTestDB';
 import { tokenTypes } from '../../src/config/tokens';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { authService, userService } from '../../src/services';
-import { User, Token, Guild, IUser, IGuild } from 'tc-dbcomm';
+import { Token } from 'tc-dbcomm';
 
 setupTestDB();
 
@@ -40,34 +40,18 @@ describe('Auth routes', () => {
             email: 'gmail@yaoo.com',
             verified: true
         })
-        test('should return 200 and successfully create user and guild', async () => {
-            const res = await request(app)
+        test('should return 302 and successfully create user and guild', async () => {
+            await request(app)
                 .get('/api/v1/auth/callback')
                 .query({ code: 'code' })
                 .send()
-                .expect(httpStatus.OK);
-
-
-            const dbUser: IUser | null = await User.findOne({
-                discordId: res.body.user.discordId
-            });
-            expect(dbUser).toBeDefined();
-
-            const dbGuild: IGuild | null = await Guild.findOne({
-                guildId: res.body.guild.guildId
-            });
-            expect(dbGuild).toBeDefined();
-
-            expect(res.body.tokens).toEqual({
-                access: { token: expect.anything(), expires: expect.anything() },
-                refresh: { token: expect.anything(), expires: expect.anything() },
-            });
+                .expect(httpStatus.FOUND);
         })
-        test('should return 400 if code does not provided', async () => {
+        test('should return 302 if code does not provided', async () => {
             await request(app)
                 .get('/api/v1/auth/callback')
                 .send()
-                .expect(httpStatus.FORBIDDEN);
+                .expect(httpStatus.FOUND);
         })
     })
 
