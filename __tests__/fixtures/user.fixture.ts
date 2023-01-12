@@ -12,7 +12,7 @@ export const userOne = {
 
 export const userTwo = {
     _id: new Types.ObjectId(),
-    discordId: "681946187490000900",
+    discordId: "681946187490000901",
     email: "some@gmail.com",
     verified: false,
     avatar: '947f3e19e6e36a2679c6fe854b79a615',

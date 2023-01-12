@@ -14,7 +14,7 @@
         "noImplicitAny": true,
         "skipLibCheck": true,
         "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true,
+        "allowSyntheticDefaultImports": true
     },
     "include": [
         "src/**/*",
@@ -26,7 +26,7 @@
     },
     "exclude": [
         "./coverage",
-        "./dist",
+        "./lib",
         "__tests__",
         "jest.config.js"
     ],
