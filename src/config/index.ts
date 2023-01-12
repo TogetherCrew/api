@@ -32,7 +32,7 @@ export default {
     port: envVars.PORT,
     mongoose: {
         // url: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}/${envVars.DB_NAME}`
-        url: 'mongodb://localhost:27017'
+        url: 'mongodb://127.0.0.1:27017/dev'
     },
     discord: {
         clientId: envVars.DISCROD_CLIENT_ID,
