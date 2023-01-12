@@ -4,6 +4,7 @@ import config from './config';
 
 mongoose.set("strictQuery", false);
 
+console.log(config.mongoose.url)
 // Connect to MongoDB
 mongoose.connect(config.mongoose.url)
     .then(() => {
