@@ -38,9 +38,6 @@ components:
         guildId:
           type: string
           format: Snowflake
-        ownerId:
-          type: string
-          format: Snowflake
         name:
           type: string
         period:

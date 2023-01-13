@@ -4,7 +4,8 @@ import config from '../config';
 import { scopes, permissions } from '../config/dicord'
 import { userService, authService, tokenService, guildService } from '../services';
 import { IDiscordUser, IDiscordOathBotCallback } from 'tc-dbcomm';
-import { catchAsync, ApiError } from "../utils";
+import { catchAsync } from "../utils";
+import querystring from 'querystring';
 
 const login = catchAsync(async function (req: Request, res: Response) {
     res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI}&response_type=code&scope=${scopes.bot}&permissions=${permissions.ViewChannels}`);
@@ -12,10 +13,10 @@ const login = catchAsync(async function (req: Request, res: Response) {
 
 const callback = catchAsync(async function (req: Request, res: Response) {
     const code = req.query.code as string;
-    if (!code) {
-        throw new ApiError(httpStatus.FORBIDDEN, req.query.error_description as string);
-    }
     try {
+        if (!code) {
+            throw new Error();
+        }
         const discordOathCallback: IDiscordOathBotCallback = await authService.exchangeCode(code);
         const discordUser: IDiscordUser = await userService.getUserFromDiscordAPI(discordOathCallback.access_token);
         let user = await userService.getUserByDiscordId(discordUser.id);
@@ -27,13 +28,24 @@ const callback = catchAsync(async function (req: Request, res: Response) {
             guild = await guildService.createGuild(discordOathCallback.guild, user.discordId);
         }
         tokenService.saveDiscordAuth(user.discordId, discordOathCallback);
-        const tokens = await tokenService.generateAuthTokens(user.discordId);
-        res.status(httpStatus.OK).send({ user, guild, tokens });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const tokens: any = await tokenService.generateAuthTokens(user.discordId);
+        const query = querystring.stringify({
+            "isSuccessful": true,
+            "accessToken": tokens.access.token,
+            "accessExp": tokens.access.expires.toString(),
+            "refreshToken": tokens.refresh.token,
+            "refreshExp": tokens.refresh.expires.toString(),
+            "guildId": guild.guildId,
+            "guildName": guild.name
+        });
+        res.redirect('http://localhost:3000/login?' + query);
     } catch (err) {
-        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Faild to login");
-
+        const query = querystring.stringify({
+            "isSuccessful": false
+        });
+        res.redirect('http://localhost:3000/login?' + query);
     }
-
 });
 
 const logout = catchAsync(async function (req: Request, res: Response) {

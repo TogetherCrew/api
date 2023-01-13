@@ -3,7 +3,7 @@ paths:
     get:
       tags:
         - [Auth]
-      summary: Login using discord oauth2
+      summary: Login using discord oauth2 (it will redirect to discord so can not use this api here)
       description: See [Discord oauth2](https://discord.com/developers/docs/topics/oauth2#oauth2) for more information
       responses:
         "200":
@@ -13,17 +13,29 @@ paths:
               schema:
                 type: object
                 properties:
-                  user:
-                    $ref: "#/components/schemas/User"
-                  guild:
-                    $ref: "#/components/schemas/Guild"
-                  tokens:
-                    type: object
-                    properties:
-                      access:
-                        $ref: "#/components/schemas/Token"
-                      refresh:
-                        $ref: "#/components/schemas/Token"
+                  isSuccessful:
+                    type: boolean
+                  accessToken:
+                    type: string
+                  accessExp:
+                    type: string
+                  refreshToken:
+                    type: string
+                  refreshExp:
+                    type: string
+                  guildId:
+                    type: string
+                    format: Snowflake
+                  guildName:
+                    type: string
+                example:
+                  isSuccessful:	true
+                  accessToken:	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMDQ5NDEyNTgxNjk5MzY3MDcyIiwiaWF0IjoxNjczNDIzNDg4LCJleHAiOjE2NzM0MjUyODgsInR5cGUiOiJhY2Nlc3MifQ.EDbNZXludaA-3C53XLqBE6MpV3KmL8OgUYGCJJM7NxY
+                  accessExp:	Wed Jan 11 2023 12:21:28…(Georgia Standard Time)
+                  refreshToken:	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMDQ5NDEyNTgxNjk5MzY3MDcyIiwiaWF0IjoxNjczNDIzNDg4LCJleHAiOjE2NzYwMTU0ODgsInR5cGUiOiJyZWZyZXNoIn0.f61PyXfzr4u916GFKu8vuQByC2dpygN22s3Z7TWMpmE
+                  refreshExp:	Fri Feb 10 2023 11:51:28…(Georgia Standard Time)
+                  guildId:	1049416767602363487
+                  guildName:	behzad-rabiei's server
         "400":
           description: Bad Request
           $ref: "#/components/responses/BadRequest"
