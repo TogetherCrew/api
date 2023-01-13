@@ -4,14 +4,14 @@ import app from '../../src/app';
 import setupTestDB from '../utils/setupTestDB';
 import { userOne, userTwo, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
-import { discordResponseGuildOne, discordResponseGuildTwo } from '../fixtures/guilds.fixture';
+import { discordResponseGuildOne, discordResponseGuildTwo, discordResponseGuildThree } from '../fixtures/guilds.fixture';
 import { IUserUpdateBody } from '../../src/interfaces/user.interface';
 import { userService, tokenService } from '../../src/services';
 import { User } from 'tc-dbcomm';
 setupTestDB();
 
 describe('User routes', () => {
-    userService.getCurrentUserGuilds = jest.fn().mockReturnValue([discordResponseGuildOne, discordResponseGuildTwo]);
+    userService.getCurrentUserGuilds = jest.fn().mockReturnValue([discordResponseGuildOne, discordResponseGuildTwo, discordResponseGuildThree]);
     tokenService.getDiscordAuth = jest.fn().mockReturnValue({ access: { token: "681946187490000900" } });
 
     describe('GET /api/v1/users/@me/guilds-with-admin-role', () => {
