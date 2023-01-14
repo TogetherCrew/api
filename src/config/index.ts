@@ -37,7 +37,7 @@ export default {
     discord: {
         clientId: envVars.DISCROD_CLIENT_ID,
         clientSecret: envVars.DISCORD_CLIENT_SECRET,
-        callbackURI: envVars.Discord_Callback_URI,
+        callbackURI: envVars.DISCORD_CALLBACK_URI,
         botToken: envVars.DISCORD_BOT_TOKEN
     },
     jwt: {
