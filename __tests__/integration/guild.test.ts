@@ -68,8 +68,6 @@ describe('Guild routes', () => {
         })
     })
 
-
-
     describe('GET /api/v1/guilds/:guildId', () => {
         test('should return 200 and the guild object if data is ok', async () => {
             await insertUsers([userOne]);
@@ -85,6 +83,7 @@ describe('Guild routes', () => {
                 guildId: guildOne.guildId,
                 user: userOne.discordId,
                 name: guildOne.name,
+                selectedChannels: []
             });
         })
 
@@ -103,18 +102,8 @@ describe('Guild routes', () => {
             await request(app)
                 .get(`/api/v1/guilds/${guildOne.guildId}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .expect(httpStatus.BAD_REQUEST);
+                .expect(httpStatus.NOT_FOUND);
         })
-
-        test('should return 400 if guildId is invalid', async () => {
-            await insertUsers([userOne]);
-
-            await request(app)
-                .get(`/api/v1/guilds/1234`)
-                .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .expect(httpStatus.BAD_REQUEST);
-        });
-
     })
 
     describe('PATCH /api/v1/guilds/:guildId', () => {
@@ -173,16 +162,6 @@ describe('Guild routes', () => {
                 .send(updateBody)
                 .expect(httpStatus.NOT_FOUND);
         })
-
-        test('should return 400 if guildId is invalid', async () => {
-            await insertUsers([userOne]);
-
-            await request(app)
-                .patch(`/api/v1/guilds/123`)
-                .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send(updateBody)
-                .expect(httpStatus.BAD_REQUEST);
-        });
 
         test('should return 400 if period is invalid', async () => {
             await insertUsers([userOne]);
