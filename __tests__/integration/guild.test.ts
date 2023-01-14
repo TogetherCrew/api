@@ -6,7 +6,7 @@ import setupTestDB from '../utils/setupTestDB';
 import { userOne, userTwo, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken, userTwoAccessToken } from '../fixtures/token.fixture';
 import { discordResponseGuildOne, guildOne, insertGuilds } from '../fixtures/guilds.fixture';
-import { discordResponseChannelOne } from '../fixtures/channels.fixture';
+import { discordResponseChannelOne, discordResponseChannelTwo, discordResponseChannelThree, discordResponseChannelFour } from '../fixtures/channels.fixture';
 import { IGuildUpdateBody } from '../../src/interfaces/guild.interface';
 import { guildService } from '../../src/services';
 import { Guild } from 'tc-dbcomm';
@@ -16,7 +16,7 @@ describe('Guild routes', () => {
 
 
     describe('GET /api/v1/guilds/:guildId/channels', () => {
-        guildService.getGuildChannels = jest.fn().mockReturnValue([discordResponseChannelOne]);
+        guildService.getGuildChannels = jest.fn().mockReturnValue([discordResponseChannelOne, discordResponseChannelTwo, discordResponseChannelThree, discordResponseChannelFour]);
         guildService.isBotAddedToGuild = jest.fn().mockReturnValue(true);
         test('should return 200 and array of channels of guild', async () => {
             await insertUsers([userOne]);
@@ -26,8 +26,20 @@ describe('Guild routes', () => {
                 .send()
                 .expect(httpStatus.OK);
 
-            expect(res.body).toHaveLength(1);
-            expect(res.body[0].name).toBe(discordResponseChannelOne.name);
+            expect(res.body).toHaveLength(2);
+            expect(res.body[0]).toEqual({
+                id: discordResponseChannelTwo.id,
+                title: discordResponseChannelTwo.name,
+                subChannels: [discordResponseChannelFour]
+            });
+
+            expect(res.body[1]).toEqual({
+                id: discordResponseChannelThree.id,
+                title: discordResponseChannelThree.name,
+                subChannels: [discordResponseChannelOne]
+            });
+
+
         })
         test('should return 400 if bot is not added to guild', async () => {
             guildService.isBotAddedToGuild = jest.fn().mockReturnValue(false);

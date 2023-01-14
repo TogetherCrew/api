@@ -27,31 +27,42 @@ paths:
                     id: 
                       type: string
                       format: Snowflake
-                    guild_id: 
-                      type: Snowflake
-                    type: 
-                      type: number
-                    name: 
+                    title: 
                       type: string
-                    position: 
-                      type: number
-                    flags: 
-                      type: number
-                    parent_id: 
-                      type: Snowflake
-                    Permission_overwrites: 
+                    subChannels: 
                       type: array
                       items:
-                       type: string
-                  example:
-                    id: "80351110224678912"
-                    guild_id: "80351110224678913"
-                    type: 4
-                    name: "channel B"
-                    position: 0
-                    flags: 0
-                    parent_id: "80351110224678914"
-                    Permission_overwrites: []
+                        type: object
+                        properties:
+                          guild_id: 
+                            type: Snowflake
+                          type: 
+                            type: number
+                          name: 
+                            type: string
+                          position: 
+                            type: number
+                          flags: 
+                            type: number
+                          parent_id: 
+                            type: Snowflake
+                          Permission_overwrites: 
+                            type: array
+                            items:
+                              type: string
+                example:
+                    id: "80351110224678914"
+                    title: "channel B"
+                    subChannels: [{
+                        id: "80351110224678912",
+                        guild_id: "80351110224678913",
+                        type: 4,
+                        name: "channel C",
+                        position: 0,
+                        flags: 0,
+                        parent_id: "80351110224678914",
+                        Permission_overwrites: [],
+                      }]
         "400":
           description: Bad Request
           $ref: "#/components/responses/BadRequest"
