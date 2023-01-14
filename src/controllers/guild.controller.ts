@@ -13,6 +13,13 @@ const getGuildChannels = catchAsync(async function (req: IAuthRequest, res: Resp
     res.send(sortedChannels)
 });
 
+
+
+const getGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
+    const user = await guildService.getGuildByQuery({ guildId: req.params.guildId, user: req.user.discordId });
+    res.send(user);
+});
+
 const updateGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
     const guild = await guildService.updateGuildByGuildId(req.params.guildId, req.user.discordId, req.body);
     res.send(guild);
@@ -22,6 +29,7 @@ const updateGuild = catchAsync(async function (req: IAuthRequest, res: Response)
 
 export default {
     getGuildChannels,
-    updateGuild
+    getGuild,
+    updateGuild,
 }
 

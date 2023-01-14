@@ -26,8 +26,17 @@ async function createGuild(data: IDiscordGuild, discordId: Snowflake) {
  * @returns {Promise<IGuild | null>}
  */
 async function getGuildByGuildId(guildId: Snowflake) {
-    const user = await Guild.findOne({ guildId });
-    return user;
+    return Guild.findOne({ guildId });
+
+}
+
+/**
+ * get guild by query 
+ * @param {Object} query
+ * @returns {Promise<IGuild | null>}
+ */
+async function getGuildByQuery(query: object) {
+    return Guild.findOne(query);
 }
 
 /**
@@ -87,5 +96,6 @@ export default {
     getGuildByGuildId,
     getGuildChannels,
     updateGuildByGuildId,
-    isBotAddedToGuild
+    isBotAddedToGuild,
+    getGuildByQuery
 }
