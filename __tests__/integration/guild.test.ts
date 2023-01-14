@@ -164,25 +164,25 @@ describe('Guild routes', () => {
                 .expect(httpStatus.UNAUTHORIZED);
         })
 
-        test('should return 400 if guild not found', async () => {
+        test('should return 404 if guild not found', async () => {
             await insertUsers([userOne]);
 
             await request(app)
                 .patch(`/api/v1/guilds/${guildOne.guildId}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send(updateBody)
-                .expect(httpStatus.BAD_REQUEST);
+                .expect(httpStatus.NOT_FOUND);
         })
 
-        test('should return 400 if another user want to update not owned guild', async () => {
-            await insertUsers([userTwo]);
+        test('should return 400 if guildId is invalid', async () => {
+            await insertUsers([userOne]);
 
             await request(app)
-                .patch(`/api/v1/guilds/${guildOne.guildId}`)
-                .set('Authorization', `Bearer ${userTwoAccessToken}`)
+                .patch(`/api/v1/guilds/123`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send(updateBody)
                 .expect(httpStatus.BAD_REQUEST);
-        })
+        });
 
         test('should return 400 if period is invalid', async () => {
             await insertUsers([userOne]);

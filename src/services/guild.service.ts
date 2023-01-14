@@ -62,7 +62,7 @@ async function getGuildChannels(guildId: string) {
 async function updateGuildByGuildId(guildId: Snowflake, userDiscordId: Snowflake, updateBody: IGuildUpdateBody) {
     const guild = await Guild.findOne({ guildId, user: userDiscordId });
     if (!guild) {
-        throw new ApiError(httpStatus.BAD_REQUEST, 'Guild not found');
+        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
     }
     Object.assign(guild, updateBody);
     await guild.save();
