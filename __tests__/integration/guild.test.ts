@@ -70,7 +70,54 @@ describe('Guild routes', () => {
 
 
 
-    describe('PATCH /api/v1/users/@me', () => {
+    describe('GET /api/v1/guilds/:guildId', () => {
+        test('should return 200 and the guild object if data is ok', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+
+            const res = await request(app)
+                .get(`/api/v1/guilds/${guildOne.guildId}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                id: guildOne._id.toHexString(),
+                guildId: guildOne.guildId,
+                user: userOne.discordId,
+                name: guildOne.name,
+            });
+        })
+
+        test('should return 401 if access token is missing', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+
+            await request(app)
+                .get(`/api/v1/guilds/${guildOne.guildId}`)
+                .expect(httpStatus.UNAUTHORIZED);
+        })
+
+        test('should return 404 if guild not found', async () => {
+            await insertUsers([userOne]);
+
+            await request(app)
+                .get(`/api/v1/guilds/${guildOne.guildId}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .expect(httpStatus.BAD_REQUEST);
+        })
+
+        test('should return 400 if guildId is invalid', async () => {
+            await insertUsers([userOne]);
+
+            await request(app)
+                .get(`/api/v1/guilds/1234`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .expect(httpStatus.BAD_REQUEST);
+        });
+
+    })
+
+    describe('PATCH /api/v1/guilds/:guildId', () => {
         let updateBody: IGuildUpdateBody;
 
         beforeEach(() => {
