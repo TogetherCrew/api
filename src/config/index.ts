@@ -11,7 +11,7 @@ const envVarsSchema = Joi.object()
         DB_NAME: Joi.string().required().description('Mongo DB name'),
         DISCROD_CLIENT_ID: Joi.string().required().description('Discord clinet id'),
         DISCORD_CLIENT_SECRET: Joi.string().required().description('Discord clinet secret'),
-        Discord_Callback_URI: Joi.string().required().description('Discord callback uri'),
+        DISCORD_CALLBACK_URI: Joi.string().required().description('Discord callback uri'),
         DISCORD_BOT_TOKEN: Joi.string().required().description('Discord bot token'),
         JWT_SECRET: Joi.string().required().description('JWT secret key'),
         JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().default(30).description('minutes after which access tokens expire'),
@@ -36,7 +36,7 @@ export default {
     discord: {
         clientId: envVars.DISCROD_CLIENT_ID,
         clientSecret: envVars.DISCORD_CLIENT_SECRET,
-        callbackURI: envVars.Discord_Callback_URI,
+        callbackURI: envVars.DISCORD_CALLBACK_URI,
         botToken: envVars.DISCORD_BOT_TOKEN
     },
     jwt: {

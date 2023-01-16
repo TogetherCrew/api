@@ -9,7 +9,7 @@
     "postbuild": "npm run copy-files",
     "copy-files": "copyfiles -u 1 src/**/*.yml lib",
     "dev": "env-cmd -f ./src/config/dev.env nodemon ./src/index.ts",
-    "test": "env-cmd -f ./src/config/test.env jest  --watch  --detectOpenHandles --runInBand"
+    "test": "env-cmd -f ./src/config/test.env jest --detectOpenHandles"
   },
   "author": "",
   "license": "ISC",
