@@ -39,7 +39,6 @@ const callback = catchAsync(async function (req: Request, res: Response) {
             "guildId": guild.guildId,
             "guildName": guild.name
         });
-        console.log(tokens.access.token, tokens.refresh.token)
         res.redirect('http://localhost:3000/login?' + query);
     } catch (err) {
         const query = querystring.stringify({
