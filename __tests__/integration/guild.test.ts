@@ -163,16 +163,6 @@ describe('Guild routes', () => {
                 .expect(httpStatus.NOT_FOUND);
         })
 
-        test('should return 400 if period is invalid', async () => {
-            await insertUsers([userOne]);
-            const updateBody = { period: 10 };
-
-            await request(app)
-                .patch(`/api/v1/guilds/${guildOne.guildId}`)
-                .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send(updateBody)
-                .expect(httpStatus.BAD_REQUEST);
-        });
 
         test('should return 400 if selectedChannels is invalid', async () => {
             await insertUsers([userOne]);

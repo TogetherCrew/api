@@ -22,7 +22,7 @@ const updateGuild = {
             channelId: Joi.string().required(),
             channelName: Joi.string().required()
         })),
-        period: Joi.string()
+        period: Joi.date()
 
     }),
 };
