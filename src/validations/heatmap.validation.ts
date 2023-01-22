@@ -5,7 +5,9 @@ const getHeatmaps = {
         guildId: Joi.string().required()
     }),
     body: Joi.object().required().keys({
-        startDate: Joi.date().required()
+        startDate: Joi.date().required(),
+        endDate: Joi.date().required(),
+        timeZone: Joi.string().required()
     }),
 };
 

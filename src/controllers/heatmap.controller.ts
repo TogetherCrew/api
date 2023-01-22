@@ -11,7 +11,7 @@ const getHeatmaps = catchAsync(async function (req: IAuthRequest, res: Response)
         throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
     }
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
-    const heatmaps = await heatmapService.getHeatmaps(connection, req.body.startDate);
+    const heatmaps = await heatmapService.getHeatmaps(connection, req.body.startDate, req.body.endDate, req.body.timeZone);
     res.send(heatmaps);
 });
 
