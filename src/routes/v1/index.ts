@@ -3,6 +3,7 @@ import docsRoute from './docs.route';
 import authRoute from './auth.route';
 import guildsRoute from './guilds.route';
 import usersRoute from './users.route'
+import heatmapsRoute from './heatmaps.route';
 
 const router = express.Router();
 
@@ -22,6 +23,10 @@ const defaultRoutes = [
     {
         path: '/users',
         route: usersRoute,
+    },
+    {
+        path: '/heatmaps',
+        route: heatmapsRoute
     }
 ];
 
