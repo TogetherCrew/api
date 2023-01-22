@@ -4,7 +4,7 @@ import { IAuthRequest } from '../interfaces/request.interface';
 import { catchAsync, ApiError } from "../utils";
 import { databaseService, Guild } from 'tc-dbcomm'
 import httpStatus from 'http-status';
-import config from 'src/config';
+import config from '../config';
 
 const getHeatmaps = catchAsync(async function (req: IAuthRequest, res: Response) {
     if (!await Guild.findOne({ guildId: req.params.guildId, user: req.user.discordId })) {
