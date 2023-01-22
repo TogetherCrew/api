@@ -43,7 +43,6 @@ app.use((req, res, next) => {
     next(new ApiError(httpStatus.NOT_FOUND, 'Not found'));
 });
 
-
 app.use(error.errorConverter);
 app.use(error.errorHandler);
 

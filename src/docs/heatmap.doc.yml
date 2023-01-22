@@ -1,0 +1,48 @@
+paths:
+  /api/v1/heatmaps/{guildId}:
+    post:
+      tags:
+        - [Heatmap]
+      summary: Get array of 3D arrays [dayOfweek, hour, interactions]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: guildId
+          required: true
+          schema:
+            type: string
+          description: Guild Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startDate:
+                  type: string
+                  format: date-time             
+              example:
+                startDate: "2023-01-17T13:02:10.911+00:00"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  type: array
+                  items:
+                    type: number
+                example: [[7,13,28], [5,10,30]]
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
