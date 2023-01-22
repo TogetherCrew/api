@@ -9,14 +9,14 @@ import { guildOne } from '../fixtures/guilds.fixture';
 setupTestDB();
 
 describe('Guild routes', () => {
-    describe('GET /api/v1/heatmaps/:guildId', () => {
+    describe('POST /api/v1/heatmaps/:guildId', () => {
         // test('should return 200 and array of 3D arrays if req data is ok', async () => {
         // TODO
         // })
 
         test('should return 401 if access token is missing', async () => {
             await request(app)
-                .get(`/api/v1/heatmaps/${guildOne.guildId}`)
+                .post(`/api/v1/heatmaps/${guildOne.guildId}`)
                 .send({ startDate: new Date() })
                 .expect(httpStatus.UNAUTHORIZED);
         })
@@ -24,7 +24,7 @@ describe('Guild routes', () => {
         test('should return 404 if guild not found', async () => {
             await insertUsers([userOne]);
             await request(app)
-                .get(`/api/v1/heatmaps/${guildOne.guildId}`)
+                .post(`/api/v1/heatmaps/${guildOne.guildId}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send({ startDate: new Date() })
                 .expect(httpStatus.NOT_FOUND);
