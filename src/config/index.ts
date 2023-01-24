@@ -31,13 +31,13 @@ export default {
     env: envVars.NODE_ENV,
     port: envVars.PORT,
     mongoose: {
-        // url: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}/${envVars.DB_NAME}`,
-        url: 'mongodb://127.0.0.1:27017/devv'
+        serverURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}/${envVars.DB_NAME}`,
+        botURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}`,
     },
     discord: {
         clientId: envVars.DISCROD_CLIENT_ID,
         clientSecret: envVars.DISCORD_CLIENT_SECRET,
-        callbackURI: envVars.Discord_Callback_URI,
+        callbackURI: envVars.DISCORD_CALLBACK_URI,
         botToken: envVars.DISCORD_BOT_TOKEN
     },
     jwt: {

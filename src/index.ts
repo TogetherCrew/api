@@ -4,9 +4,8 @@ import config from './config';
 
 mongoose.set("strictQuery", false);
 
-console.log(config.mongoose.url)
 // Connect to MongoDB
-mongoose.connect(config.mongoose.url)
+mongoose.connect(config.mongoose.serverURL)
     .then(() => {
         console.log('Connected to MongoDB!');
         // Run server
@@ -14,3 +13,7 @@ mongoose.connect(config.mongoose.url)
             console.log(`Listening on ${config.port}`);
         });
     });
+
+
+
+

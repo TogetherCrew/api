@@ -9,7 +9,7 @@
     "postbuild": "npm run copy-files",
     "copy-files": "copyfiles -u 1 src/**/*.yml lib",
     "dev": "env-cmd -f ./src/config/dev.env nodemon ./src/index.ts",
-    "test": "env-cmd -f ./src/config/test.env jest  --watch  --detectOpenHandles --runInBand"
+    "test": "env-cmd -f ./src/config/test.env jest --detectOpenHandles"
   },
   "author": "",
   "license": "ISC",
@@ -22,7 +22,7 @@
     "express": "^4.18.2",
     "express-rate-limit": "^6.7.0",
     "helmet": "^6.0.1",
-    "http-status": "^1.5.3",
+    "http-status": "^1.6.2",
     "joi": "^17.7.0",
     "jsonwebtoken": "^9.0.0",
     "moment": "^2.29.4",
