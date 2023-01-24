@@ -46,5 +46,16 @@ app.use((req, res, next) => {
 app.use(error.errorConverter);
 app.use(error.errorHandler);
 
+
+import moment = require("moment-timezone");
+const x = moment().tz("Asia/Tehran").format('Z')// -05:00
+console.log(typeof x)
+
+
+console.log(x)
+const spl = x.split("[+]");
+console.log(spl)
+
+
 export default app;
 

@@ -7,9 +7,9 @@ import httpStatus from 'http-status';
 import config from '../config';
 
 const getHeatmaps = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (!await Guild.findOne({ guildId: req.params.guildId, user: req.user.discordId })) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    }
+    // if (!await Guild.findOne({ guildId: req.params.guildId, user: req.user.discordId })) {
+    //     throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    // }
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     const heatmaps = await heatmapService.getHeatmaps(connection, req.body.startDate, req.body.endDate, req.body.timeZone);
     res.send(heatmaps);

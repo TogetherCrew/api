@@ -31,8 +31,10 @@ export default {
     env: envVars.NODE_ENV,
     port: envVars.PORT,
     mongoose: {
-        serverURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}/${envVars.DB_NAME}`,
-        botURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}`,
+        // serverURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}/${envVars.DB_NAME}`,
+        // botURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}`,
+        serverURL: "mongodb://127.0.0.1:27017/dev",
+        botURL: "mongodb://127.0.0.1:27017"
     },
     discord: {
         clientId: envVars.DISCROD_CLIENT_ID,
