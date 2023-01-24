@@ -72,10 +72,10 @@ async function getHeatmaps(connection: Connection, startDate: Date, endDate: Dat
 
     ]);
 
-    console.log(heatmaps)
-    console.log(new Date().toLocaleString('en-US', { timeZone: "America/Havana" }));
-    import moment from 'moment-timezone';
-    const timezoneOffsetInHours = moment().tz('Europe/Amsterdam').hour() - new Date().getHours()
+    // console.log(heatmaps)
+    // console.log(new Date().toLocaleString('en-US', { timeZone: "America/Havana" }));
+    // import moment from 'moment-timezone';
+    // const timezoneOffsetInHours = moment().tz('Europe/Amsterdam').hour() - new Date().getHours()
     // // Convert Arrays of objects to array of arrays
     return heatmaps.map(object => [object.dayOfWeek, object.hour, object.interactions]);
 }
