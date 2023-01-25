@@ -27,7 +27,6 @@ const updateGuild = {
     }),
 };
 
-
 export default {
     getGuildChannels,
     updateGuild,
