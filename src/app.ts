@@ -9,7 +9,6 @@ import path from "path";
 import { error } from "./middlewares";
 import { ApiError } from "./utils";
 import routes from "./routes/v1";
-import moment from 'moment-timezone'
 
 const app: Application = express();
 
@@ -46,13 +45,6 @@ app.use((req, res, next) => {
 
 app.use(error.errorConverter);
 app.use(error.errorHandler);
-
-
-const x = moment().tz("America/La_Paz").format('Z')// -05:00
-const y = parseInt(x)
-console.log(x)
-console.log(y)
-
 
 export default app;
 

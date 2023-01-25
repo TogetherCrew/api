@@ -17,7 +17,7 @@ describe('Guild routes', () => {
         test('should return 401 if access token is missing', async () => {
             await request(app)
                 .post(`/api/v1/heatmaps/${guildOne.guildId}`)
-                .send({ startDate: new Date() })
+                .send({ startDate: new Date(), endDate: new Date(), timeZone: "Asia/Tehran" })
                 .expect(httpStatus.UNAUTHORIZED);
         })
 
@@ -26,7 +26,7 @@ describe('Guild routes', () => {
             await request(app)
                 .post(`/api/v1/heatmaps/${guildOne.guildId}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send({ startDate: new Date() })
+                .send({ startDate: new Date(), endDate: new Date(), timeZone: "Asia/Tehran" })
                 .expect(httpStatus.NOT_FOUND);
         })
     })

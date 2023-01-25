@@ -22,9 +22,16 @@ paths:
               properties:
                 startDate:
                   type: string
-                  format: date-time             
+                  format: date-time     
+                endDate:
+                  type: string
+                  format: date-time  
+                timeZone:
+                  type: string        
               example:
                 startDate: "2023-01-17T13:02:10.911+00:00"
+                endDate: "2023-01-29T10:50:01.513Z"
+                timeZone: "America/Fortaleza"
       responses:
         "200":
           description: OK
@@ -36,7 +43,7 @@ paths:
                   type: array
                   items:
                     type: number
-                example: [[7,13,28], [5,10,30]]
+                example: [[6,5,28],[7,10,28]]
         "400":
           description: Bad Request
           $ref: "#/components/responses/BadRequest"

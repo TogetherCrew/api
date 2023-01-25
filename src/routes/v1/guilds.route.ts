@@ -6,7 +6,6 @@ import { auth, validate } from '../../middlewares';
 const router = express.Router();
 
 // Routes
-router.get('/guildId/discordAPI', auth(), validate(guildValidation.getGuildFromDiscordAPI), guildController.getGuildFromDiscordAPI)
 router.get('/:guildId/channels', auth(), validate(guildValidation.getGuildChannels), guildController.getGuildChannels);
 router.route('/:guildId')
     .get(auth(), validate(guildValidation.getGuild), guildController.getGuild)

@@ -28,15 +28,6 @@ const updateGuild = catchAsync(async function (req: IAuthRequest, res: Response)
     res.send(guild);
 });
 
-
-const getGuildFromDiscordAPI = catchAsync(async function (req: IAuthRequest, res: Response) {
-    const guild = await guildService.getGuildByQuery({ guildId: req.params.guildId, user: req.user.discordId });
-    if (!guild) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    }
-    res.send(guild);
-});
-
 export default {
     getGuildChannels,
     getGuild,
