@@ -1,29 +1,15 @@
 import { Connection } from 'mongoose';
 
 /**
- * Create heatmap
- * @param {IHeatMap} data
- * @returns {Promise<IHeatMap>}
+ * get heatmaps
+ * @param {Connection} connection
+ * @param {Date} startDate
+ * @param {Date} endDate
+ * @returns {Array<Array<number>>}
  */
-async function getHeatmaps(connection: Connection, startDate: Date, endDate: Date, timeZone: string) {
+async function getHeatmaps(connection: Connection, startDate: Date, endDate: Date) {
     const heatmaps = await connection.models.HeatMap.aggregate([
-
-        // Stage1 : convert dates to required timeZone
-        // {
-        //     $project: {
-        //         _id: 0,
-        //         interactions: 1,
-        //         date: {
-        //             $function: {
-        //                 body: function (date: Date) { const tz = new Date(date).toLocaleString('en-US', { timeZone }); return new Date(tz) },
-        //                 args: ['$date'],
-        //                 lang: "js"
-        //             }
-        //         }
-        //     }
-        // },
-
-        // Stage2 : find heatmaps between startDate and endDate
+        // Stage1 : find heatmaps between startDate and endDate
         {
             $match: {
                 'date': {
@@ -33,7 +19,7 @@ async function getHeatmaps(connection: Connection, startDate: Date, endDate: Dat
             }
         },
 
-        // Stage3 : provide one document for each elment of interactions array
+        // Stage2 : provide one document for each element of interactions array
         {
             $unwind: {
                 path: '$interactions',
@@ -41,7 +27,7 @@ async function getHeatmaps(connection: Connection, startDate: Date, endDate: Dat
             }
         },
 
-        // Stage4 : extract needed data
+        // Stage3 : extract needed data
         {
             $project: {
                 _id: 0,
@@ -49,12 +35,19 @@ async function getHeatmaps(connection: Connection, startDate: Date, endDate: Dat
                 'hour': { $add: ['$arrayIndex', 1] },
                 'interactions': 1,
             }
-        }
+        },
 
+        // Stage4 : group documents base on day and hour
+        {
+            $group: {
+                '_id': { dayOfWeek: '$dayOfWeek', hour: '$hour' }
+                , interactions: { $sum: "$interactions" }
+            }
+        }
     ]);
 
-    // // Convert Arrays of objects to array of arrays
-    return heatmaps.map(object => [object.dayOfWeek, object.hour, object.interactions]);
+    // Convert Arrays of objects to array of 2D arrays
+    return heatmaps.map(object => [object._id.dayOfWeek, object._id.hour, object.interactions]);
 }
 
 export default {
