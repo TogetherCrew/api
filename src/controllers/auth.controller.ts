@@ -40,12 +40,12 @@ const callback = catchAsync(async function (req: Request, res: Response) {
             "guildName": guild.name
         });
 
-        res.redirect('http://app.togethercrew.com/login?' + query);
+        res.redirect('http://localhost:3000/login?' + query);
     } catch (err) {
         const query = querystring.stringify({
             "isSuccessful": false
         });
-        res.redirect('http://app.togethercrew.com/login?' + query);
+        res.redirect('http://localhost:3000/login?' + query);
     }
 });
 
