@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { heatmapService } from '../services';
 import { IAuthRequest } from '../interfaces/request.interface';
-import { catchAsync, ApiError, timezone, sort } from "../utils";
+import { catchAsync, ApiError, timezone, array, sort } from "../utils";
 import { databaseService, Guild } from 'tc-dbcomm'
 import httpStatus from 'http-status';
 import config from '../config';
@@ -16,12 +16,14 @@ const getHeatmaps = catchAsync(async function (req: IAuthRequest, res: Response)
     const timeZoneOffset = parseInt(moment().tz(req.body.timeZone).format('Z'));
     heatmaps = timezone.shiftHeatMapsHours(heatmaps, timeZoneOffset);
     heatmaps.sort(sort.sortHeatmap)
+    heatmaps = array.fillEmptyElemetns(heatmaps);
     res.send(heatmaps);
 });
 
 
 
 export default {
+
     getHeatmaps
 }
 

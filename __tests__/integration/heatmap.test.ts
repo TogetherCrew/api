@@ -14,7 +14,7 @@ setupTestDB();
 describe('Guild routes', () => {
     describe('POST /api/v1/heatmaps/:guildId', () => {
 
-        test('should return 200 and array of 3D arrays if req data is ok', async () => {
+        test('should return 200 and array of 2D arrays if req data is ok', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
@@ -23,7 +23,7 @@ describe('Guild routes', () => {
             const res = await request(app)
                 .post(`/api/v1/heatmaps/${guildOne.guildId}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send({ startDate: new Date("2023-01-21T13:02:10.911+00:00"), endDate: new Date("2023-01-29T13:02:10.911+00:00"), timeZone: "America/Fortaleza" })
+                .send({ startDate: new Date("2023-01-21T10:50:01.513Z"), endDate: new Date("2023-01-29T10:50:01.513Z"), timeZone: "Asia/Tehran" })
                 .expect(httpStatus.OK);
 
             expect(res.body).toStrictEqual(APIresponse);

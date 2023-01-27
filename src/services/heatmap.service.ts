@@ -31,7 +31,7 @@ async function getHeatmaps(connection: Connection, startDate: Date, endDate: Dat
         {
             $project: {
                 _id: 0,
-                'dayOfWeek': { $dayOfWeek: "$date" },
+                'dayOfWeek': { $add: [{ $dayOfWeek: "$date" }, -1] },
                 'hour': { $add: ['$arrayIndex', 1] },
                 'interactions': 1,
             }
