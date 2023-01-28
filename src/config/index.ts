@@ -17,7 +17,7 @@ const envVarsSchema = Joi.object()
         JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().default(30).description('minutes after which access tokens expire'),
         JWT_REFRESH_EXPIRATION_DAYS: Joi.number().default(30).description('days after which refresh tokens expire'),
         JWT_DISCORD_REFRESH_EXPIRATION_DAYS: Joi.number().default(30).description('days after which discord refresh tokens expire'),
-
+        FRONTEND_URL: Joi.string().required().description('frontend URL'),
     })
     .unknown();
 
@@ -47,4 +47,7 @@ export default {
         discordRefreshExpirationDays: envVars.JWT_DISCORD_REFRESH_EXPIRATION_DAYS,
 
     },
+    frontend: {
+        url: envVars.FRONTEND_URL
+    }
 }
