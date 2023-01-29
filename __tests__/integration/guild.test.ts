@@ -16,8 +16,11 @@ describe('Guild routes', () => {
 
 
     describe('GET /api/v1/guilds/:guildId/channels', () => {
-        guildService.getGuildChannels = jest.fn().mockReturnValue([discordResponseChannelOne, discordResponseChannelTwo, discordResponseChannelThree, discordResponseChannelFour]);
-        guildService.isBotAddedToGuild = jest.fn().mockReturnValue(true);
+        beforeEach(() => {
+            guildService.getGuildChannels = jest.fn().mockReturnValue([discordResponseChannelOne, discordResponseChannelTwo, discordResponseChannelThree, discordResponseChannelFour]);
+            guildService.isBotAddedToGuild = jest.fn().mockReturnValue(true);
+        });
+
         test('should return 200 and array of channels of guild', async () => {
             await insertUsers([userOne]);
             const res = await request(app)
@@ -178,8 +181,11 @@ describe('Guild routes', () => {
     })
 
     describe('GET /api/v1/guilds/discord-api/:guildId', () => {
-        guildService.getGuildFromDiscordAPI = jest.fn().mockReturnValue(discordResponseGuildOne);
-        guildService.isBotAddedToGuild = jest.fn().mockReturnValue(true);
+        beforeEach(() => {
+            guildService.getGuildFromDiscordAPI = jest.fn().mockReturnValue(discordResponseGuildOne);
+            guildService.isBotAddedToGuild = jest.fn().mockReturnValue(true);
+        });
+
         test('should return 200 and the guild object (from Discord API) if data is ok', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);

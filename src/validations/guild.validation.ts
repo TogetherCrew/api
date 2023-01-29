@@ -1,12 +1,5 @@
 import Joi from "joi";
 
-
-const getGuildChannels = {
-    params: Joi.object().required().keys({
-        guildId: Joi.string().required()
-    })
-};
-
 const getGuild = {
     params: Joi.object().required().keys({
         guildId: Joi.string().required()
@@ -27,8 +20,21 @@ const updateGuild = {
     }),
 };
 
+const getGuildFromDiscordAPI = {
+    params: Joi.object().required().keys({
+        guildId: Joi.string().required()
+    })
+};
+
+const getGuildChannels = {
+    params: Joi.object().required().keys({
+        guildId: Joi.string().required()
+    })
+};
+
 export default {
     getGuildChannels,
     updateGuild,
     getGuild,
+    getGuildFromDiscordAPI
 }
