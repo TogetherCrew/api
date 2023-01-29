@@ -40,7 +40,7 @@ export const discordResponseGuildThree = {
 
 export const guildOne = {
     _id: new Types.ObjectId(),
-    guildId: "681946187490000903",
+    guildId: "681946187490000901",
     user: userOne.discordId,
     name: 'guildOne'
 }

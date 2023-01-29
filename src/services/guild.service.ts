@@ -40,28 +40,6 @@ async function getGuildByQuery(query: object) {
 }
 
 /**
- * Get guild channels
- * @param {Snowflake} guildId
- * @returns {Promise<Array<IDiscordGuild>>}
- */
-async function getGuildChannels(guildId: string) {
-    try {
-        const response = await fetch(`https://discord.com/api/guilds/${guildId}/channels`, {
-            method: 'GET',
-            headers: { 'Authorization': `Bot ${config.discord.botToken}` }
-        });
-        const json = await response.json();
-        // Note: {message: '401: Unauthorized', code:0} means that we have not access to guild channels
-        if (json.message) {
-            throw new Error();
-        }
-        return json;
-    } catch (err) {
-        throw new ApiError(590, 'Can not fetch from discord API');
-    }
-}
-
-/**
  * update guild by guildId
  * @param {Snowflake} guildId
  * @param {Snowflake} userDiscordId
@@ -90,6 +68,52 @@ async function isBotAddedToGuild(guildId: Snowflake, userDiscordId: Snowflake) {
 }
 
 
+/**
+ * Get guild from discord API
+ * @param {Snowflake} guildId
+ * @returns {Promise<IDiscordGuild>}
+ */
+async function getGuildFromDiscordAPI(guildId: string) {
+    try {
+        const response = await fetch(`https://discord.com/api/guilds/${guildId}`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bot ${config.discord.botToken}` }
+        });
+        const json = await response.json();
+        // Note: {message: '401: Unauthorized', code:0} means that we have not access to guild channels
+        if (json.message) {
+            throw new Error();
+        }
+        return json;
+    } catch (err) {
+        throw new ApiError(590, 'Can not fetch from discord API');
+    }
+}
+
+/**
+ * Get guild channels
+ * @param {Snowflake} guildId
+ * @returns {Promise<Array<IDiscordGuild>>}
+ */
+async function getGuildChannels(guildId: string) {
+    try {
+        const response = await fetch(`https://discord.com/api/guilds/${guildId}/channels`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bot ${config.discord.botToken}` }
+        });
+        const json = await response.json();
+        // Note: {message: '401: Unauthorized', code:0} means that we have not access to guild channels
+        if (json.message) {
+            throw new Error();
+        }
+        return json;
+    } catch (err) {
+        throw new ApiError(590, 'Can not fetch from discord API');
+    }
+}
+
+
+
 
 export default {
     createGuild,
@@ -97,5 +121,6 @@ export default {
     getGuildChannels,
     updateGuildByGuildId,
     isBotAddedToGuild,
-    getGuildByQuery
+    getGuildByQuery,
+    getGuildFromDiscordAPI
 }

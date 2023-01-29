@@ -39,8 +39,6 @@ const callback = catchAsync(async function (req: Request, res: Response) {
             "guildId": guild.guildId,
             "guildName": guild.name
         });
-
-
         res.redirect(`${config.frontend.url}/login?` + query);
 
     } catch (err) {

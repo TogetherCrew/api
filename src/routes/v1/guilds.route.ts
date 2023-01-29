@@ -12,6 +12,7 @@ router.route('/:guildId')
     .get(auth(), validate(guildValidation.getGuild), guildController.getGuild)
     .patch(auth(), validate(guildValidation.updateGuild), guildController.updateGuild);
 
+router.get('/discord-api/:guildId', auth(), validate(guildValidation.getGuildFromDiscordAPI), guildController.getGuildFromDiscordAPI);
 
 export default router;
 

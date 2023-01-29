@@ -36,6 +36,31 @@ describe('User routes', () => {
     })
 
 
+    describe('GET /api/v1/users/@me', () => {
+        test('should return 200 and the user object if data is ok', async () => {
+            await insertUsers([userOne]);
+            const res = await request(app)
+                .get('/api/v1/users/@me')
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                id: userOne._id.toHexString(),
+                discordId: userOne.discordId,
+                email: userOne.email,
+                verified: userOne.verified,
+                avatar: userOne.avatar,
+            });
+        })
+        test('should return 401 if access token is missing', async () => {
+            await insertUsers([userOne]);
+            await request(app)
+                .get('/api/v1/users/@me')
+                .expect(httpStatus.UNAUTHORIZED);
+        })
+    })
+
+
 
     describe('PATCH /api/v1/users/@me', () => {
         let updateBody: IUserUpdateBody;

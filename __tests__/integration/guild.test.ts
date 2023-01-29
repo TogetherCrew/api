@@ -16,8 +16,11 @@ describe('Guild routes', () => {
 
 
     describe('GET /api/v1/guilds/:guildId/channels', () => {
-        guildService.getGuildChannels = jest.fn().mockReturnValue([discordResponseChannelOne, discordResponseChannelTwo, discordResponseChannelThree, discordResponseChannelFour]);
-        guildService.isBotAddedToGuild = jest.fn().mockReturnValue(true);
+        beforeEach(() => {
+            guildService.getGuildChannels = jest.fn().mockReturnValue([discordResponseChannelOne, discordResponseChannelTwo, discordResponseChannelThree, discordResponseChannelFour]);
+            guildService.isBotAddedToGuild = jest.fn().mockReturnValue(true);
+        });
+
         test('should return 200 and array of channels of guild', async () => {
             await insertUsers([userOne]);
             const res = await request(app)
@@ -57,13 +60,14 @@ describe('Guild routes', () => {
                 .send()
                 .expect(httpStatus.UNAUTHORIZED);
         })
-        test('should return 401 if can not fetch guild channels', async () => {
-            guildService.isBotAddedToGuild = jest.fn().mockReturnValue(true);
+        test('should return 400 if can not fetch guild channels', async () => {
+            guildService.isBotAddedToGuild = jest.fn().mockReturnValue(false);
             await insertUsers([userOne]);
             await request(app)
                 .get(`/api/v1/guilds/${discordResponseGuildOne.id}/channels`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
-                .expect(httpStatus.UNAUTHORIZED);
+                .expect(httpStatus.BAD_REQUEST);
 
         })
     })
@@ -174,6 +178,45 @@ describe('Guild routes', () => {
                 .send(updateBody)
                 .expect(httpStatus.BAD_REQUEST);
         });
+    })
+
+    describe('GET /api/v1/guilds/discord-api/:guildId', () => {
+        beforeEach(() => {
+            guildService.getGuildFromDiscordAPI = jest.fn().mockReturnValue(discordResponseGuildOne);
+            guildService.isBotAddedToGuild = jest.fn().mockReturnValue(true);
+        });
+
+        test('should return 200 and the guild object (from Discord API) if data is ok', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+
+            const res = await request(app)
+                .get(`/api/v1/guilds/discord-api/${guildOne.guildId}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual(discordResponseGuildOne);
+        })
+
+        test('should return 401 if access token is missing', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+
+            await request(app)
+                .get(`/api/v1/guilds/discord-api/${guildOne.guildId}`)
+                .expect(httpStatus.UNAUTHORIZED);
+        })
+
+        test('should return 400 if can not fetch guild channels', async () => {
+            guildService.isBotAddedToGuild = jest.fn().mockReturnValue(false);
+            await insertUsers([userOne]);
+            await request(app)
+                .get(`/api/v1/guilds/discord-api/${guildOne.guildId}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send()
+                .expect(httpStatus.BAD_REQUEST);
+
+        })
     })
 
 });

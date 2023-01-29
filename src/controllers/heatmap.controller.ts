@@ -23,7 +23,6 @@ const getHeatmaps = catchAsync(async function (req: IAuthRequest, res: Response)
 
 
 export default {
-
     getHeatmaps
 }
 
