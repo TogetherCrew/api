@@ -42,7 +42,7 @@ export const guildOne = {
     _id: new Types.ObjectId(),
     guildId: "681946187490000901",
     user: userOne.discordId,
-    name: 'guildOne'
+    name: 'guildOne',
 }
 
 export const insertGuilds = async function <Type>(guilds: Array<Type>) {

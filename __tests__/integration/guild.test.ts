@@ -87,7 +87,10 @@ describe('Guild routes', () => {
                 guildId: guildOne.guildId,
                 user: userOne.discordId,
                 name: guildOne.name,
-                selectedChannels: []
+                selectedChannels: [],
+                isInProgress: true,
+                isDisconneted: false,
+                connectedAt: expect.anything()
             });
         })
 
