@@ -1,5 +1,5 @@
 import { Guild } from "tc-dbcomm";
-import { userOne } from "./user.fixture";
+import { userOne, userTwo } from "./user.fixture";
 import { Types } from "mongoose"
 
 export const discordResponseGuildOne = {
@@ -59,7 +59,7 @@ export const guildTwo = {
 export const guildThree = {
     _id: new Types.ObjectId(),
     guildId: "681946187490000901",
-    user: userOne.discordId,
+    user: userTwo.discordId,
     name: 'guildThree',
     isDisconneted: true,
     isInProgress: false
@@ -68,7 +68,7 @@ export const guildThree = {
 export const guildFour = {
     _id: new Types.ObjectId(),
     guildId: "681946187490000901",
-    user: userOne.discordId,
+    user: userTwo.discordId,
     name: 'guildFour',
     isDisconneted: false,
     isInProgress: true

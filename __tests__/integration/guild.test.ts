@@ -5,7 +5,7 @@ import app from '../../src/app';
 import setupTestDB from '../utils/setupTestDB';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
-import { discordResponseGuildOne, guildOne, insertGuilds } from '../fixtures/guilds.fixture';
+import { discordResponseGuildOne, guildOne, guildTwo, guildThree, guildFour, insertGuilds } from '../fixtures/guilds.fixture';
 import { discordResponseChannelOne, discordResponseChannelTwo, discordResponseChannelThree, discordResponseChannelFour } from '../fixtures/channels.fixture';
 import { IGuildUpdateBody } from '../../src/interfaces/guild.interface';
 import { guildService } from '../../src/services';
@@ -234,6 +234,203 @@ describe('Guild routes', () => {
         })
     })
 
+    describe('GET /api/v1/guilds', () => {
+        test('should return 200 and apply the default query options', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne, guildTwo, guildThree, guildFour]);
 
+            const res = await request(app)
+                .get('/api/v1/guilds')
+                .set('Authorization', `Bearer ${userOne}`)
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 2,
+            });
+            expect(res.body.results).toHaveLength(2);
+            expect(res.body.results[0]).toEqual({
+                id: guildTwo._id.toHexString(),
+                guildId: guildTwo.guildId,
+                user: userOne.discordId,
+                name: guildTwo.name,
+                selectedChannels: [],
+                isInProgress: guildTwo.isInProgress,
+                isDisconneted: guildTwo.isDisconneted,
+                connectedAt: expect.anything()
+            });
+        });
+
+        test('should return 401 if access token is missing', async () => {
+            await insertUsers([userOne]);
+
+            await request(app)
+                .get('/api/v1/guilds')
+                .send()
+                .expect(httpStatus.UNAUTHORIZED);
+        });
+
+        test('should correctly apply filter on isInProgress field', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne, guildTwo, guildThree, guildFour]);
+
+            const res = await request(app)
+                .get('/api/v1/guilds')
+                .set('Authorization', `Bearer ${userOne}`)
+                .query({ isInProgress: guildOne.isInProgress })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 1,
+            });
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].id).toBe(guildOne._id.toHexString());
+        });
+
+        test('should correctly apply filter on isDisconneted field', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne, guildTwo, guildThree, guildFour]);
+
+            const res = await request(app)
+                .get('/api/v1/guilds')
+                .set('Authorization', `Bearer ${userOne}`)
+                .query({ isDisconneted: guildTwo.isDisconneted })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 1,
+            });
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].id).toBe(guildTwo._id.toHexString());
+        });
+
+        test('should correctly sort the returned array if descending sort param is specified', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne, guildTwo, guildThree, guildFour]);
+
+            const res = await request(app)
+                .get('/api/v1/guilds')
+                .set('Authorization', `Bearer ${userOne}`)
+                .query({ sortBy: 'name:desc' })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 2,
+            });
+            expect(res.body.results).toHaveLength(2);
+            expect(res.body.results[0].id).toBe(guildOne._id.toHexString());
+            expect(res.body.results[1].id).toBe(guildTwo._id.toHexString());
+        });
+
+        test('should correctly sort the returned array if ascending sort param is specified', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne, guildTwo, guildThree, guildFour]);
+
+            const res = await request(app)
+                .get('/api/v1/guilds')
+                .set('Authorization', `Bearer ${userOne}`)
+                .query({ sortBy: 'name:asc' })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 2,
+            });
+            expect(res.body.results).toHaveLength(2);
+            expect(res.body.results[0].id).toBe(guildTwo._id.toHexString());
+            expect(res.body.results[1].id).toBe(guildOne._id.toHexString());
+        });
+
+        test('should correctly sort the returned array if multiple sorting criteria are specified', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne, guildTwo, guildThree, guildFour]);
+
+            const res = await request(app)
+                .get('/api/v1/guilds')
+                .set('Authorization', `Bearer ${userOne}`)
+                .query({ sortBy: 'isInProgress:desc,name:asc' })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 2,
+            });
+            expect(res.body.results).toHaveLength(2);
+
+            expect(res.body.results[0].id).toBe(guildTwo._id.toHexString());
+            expect(res.body.results[1].id).toBe(guildOne._id.toHexString());
+        });
+
+        test('should limit returned array if limit param is specified', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne, guildTwo, guildThree, guildFour]);
+
+            const res = await request(app)
+                .get('/api/v1/guilds')
+                .set('Authorization', `Bearer ${userOne}`)
+                .query({ limit: 1 })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 1,
+                totalPages: 2,
+                totalResults: 2,
+            });
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].id).toBe(guildOne._id.toHexString());
+        });
+
+        test('should return the correct page if page and limit params are specified', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne, guildTwo, guildThree, guildFour]);
+
+            const res = await request(app)
+                .get('/api/v1/guilds')
+                .set('Authorization', `Bearer ${userOne}`)
+                .query({ page: 2, limit: 1 })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 2,
+                limit: 1,
+                totalPages: 2,
+                totalResults: 2,
+            });
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].id).toBe(guildTwo._id.toHexString());
+        });
+    });
 
 });
