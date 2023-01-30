@@ -43,6 +43,35 @@ export const guildOne = {
     guildId: "681946187490000901",
     user: userOne.discordId,
     name: 'guildOne',
+    isDisconneted: false,
+    isInProgress: true
+}
+
+export const guildTwo = {
+    _id: new Types.ObjectId(),
+    guildId: "681946187490000901",
+    user: userOne.discordId,
+    name: 'guildTwo',
+    isDisconneted: false,
+    isInProgress: false
+}
+
+export const guildThree = {
+    _id: new Types.ObjectId(),
+    guildId: "681946187490000901",
+    user: userOne.discordId,
+    name: 'guildThree',
+    isDisconneted: true,
+    isInProgress: false
+}
+
+export const guildFour = {
+    _id: new Types.ObjectId(),
+    guildId: "681946187490000901",
+    user: userOne.discordId,
+    name: 'guildFour',
+    isDisconneted: false,
+    isInProgress: true
 }
 
 export const insertGuilds = async function <Type>(guilds: Array<Type>) {

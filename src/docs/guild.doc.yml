@@ -191,7 +191,7 @@ paths:
                         type: string
                         required:
               example:
-                period: Thu Dec 08 2022 11:49:12 GMT+0400
+                period:  "2023-01-23T06:38:05.157Z"
                 selectedChannels: [{
                   channelId: "1048535753103261706",
                   channelName: "channelName"

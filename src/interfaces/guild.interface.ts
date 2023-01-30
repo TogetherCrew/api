@@ -9,5 +9,4 @@ export interface IGuildUpdateBody {
     ],
     period?: Date,
     isDisconneted?: boolean,
-    isInProgress?: boolean
 }

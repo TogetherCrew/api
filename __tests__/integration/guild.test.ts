@@ -88,8 +88,8 @@ describe('Guild routes', () => {
                 user: userOne.discordId,
                 name: guildOne.name,
                 selectedChannels: [],
-                isInProgress: true,
-                isDisconneted: false,
+                isInProgress: guildOne.isInProgress,
+                isDisconneted: guildOne.isDisconneted,
                 connectedAt: expect.anything()
             });
         })
@@ -124,7 +124,8 @@ describe('Guild routes', () => {
                         channelId: discordResponseChannelOne.id,
                         channelName: discordResponseChannelOne.name
                     }
-                ]
+                ],
+                isDisconneted: false
             };
         });
         test('should return 200 and successfully update guild if data is ok', async () => {
@@ -181,6 +182,17 @@ describe('Guild routes', () => {
                 .send(updateBody)
                 .expect(httpStatus.BAD_REQUEST);
         });
+
+        test('should return 400 if isDisconneted is invalid', async () => {
+            await insertUsers([userOne]);
+            const updateBody = { isDisconneted: ':(' };
+
+            await request(app)
+                .patch(`/api/v1/guilds/${guildOne.guildId}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send(updateBody)
+                .expect(httpStatus.BAD_REQUEST);
+        });
     })
 
     describe('GET /api/v1/guilds/discord-api/:guildId', () => {
@@ -221,5 +233,7 @@ describe('Guild routes', () => {
 
         })
     })
+
+
 
 });
