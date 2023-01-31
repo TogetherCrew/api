@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { guildService, channelService } from '../services';
 import { IAuthRequest } from '../interfaces/request.interface';
-import { catchAsync, ApiError } from "../utils";
+import { catchAsync, ApiError, pick } from "../utils";
 import httpStatus from 'http-status';
 
 const getGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
@@ -34,6 +34,15 @@ const getGuildChannels = catchAsync(async function (req: IAuthRequest, res: Resp
     res.send(sortedChannels)
 });
 
+const getGuilds = catchAsync(async function (req: IAuthRequest, res: Response) {
+    const filter = pick(req.query, ['isDisconnected', 'isInProgress']);
+    filter.user = req.user.discordId;
+    const options = pick(req.query, ['sortBy', 'limit', 'page']);
+    const result = await guildService.queryGuilds(filter, options);
+    res.send(result);
+});
+
+
 
 
 
@@ -42,6 +51,7 @@ export default {
     getGuildChannels,
     getGuild,
     updateGuild,
-    getGuildFromDiscordAPI
+    getGuildFromDiscordAPI,
+    getGuilds
 }
 

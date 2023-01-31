@@ -89,7 +89,7 @@ describe('Guild routes', () => {
                 name: guildOne.name,
                 selectedChannels: [],
                 isInProgress: guildOne.isInProgress,
-                isDisconneted: guildOne.isDisconneted,
+                isDisconnected: guildOne.isDisconnected,
                 connectedAt: expect.anything()
             });
         })
@@ -125,7 +125,7 @@ describe('Guild routes', () => {
                         channelName: discordResponseChannelOne.name
                     }
                 ],
-                isDisconneted: false
+                isDisconnected: false
             };
         });
         test('should return 200 and successfully update guild if data is ok', async () => {
@@ -238,12 +238,13 @@ describe('Guild routes', () => {
         test('should return 200 and apply the default query options', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne, guildTwo, guildThree, guildFour]);
-
             const res = await request(app)
                 .get('/api/v1/guilds')
-                .set('Authorization', `Bearer ${userOne}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(httpStatus.OK);
+
+
 
             expect(res.body).toEqual({
                 results: expect.any(Array),
@@ -254,13 +255,13 @@ describe('Guild routes', () => {
             });
             expect(res.body.results).toHaveLength(2);
             expect(res.body.results[0]).toEqual({
-                id: guildTwo._id.toHexString(),
-                guildId: guildTwo.guildId,
+                id: guildOne._id.toHexString(),
+                guildId: guildOne.guildId,
                 user: userOne.discordId,
-                name: guildTwo.name,
+                name: guildOne.name,
                 selectedChannels: [],
-                isInProgress: guildTwo.isInProgress,
-                isDisconneted: guildTwo.isDisconneted,
+                isInProgress: guildOne.isInProgress,
+                isDisconnected: guildOne.isDisconnected,
                 connectedAt: expect.anything()
             });
         });
@@ -280,7 +281,7 @@ describe('Guild routes', () => {
 
             const res = await request(app)
                 .get('/api/v1/guilds')
-                .set('Authorization', `Bearer ${userOne}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ isInProgress: guildOne.isInProgress })
                 .send()
                 .expect(httpStatus.OK);
@@ -296,14 +297,14 @@ describe('Guild routes', () => {
             expect(res.body.results[0].id).toBe(guildOne._id.toHexString());
         });
 
-        test('should correctly apply filter on isDisconneted field', async () => {
+        test('should correctly apply filter on isDisconnected field', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne, guildTwo, guildThree, guildFour]);
 
             const res = await request(app)
                 .get('/api/v1/guilds')
-                .set('Authorization', `Bearer ${userOne}`)
-                .query({ isDisconneted: guildTwo.isDisconneted })
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ isDisconnected: guildTwo.isDisconnected })
                 .send()
                 .expect(httpStatus.OK);
 
@@ -324,8 +325,31 @@ describe('Guild routes', () => {
 
             const res = await request(app)
                 .get('/api/v1/guilds')
-                .set('Authorization', `Bearer ${userOne}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ sortBy: 'name:desc' })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 2,
+            });
+            expect(res.body.results).toHaveLength(2);
+            expect(res.body.results[0].id).toBe(guildTwo._id.toHexString());
+            expect(res.body.results[1].id).toBe(guildOne._id.toHexString());
+        });
+
+        test('should correctly sort the returned array if ascending sort param is specified', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne, guildTwo, guildThree, guildFour]);
+
+            const res = await request(app)
+                .get('/api/v1/guilds')
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ sortBy: 'name:asc' })
                 .send()
                 .expect(httpStatus.OK);
 
@@ -341,36 +365,13 @@ describe('Guild routes', () => {
             expect(res.body.results[1].id).toBe(guildTwo._id.toHexString());
         });
 
-        test('should correctly sort the returned array if ascending sort param is specified', async () => {
-            await insertUsers([userOne]);
-            await insertGuilds([guildOne, guildTwo, guildThree, guildFour]);
-
-            const res = await request(app)
-                .get('/api/v1/guilds')
-                .set('Authorization', `Bearer ${userOne}`)
-                .query({ sortBy: 'name:asc' })
-                .send()
-                .expect(httpStatus.OK);
-
-            expect(res.body).toEqual({
-                results: expect.any(Array),
-                page: 1,
-                limit: 10,
-                totalPages: 1,
-                totalResults: 2,
-            });
-            expect(res.body.results).toHaveLength(2);
-            expect(res.body.results[0].id).toBe(guildTwo._id.toHexString());
-            expect(res.body.results[1].id).toBe(guildOne._id.toHexString());
-        });
-
         test('should correctly sort the returned array if multiple sorting criteria are specified', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne, guildTwo, guildThree, guildFour]);
 
             const res = await request(app)
                 .get('/api/v1/guilds')
-                .set('Authorization', `Bearer ${userOne}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ sortBy: 'isInProgress:desc,name:asc' })
                 .send()
                 .expect(httpStatus.OK);
@@ -384,8 +385,8 @@ describe('Guild routes', () => {
             });
             expect(res.body.results).toHaveLength(2);
 
-            expect(res.body.results[0].id).toBe(guildTwo._id.toHexString());
-            expect(res.body.results[1].id).toBe(guildOne._id.toHexString());
+            expect(res.body.results[0].id).toBe(guildOne._id.toHexString());
+            expect(res.body.results[1].id).toBe(guildTwo._id.toHexString());
         });
 
         test('should limit returned array if limit param is specified', async () => {
@@ -394,7 +395,7 @@ describe('Guild routes', () => {
 
             const res = await request(app)
                 .get('/api/v1/guilds')
-                .set('Authorization', `Bearer ${userOne}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ limit: 1 })
                 .send()
                 .expect(httpStatus.OK);
@@ -416,7 +417,7 @@ describe('Guild routes', () => {
 
             const res = await request(app)
                 .get('/api/v1/guilds')
-                .set('Authorization', `Bearer ${userOne}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ page: 2, limit: 1 })
                 .send()
                 .expect(httpStatus.OK);

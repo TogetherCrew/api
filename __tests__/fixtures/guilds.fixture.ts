@@ -43,34 +43,34 @@ export const guildOne = {
     guildId: "681946187490000901",
     user: userOne.discordId,
     name: 'guildOne',
-    isDisconneted: false,
+    isDisconnected: false,
     isInProgress: true
 }
 
 export const guildTwo = {
     _id: new Types.ObjectId(),
-    guildId: "681946187490000901",
+    guildId: "681946187490000803",
     user: userOne.discordId,
     name: 'guildTwo',
-    isDisconneted: false,
+    isDisconnected: true,
     isInProgress: false
 }
 
 export const guildThree = {
     _id: new Types.ObjectId(),
-    guildId: "681946187490000901",
+    guildId: "681946187490000802",
     user: userTwo.discordId,
     name: 'guildThree',
-    isDisconneted: true,
+    isDisconnected: true,
     isInProgress: false
 }
 
 export const guildFour = {
     _id: new Types.ObjectId(),
-    guildId: "681946187490000901",
+    guildId: "681946187490000801",
     user: userTwo.discordId,
     name: 'guildFour',
-    isDisconneted: false,
+    isDisconnected: false,
     isInProgress: true
 }
 

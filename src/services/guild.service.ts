@@ -112,6 +112,15 @@ async function getGuildChannels(guildId: string) {
     }
 }
 
+/**
+ * query guilds
+ * @param {Object} filter 
+ * @param {Object} options 
+ * @returns {Promise<Array<IGuild>>}
+ */
+async function queryGuilds(filter: object, options: object) {
+    return Guild.paginate(filter, options);
+}
 
 
 
@@ -122,5 +131,6 @@ export default {
     updateGuildByGuildId,
     isBotAddedToGuild,
     getGuildByQuery,
-    getGuildFromDiscordAPI
+    getGuildFromDiscordAPI,
+    queryGuilds
 }

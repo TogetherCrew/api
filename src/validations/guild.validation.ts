@@ -1,5 +1,15 @@
 import Joi from "joi";
 
+const getGuilds = {
+    query: Joi.object().keys({
+        isDisconnected: Joi.boolean(),
+        isInProgress: Joi.boolean(),
+        sortBy: Joi.string(),
+        limit: Joi.number().integer(),
+        page: Joi.number().integer(),
+    })
+};
+
 const getGuild = {
     params: Joi.object().required().keys({
         guildId: Joi.string().required()
@@ -16,7 +26,7 @@ const updateGuild = {
             channelName: Joi.string().required()
         })),
         period: Joi.date(),
-        isDisconneted: Joi.boolean()
+        isDisconnected: Joi.boolean()
     }),
 };
 
@@ -25,6 +35,8 @@ const getGuildFromDiscordAPI = {
         guildId: Joi.string().required()
     })
 };
+
+
 
 const getGuildChannels = {
     params: Joi.object().required().keys({
@@ -36,5 +48,6 @@ export default {
     getGuildChannels,
     updateGuild,
     getGuild,
-    getGuildFromDiscordAPI
+    getGuildFromDiscordAPI,
+    getGuilds
 }
