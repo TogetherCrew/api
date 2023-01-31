@@ -117,10 +117,10 @@ describe('Guild routes', () => {
         test('should return 200 and soft disconnect the guild if req data is ok', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
-
             await request(app)
                 .post(`/api/v1/guilds/${guildOne.guildId}/disconnect`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ disconnectType: 'soft' })
                 .expect(httpStatus.NO_CONTENT);
 
 
@@ -132,10 +132,10 @@ describe('Guild routes', () => {
         test('should return 200 and hard disconnect the guild if req data is ok', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
-
             await request(app)
                 .post(`/api/v1/guilds/${guildOne.guildId}/disconnect`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ disconnectType: 'hard' })
                 .expect(httpStatus.NO_CONTENT);
 
             const dbGuild = await Guild.findById(guildOne._id);
@@ -146,20 +146,28 @@ describe('Guild routes', () => {
         test('should return 401 if access token is missing', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
-
             await request(app)
                 .post(`/api/v1/guilds/${guildOne.guildId}/disconnect`)
+                .send({ disconnectType: 'soft' })
                 .expect(httpStatus.UNAUTHORIZED);
         })
 
         test('should return 404 if guild not found', async () => {
             await insertUsers([userOne]);
-
             await request(app)
                 .post(`/api/v1/guilds/${guildOne.guildId}/disconnect`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ disconnectType: 'soft' })
                 .expect(httpStatus.NOT_FOUND);
         })
+        test('should return 400 if disconnectType is invalid', async () => {
+            await insertUsers([userOne]);
+            await request(app)
+                .patch(`/api/v1/guilds/${guildOne.guildId}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ disconnectType: ':/' })
+                .expect(httpStatus.BAD_REQUEST);
+        });
     })
 
 
