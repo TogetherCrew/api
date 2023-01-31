@@ -257,7 +257,7 @@ paths:
                         format: Snowflake
                       channelName:
                         type: string
-                        required:
+                        required: true
               example:
                 period:  "2023-01-23T06:38:05.157Z"
                 selectedChannels: [{
@@ -273,6 +273,48 @@ paths:
                 type: object
                 $ref: "#/components/schemas/Guild"
               
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
+
+
+  /api/v1/guilds/{guildId}/disconnect:
+    post:
+      tags:
+        - [Guild]
+      summary: Disconnect a guild
+      description:  In hard dc, the user's guild will remove but in soft dc the isDisconnected filed will set true.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: guildId
+          required: true
+          schema:
+            type: string
+          description: Guild Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                disconnectType:
+                  type: string
+                  format: date-time  
+                  required: true   
+                  enum: ['soft','hard']        
+                  example: soft 
+      responses:
+        "204":
+          description: No Content
         "400":
           description: Bad Request
           $ref: "#/components/responses/BadRequest"
