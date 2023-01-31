@@ -113,6 +113,56 @@ describe('Guild routes', () => {
         })
     })
 
+    describe('POST /api/v1/guilds/:guildId/disconnect', () => {
+        test('should return 200 and soft disconnect the guild if req data is ok', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+
+            await request(app)
+                .post(`/api/v1/guilds/${guildOne.guildId}/disconnect`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .expect(httpStatus.NO_CONTENT);
+
+
+            const dbGuild = await Guild.findById(guildOne._id);
+            expect(dbGuild).toBeDefined();
+            expect(dbGuild).toMatchObject({ isDisconnected: true });
+        })
+
+        test('should return 200 and hard disconnect the guild if req data is ok', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+
+            await request(app)
+                .post(`/api/v1/guilds/${guildOne.guildId}/disconnect`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .expect(httpStatus.NO_CONTENT);
+
+            const dbGuild = await Guild.findById(guildOne._id);
+            expect(dbGuild).toBeUndefined();
+        })
+
+
+        test('should return 401 if access token is missing', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+
+            await request(app)
+                .post(`/api/v1/guilds/${guildOne.guildId}/disconnect`)
+                .expect(httpStatus.UNAUTHORIZED);
+        })
+
+        test('should return 404 if guild not found', async () => {
+            await insertUsers([userOne]);
+
+            await request(app)
+                .post(`/api/v1/guilds/${guildOne.guildId}/disconnect`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .expect(httpStatus.NOT_FOUND);
+        })
+    })
+
+
     describe('PATCH /api/v1/guilds/:guildId', () => {
         let updateBody: IGuildUpdateBody;
 
