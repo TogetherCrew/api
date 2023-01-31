@@ -5,7 +5,7 @@ import { catchAsync, ApiError, pick } from "../utils";
 import httpStatus from 'http-status';
 
 const getGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
-    const guild = await guildService.getGuildByQuery({ guildId: req.params.guildId, user: req.user.discordId });
+    const guild = await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId });
     if (!guild) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
     }
@@ -14,6 +14,8 @@ const getGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
 
 const updateGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
     const guild = await guildService.updateGuildByGuildId(req.params.guildId, req.user.discordId, req.body);
+
+
     res.send(guild);
 });
 
@@ -43,6 +45,15 @@ const getGuilds = catchAsync(async function (req: IAuthRequest, res: Response) {
 });
 
 
+const disconnectGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
+    if (req.body.disconnectType === "soft") {
+        await guildService.updateGuildByGuildId(req.params.guildId, req.user.discordId, { isDisconnected: true })
+    }
+    else if (req.body.disconnectType === "hard") {
+        await guildService.deleteGuild({ guildId: req.params.guildId, user: req.user.discordId })
+    }
+    res.status(httpStatus.NO_CONTENT).send();
+});
 
 
 
@@ -52,6 +63,7 @@ export default {
     getGuild,
     updateGuild,
     getGuildFromDiscordAPI,
-    getGuilds
+    getGuilds,
+    disconnectGuild
 }
 

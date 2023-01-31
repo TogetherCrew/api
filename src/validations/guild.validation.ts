@@ -30,6 +30,15 @@ const updateGuild = {
     }),
 };
 
+const disconnectGuild = {
+    params: Joi.object().required().keys({
+        guildId: Joi.string().required()
+    }),
+    body: Joi.object().required().keys({
+        disconnectType: Joi.string().required().valid('soft', 'hard')
+    }),
+};
+
 const getGuildFromDiscordAPI = {
     params: Joi.object().required().keys({
         guildId: Joi.string().required()
@@ -49,5 +58,6 @@ export default {
     updateGuild,
     getGuild,
     getGuildFromDiscordAPI,
-    getGuilds
+    getGuilds,
+    disconnectGuild
 }

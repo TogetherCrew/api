@@ -139,7 +139,7 @@ describe('Guild routes', () => {
                 .expect(httpStatus.NO_CONTENT);
 
             const dbGuild = await Guild.findById(guildOne._id);
-            expect(dbGuild).toBeUndefined();
+            expect(dbGuild).toBe(null);
         })
 
 

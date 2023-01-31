@@ -9,6 +9,7 @@ const router = express.Router();
 router.get('/', auth(), validate(guildValidation.getGuilds), guildController.getGuilds);
 
 router.get('/:guildId/channels', auth(), validate(guildValidation.getGuildChannels), guildController.getGuildChannels);
+router.post('/:guildId/disconnect', auth(), validate(guildValidation.disconnectGuild), guildController.disconnectGuild);
 
 router.route('/:guildId')
     .get(auth(), validate(guildValidation.getGuild), guildController.getGuild)
