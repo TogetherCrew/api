@@ -183,9 +183,9 @@ describe('Guild routes', () => {
                 .expect(httpStatus.BAD_REQUEST);
         });
 
-        test('should return 400 if isDisconneted is invalid', async () => {
+        test('should return 400 if isDisconnected is invalid', async () => {
             await insertUsers([userOne]);
-            const updateBody = { isDisconneted: ':(' };
+            const updateBody = { isDisconnected: ':(' };
 
             await request(app)
                 .patch(`/api/v1/guilds/${guildOne.guildId}`)
