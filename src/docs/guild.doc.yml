@@ -1,4 +1,72 @@
 paths:
+  /api/v1/guilds:
+    get:
+      tags:
+        - [Guild]
+      summary: get all guilds
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: isDisconnected
+          schema:
+            type: string
+          description: guild connection status
+        - in: query
+          name: isInProgress
+          schema:
+            type: string
+          description: guild analysis progress status
+        - in: query
+          name: sortBy
+          schema:
+            type: string
+          description: sort by query in the form of field:desc/asc (ex. name:asc)
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            default: 10
+          description: Maximum number of guilds
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Guild"
+                  page:
+                    type: integer
+                    example: 1
+                  limit:
+                    type: integer
+                    example: 10
+                  totalPages:
+                    type: integer
+                    example: 1
+                  totalResults:
+                    type: integer
+                    example: 1
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
+
   /api/v1/guilds/{guildId}/channels:
     get:
       tags:

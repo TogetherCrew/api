@@ -244,8 +244,6 @@ describe('Guild routes', () => {
                 .send()
                 .expect(httpStatus.OK);
 
-
-
             expect(res.body).toEqual({
                 results: expect.any(Array),
                 page: 1,
