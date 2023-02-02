@@ -8,7 +8,7 @@ import { userOneAccessToken } from '../fixtures/token.fixture';
 import { discordResponseGuildOne, guildOne, guildTwo, guildThree, guildFour, insertGuilds } from '../fixtures/guilds.fixture';
 import { discordResponseChannelOne, discordResponseChannelTwo, discordResponseChannelThree, discordResponseChannelFour } from '../fixtures/channels.fixture';
 import { IGuildUpdateBody } from '../../src/interfaces/guild.interface';
-import { guildService } from '../../src/services';
+import { guildService, authService, userService } from '../../src/services';
 import { Guild } from 'tc-dbcomm';
 setupTestDB();
 
@@ -113,6 +113,94 @@ describe('Guild routes', () => {
         })
     })
 
+    describe('POST /api/v1/guilds/connect', () => {
+        test('should return 302 when redirect correctly if req data is ok', async () => {
+            await insertUsers([userOne]);
+            await request(app)
+                .post(`/api/v1/guilds/connect`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .expect(httpStatus.FOUND)
+        })
+
+        test('should return 401 if access token is missing', async () => {
+            await insertUsers([userOne]);
+            await request(app)
+                .post(`/api/v1/guilds/connect`)
+                .expect(httpStatus.UNAUTHORIZED);
+        })
+
+        test('should return 400 if user has a connected guild', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne, guildTwo]);
+            await request(app)
+                .post(`/api/v1/guilds/connect`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .expect(httpStatus.BAD_REQUEST);
+        })
+    })
+
+    describe('GET /api/v1/guilds/connect/callback', () => {
+        userService.getUserFromDiscordAPI = jest.fn().mockReturnValue({
+            id: '681946187490000900',
+            username: 'Behzad',
+            avatar: '947f3e19e6e36a2679c6fe854b79a699',
+            email: 'gmail@yaoo.com',
+            verified: true
+        })
+        authService.exchangeCode = jest.fn().mockReturnValue({
+            access_token: 'mockAccess',
+            expires_in: 604800,
+            refresh_token: 'mockRefresh',
+            scope: 'some scope',
+            token_type: 'Bearer',
+            guild: {
+                id: '681946187490000803',
+            }
+        });
+        test('should return 302 and successfully create guild', async () => {
+            await insertUsers([userOne]);
+            await request(app)
+                .get('/api/v1/guilds/connect/callback')
+                .query({ code: 'code' })
+                .send()
+                .expect(httpStatus.FOUND);
+
+            const dbGuild = await Guild.findById(guildTwo._id);
+            expect(dbGuild).toBeDefined();
+        })
+        test('should return 302 and set guild isDisconnected filed to false if the guild is exist in db', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne, guildTwo]);
+            await request(app)
+                .get('/api/v1/guilds/connect/callback')
+                .query({ code: 'code' })
+                .send()
+                .expect(httpStatus.FOUND);
+
+
+            const dbGuild = await Guild.findById(guildTwo._id);
+            expect(dbGuild).toBeDefined();
+            expect(dbGuild).toMatchObject({ isDisconnected: false });
+
+        })
+
+        test('should return 302 if user is not in db', async () => {
+            await request(app)
+                .get('/api/v1/guilds/connect/callback')
+                .query({ code: 'code' })
+                .send()
+                .expect(httpStatus.FOUND);
+
+        })
+        test('should return 302 if code does not provided', async () => {
+            await request(app)
+                .get('/api/v1/guilds/connect/callback')
+                .send()
+                .expect(httpStatus.FOUND);
+        })
+    })
+
+
     describe('POST /api/v1/guilds/:guildId/disconnect', () => {
         test('should return 200 and soft disconnect the guild if req data is ok', async () => {
             await insertUsers([userOne]);
@@ -169,7 +257,6 @@ describe('Guild routes', () => {
                 .expect(httpStatus.BAD_REQUEST);
         });
     })
-
 
     describe('PATCH /api/v1/guilds/:guildId', () => {
         let updateBody: IGuildUpdateBody;
