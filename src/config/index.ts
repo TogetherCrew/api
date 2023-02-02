@@ -13,6 +13,7 @@ const envVarsSchema = Joi.object()
         DISCORD_CLIENT_SECRET: Joi.string().required().description('Discord clinet secret'),
         DISCORD_CALLBACK_URI: Joi.string().required().description('Discord callback uri'),
         DISCORD_BOT_TOKEN: Joi.string().required().description('Discord bot token'),
+        DISCORD_CONNECT_GUILD_CALLBACK_URI: Joi.string().required().description('Discord callback uri'),
         JWT_SECRET: Joi.string().required().description('JWT secret key'),
         JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().default(30).description('minutes after which access tokens expire'),
         JWT_REFRESH_EXPIRATION_DAYS: Joi.number().default(30).description('days after which refresh tokens expire'),
@@ -31,16 +32,17 @@ export default {
     env: envVars.NODE_ENV,
     port: envVars.PORT,
     mongoose: {
-        serverURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}/${envVars.DB_NAME}`,
-        botURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}`,
-        // serverURL: `mongodb://127.0.0.1:27017/RnDAO-${envVars.NODE_ENV}`,
-        // botURL: "mongodb://127.0.0.1:27017"
+        // serverURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}/${envVars.DB_NAME}`,
+        // botURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}`,
+        serverURL: `mongodb://127.0.0.1:27017/RnDAO-${envVars.NODE_ENV}`,
+        botURL: "mongodb://127.0.0.1:27017"
     },
     discord: {
         clientId: envVars.DISCROD_CLIENT_ID,
         clientSecret: envVars.DISCORD_CLIENT_SECRET,
         callbackURI: envVars.DISCORD_CALLBACK_URI,
-        botToken: envVars.DISCORD_BOT_TOKEN
+        botToken: envVars.DISCORD_BOT_TOKEN,
+        connectGuildCallbackURI: envVars.DISCORD_CONNECT_GUILD_CALLBACK_URI
     },
     jwt: {
         secret: envVars.JWT_SECRET,

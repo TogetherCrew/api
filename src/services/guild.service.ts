@@ -26,8 +26,7 @@ async function createGuild(data: IDiscordGuild, discordId: Snowflake) {
  * @returns {Promise<IGuild | null>}
  */
 async function getGuildByGuildId(guildId: Snowflake) {
-    return Guild.findOne({ guildId });
-
+    return Guild.findOne({ guildId })
 }
 
 /**
