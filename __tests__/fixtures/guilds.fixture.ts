@@ -1,5 +1,5 @@
 import { Guild } from "tc-dbcomm";
-import { userOne } from "./user.fixture";
+import { userOne, userTwo } from "./user.fixture";
 import { Types } from "mongoose"
 
 export const discordResponseGuildOne = {
@@ -42,7 +42,36 @@ export const guildOne = {
     _id: new Types.ObjectId(),
     guildId: "681946187490000901",
     user: userOne.discordId,
-    name: 'guildOne'
+    name: 'guildOne',
+    isDisconnected: false,
+    isInProgress: true
+}
+
+export const guildTwo = {
+    _id: new Types.ObjectId(),
+    guildId: "681946187490000803",
+    user: userOne.discordId,
+    name: 'guildTwo',
+    isDisconnected: true,
+    isInProgress: false
+}
+
+export const guildThree = {
+    _id: new Types.ObjectId(),
+    guildId: "681946187490000802",
+    user: userTwo.discordId,
+    name: 'guildThree',
+    isDisconnected: true,
+    isInProgress: false
+}
+
+export const guildFour = {
+    _id: new Types.ObjectId(),
+    guildId: "681946187490000801",
+    user: userTwo.discordId,
+    name: 'guildFour',
+    isDisconnected: false,
+    isInProgress: true
 }
 
 export const insertGuilds = async function <Type>(guilds: Array<Type>) {

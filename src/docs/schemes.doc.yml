@@ -42,7 +42,16 @@ components:
           type: string
         period:
           type: string
-          format: date-time             
+          format: date-time   
+        connectedAt:
+          type: string
+          format: date-time   
+        isInProgress:
+          type: boolean
+          default: true
+        isDisconnected:
+          type: boolean
+          default: false
         selectedChannels:
           type: array
           items:
@@ -62,11 +71,14 @@ components:
         guildId: "1048535753103261706"
         ownerId: "681946187490000900"
         name: "guildname"
-        period: Thu Dec 08 2022 11:49:12 GMT+0400
+        period: "2023-01-23T06:38:05.157Z"
         selectedChannels: [{
           channelId: "1048535753103261706",
           channelName: "channelName"
         }]
+        isInProgress: true
+        isDisconnected: false
+        connectedAt: "2023-01-23T06:38:05.157Z"
 
     # ********Token********
     Token:

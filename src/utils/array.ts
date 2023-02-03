@@ -7,10 +7,8 @@ function fillEmptyElemetns(heatmaps: number[][]) {
         }
         fullArray.push([i, j, 0]);
     }
-    for (let counter = 0; counter < fullArray.length; counter++) {
-        if (heatmaps[counter]) {
-            fullArray[((heatmaps[counter][0] * 24) + heatmaps[counter][1]) - 1] = heatmaps[counter]
-        }
+    for (let counter = 0; counter < heatmaps.length; counter++) {
+        fullArray[((heatmaps[counter][0] * 24) + heatmaps[counter][1]) - 1] = heatmaps[counter]
     }
     return fullArray;
 }

@@ -17,7 +17,7 @@ async function exchangeCode(code: string): Promise<IDiscordOathBotCallback> {
             client_id: config.discord.clientId,
             client_secret: config.discord.clientSecret,
             grant_type: 'authorization_code',
-            redirect_uri: config.discord.callbackURI,
+            redirect_uri: config.discord.connectGuildCallbackURI,
             code
         };
 
@@ -26,6 +26,7 @@ async function exchangeCode(code: string): Promise<IDiscordOathBotCallback> {
             body: new URLSearchParams(data),
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         })
+        console.log(response)
         const json = await response.json();
         // Note: {message: '401: Unauthorized', code:0} means that we have not discord auth tokens
         if (json.message) {
