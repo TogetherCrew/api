@@ -1,5 +1,5 @@
 import { Response, Request } from 'express';
-import { guildService, channelService, userService, authService, tokenService } from '../services';
+import { guildService, channelService, userService, authService } from '../services';
 import { IAuthRequest } from '../interfaces/request.interface';
 import { catchAsync, ApiError, pick } from "../utils";
 import httpStatus from 'http-status';
@@ -53,7 +53,6 @@ const connectGuild = catchAsync(async function (req: IAuthRequest, res: Response
         throw new ApiError(httpStatus.BAD_REQUEST, 'You have already connected guild. please disconnect your guild to be able to add another one');
     }
     res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.connectGuildCallbackURI}&response_type=code&scope=${scopes.bot}&permissions=${permissions.ViewChannels}`);
-
 });
 
 const connectGuildCallback = catchAsync(async function (req: Request, res: Response) {
@@ -78,7 +77,7 @@ const connectGuildCallback = catchAsync(async function (req: Request, res: Respo
                 "guildId": guild.guildId,
                 "guildName": guild.name
             });
-            res.redirect(`${config.frontend.url}/login?` + query);
+            res.redirect(`${config.frontend.url}/settings?` + query);
         }
         else {
             throw new Error();
@@ -87,10 +86,9 @@ const connectGuildCallback = catchAsync(async function (req: Request, res: Respo
         const query = querystring.stringify({
             "isSuccessful": false
         });
-        res.redirect(`${config.frontend.url}/login?` + query);
+        res.redirect(`${config.frontend.url}/settings?` + query);
     }
 });
-
 
 const disconnectGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
     if (req.body.disconnectType === "soft") {
@@ -101,9 +99,6 @@ const disconnectGuild = catchAsync(async function (req: IAuthRequest, res: Respo
     }
     res.status(httpStatus.NO_CONTENT).send();
 });
-
-
-
 
 export default {
     getGuildChannels,
