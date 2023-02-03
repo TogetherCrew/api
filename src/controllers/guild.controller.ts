@@ -52,7 +52,8 @@ const connectGuild = catchAsync(async function (req: IAuthRequest, res: Response
     if (await guildService.getGuild({ user: req.user.discordId, isDisconnected: false })) {
         throw new ApiError(httpStatus.BAD_REQUEST, 'You have already connected guild. please disconnect your guild to be able to add another one');
     }
-    res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.connectGuildCallbackURI}&response_type=code&scope=${scopes.connectGuild}&permissions=${permissions.ViewChannels}`);
+    res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.connectGuildCallbackURI}&response_type=code&scope=${scopes.bot}&permissions=${permissions.ViewChannels}`);
+
 });
 
 const connectGuildCallback = catchAsync(async function (req: Request, res: Response) {

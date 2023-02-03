@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { heatmapService } from '../services';
+import { guildService, heatmapService } from '../services';
 import { IAuthRequest } from '../interfaces/request.interface';
 import { catchAsync, ApiError, timezone, array } from "../utils";
 import { databaseService, Guild } from 'tc-dbcomm'
@@ -8,7 +8,7 @@ import config from '../config';
 import moment from 'moment-timezone';
 
 const getHeatmaps = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (!await Guild.findOne({ guildId: req.params.guildId, user: req.user.discordId })) {
+    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
     }
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);

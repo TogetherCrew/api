@@ -117,7 +117,7 @@ describe('Guild routes', () => {
         test('should return 302 when redirect correctly if req data is ok', async () => {
             await insertUsers([userOne]);
             await request(app)
-                .post(`/api/v1/guilds/connect`)
+                .get(`/api/v1/guilds/connect`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.FOUND)
         })
@@ -125,7 +125,7 @@ describe('Guild routes', () => {
         test('should return 401 if access token is missing', async () => {
             await insertUsers([userOne]);
             await request(app)
-                .post(`/api/v1/guilds/connect`)
+                .get(`/api/v1/guilds/connect`)
                 .expect(httpStatus.UNAUTHORIZED);
         })
 
@@ -133,7 +133,7 @@ describe('Guild routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne, guildTwo]);
             await request(app)
-                .post(`/api/v1/guilds/connect`)
+                .get(`/api/v1/guilds/connect`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.BAD_REQUEST);
         })
