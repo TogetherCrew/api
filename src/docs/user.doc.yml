@@ -51,6 +51,23 @@ paths:
           $ref: "#/components/responses/Can_Not_Fetch_From_Discord_API"
           
   /api/v1/users/@me:
+    get:
+      tags:
+        - [User]
+      summary: get user 
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
     patch:
       tags:
         - [User]

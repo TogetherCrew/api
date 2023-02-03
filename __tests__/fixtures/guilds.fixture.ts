@@ -26,9 +26,21 @@ export const discordResponseGuildTwo = {
     Permission_new: "1071698529857"
 };
 
+export const discordResponseGuildThree = {
+    id: "681946187490000902",
+    name: "guildTwo",
+    icon: "947f3e19e6e36a2679c6fe854b79a602",
+    owner: false,
+    permissions: 1342178320,
+    features: [
+        "APPLICATION_COMMAND_PREMISSION_V2"
+    ],
+    Permission_new: "1071698529857"
+};
+
 export const guildOne = {
     _id: new Types.ObjectId(),
-    guildId: "681946187490000903",
+    guildId: "681946187490000901",
     user: userOne.discordId,
     name: 'guildOne'
 }

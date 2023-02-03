@@ -122,7 +122,7 @@ describe('Auth routes', () => {
             });
 
             const dbRefreshTokenDoc = await Token.findOne({ token: res.body.refresh.token });
-            expect(dbRefreshTokenDoc).toMatchObject({ type: tokenTypes.REFRESH, user: userOne._id, blacklisted: false });
+            expect(dbRefreshTokenDoc).toMatchObject({ type: tokenTypes.REFRESH, user: userOne.discordId, blacklisted: false });
 
             const dbRefreshTokenCount = await Token.countDocuments();
             expect(dbRefreshTokenCount).toBe(1);

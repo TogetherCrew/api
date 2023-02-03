@@ -26,8 +26,68 @@ async function createGuild(data: IDiscordGuild, discordId: Snowflake) {
  * @returns {Promise<IGuild | null>}
  */
 async function getGuildByGuildId(guildId: Snowflake) {
-    const user = await Guild.findOne({ guildId });
-    return user;
+    return Guild.findOne({ guildId });
+
+}
+
+/**
+ * get guild by query 
+ * @param {Object} query
+ * @returns {Promise<IGuild | null>}
+ */
+async function getGuildByQuery(query: object) {
+    return Guild.findOne(query);
+}
+
+/**
+ * update guild by guildId
+ * @param {Snowflake} guildId
+ * @param {Snowflake} userDiscordId
+ * @param {IGuildUpdateBody} updateBody
+ * @returns {Promise<IGuild>}
+ */
+async function updateGuildByGuildId(guildId: Snowflake, userDiscordId: Snowflake, updateBody: IGuildUpdateBody) {
+    const guild = await Guild.findOne({ guildId, user: userDiscordId });
+    if (!guild) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    }
+    Object.assign(guild, updateBody);
+    await guild.save();
+    return guild;
+}
+
+/**
+ * check if our bot is added to guild
+ * @param {Snowflake} guildId
+ * @param {Snowflake} userDiscordId
+ * @returns {Boolean}
+ */
+async function isBotAddedToGuild(guildId: Snowflake, userDiscordId: Snowflake) {
+    const guild = await Guild.findOne({ guildId, user: userDiscordId });
+    return guild ? true : false
+}
+
+
+/**
+ * Get guild from discord API
+ * @param {Snowflake} guildId
+ * @returns {Promise<IDiscordGuild>}
+ */
+async function getGuildFromDiscordAPI(guildId: string) {
+    try {
+        const response = await fetch(`https://discord.com/api/guilds/${guildId}`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bot ${config.discord.botToken}` }
+        });
+        const json = await response.json();
+        // Note: {message: '401: Unauthorized', code:0} means that we have not access to guild channels
+        if (json.message) {
+            throw new Error();
+        }
+        return json;
+    } catch (err) {
+        throw new ApiError(590, 'Can not fetch from discord API');
+    }
 }
 
 /**
@@ -52,33 +112,6 @@ async function getGuildChannels(guildId: string) {
     }
 }
 
-/**
- * update guild by guildId
- * @param {Snowflake} guildId
- * @param {Snowflake} userDiscordId
- * @param {IGuildUpdateBody} updateBody
- * @returns {Promise<IGuild>}
- */
-async function updateGuildByGuildId(guildId: Snowflake, userDiscordId: Snowflake, updateBody: IGuildUpdateBody) {
-    const guild = await Guild.findOne({ guildId, user: userDiscordId });
-    if (!guild) {
-        throw new ApiError(httpStatus.BAD_REQUEST, 'Guild not found');
-    }
-    Object.assign(guild, updateBody);
-    await guild.save();
-    return guild;
-}
-
-/**
- * check if our bot is added to guild
- * @param {Snowflake} guildId
- * @param {Snowflake} userDiscordId
- * @returns {Boolean}
- */
-async function isBotAddedToGuild(guildId: Snowflake, userDiscordId: Snowflake) {
-    const guild = await Guild.findOne({ guildId, user: userDiscordId });
-    return guild ? true : false
-}
 
 
 
@@ -87,5 +120,7 @@ export default {
     getGuildByGuildId,
     getGuildChannels,
     updateGuildByGuildId,
-    isBotAddedToGuild
+    isBotAddedToGuild,
+    getGuildByQuery,
+    getGuildFromDiscordAPI
 }

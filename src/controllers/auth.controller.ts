@@ -39,12 +39,14 @@ const callback = catchAsync(async function (req: Request, res: Response) {
             "guildId": guild.guildId,
             "guildName": guild.name
         });
-        res.redirect('http://localhost:3000/login?' + query);
+        res.redirect(`${config.frontend.url}/login?` + query);
+
     } catch (err) {
         const query = querystring.stringify({
             "isSuccessful": false
         });
-        res.redirect('http://localhost:3000/login?' + query);
+
+        res.redirect(`${config.frontend.url}/login?` + query);
     }
 });
 

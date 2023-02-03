@@ -7,7 +7,11 @@ const router = express.Router();
 
 // Routes
 router.get('/@me/guilds-with-admin-role', auth(), userController.getGuildsWithAdminRole);
-router.patch('/@me', auth(), validate(userValidation.updateUser), userController.updateUser);
+
+router.route('/@me')
+    .get(auth(), auth(), userController.getUser)
+    .patch(auth(), auth(), validate(userValidation.updateUser), userController.updateUser);
+
 
 
 export default router;
