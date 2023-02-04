@@ -9,15 +9,17 @@ import { Token, IDiscordOathBotCallback } from 'tc-dbcomm';
 /**
  * exchange code with access token
  * @param {string} code
+   @param {string} redirect_uri
  * @returns {Promise<IDiscordOathBotCallback>}
  */
-async function exchangeCode(code: string): Promise<IDiscordOathBotCallback> {
+async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscordOathBotCallback> {
+    console.log(redirect_uri)
     try {
         const data = {
             client_id: config.discord.clientId,
             client_secret: config.discord.clientSecret,
             grant_type: 'authorization_code',
-            redirect_uri: config.discord.connectGuildCallbackURI,
+            redirect_uri,
             code
         };
 
@@ -26,7 +28,6 @@ async function exchangeCode(code: string): Promise<IDiscordOathBotCallback> {
             body: new URLSearchParams(data),
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         })
-        console.log(response)
         const json = await response.json();
         // Note: {message: '401: Unauthorized', code:0} means that we have not discord auth tokens
         if (json.message) {

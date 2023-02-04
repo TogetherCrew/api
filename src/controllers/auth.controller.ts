@@ -17,7 +17,7 @@ const callback = catchAsync(async function (req: Request, res: Response) {
         if (!code) {
             throw new Error();
         }
-        const discordOathCallback: IDiscordOathBotCallback = await authService.exchangeCode(code);
+        const discordOathCallback: IDiscordOathBotCallback = await authService.exchangeCode(code, config.discord.callbackURI);
         const discordUser: IDiscordUser = await userService.getUserFromDiscordAPI(discordOathCallback.access_token);
         let user = await userService.getUserByDiscordId(discordUser.id);
         if (!user) {
