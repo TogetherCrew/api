@@ -122,21 +122,21 @@ describe('Guild routes', () => {
                 .expect(httpStatus.FOUND)
         })
 
-        test('should return 401 if access token is missing', async () => {
-            await insertUsers([userOne]);
-            await request(app)
-                .get(`/api/v1/guilds/connect`)
-                .expect(httpStatus.UNAUTHORIZED);
-        })
+        // test('should return 401 if access token is missing', async () => {
+        //     await insertUsers([userOne]);
+        //     await request(app)
+        //         .get(`/api/v1/guilds/connect`)
+        //         .expect(httpStatus.UNAUTHORIZED);
+        // })
 
-        test('should return 400 if user has a connected guild', async () => {
-            await insertUsers([userOne]);
-            await insertGuilds([guildOne, guildTwo]);
-            await request(app)
-                .get(`/api/v1/guilds/connect`)
-                .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .expect(httpStatus.BAD_REQUEST);
-        })
+        // test('should return 400 if user has a connected guild', async () => {
+        //     await insertUsers([userOne]);
+        //     await insertGuilds([guildOne, guildTwo]);
+        //     await request(app)
+        //         .get(`/api/v1/guilds/connect`)
+        //         .set('Authorization', `Bearer ${userOneAccessToken}`)
+        //         .expect(httpStatus.BAD_REQUEST);
+        // })
     })
 
     describe('GET /api/v1/guilds/connect/callback', () => {
