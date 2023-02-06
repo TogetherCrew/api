@@ -38,6 +38,9 @@ components:
         guildId:
           type: string
           format: Snowflake
+        user: 
+          type: string
+          format: Snowflake
         name:
           type: string
         period:
@@ -54,6 +57,8 @@ components:
           default: false
         selectedChannels:
           type: array
+        icon:
+          type: string
           items:
             type: object
             properties:
@@ -62,14 +67,14 @@ components:
                 format: Snowflake
               channelName:
                 type: string
-          
       required:
+        - user
         - guildId
-        - ownerId
+        - icon
       example:
         id: 5ebac534954b54139806c112
         guildId: "1048535753103261706"
-        ownerId: "681946187490000900"
+        user: "681946187490000900"
         name: "guildname"
         period: "2023-01-23T06:38:05.157Z"
         selectedChannels: [{
@@ -79,6 +84,7 @@ components:
         isInProgress: true
         isDisconnected: false
         connectedAt: "2023-01-23T06:38:05.157Z"
+        icon: 'icon'
 
     # ********Token********
     Token:

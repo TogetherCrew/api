@@ -8,7 +8,8 @@ const router = express.Router();
 // Routes
 router.get('/', auth(), validate(guildValidation.getGuilds), guildController.getGuilds);
 
-router.get('/connect', auth(), guildController.connectGuild);
+// TODO: ADD auth for connect
+router.get('/connect', guildController.connectGuild);
 router.get('/connect/callback', guildController.connectGuildCallback);
 
 router.get('/:guildId/channels', auth(), validate(guildValidation.getGuildChannels), guildController.getGuildChannels);
