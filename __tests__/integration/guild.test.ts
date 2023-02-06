@@ -90,7 +90,8 @@ describe('Guild routes', () => {
                 selectedChannels: [],
                 isInProgress: guildOne.isInProgress,
                 isDisconnected: guildOne.isDisconnected,
-                connectedAt: expect.anything()
+                connectedAt: expect.anything(),
+                icon: guildOne.icon
             });
         })
 
@@ -405,7 +406,8 @@ describe('Guild routes', () => {
                 selectedChannels: [],
                 isInProgress: guildOne.isInProgress,
                 isDisconnected: guildOne.isDisconnected,
-                connectedAt: expect.anything()
+                connectedAt: expect.anything(),
+                icon: guildOne.icon
             });
         });
 

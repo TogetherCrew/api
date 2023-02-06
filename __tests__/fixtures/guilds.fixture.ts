@@ -44,7 +44,8 @@ export const guildOne = {
     user: userOne.discordId,
     name: 'guildOne',
     isDisconnected: false,
-    isInProgress: true
+    isInProgress: true,
+    icon: 'IconOne'
 }
 
 export const guildTwo = {
@@ -53,7 +54,9 @@ export const guildTwo = {
     user: userOne.discordId,
     name: 'guildTwo',
     isDisconnected: true,
-    isInProgress: false
+    isInProgress: false,
+    icon: 'IconTwo'
+
 }
 
 export const guildThree = {
@@ -62,7 +65,9 @@ export const guildThree = {
     user: userTwo.discordId,
     name: 'guildThree',
     isDisconnected: true,
-    isInProgress: false
+    isInProgress: false,
+    icon: 'IconThree'
+
 }
 
 export const guildFour = {
@@ -71,7 +76,8 @@ export const guildFour = {
     user: userTwo.discordId,
     name: 'guildFour',
     isDisconnected: false,
-    isInProgress: true
+    isInProgress: true,
+    icon: 'IconFour'
 }
 
 export const insertGuilds = async function <Type>(guilds: Array<Type>) {

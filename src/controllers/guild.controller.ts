@@ -8,6 +8,14 @@ import { scopes, permissions } from '../config/dicord';
 import { IDiscordUser, IDiscordOathBotCallback } from 'tc-dbcomm';
 import querystring from 'querystring';
 
+const getGuilds = catchAsync(async function (req: IAuthRequest, res: Response) {
+    const filter = pick(req.query, ['isDisconnected', 'isInProgress']);
+    filter.user = req.user.discordId;
+    const options = pick(req.query, ['sortBy', 'limit', 'page']);
+    const result = await guildService.queryGuilds(filter, options);
+    res.send(result);
+});
+
 const getGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
     const guild = await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId });
     if (!guild) {
@@ -18,8 +26,6 @@ const getGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
 
 const updateGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
     const guild = await guildService.updateGuildByGuildId(req.params.guildId, req.user.discordId, req.body);
-
-
     res.send(guild);
 });
 
@@ -40,16 +46,9 @@ const getGuildChannels = catchAsync(async function (req: IAuthRequest, res: Resp
     res.send(sortedChannels)
 });
 
-const getGuilds = catchAsync(async function (req: IAuthRequest, res: Response) {
-    const filter = pick(req.query, ['isDisconnected', 'isInProgress']);
-    filter.user = req.user.discordId;
-    const options = pick(req.query, ['sortBy', 'limit', 'page']);
-    const result = await guildService.queryGuilds(filter, options);
-    res.send(result);
-});
+
 
 const connectGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
-
     res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.connectGuildCallbackURI}&response_type=code&scope=${scopes.connectGuild}&permissions=${permissions.ViewChannels}`);
 });
 
@@ -63,9 +62,10 @@ const connectGuildCallback = catchAsync(async function (req: Request, res: Respo
         const discordUser: IDiscordUser = await userService.getUserFromDiscordAPI(discordOathCallback.access_token);
         const user = await userService.getUserByDiscordId(discordUser.id);
         if (user) {
-            if (await guildService.getGuild({ user: user.discordId, isDisconnected: false })) {
-                throw new ApiError(httpStatus.BAD_REQUEST, 'You have already connected guild. please disconnect your guild to be able to add another one');
-            }
+            // TODO
+            // if (await guildService.getGuild({ user: user.discordId, isDisconnected: false })) {
+            //     throw new ApiError(httpStatus.BAD_REQUEST, 'You have already connected guild. please disconnect your guild to be able to add another one');
+            // }
             let guild = await guildService.getGuildByGuildId(discordOathCallback.guild.id);
             if (guild) {
                 await guildService.updateGuildByGuildId(discordOathCallback.guild.id, discordUser.id, { isDisconnected: false })

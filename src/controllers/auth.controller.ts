@@ -42,6 +42,7 @@ const callback = catchAsync(async function (req: Request, res: Response) {
         res.redirect(`${config.frontend.url}/login?` + query);
 
     } catch (err) {
+        console.log(err)
         const query = querystring.stringify({
             "isSuccessful": false
         });
