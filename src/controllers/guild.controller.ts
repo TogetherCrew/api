@@ -17,9 +17,7 @@ const getGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
 });
 
 const updateGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
-    const guild = await guildService.updateGuildByGuildId(req.params.guildId, req.user.discordId, req.body);
-
-
+    const guild = await guildService.updateGuild({ guildId: req.params.guildId, user: req.user.discordId }, req.body);
     res.send(guild);
 });
 
@@ -61,13 +59,13 @@ const connectGuildCallback = catchAsync(async function (req: Request, res: Respo
         if (!code) {
             throw new Error();
         }
-        const discordOathCallback: IDiscordOathBotCallback = await authService.exchangeCode(code, config.discord.connectGuildCallbackURI);
+        const discordOathCallback: IDiscordOathBotCallback = await authService.exchangeCode(code, config.discord.callbackURI.connectGuild);
         const discordUser: IDiscordUser = await userService.getUserFromDiscordAPI(discordOathCallback.access_token);
         const user = await userService.getUserByDiscordId(discordUser.id);
         if (user) {
             let guild = await guildService.getGuildByGuildId(discordOathCallback.guild.id);
             if (guild) {
-                await guildService.updateGuildByGuildId(discordOathCallback.guild.id, discordUser.id, { isDisconnected: false })
+                await guildService.updateGuild({ guildId: discordOathCallback.guild.id, user: discordUser.id }, { isDisconnected: false })
             }
             else {
                 guild = await guildService.createGuild(discordOathCallback.guild, user.discordId);

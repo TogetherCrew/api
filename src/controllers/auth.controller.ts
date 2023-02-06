@@ -7,11 +7,62 @@ import { IDiscordUser, IDiscordOathBotCallback } from 'tc-dbcomm';
 import { catchAsync } from "../utils";
 import querystring from 'querystring';
 
-const login = catchAsync(async function (req: Request, res: Response) {
-    res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI}&response_type=code&scope=${scopes.bot}&permissions=${permissions.ViewChannels}`);
+const tryNow = catchAsync(async function (req: Request, res: Response) {
+    res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.tryNow}&response_type=code&scope=${scopes.tryNow}&permissions=${permissions.ViewChannels}`);
 });
 
-const callback = catchAsync(async function (req: Request, res: Response) {
+const tryNowCallback = catchAsync(async function (req: Request, res: Response) {
+    const code = req.query.code as string;
+    try {
+        if (!code) {
+            throw new Error();
+        }
+        const discordOathCallback: IDiscordOathBotCallback = await authService.exchangeCode(code, config.discord.callbackURI.tryNow);
+        const discordUser: IDiscordUser = await userService.getUserFromDiscordAPI(discordOathCallback.access_token);
+        let user = await userService.getUserByDiscordId(discordUser.id);
+        let guild = await guildService.getGuildByGuildId(discordOathCallback.guild.id);
+        let url = "login";
+
+        if (await guildService.getGuild({ user: user?.discordId, guildId: { $ne: discordOathCallback.guild.id }, isDisconnected: false })) {
+            url = "error/page";
+        }
+        if (!user) {
+            user = await userService.createUser(discordUser);
+        }
+        if (!guild) {
+            guild = await guildService.createGuild(discordOathCallback.guild, user.discordId);
+        }
+        else {
+            if (guild.isDisconnected) {
+                await guildService.updateGuild({ guildId: discordOathCallback.guild.id, user: user.discordId }, { isDisconnected: false });
+            }
+            url = "setting/page"
+        }
+
+        tokenService.saveDiscordAuth(user.discordId, discordOathCallback);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const tokens: any = await tokenService.generateAuthTokens(user.discordId);
+        const query = querystring.stringify({
+            "isSuccessful": true,
+            "accessToken": tokens.access.token, "accessExp": tokens.access.expires.toString(),
+            "refreshToken": tokens.refresh.token, "refreshExp": tokens.refresh.expires.toString(),
+            "guildId": guild.guildId, "guildName": guild.name
+        });
+        res.redirect(`${config.frontend.url}/${url}?` + query);
+    } catch (err) {
+        const query = querystring.stringify({
+            "isSuccessful": false
+        });
+
+        res.redirect(`${config.frontend.url}/login?` + query);
+    }
+});
+
+const login = catchAsync(async function (req: Request, res: Response) {
+    res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.login}&response_type=code&scope=${scopes.login}`);
+});
+
+const loginCallback = catchAsync(async function (req: Request, res: Response) {
     const code = req.query.code as string;
     try {
         if (!code) {
