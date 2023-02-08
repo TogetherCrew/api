@@ -13,7 +13,6 @@ import httpStatus = require('http-status');
  * @returns {Promise<IGuild>}
  */
 async function createGuild(data: IDiscordGuild, discordId: Snowflake) {
-    console.log(data.icon)
     return Guild.create({
         guildId: data.id,
         user: discordId,

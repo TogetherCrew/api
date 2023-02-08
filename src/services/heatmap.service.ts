@@ -22,7 +22,7 @@ async function getHeatmaps(connection: Connection, startDate: Date, endDate: Dat
         // Stage2 : provide one document for each element of interactions array
         {
             $unwind: {
-                path: '$interactions',
+                path: '$thr_messages',
                 includeArrayIndex: "arrayIndex",
             }
         },
@@ -33,7 +33,7 @@ async function getHeatmaps(connection: Connection, startDate: Date, endDate: Dat
                 _id: 0,
                 'dayOfWeek': { $add: [{ $dayOfWeek: "$date" }, -1] },
                 'hour': { $add: ['$arrayIndex', 1] },
-                'interactions': 1,
+                'interactions': { $add: ['$thr_messages', { $arrayElemAt: ['$lone_messages', '$arrayIndex'] }] },
             }
         },
 
