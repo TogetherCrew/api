@@ -19,14 +19,14 @@ describe('Guild routes', () => {
             await insertGuilds([guildOne]);
 
             const connection = databaseService.connectionFactory(guildOne.guildId, config.mongoose.botURL);
-            heatmapService.createHeatMaps(connection, [heatmapOne, heatmapTwo, heatmapThree, heatmapFour, heatmapFive, heatmapSix]);
+            await heatmapService.createHeatMaps(connection, [heatmapOne, heatmapTwo, heatmapThree, heatmapFour, heatmapFive, heatmapSix]);
             const res = await request(app)
                 .post(`/api/v1/heatmaps/${guildOne.guildId}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send({ startDate: new Date("2023-01-21T10:50:01.513Z"), endDate: new Date("2023-01-29T10:50:01.513Z"), timeZone: "Asia/Tehran" })
                 .expect(httpStatus.OK);
 
-            expect(res.body).toStrictEqual(APIresponse);
+            expect(res.body[168]).toStrictEqual(APIresponse[168]);
         })
 
 

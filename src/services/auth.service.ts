@@ -9,15 +9,16 @@ import { Token, IDiscordOathBotCallback } from 'tc-dbcomm';
 /**
  * exchange code with access token
  * @param {string} code
+   @param {string} redirect_uri
  * @returns {Promise<IDiscordOathBotCallback>}
  */
-async function exchangeCode(code: string): Promise<IDiscordOathBotCallback> {
+async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscordOathBotCallback> {
     try {
         const data = {
             client_id: config.discord.clientId,
             client_secret: config.discord.clientSecret,
             grant_type: 'authorization_code',
-            redirect_uri: config.discord.callbackURI,
+            redirect_uri,
             code
         };
 
@@ -33,7 +34,6 @@ async function exchangeCode(code: string): Promise<IDiscordOathBotCallback> {
         }
         return json;
     } catch (err) {
-        console.log(err)
         throw new ApiError(590, 'Can not fetch from discord API');
     }
 }

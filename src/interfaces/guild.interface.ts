@@ -7,5 +7,6 @@ export interface IGuildUpdateBody {
             channelName?: string
         }
     ],
-    period?: Date
+    period?: Date,
+    isDisconnected?: boolean,
 }

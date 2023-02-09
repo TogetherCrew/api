@@ -13,10 +13,12 @@ import httpStatus = require('http-status');
  * @returns {Promise<IGuild>}
  */
 async function createGuild(data: IDiscordGuild, discordId: Snowflake) {
+    console.log(data.icon)
     return Guild.create({
         guildId: data.id,
         user: discordId,
-        name: data.name
+        name: data.name,
+        icon: data.icon
     });
 }
 
@@ -26,17 +28,16 @@ async function createGuild(data: IDiscordGuild, discordId: Snowflake) {
  * @returns {Promise<IGuild | null>}
  */
 async function getGuildByGuildId(guildId: Snowflake) {
-    return Guild.findOne({ guildId });
-
+    return Guild.findOne({ guildId })
 }
 
 /**
  * get guild by query 
- * @param {Object} query
+ * @param {Object} filter
  * @returns {Promise<IGuild | null>}
  */
-async function getGuildByQuery(query: object) {
-    return Guild.findOne(query);
+async function getGuild(filter: object) {
+    return Guild.findOne(filter);
 }
 
 /**
@@ -55,6 +56,16 @@ async function updateGuildByGuildId(guildId: Snowflake, userDiscordId: Snowflake
     await guild.save();
     return guild;
 }
+
+
+/**
+ * delete guild
+ * @param {Object} filter
+ */
+async function deleteGuild(filter: object) {
+    await Guild.deleteOne(filter)
+}
+
 
 /**
  * check if our bot is added to guild
@@ -112,6 +123,15 @@ async function getGuildChannels(guildId: string) {
     }
 }
 
+/**
+ * query guilds
+ * @param {Object} filter 
+ * @param {Object} options 
+ * @returns {Promise<Array<IGuild>>}
+ */
+async function queryGuilds(filter: object, options: object) {
+    return Guild.paginate(filter, options);
+}
 
 
 
@@ -121,6 +141,8 @@ export default {
     getGuildChannels,
     updateGuildByGuildId,
     isBotAddedToGuild,
-    getGuildByQuery,
-    getGuildFromDiscordAPI
+    getGuild,
+    getGuildFromDiscordAPI,
+    queryGuilds,
+    deleteGuild
 }

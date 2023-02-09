@@ -1,4 +1,217 @@
 paths:
+  /api/v1/guilds:
+    get:
+      tags:
+        - [Guild]
+      summary: get all guilds
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: isDisconnected
+          schema:
+            type: string
+          description: guild connection status
+        - in: query
+          name: isInProgress
+          schema:
+            type: string
+          description: guild analysis progress status
+        - in: query
+          name: sortBy
+          schema:
+            type: string
+          description: sort by query in the form of field:desc/asc (ex. name:asc)
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            default: 10
+          description: Maximum number of guilds
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Guild"
+                  page:
+                    type: integer
+                    example: 1
+                  limit:
+                    type: integer
+                    example: 10
+                  totalPages:
+                    type: integer
+                    example: 1
+                  totalResults:
+                    type: integer
+                    example: 1
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
+
+  /api/v1/guilds/{guildId}:
+    get:
+      tags:
+        - [Guild]
+      summary: get guild by guildId
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: guildId
+          required: true
+          schema:
+            type: string
+          description: Guild Id
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#/components/schemas/Guild"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
+
+    patch:
+      tags:
+        - [Guild]
+      summary: Update guild by guildId
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: guildId
+          required: true
+          schema:
+            type: string
+          description: Guild Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                period:
+                  type: string
+                  format: date-time             
+                selectedChannels:
+                   type: array
+                   items:
+                     type: object
+                     properties:
+                      channelId:
+                        type: string
+                        format: Snowflake
+                      channelName:
+                        type: string
+                        required: true
+              example:
+                period:  "2023-01-23T06:38:05.157Z"
+                selectedChannels: [{
+                  channelId: "1048535753103261706",
+                  channelName: "channelName"
+                }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#/components/schemas/Guild"
+              
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
+
+
+  /api/v1/guilds/discord-api/{guildId}:
+    get:
+      tags:
+        - [Guild]
+      summary: Get guild from discord api
+      description: Used [this](https://discord.com/developers/docs/resources/guild#get-guild) Discord API
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: guildId
+          required: true
+          schema:
+            type: string
+          description: Guild Id
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  type: object
+                  properties: 
+                    id: 
+                      type: string
+                      format: Snowflake
+                    title: 
+                      type: string
+                    subChannels: 
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id: 
+                            type: Snowflake
+                          name: 
+                            type: string
+                          icon: 
+                            type: string
+                example:
+                    id: "80351110224678914"
+                    name: "Behzad's server"
+                    icon: null
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "590":
+          description: Can not fetch from discord API
+          $ref: "#/components/responses/Can_Not_Fetch_From_Discord_API"
+
+
   /api/v1/guilds/{guildId}/channels:
     get:
       tags:
@@ -72,75 +285,18 @@ paths:
         "590":
           description: Can not fetch from discord API
           $ref: "#/components/responses/Can_Not_Fetch_From_Discord_API"
-  /api/v1/guilds/discord-api/{guildId}:
-    get:
-      tags:
-        - [Guild]
-      summary: Get guild from discord api
-      description: Used [this](https://discord.com/developers/docs/resources/guild#get-guild) Discord API
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: guildId
-          required: true
-          schema:
-            type: string
-          description: Guild Id
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items: 
-                  type: object
-                  properties: 
-                    id: 
-                      type: string
-                      format: Snowflake
-                    title: 
-                      type: string
-                    subChannels: 
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          id: 
-                            type: Snowflake
-                          name: 
-                            type: string
-                          icon: 
-                            type: string
-                example:
-                    id: "80351110224678914"
-                    name: "Behzad's server"
-                    icon: null
-        "400":
-          description: Bad Request
-          $ref: "#/components/responses/BadRequest"
-        "401":
-          description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-        "590":
-          description: Can not fetch from discord API
-          $ref: "#/components/responses/Can_Not_Fetch_From_Discord_API"
 
-  /api/v1/guilds/{guildId}:
+
+
+
+  /api/v1/guilds/connect:
     get:
       tags:
         - [Guild]
-      summary: get guild by guildId
       security:
         - bearerAuth: []
-      parameters:
-        - in: path
-          name: guildId
-          required: true
-          schema:
-            type: string
-          description: Guild Id
+      summary: Connect new guild using discord oauth2 (it will redirect to discord so can not use this api here)
+      description: See [Discord oauth2](https://discord.com/developers/docs/topics/oauth2#oauth2) for more information
       responses:
         "200":
           description: OK
@@ -148,18 +304,30 @@ paths:
             application/json:
               schema:
                 type: object
-                $ref: "#/components/schemas/Guild"
+                properties:
+                  isSuccessful:
+                    type: boolean
+                    example: true
+                  guildId:
+                    type: string
+                    format: Snowflake
+                    example: 1049416767602363487
+                  guildName:
+                    type: string
+                    example: 	behzad-rabiei's server
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
         "401":
           description: Unauthorized
           $ref: "#/components/responses/Unauthorized"
-        "404":
-          description: NotFound
-          $ref: "#/components/responses/NotFound"
 
-    patch:
+  /api/v1/guilds/{guildId}/disconnect:
+    post:
       tags:
         - [Guild]
-      summary: Update guild by guildId
+      summary: Disconnect a guild
+      description:  In hard dc, the user's guild will remove but in soft dc the isDisconnected filed will set true.
       security:
         - bearerAuth: []
       parameters:
@@ -176,35 +344,15 @@ paths:
             schema:
               type: object
               properties:
-                period:
+                disconnectType:
                   type: string
-                  format: date-time             
-                selectedChannels:
-                   type: array
-                   items:
-                     type: object
-                     properties:
-                      channelId:
-                        type: string
-                        format: Snowflake
-                      channelName:
-                        type: string
-                        required:
-              example:
-                period: Thu Dec 08 2022 11:49:12 GMT+0400
-                selectedChannels: [{
-                  channelId: "1048535753103261706",
-                  channelName: "channelName"
-                }]
+                  format: date-time  
+                  required: true   
+                  enum: ['soft','hard']        
+                  example: soft 
       responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                $ref: "#/components/schemas/Guild"
-              
+        "204":
+          description: No Content
         "400":
           description: Bad Request
           $ref: "#/components/responses/BadRequest"
@@ -214,3 +362,8 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
+
+
+
+
+

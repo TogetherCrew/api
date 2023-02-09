@@ -14,7 +14,11 @@ describe('Guild model', () => {
                     channelId: "681946187490000906",
                     channelName: "channel"
                 }],
-                period: moment("2022-02-01 08:30:26.127Z").toDate()
+                period: moment("2022-02-01 08:30:26.127Z").toDate(),
+                connectedAt: moment("2022-02-01 08:30:26.127Z").toDate(),
+                isDisconnected: true,
+                isInProgress: false,
+                icon: 'discordIcon'
             };
         });
 
