@@ -1,7 +1,37 @@
 components:
   # ********Responses********
   responses:
-      # ********400********
+    # ********204********
+    NoContent:
+      description: No Content
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: number
+              message:
+                type: string
+          example:
+            code: 204
+            message:  No Content
+    # ********302********
+    Found:
+      description: Found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: number
+              message:
+                type: string
+          example:
+            code: 302
+            message:  Found
+    # ********400********
     BadRequest:
       description: Bad Request
       content:

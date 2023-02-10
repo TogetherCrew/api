@@ -5,7 +5,6 @@ import passport from "passport";
 import { jwtStrategy } from "./config/passport";
 import cors from "cors";
 import httpStatus from "http-status";
-import path from "path";
 import { error } from "./middlewares";
 import { ApiError } from "./utils";
 import routes from "./routes/v1";
