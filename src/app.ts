@@ -34,10 +34,6 @@ passport.use('jwt', jwtStrategy);
 // v1 api routes
 app.use('/api/v1', routes);
 
-app.get('/', (req, res) => {
-    res.status(200).sendFile(path.join(__dirname, '../', '/statics/index.html'));
-});
-
 // send back a 404 error for any unknown api request
 app.use((req, res, next) => {
     next(new ApiError(httpStatus.NOT_FOUND, 'Not found'));

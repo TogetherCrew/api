@@ -34,7 +34,6 @@ async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscor
         }
         return json;
     } catch (err) {
-        console.log(err)
         throw new ApiError(590, 'Can not fetch from discord API');
     }
 }

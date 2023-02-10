@@ -1,38 +1,4 @@
 paths:
-  /api/v1/guilds/connect:
-    get:
-      tags:
-        - [Guild]
-      security:
-        - bearerAuth: []
-      summary: Connect new guild using discord oauth2 (it will redirect to discord so can not use this api here)
-      description: See [Discord oauth2](https://discord.com/developers/docs/topics/oauth2#oauth2) for more information
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  isSuccessful:
-                    type: boolean
-                    example: true
-                  guildId:
-                    type: string
-                    format: Snowflake
-                    example: 1049416767602363487
-                  guildName:
-                    type: string
-                    example: 	behzad-rabiei's server
-        "400":
-          description: Bad Request
-          $ref: "#/components/responses/BadRequest"
-        "401":
-          description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-
-
   /api/v1/guilds:
     get:
       tags:
@@ -100,134 +66,6 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
-
-  /api/v1/guilds/{guildId}/channels:
-    get:
-      tags:
-        - [Guild]
-      summary: Get guild's channels by guildId
-      description: Used [this](https://discord.com/developers/docs/resources/user#get-current-user-guilds) Discord API
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: guildId
-          required: true
-          schema:
-            type: string
-          description: Guild Id
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items: 
-                  type: object
-                  properties: 
-                    id: 
-                      type: string
-                      format: Snowflake
-                    title: 
-                      type: string
-                    subChannels: 
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          guild_id: 
-                            type: Snowflake
-                          type: 
-                            type: number
-                          name: 
-                            type: string
-                          position: 
-                            type: number
-                          flags: 
-                            type: number
-                          parent_id: 
-                            type: Snowflake
-                          Permission_overwrites: 
-                            type: array
-                            items:
-                              type: string
-                example:
-                    id: "80351110224678914"
-                    title: "channel B"
-                    subChannels: [{
-                        id: "80351110224678912",
-                        guild_id: "80351110224678913",
-                        type: 4,
-                        name: "channel C",
-                        position: 0,
-                        flags: 0,
-                        parent_id: "80351110224678914",
-                        Permission_overwrites: [],
-                      }]
-        "400":
-          description: Bad Request
-          $ref: "#/components/responses/BadRequest"
-        "401":
-          description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-        "590":
-          description: Can not fetch from discord API
-          $ref: "#/components/responses/Can_Not_Fetch_From_Discord_API"
-  /api/v1/guilds/discord-api/{guildId}:
-    get:
-      tags:
-        - [Guild]
-      summary: Get guild from discord api
-      description: Used [this](https://discord.com/developers/docs/resources/guild#get-guild) Discord API
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: guildId
-          required: true
-          schema:
-            type: string
-          description: Guild Id
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items: 
-                  type: object
-                  properties: 
-                    id: 
-                      type: string
-                      format: Snowflake
-                    title: 
-                      type: string
-                    subChannels: 
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          id: 
-                            type: Snowflake
-                          name: 
-                            type: string
-                          icon: 
-                            type: string
-                example:
-                    id: "80351110224678914"
-                    name: "Behzad's server"
-                    icon: null
-        "400":
-          description: Bad Request
-          $ref: "#/components/responses/BadRequest"
-        "401":
-          description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-        "590":
-          description: Can not fetch from discord API
-          $ref: "#/components/responses/Can_Not_Fetch_From_Discord_API"
 
   /api/v1/guilds/{guildId}:
     get:
@@ -318,6 +156,172 @@ paths:
           $ref: "#/components/responses/NotFound"
 
 
+  /api/v1/guilds/discord-api/{guildId}:
+    get:
+      tags:
+        - [Guild]
+      summary: Get guild from discord api
+      description: Used [this](https://discord.com/developers/docs/resources/guild#get-guild) Discord API
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: guildId
+          required: true
+          schema:
+            type: string
+          description: Guild Id
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  type: object
+                  properties: 
+                    id: 
+                      type: string
+                      format: Snowflake
+                    title: 
+                      type: string
+                    subChannels: 
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id: 
+                            type: Snowflake
+                          name: 
+                            type: string
+                          icon: 
+                            type: string
+                example:
+                    id: "80351110224678914"
+                    name: "Behzad's server"
+                    icon: null
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "590":
+          description: Can not fetch from discord API
+          $ref: "#/components/responses/Can_Not_Fetch_From_Discord_API"
+
+
+  /api/v1/guilds/{guildId}/channels:
+    get:
+      tags:
+        - [Guild]
+      summary: Get guild's channels by guildId
+      description: Used [this](https://discord.com/developers/docs/resources/user#get-current-user-guilds) Discord API
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: guildId
+          required: true
+          schema:
+            type: string
+          description: Guild Id
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  type: object
+                  properties: 
+                    id: 
+                      type: string
+                      format: Snowflake
+                    title: 
+                      type: string
+                    subChannels: 
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          guild_id: 
+                            type: Snowflake
+                          type: 
+                            type: number
+                          name: 
+                            type: string
+                          position: 
+                            type: number
+                          flags: 
+                            type: number
+                          parent_id: 
+                            type: Snowflake
+                          Permission_overwrites: 
+                            type: array
+                            items:
+                              type: string
+                example:
+                    id: "80351110224678914"
+                    title: "channel B"
+                    subChannels: [{
+                        id: "80351110224678912",
+                        guild_id: "80351110224678913",
+                        type: 4,
+                        name: "channel C",
+                        position: 0,
+                        flags: 0,
+                        parent_id: "80351110224678914",
+                        Permission_overwrites: [],
+                      }]
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "590":
+          description: Can not fetch from discord API
+          $ref: "#/components/responses/Can_Not_Fetch_From_Discord_API"
+
+
+
+
+  /api/v1/guilds/connect:
+    get:
+      tags:
+        - [Guild]
+      security:
+        - bearerAuth: []
+      summary: Connect new guild using discord oauth2 (it will redirect to discord so can not use this api here)
+      description: See [Discord oauth2](https://discord.com/developers/docs/topics/oauth2#oauth2) for more information
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isSuccessful:
+                    type: boolean
+                    example: true
+                  guildId:
+                    type: string
+                    format: Snowflake
+                    example: 1049416767602363487
+                  guildName:
+                    type: string
+                    example: 	behzad-rabiei's server
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+
   /api/v1/guilds/{guildId}/disconnect:
     post:
       tags:
@@ -358,3 +362,8 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
+
+
+
+
+

@@ -16,7 +16,8 @@ async function createGuild(data: IDiscordGuild, discordId: Snowflake) {
     return Guild.create({
         guildId: data.id,
         user: discordId,
-        name: data.name
+        name: data.name,
+        icon: data.icon
     });
 }
 
