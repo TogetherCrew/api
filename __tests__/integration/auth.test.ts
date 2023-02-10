@@ -9,10 +9,96 @@ import { tokenTypes } from '../../src/config/tokens';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { authService, userService } from '../../src/services';
 import { Token } from 'tc-dbcomm';
+import { guildOne, insertGuilds } from '../fixtures/guilds.fixture';
+import { Guild } from 'tc-dbcomm';
 
 setupTestDB();
 
 describe('Auth routes', () => {
+    describe('GET /api/v1/auth/try-now', () => {
+        test('should return 302 when redirect correctly', async () => {
+            await request(app)
+                .get('/api/v1/auth/try-now')
+                .send()
+                .expect(httpStatus.FOUND)
+        })
+    })
+
+    describe('GET /api/v1/auth/try-now/callback', () => {
+        authService.exchangeCode = jest.fn().mockReturnValue({
+            access_token: 'mockAccess',
+            expires_in: 604800,
+            refresh_token: 'mockRefresh',
+            scope: 'some scope',
+            token_type: 'Bearer',
+            guild: {
+                id: '681946187490000901',
+            }
+        });
+        userService.getUserFromDiscordAPI = jest.fn().mockReturnValue({
+            id: '681946187490000900',
+            username: 'Behzad',
+            avatar: '947f3e19e6e36a2679c6fe854b79a699',
+            email: 'gmail@yaoo.com',
+            verified: true
+        })
+
+        test('should return 302 and successfully create user and guild', async () => {
+            await request(app)
+                .get('/api/v1/auth/try-now/callback')
+                .query({ code: 'code' })
+                .send()
+                .expect(httpStatus.FOUND);
+        })
+
+        test('should return 302 if user has selected a connected guild', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+            await request(app)
+                .get('/api/v1/auth/try-now/callback')
+                .query({ code: 'code' })
+                .send()
+                .expect(httpStatus.FOUND);
+        })
+
+        test('should return 302 if user has connected guild already', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+            await request(app)
+                .get('/api/v1/auth/try-now/callback')
+                .query({ code: 'code' })
+                .send()
+                .expect(httpStatus.FOUND);
+        })
+
+        test('should return 302 and set guild isDisconnected filed to false if the guild is exist in db', async () => {
+            await insertUsers([userOne]);
+            guildOne.isDisconnected = true;
+            await insertGuilds([guildOne]);
+            await request(app)
+                .get('/api/v1/auth/try-now/callback')
+                .query({ code: 'code' })
+                .send()
+                .expect(httpStatus.FOUND);
+
+
+            const dbGuild = await Guild.findById(guildOne._id);
+            expect(dbGuild).toBeDefined();
+            expect(dbGuild).toMatchObject({ isDisconnected: false });
+
+        })
+
+        test('should return 490 if code does not provided', async () => {
+            await request(app)
+                .get('/api/v1/auth/try-now/callback')
+                .send()
+                .expect(490);
+        })
+
+    })
+
+
+
     describe('GET /api/v1/auth/login', () => {
         test('should return 302 when redirect correctly', async () => {
             await request(app)
@@ -30,28 +116,38 @@ describe('Auth routes', () => {
             scope: 'some scope',
             token_type: 'Bearer',
             guild: {
-                id: '104941675760290000',
+                id: '681946187490000901',
             }
         });
         userService.getUserFromDiscordAPI = jest.fn().mockReturnValue({
-            id: '600941675760290000',
+            id: '681946187490000900',
             username: 'Behzad',
             avatar: '947f3e19e6e36a2679c6fe854b79a699',
             email: 'gmail@yaoo.com',
             verified: true
         })
         test('should return 302 and successfully create user and guild', async () => {
+            await insertUsers([userOne]);
             await request(app)
-                .get('/api/v1/auth/callback')
+                .get('/api/v1/auth/login/callback')
                 .query({ code: 'code' })
                 .send()
                 .expect(httpStatus.FOUND);
         })
-        test('should return 302 if code does not provided', async () => {
+
+        test('should return 302 if user is not signed up', async () => {
             await request(app)
-                .get('/api/v1/auth/callback')
+                .get('/api/v1/auth/login/callback')
+                .query({ code: 'code' })
                 .send()
                 .expect(httpStatus.FOUND);
+        })
+
+        test('should return 490 if code does not provided', async () => {
+            await request(app)
+                .get('/api/v1/auth/login/callback')
+                .send()
+                .expect(490);
         })
     })
 

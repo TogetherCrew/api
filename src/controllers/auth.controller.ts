@@ -31,6 +31,7 @@ const tryNowCallback = catchAsync(async function (req: Request, res: Response) {
         }
         else {
             if (!guild) {
+                statusCode = 502;
                 guild = await guildService.createGuild(discordOathCallback.guild, user.discordId);
             }
             else {

@@ -79,11 +79,9 @@ const connectGuildCallback = catchAsync(async function (req: Request, res: Respo
             res.redirect(`${config.frontend.url}/callback?` + query);
         }
         else {
-            console.log(':)')
             throw new Error();
         }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
+    } catch (err) {
         throw new ApiError(490, 'Discord authentication failed. Please try again');
     }
 });
