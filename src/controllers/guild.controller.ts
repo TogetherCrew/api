@@ -25,7 +25,7 @@ const getGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
 });
 
 const updateGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
-    const guild = await guildService.updateGuildByGuildId(req.params.guildId, req.user.discordId, req.body);
+    const guild = await guildService.updateGuild({ guildId: req.params.guildId, user: req.user.discordId }, req.body);
     res.send(guild);
 });
 
@@ -49,51 +49,46 @@ const getGuildChannels = catchAsync(async function (req: IAuthRequest, res: Resp
 
 
 const connectGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
-    res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.connectGuildCallbackURI}&response_type=code&scope=${scopes.connectGuild}&permissions=${permissions.ViewChannels}`);
+    res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.connectGuild}&response_type=code&scope=${scopes.connectGuild}&permissions=${permissions.ViewChannels}`);
 });
 
 const connectGuildCallback = catchAsync(async function (req: Request, res: Response) {
     const code = req.query.code as string;
+    let statusCode = 701;
     try {
         if (!code) {
             throw new Error();
         }
-        const discordOathCallback: IDiscordOathBotCallback = await authService.exchangeCode(code, config.discord.connectGuildCallbackURI);
+        const discordOathCallback: IDiscordOathBotCallback = await authService.exchangeCode(code, config.discord.callbackURI.connectGuild);
         const discordUser: IDiscordUser = await userService.getUserFromDiscordAPI(discordOathCallback.access_token);
         const user = await userService.getUserByDiscordId(discordUser.id);
         if (user) {
-            // TODO
-            // if (await guildService.getGuild({ user: user.discordId, isDisconnected: false })) {
-            //     throw new ApiError(httpStatus.BAD_REQUEST, 'You have already connected guild. please disconnect your guild to be able to add another one');
-            // }
+            if (await guildService.getGuild({ user: user.discordId, guildId: { $ne: discordOathCallback.guild.id }, isDisconnected: false })) {
+                throw new Error();
+            }
             let guild = await guildService.getGuildByGuildId(discordOathCallback.guild.id);
             if (guild) {
-                await guildService.updateGuildByGuildId(discordOathCallback.guild.id, discordUser.id, { isDisconnected: false })
+                statusCode = 702;
+                await guildService.updateGuild({ guildId: discordOathCallback.guild.id, user: discordUser.id }, { isDisconnected: false })
             }
             else {
+                statusCode = 701;
                 guild = await guildService.createGuild(discordOathCallback.guild, user.discordId);
             }
-            const query = querystring.stringify({
-                "isSuccessful": true,
-                "guildId": guild.guildId,
-                "guildName": guild.name
-            });
-            res.redirect(`${config.frontend.url}/settings?` + query);
+            const query = querystring.stringify({ "statusCode": statusCode, "guildId": guild.guildId, "guildName": guild.name, });
+            res.redirect(`${config.frontend.url}/callback?` + query);
         }
         else {
             throw new Error();
         }
     } catch (err) {
-        const query = querystring.stringify({
-            "isSuccessful": false
-        });
-        res.redirect(`${config.frontend.url}/settings?` + query);
+        throw new ApiError(490, 'Discord authentication failed. Please try again');
     }
 });
 
 const disconnectGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
     if (req.body.disconnectType === "soft") {
-        await guildService.updateGuildByGuildId(req.params.guildId, req.user.discordId, { isDisconnected: true })
+        await guildService.updateGuild({ guildId: req.params.guildId, user: req.user.discordId }, { isDisconnected: true })
     }
     else if (req.body.disconnectType === "hard") {
         await guildService.deleteGuild({ guildId: req.params.guildId, user: req.user.discordId })

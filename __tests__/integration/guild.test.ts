@@ -122,22 +122,6 @@ describe('Guild routes', () => {
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.FOUND)
         })
-
-        // test('should return 401 if access token is missing', async () => {
-        //     await insertUsers([userOne]);
-        //     await request(app)
-        //         .get(`/api/v1/guilds/connect`)
-        //         .expect(httpStatus.UNAUTHORIZED);
-        // })
-
-        // test('should return 400 if user has a connected guild', async () => {
-        //     await insertUsers([userOne]);
-        //     await insertGuilds([guildOne, guildTwo]);
-        //     await request(app)
-        //         .get(`/api/v1/guilds/connect`)
-        //         .set('Authorization', `Bearer ${userOneAccessToken}`)
-        //         .expect(httpStatus.BAD_REQUEST);
-        // })
     })
 
     describe('GET /api/v1/guilds/connect/callback', () => {
@@ -171,7 +155,7 @@ describe('Guild routes', () => {
         })
         test('should return 302 and set guild isDisconnected filed to false if the guild is exist in db', async () => {
             await insertUsers([userOne]);
-            await insertGuilds([guildOne, guildTwo]);
+            await insertGuilds([guildTwo]);
             await request(app)
                 .get('/api/v1/guilds/connect/callback')
                 .query({ code: 'code' })
@@ -185,19 +169,19 @@ describe('Guild routes', () => {
 
         })
 
-        test('should return 302 if user is not in db', async () => {
+        test('should return 490 if user is not in db', async () => {
             await request(app)
                 .get('/api/v1/guilds/connect/callback')
                 .query({ code: 'code' })
                 .send()
-                .expect(httpStatus.FOUND);
+                .expect(490);
 
         })
-        test('should return 302 if code does not provided', async () => {
+        test('should return 490 if code does not provided', async () => {
             await request(app)
                 .get('/api/v1/guilds/connect/callback')
                 .send()
-                .expect(httpStatus.FOUND);
+                .expect(490);
         })
     })
 

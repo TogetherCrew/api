@@ -13,7 +13,6 @@ import httpStatus = require('http-status');
  * @returns {Promise<IGuild>}
  */
 async function createGuild(data: IDiscordGuild, discordId: Snowflake) {
-    console.log(data.icon)
     return Guild.create({
         guildId: data.id,
         user: discordId,
@@ -42,13 +41,12 @@ async function getGuild(filter: object) {
 
 /**
  * update guild by guildId
- * @param {Snowflake} guildId
- * @param {Snowflake} userDiscordId
+ * @param {Object} filter
  * @param {IGuildUpdateBody} updateBody
  * @returns {Promise<IGuild>}
  */
-async function updateGuildByGuildId(guildId: Snowflake, userDiscordId: Snowflake, updateBody: IGuildUpdateBody) {
-    const guild = await Guild.findOne({ guildId, user: userDiscordId });
+async function updateGuild(filter: object, updateBody: IGuildUpdateBody) {
+    const guild = await Guild.findOne(filter);
     if (!guild) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
     }
@@ -139,7 +137,7 @@ export default {
     createGuild,
     getGuildByGuildId,
     getGuildChannels,
-    updateGuildByGuildId,
+    updateGuild,
     isBotAddedToGuild,
     getGuild,
     getGuildFromDiscordAPI,

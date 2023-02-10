@@ -7,6 +7,7 @@ import { tokenTypes } from '../config/tokens';
 import { ApiError } from '../utils';
 import authService from './auth.service';
 import { IDiscordOathBotCallback, IToken, Token } from 'tc-dbcomm';
+import { authTokens } from '../interfaces/token.interface';
 
 /**
  * Generate token
@@ -67,7 +68,7 @@ async function verifyToken(token: string, type: string) {
  * @param {Snowflake} discordId
  * @returns {Promise<Object>}
  */
-async function generateAuthTokens(discordId: Snowflake): Promise<object> {
+async function generateAuthTokens(discordId: Snowflake): Promise<authTokens> {
     const accessTokenExpires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
     const accessToken = generateToken(discordId, accessTokenExpires, tokenTypes.ACCESS);
 
