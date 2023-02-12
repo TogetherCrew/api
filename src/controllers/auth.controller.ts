@@ -4,7 +4,7 @@ import config from '../config';
 import { scopes, permissions } from '../config/dicord'
 import { userService, authService, tokenService, guildService } from '../services';
 import { IDiscordUser, IDiscordOathBotCallback } from 'tc-dbcomm';
-import { catchAsync, ApiError } from "../utils";
+import { catchAsync } from "../utils";
 import { authTokens } from '../interfaces/token.interface'
 import querystring from 'querystring';
 
@@ -14,7 +14,7 @@ const tryNow = catchAsync(async function (req: Request, res: Response) {
 
 const tryNowCallback = catchAsync(async function (req: Request, res: Response) {
     const code = req.query.code as string;
-    let statusCode = 501;
+    let statusCode = 501, guildName, guildId, connectedGuild;
     try {
         if (!code) {
             throw new Error();
@@ -26,33 +26,42 @@ const tryNowCallback = catchAsync(async function (req: Request, res: Response) {
         if (!user) {
             user = await userService.createUser(discordUser);
         }
-        if (await guildService.getGuild({ user: user?.discordId, guildId: { $ne: discordOathCallback.guild.id }, isDisconnected: false })) {
-            statusCode = 502;
-        }
         else {
-            if (!guild) {
+            connectedGuild = await guildService.getGuild({ user: user.discordId, guildId: { $ne: discordOathCallback.guild.id }, isDisconnected: false });
+            if (connectedGuild) {
+                guildName = connectedGuild.name;
+                guildId = connectedGuild.guildId;
                 statusCode = 502;
-                guild = await guildService.createGuild(discordOathCallback.guild, user.discordId);
-            }
-            else {
-                if (guild.isDisconnected) {
-                    statusCode = 504;
-                    await guildService.updateGuild({ guildId: discordOathCallback.guild.id, user: user.discordId }, { isDisconnected: false });
+            } else {
+                if (!guild) {
+                    guild = await guildService.createGuild(discordOathCallback.guild, user.discordId);
                 }
                 else {
-                    statusCode = 503;
+                    if (guild.isDisconnected) {
+                        statusCode = 504;
+                        await guildService.updateGuild({ guildId: discordOathCallback.guild.id, user: user.discordId }, { isDisconnected: false });
+                    }
+                    else {
+                        statusCode = 503;
+                    }
                 }
+                guildName = guild.name;
+                guildId = guild.guildId;
             }
+
         }
         tokenService.saveDiscordAuth(user.discordId, discordOathCallback);
         const tokens: authTokens = await tokenService.generateAuthTokens(user.discordId);
         const query = querystring.stringify({
-            "statusCode": statusCode, "guildId": guild?.guildId, "guildName": guild?.name,
+            "statusCode": statusCode, "guildId": guildId, "guildName": guildName,
             "accessToken": tokens.access.token, "accessExp": tokens.access.expires.toString(), "refreshToken": tokens.refresh.token, "refreshExp": tokens.refresh.expires.toString(),
         });
         res.redirect(`${config.frontend.url}/callback?` + query);
     } catch (err) {
-        throw new ApiError(490, 'Discord authentication failed. Please try again');
+        const query = querystring.stringify({
+            "statusCode": 490
+        });
+        res.redirect(`${config.frontend.url}/callback?` + query);
     }
 });
 
@@ -76,17 +85,21 @@ const loginCallback = catchAsync(async function (req: Request, res: Response) {
             res.redirect(`${config.frontend.url}/callback?` + query);
         }
         else {
+            const guild = await guildService.getGuild({ user: user.discordId, isDisconnected: false })
             tokenService.saveDiscordAuth(user.discordId, discordOathCallback);
             const tokens: authTokens = await tokenService.generateAuthTokens(user.discordId);
             const query = querystring.stringify({
-                "statusCode": statusCode,
+                "statusCode": statusCode, "guildId": guild?.guildId, "guildName": guild?.name,
                 "accessToken": tokens.access.token, "accessExp": tokens.access.expires.toString(), "refreshToken": tokens.refresh.token, "refreshExp": tokens.refresh.expires.toString(),
             });
             res.redirect(`${config.frontend.url}/callback?` + query);
         }
 
     } catch (err) {
-        throw new ApiError(490, 'Discord authentication failed. Please try again');
+        const query = querystring.stringify({
+            "statusCode": 490
+        });
+        res.redirect(`${config.frontend.url}/callback?` + query);
     }
 });
 

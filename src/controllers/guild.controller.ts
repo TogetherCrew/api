@@ -82,7 +82,10 @@ const connectGuildCallback = catchAsync(async function (req: Request, res: Respo
             throw new Error();
         }
     } catch (err) {
-        throw new ApiError(490, 'Discord authentication failed. Please try again');
+        const query = querystring.stringify({
+            "statusCode": 490
+        });
+        res.redirect(`${config.frontend.url}/callback?` + query);
     }
 });
 
