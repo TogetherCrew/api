@@ -83,7 +83,7 @@ const connectGuildCallback = catchAsync(async function (req: Request, res: Respo
         }
     } catch (err) {
         const query = querystring.stringify({
-            "statusCode": 490
+            "statusCode": 491
         });
         res.redirect(`${config.frontend.url}/callback?` + query);
     }

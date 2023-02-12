@@ -9,7 +9,7 @@ import { tokenTypes } from '../../src/config/tokens';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { authService, userService } from '../../src/services';
 import { Token } from 'tc-dbcomm';
-import { guildOne, insertGuilds } from '../fixtures/guilds.fixture';
+import { guildOne, guildTwo, insertGuilds } from '../fixtures/guilds.fixture';
 import { Guild } from 'tc-dbcomm';
 
 setupTestDB();
@@ -108,7 +108,7 @@ describe('Auth routes', () => {
         })
     })
 
-    describe('GET /api/v1/auth/callback', () => {
+    describe('GET /api/v1/auth/login/callback', () => {
         authService.exchangeCode = jest.fn().mockReturnValue({
             access_token: 'mockAccess',
             expires_in: 604800,
@@ -128,6 +128,8 @@ describe('Auth routes', () => {
         })
         test('should return 302 and successfully create user and guild', async () => {
             await insertUsers([userOne]);
+            guildOne.isDisconnected = false;
+            await insertGuilds([guildOne]);
             await request(app)
                 .get('/api/v1/auth/login/callback')
                 .query({ code: 'code' })
@@ -136,6 +138,18 @@ describe('Auth routes', () => {
         })
 
         test('should return 302 if user is not signed up', async () => {
+            await request(app)
+                .get('/api/v1/auth/login/callback')
+                .query({ code: 'code' })
+                .send()
+                .expect(httpStatus.FOUND);
+        })
+
+        test('should return 302 if user has not connected guild', async () => {
+            await insertUsers([userOne]);
+            guildOne.isDisconnected = true;
+            await insertGuilds([guildOne]);
+
             await request(app)
                 .get('/api/v1/auth/login/callback')
                 .query({ code: 'code' })

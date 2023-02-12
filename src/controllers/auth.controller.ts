@@ -26,30 +26,29 @@ const tryNowCallback = catchAsync(async function (req: Request, res: Response) {
         if (!user) {
             user = await userService.createUser(discordUser);
         }
-        else {
-            connectedGuild = await guildService.getGuild({ user: user.discordId, guildId: { $ne: discordOathCallback.guild.id }, isDisconnected: false });
-            if (connectedGuild) {
-                guildName = connectedGuild.name;
-                guildId = connectedGuild.guildId;
-                statusCode = 502;
-            } else {
-                if (!guild) {
-                    guild = await guildService.createGuild(discordOathCallback.guild, user.discordId);
+        connectedGuild = await guildService.getGuild({ user: user.discordId, guildId: { $ne: discordOathCallback.guild.id }, isDisconnected: false });
+        if (connectedGuild) {
+            guildName = connectedGuild.name;
+            guildId = connectedGuild.guildId;
+            statusCode = 502;
+        } else {
+            if (!guild) {
+                guild = await guildService.createGuild(discordOathCallback.guild, user.discordId);
+            }
+            else {
+                if (guild.isDisconnected) {
+                    statusCode = 504;
+                    await guildService.updateGuild({ guildId: discordOathCallback.guild.id, user: user.discordId }, { isDisconnected: false });
                 }
                 else {
-                    if (guild.isDisconnected) {
-                        statusCode = 504;
-                        await guildService.updateGuild({ guildId: discordOathCallback.guild.id, user: user.discordId }, { isDisconnected: false });
-                    }
-                    else {
-                        statusCode = 503;
-                    }
+                    statusCode = 503;
                 }
-                guildName = guild.name;
-                guildId = guild.guildId;
             }
-
+            guildName = guild.name;
+            guildId = guild.guildId;
         }
+
+
         tokenService.saveDiscordAuth(user.discordId, discordOathCallback);
         const tokens: authTokens = await tokenService.generateAuthTokens(user.discordId);
         const query = querystring.stringify({
@@ -85,7 +84,10 @@ const loginCallback = catchAsync(async function (req: Request, res: Response) {
             res.redirect(`${config.frontend.url}/callback?` + query);
         }
         else {
-            const guild = await guildService.getGuild({ user: user.discordId, isDisconnected: false })
+            const guild = await guildService.getGuild({ user: user.discordId, isDisconnected: false });
+            if (!guild) {
+                statusCode = 603;
+            }
             tokenService.saveDiscordAuth(user.discordId, discordOathCallback);
             const tokens: authTokens = await tokenService.generateAuthTokens(user.discordId);
             const query = querystring.stringify({
