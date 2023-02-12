@@ -88,11 +88,11 @@ describe('Auth routes', () => {
 
         })
 
-        test('should return 490 if code does not provided', async () => {
+        test('should return 302 if code does not provided', async () => {
             await request(app)
                 .get('/api/v1/auth/try-now/callback')
                 .send()
-                .expect(490);
+                .expect(httpStatus.FOUND);
         })
 
     })
@@ -143,11 +143,11 @@ describe('Auth routes', () => {
                 .expect(httpStatus.FOUND);
         })
 
-        test('should return 490 if code does not provided', async () => {
+        test('should return 302 if code does not provided', async () => {
             await request(app)
                 .get('/api/v1/auth/login/callback')
                 .send()
-                .expect(490);
+                .expect(httpStatus.FOUND);
         })
     })
 

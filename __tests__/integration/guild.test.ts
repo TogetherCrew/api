@@ -169,19 +169,19 @@ describe('Guild routes', () => {
 
         })
 
-        test('should return 490 if user is not in db', async () => {
+        test('should return 302 if user is not in db', async () => {
             await request(app)
                 .get('/api/v1/guilds/connect/callback')
                 .query({ code: 'code' })
                 .send()
-                .expect(490);
+                .expect(httpStatus.FOUND);
 
         })
-        test('should return 490 if code does not provided', async () => {
+        test('should return 302 if code does not provided', async () => {
             await request(app)
                 .get('/api/v1/guilds/connect/callback')
                 .send()
-                .expect(490);
+                .expect(httpStatus.FOUND);
         })
     })
 
