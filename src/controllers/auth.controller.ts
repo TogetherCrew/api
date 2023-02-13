@@ -47,8 +47,6 @@ const tryNowCallback = catchAsync(async function (req: Request, res: Response) {
             guildName = guild.name;
             guildId = guild.guildId;
         }
-
-
         tokenService.saveDiscordAuth(user.discordId, discordOathCallback);
         const tokens: authTokens = await tokenService.generateAuthTokens(user.discordId);
         const query = querystring.stringify({
