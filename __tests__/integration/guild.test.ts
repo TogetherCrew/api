@@ -6,7 +6,7 @@ import setupTestDB from '../utils/setupTestDB';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { discordResponseGuildOne, guildOne, guildTwo, guildThree, guildFour, insertGuilds } from '../fixtures/guilds.fixture';
-import { discordResponseChannelOne, discordResponseChannelTwo, discordResponseChannelThree, discordResponseChannelFour } from '../fixtures/channels.fixture';
+import { discordResponseChannels, discordResponseChannelOne } from '../fixtures/channels.fixture';
 import { IGuildUpdateBody } from '../../src/interfaces/guild.interface';
 import { guildService, authService, userService } from '../../src/services';
 import { Guild } from 'tc-dbcomm';
@@ -17,7 +17,7 @@ describe('Guild routes', () => {
 
     describe('GET /api/v1/guilds/:guildId/channels', () => {
         beforeEach(() => {
-            guildService.getGuildChannels = jest.fn().mockReturnValue([discordResponseChannelOne, discordResponseChannelTwo, discordResponseChannelThree, discordResponseChannelFour]);
+            guildService.getGuildChannels = jest.fn().mockReturnValue(discordResponseChannels);
             guildService.isBotAddedToGuild = jest.fn().mockReturnValue(true);
         });
 
@@ -29,19 +29,67 @@ describe('Guild routes', () => {
                 .send()
                 .expect(httpStatus.OK);
 
-            expect(res.body).toHaveLength(2);
+            expect(res.body).toHaveLength(4);
+            expect(res.body[0].subChannels).toHaveLength(2);
+            expect(res.body[1].subChannels).toHaveLength(2);
+            expect(res.body[2].subChannels).toHaveLength(2);
+            expect(res.body[3].subChannels).toHaveLength(0);
+
+
             expect(res.body[0]).toEqual({
-                id: discordResponseChannelTwo.id,
-                title: discordResponseChannelTwo.name,
-                subChannels: [discordResponseChannelFour]
+                id: "915914985140531241",
+                title: "┏━┫COMMUNITY┣━━━━┓",
+                subChannels: [{
+                    id: "915944557605163008",
+                    name: "💬・general-chat",
+                    parent_id: "915914985140531241",
+                    guild_id: "915914985140531240"
+                },
+                {
+                    id: "920707473369878589",
+                    name: "📖・learning-together",
+                    parent_id: "915914985140531241",
+                    guild_id: "915914985140531240"
+                },]
             });
-
             expect(res.body[1]).toEqual({
-                id: discordResponseChannelThree.id,
-                title: discordResponseChannelThree.name,
-                subChannels: [discordResponseChannelOne]
+                id: "928623723190292520",
+                title: "┏━┫WELCOME┣━━━━┓",
+                subChannels: [{
+                    id: "915917066496774165",
+                    name: "👋・introductions",
+                    parent_id: "928623723190292520",
+                    guild_id: "915914985140531240"
+                },
+                {
+                    id: "921468460062605334",
+                    name: "☝・start-here",
+                    parent_id: "928623723190292520",
+                    guild_id: "915914985140531240"
+                },]
+            });
+            expect(res.body[2]).toEqual({
+                id: "928627624585072640",
+                title: "┏━┫CONTRIBUTE┣━━━┓",
+                subChannels: [{
+                    id: "930049272693530674",
+                    name: "😎・meeting room",
+                    parent_id: "928627624585072640",
+                    guild_id: "915914985140531240"
+                },
+                {
+                    id: "930488542168248390",
+                    name: "🗺・official-links",
+                    parent_id: "928627624585072640",
+                    guild_id: "915914985140531240"
+                }]
             });
 
+            expect(res.body[3]).toEqual({
+                id: "930488542168248590",
+                title: "🗺・DAO",
+                subChannels: []
+            });
 
         })
         test('should return 400 if bot is not added to guild', async () => {
