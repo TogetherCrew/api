@@ -12,6 +12,5 @@ WORKDIR /user/app
 COPY package.json ./
 RUN npm install --only=production
 COPY --from=builder /user/app/lib/ ./lib
-ADD ./statics/ ./statics/
 
 CMD ["bash", "-c", "npm run start"]

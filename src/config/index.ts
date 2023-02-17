@@ -11,9 +11,10 @@ const envVarsSchema = Joi.object()
         DB_NAME: Joi.string().required().description('Mongo DB name'),
         DISCROD_CLIENT_ID: Joi.string().required().description('Discord clinet id'),
         DISCORD_CLIENT_SECRET: Joi.string().required().description('Discord clinet secret'),
-        DISCORD_CALLBACK_URI: Joi.string().required().description('Discord callback uri'),
         DISCORD_BOT_TOKEN: Joi.string().required().description('Discord bot token'),
-        DISCORD_CONNECT_GUILD_CALLBACK_URI: Joi.string().required().description('Discord callback uri'),
+        DISCORD_TRY_NOW_CALLBACK_URI: Joi.string().required().description('Discord try now callback uri'),
+        DISCORD_LOGIN_CALLBACK_URI: Joi.string().required().description('Discord login callback uri'),
+        DISCORD_CONNECT_GUILD_CALLBACK_URI: Joi.string().required().description('Discord connect guild callback uri'),
         JWT_SECRET: Joi.string().required().description('JWT secret key'),
         JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().default(30).description('minutes after which access tokens expire'),
         JWT_REFRESH_EXPIRATION_DAYS: Joi.number().default(30).description('days after which refresh tokens expire'),
@@ -40,9 +41,12 @@ export default {
     discord: {
         clientId: envVars.DISCROD_CLIENT_ID,
         clientSecret: envVars.DISCORD_CLIENT_SECRET,
-        callbackURI: envVars.DISCORD_CALLBACK_URI,
         botToken: envVars.DISCORD_BOT_TOKEN,
-        connectGuildCallbackURI: envVars.DISCORD_CONNECT_GUILD_CALLBACK_URI
+        callbackURI: {
+            tryNow: envVars.DISCORD_TRY_NOW_CALLBACK_URI,
+            login: envVars.DISCORD_LOGIN_CALLBACK_URI,
+            connectGuild: envVars.DISCORD_CONNECT_GUILD_CALLBACK_URI
+        },
     },
     jwt: {
         secret: envVars.JWT_SECRET,
