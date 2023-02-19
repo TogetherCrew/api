@@ -11,18 +11,6 @@ const verifyCallback = (req: Request, resolve: any, reject: any, requiredRights:
         return reject(new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate'));
     }
     req.user = user;
-    // if (requiredRights.length) {
-    //     const userRights: any = roleRights.get(user.role);
-    //     const hasRequiredRights = requiredRights.every((requiredRight: any) => {
-    //         return userRights.includes(requiredRight)
-    //     });
-    //     if (!hasRequiredRights && req.params.userId !== user.id) {
-    //         return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden'));
-    //     }
-    //     if (!hasRequiredRights) {
-    //         return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden'));
-    //     }
-    // }
     resolve();
 };
 
