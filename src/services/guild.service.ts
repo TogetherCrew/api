@@ -82,7 +82,7 @@ async function isBotAddedToGuild(guildId: Snowflake, userDiscordId: Snowflake) {
  * @param {Snowflake} guildId
  * @returns {Promise<IDiscordGuild>}
  */
-async function getGuildFromDiscordAPI(guildId: string) {
+async function getGuildFromDiscordAPI(guildId: Snowflake) {
     try {
         const response = await fetch(`https://discord.com/api/guilds/${guildId}`, {
             method: 'GET',
@@ -104,7 +104,7 @@ async function getGuildFromDiscordAPI(guildId: string) {
  * @param {Snowflake} guildId
  * @returns {Promise<Array<IDiscordGuild>>}
  */
-async function getGuildChannels(guildId: string) {
+async function getGuildChannels(guildId: Snowflake) {
     try {
         const response = await fetch(`https://discord.com/api/guilds/${guildId}/channels`, {
             method: 'GET',
