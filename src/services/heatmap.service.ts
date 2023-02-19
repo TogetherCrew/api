@@ -33,7 +33,7 @@ async function getHeatmaps(connection: Connection, startDate: Date, endDate: Dat
                 _id: 0,
                 'dayOfWeek': { $add: [{ $dayOfWeek: "$date" }, -1] },
                 'hour': { $add: ['$arrayIndex', 1] },
-                'interactions': { $add: ['$thr_messages', { $arrayElemAt: ['$lone_messages', '$arrayIndex'] }] },
+                'interactions': { $add: ['$thr_messages', { $arrayElemAt: ['$lone_messages', '$arrayIndex'] }, { $arrayElemAt: ['$replier', '$arrayIndex'] }] },
             }
         },
 
