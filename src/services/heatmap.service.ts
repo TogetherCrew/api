@@ -9,7 +9,21 @@ import { Connection } from 'mongoose';
  */
 async function getHeatmaps(connection: Connection, startDate: Date, endDate: Date) {
     const heatmaps = await connection.models.HeatMap.aggregate([
-        // Stage1 : find heatmaps between startDate and endDate
+
+
+        // Stage1 : convert date from string to date type and extract needed data
+        {
+            $project: {
+                _id: 0,
+                date: { $convert: { input: "$date", to: "date", } },
+                lone_messages: 1,
+                thr_messages: 1,
+                replier: 1,
+
+            }
+        },
+
+        // Stage2 : find heatmaps between startDate and endDate
         {
             $match: {
                 'date': {
@@ -19,7 +33,7 @@ async function getHeatmaps(connection: Connection, startDate: Date, endDate: Dat
             }
         },
 
-        // Stage2 : provide one document for each element of interactions array
+        // Stage3 : provide one document for each element of interactions array
         {
             $unwind: {
                 path: '$thr_messages',
@@ -27,17 +41,16 @@ async function getHeatmaps(connection: Connection, startDate: Date, endDate: Dat
             }
         },
 
-        // Stage3 : extract needed data
+        // Stage4 : extract needed data
         {
             $project: {
-                _id: 0,
                 'dayOfWeek': { $add: [{ $dayOfWeek: "$date" }, -1] },
                 'hour': { $add: ['$arrayIndex', 1] },
-                'interactions': { $add: ['$thr_messages', { $arrayElemAt: ['$lone_messages', '$arrayIndex'] }, { $arrayElemAt: ['$replier', '$arrayIndex'] }] },
+                'interactions': { $add: ['$thr_messages', { $arrayElemAt: ['$lone_messages', '$arrayIndex'] }] },
             }
         },
 
-        // Stage4 : group documents base on day and hour
+        // Stage5 : group documents base on day and hour
         {
             $group: {
                 '_id': { dayOfWeek: '$dayOfWeek', hour: '$hour' }
