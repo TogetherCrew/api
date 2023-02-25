@@ -20,6 +20,9 @@ const envVarsSchema = Joi.object()
         JWT_REFRESH_EXPIRATION_DAYS: Joi.number().default(30).description('days after which refresh tokens expire'),
         JWT_DISCORD_REFRESH_EXPIRATION_DAYS: Joi.number().default(30).description('days after which discord refresh tokens expire'),
         FRONTEND_URL: Joi.string().required().description('frontend URL'),
+        NOTION_API_KEY: Joi.string().required().description('frontend URL'),
+        NOTION_DATABASE_ID: Joi.string().required().description('frontend URL'),
+
     })
     .unknown();
 
@@ -33,10 +36,10 @@ export default {
     env: envVars.NODE_ENV,
     port: envVars.PORT,
     mongoose: {
-        serverURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}/${envVars.DB_NAME}`,
-        botURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}`,
-        // serverURL: `mongodb://127.0.0.1:27017/RnDAO-${envVars.NODE_ENV}`,
-        // botURL: "mongodb://127.0.0.1:27017"
+        // serverURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}/${envVars.DB_NAME}`,
+        // botURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}`,
+        serverURL: `mongodb://127.0.0.1:27017/RnDAO-${envVars.NODE_ENV}`,
+        botURL: "mongodb://127.0.0.1:27017"
     },
     discord: {
         clientId: envVars.DISCROD_CLIENT_ID,
@@ -57,5 +60,9 @@ export default {
     },
     frontend: {
         url: envVars.FRONTEND_URL
+    },
+    notion: {
+        apiKey: envVars.NOTION_API_KEY,
+        databaseId: envVars.NOTION_DATABASE_ID
     }
 }
