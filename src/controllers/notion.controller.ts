@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { catchAsync } from "../utils";
-import { Client } from '@notionhq/client';
+import { Client, isNotionClientError, ClientErrorCode, APIErrorCode } from '@notionhq/client';
 import config from '../config';
 import { ApiError } from '../utils';
 
@@ -10,16 +10,38 @@ const getDatabase = catchAsync(async function (req: Request, res: Response) {
     });
 
     try {
-        const databases = await client.databases.query({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const databases: any = await client.databases.query({
             database_id: config.notion.databaseId,
             sorts: [{ property: "Name", direction: "ascending", }],
             filter: { property: "Active this month", checkbox: { equals: true, } }
         });
-        res.send(databases);
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-        throw new ApiError(err.status, err.body);
+        const teamMembers: Array<object> = [];
+        for (let i = 0; i < databases.results.length; i++) {
+            teamMembers.push({
+                name: databases.results[i].properties.Name.title[0]?.text?.content,
+                role: databases.results[i].properties.Role.rich_text[0]?.text?.content,
+                avatar: databases.results[i].properties.avatar?.files[0]?.file.url,
+            })
+        }
+        res.send(teamMembers);
+
+    } catch (error: unknown) {
+        if (isNotionClientError(error)) {
+            switch (error.code) {
+                case APIErrorCode.ValidationError:
+                    throw new ApiError(400, 'Invalid notion database Id');
+                case APIErrorCode.Unauthorized:
+                    throw new ApiError(401, 'Check notion API-Key');
+                case APIErrorCode.ObjectNotFound:
+                    throw new ApiError(404, 'Notion database not found');
+                case ClientErrorCode.RequestTimeout:
+                    throw new ApiError(500, 'Request timeout');
+                default:
+                    throw new ApiError(500, 'Can not access to notion API');
+            }
+        }
     }
 
 });
