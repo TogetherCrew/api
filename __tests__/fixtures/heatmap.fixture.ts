@@ -3,7 +3,7 @@ import moment from "moment";
 
 export const heatmapOne = {
     _id: new Types.ObjectId(),
-    date: moment("2023-01-20T10:50:01.513Z").toDate(),
+    date: moment("2023-01-20").toDate(),
     channel: "1",
     messages: [0, 1, 1, 1, 2, 0, 0, 1, 1, 0, 1, 0, 2, 0, 4, 3, 1, 2, 0, 1, 0, 1, 0, 2],
     interactions: [0, 1, 1, 1, 2, 0, 0, 1, 1, 0, 1, 0, 2, 0, 4, 3, 1, 2, 0, 1, 0, 1, 0, 2],
@@ -12,7 +12,7 @@ export const heatmapOne = {
 
 export const heatmapTwo = {
     _id: new Types.ObjectId(),
-    date: moment("2023-01-19T10:50:01.513Z").toDate(),
+    date: moment("2023-01-19").toDate(),
     channel: "1",
     messages: [0, 1, 1, 1, 2, 0, 0, 1, 1, 0, 1, 0, 2, 0, 4, 3, 1, 2, 0, 1, 0, 1, 0, 2],
     interactions: [0, 1, 1, 1, 2, 0, 0, 1, 1, 0, 1, 0, 2, 0, 4, 3, 1, 2, 0, 1, 0, 1, 0, 2],
@@ -22,7 +22,7 @@ export const heatmapTwo = {
 
 export const heatmapThree = {
     _id: new Types.ObjectId(),
-    date: moment("2023-01-18T10:50:01.513Z").toDate(),
+    date: moment("2023-01-18").toDate(),
     channel: "1",
     messages: [0, 1, 1, 1, 2, 0, 0, 1, 1, 0, 1, 0, 2, 0, 4, 3, 1, 2, 0, 1, 0, 1, 0, 2],
     interactions: [0, 1, 1, 1, 2, 0, 0, 1, 1, 0, 1, 0, 2, 0, 4, 3, 1, 2, 0, 1, 0, 1, 0, 2],
@@ -32,7 +32,7 @@ export const heatmapThree = {
 
 export const heatmapFour = {
     _id: new Types.ObjectId(),
-    date: moment("2023-01-17T10:50:01.513Z").toDate(),
+    date: moment("2023-01-17").toDate(),
     channel: "1",
     messages: [0, 1, 1, 1, 2, 0, 0, 1, 1, 0, 1, 0, 2, 0, 4, 3, 1, 2, 0, 1, 0, 1, 0, 2],
     interactions: [0, 1, 1, 1, 2, 0, 0, 1, 1, 0, 1, 0, 2, 0, 4, 3, 1, 2, 0, 1, 0, 1, 0, 2],
@@ -42,7 +42,7 @@ export const heatmapFour = {
 
 export const heatmapFive = {
     _id: new Types.ObjectId(),
-    date: moment("2023-01-21T10:50:01.513Z").toDate(),
+    date: moment("2023-01-21").toDate(),
     channel: "1",
     messages: [0, 1, 1, 1, 2, 0, 0, 1, 1, 0, 1, 0, 2, 0, 4, 3, 1, 2, 0, 1, 0, 1, 0, 2],
     interactions: [0, 1, 1, 1, 2, 0, 0, 1, 1, 0, 1, 0, 2, 0, 4, 3, 1, 2, 0, 1, 0, 1, 0, 2],
@@ -52,7 +52,7 @@ export const heatmapFive = {
 
 export const heatmapSix = {
     _id: new Types.ObjectId(),
-    date: moment("2023-01-28T10:50:01.513Z").toDate(),
+    date: moment("2023-01-28").toDate(),
     channel: "1",
     messages: [0, 1, 1, 1, 2, 0, 0, 1, 1, 0, 1, 0, 2, 0, 4, 3, 1, 2, 0, 1, 0, 1, 0, 2],
     interactions: [0, 1, 1, 1, 2, 0, 0, 1, 1, 0, 1, 0, 2, 0, 4, 3, 1, 2, 0, 1, 0, 1, 0, 2],
