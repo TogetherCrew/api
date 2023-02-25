@@ -1,0 +1,42 @@
+paths:
+  /api/v1/notion/databases:
+    get:
+      tags:
+        - [Notion]
+      summary: get team members from notion API
+      description: Used [this](https://developers.notion.com/reference/retrieve-a-database) Notion API
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  type: object
+                  properties: 
+                    name: 
+                      type: string
+                      example: Nima
+                    role: 
+                      type: string
+                      example: Frontend Developer
+                    avatar:
+                      type: string
+                      example: https://s3.us-west-2.amazonaws.com/secure.notion-static.com/c900f077-efd1-44b0-b60c-5e182fb475d3/Nima.webp?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230225%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230225T182236Z&X-Amz-Expires=3600&X-Amz-Signature=0885e374a7b460667cfd6644e859a36a32c57ef2fb55e11dcdf6b7d456b952c5&X-Amz-SignedHeaders=host&x-id=GetObject
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
+        "500":
+          description: Internal server error
+          $ref: "#/components/responses/InternalServerError"
+
+
+
+
