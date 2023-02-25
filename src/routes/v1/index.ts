@@ -4,6 +4,7 @@ import authRoute from './auth.route';
 import guildsRoute from './guilds.route';
 import usersRoute from './users.route'
 import heatmapsRoute from './heatmaps.route';
+import notionRoute from './notion.route';
 
 const router = express.Router();
 
@@ -27,6 +28,10 @@ const defaultRoutes = [
     {
         path: '/heatmaps',
         route: heatmapsRoute
+    },
+    {
+        path: '/notion',
+        route: notionRoute
     }
 ];
 
