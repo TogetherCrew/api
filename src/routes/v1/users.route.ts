@@ -9,8 +9,8 @@ const router = express.Router();
 router.get('/@me/guilds-with-admin-role', auth(), userController.getGuildsWithAdminRole);
 
 router.route('/@me')
-    .get(auth(), auth(), userController.getUser)
-    .patch(auth(), auth(), validate(userValidation.updateUser), userController.updateUser);
+    .get(auth(), userController.getUser)
+    .patch(auth(), validate(userValidation.updateUser), userController.updateUser);
 
 
 
