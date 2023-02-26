@@ -23,7 +23,7 @@ describe('Guild routes', () => {
         //     const res = await request(app)
         //         .post(`/api/v1/heatmaps/${guildOne.guildId}`)
         //         .set('Authorization', `Bearer ${userOneAccessToken}`)
-        //         .send({ startDate: new Date("2023-01-21T10:50:01.513Z"), endDate: new Date("2023-01-29T10:50:01.513Z"), timeZone: "Asia/Tehran" })
+        //         .send({ startDate: new Date("2023-01-21"), endDate: new Date("2023-01-29"), timeZone: "Asia/Tehran" })
         //         .expect(httpStatus.OK);
 
         //     expect(res.body[168]).toStrictEqual(APIresponse[168]);
