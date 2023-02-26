@@ -5,10 +5,6 @@ import { error } from "../../../src/middlewares";
 import { ApiError } from "../../../src/utils";
 import config from "../../../src/config";
 
-// const logger = require('../../../src/config/logger');
-
-
-
 describe('Error middlewares', () => {
     describe('Error converter', () => {
         test('should return the same ApiError object it was called with', () => {

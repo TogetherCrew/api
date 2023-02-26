@@ -23,6 +23,7 @@ describe('Guild routes', () => {
 
         test('should return 200 and array of channels of guild', async () => {
             await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
             const res = await request(app)
                 .get(`/api/v1/guilds/${discordResponseGuildOne.id}/channels`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
