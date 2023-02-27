@@ -92,6 +92,21 @@ components:
           example:
             code: 404
             message: Not found
+    # ********500********
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: number
+              message:
+                type: string
+          example:
+            code: 500
+            message: Internal server error
     # ********590********
     Can_Not_Fetch_From_Discord_API:
       description: Can not fetch from discord API
