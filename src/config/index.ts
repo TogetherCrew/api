@@ -20,8 +20,8 @@ const envVarsSchema = Joi.object()
         JWT_REFRESH_EXPIRATION_DAYS: Joi.number().default(30).description('days after which refresh tokens expire'),
         JWT_DISCORD_REFRESH_EXPIRATION_DAYS: Joi.number().default(30).description('days after which discord refresh tokens expire'),
         FRONTEND_URL: Joi.string().required().description('frontend URL'),
-        NOTION_API_KEY: Joi.string().required().description('frontend URL'),
-        NOTION_DATABASE_ID: Joi.string().required().description('frontend URL'),
+        NOTION_API_KEY: Joi.string().required().description('notion api key'),
+        NOTION_DATABASE_ID: Joi.string().required().description('notion database id'),
 
     })
     .unknown();
