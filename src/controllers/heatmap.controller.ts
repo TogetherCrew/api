@@ -7,14 +7,14 @@ import httpStatus from 'http-status';
 import config from '../config';
 import moment from 'moment-timezone';
 
-const getHeatmaps = catchAsync(async function (req: IAuthRequest, res: Response) {
+const heatmapChart = catchAsync(async function (req: IAuthRequest, res: Response) {
     if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
     }
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
-    let heatmaps = await heatmapService.getHeatmaps(connection, req.body.startDate, req.body.endDate);
+    let heatmaps = await heatmapService.getHeatmapChart(connection, req.body.startDate, req.body.endDate);
     const timeZoneOffset = parseInt(moment().tz(req.body.timeZone).format('Z'));
-    heatmaps = timezone.shiftHeatMapsHours(heatmaps, timeZoneOffset);
+    heatmaps = timezone.shiftHeatmapsHours(heatmaps, timeZoneOffset);
     heatmaps = array.fillEmptyElemetns(heatmaps);
     res.send(heatmaps);
 });
@@ -22,6 +22,6 @@ const getHeatmaps = catchAsync(async function (req: IAuthRequest, res: Response)
 
 
 export default {
-    getHeatmaps
+    heatmapChart
 }
 

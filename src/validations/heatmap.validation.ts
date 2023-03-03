@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-const getHeatmaps = {
+const heatmapChart = {
     params: Joi.object().required().keys({
         guildId: Joi.string().required()
     }),
@@ -13,5 +13,5 @@ const getHeatmaps = {
 
 
 export default {
-    getHeatmaps
+    heatmapChart
 }

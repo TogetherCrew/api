@@ -6,7 +6,7 @@ import { auth, validate } from '../../middlewares';
 const router = express.Router();
 
 // Routes
-router.post('/:guildId/heatmap-chart', auth(), validate(heatmapValidation.getHeatmaps), heatmapController.getHeatmaps);
+router.post('/:guildId/heatmap-chart', auth(), validate(heatmapValidation.heatmapChart), heatmapController.heatmapChart);
 
 export default router;
 

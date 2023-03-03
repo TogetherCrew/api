@@ -1,13 +1,13 @@
 import { Connection } from 'mongoose';
 
 /**
- * get heatmaps
+ * get heatmap chart data
  * @param {Connection} connection
  * @param {Date} startDate
  * @param {Date} endDate
  * @returns {Array<Array<number>>}
  */
-async function getHeatmaps(connection: Connection, startDate: Date, endDate: Date) {
+async function getHeatmapChart(connection: Connection, startDate: Date, endDate: Date) {
     try {
         const heatmaps = await connection.models.HeatMap.aggregate([
 
@@ -71,5 +71,5 @@ async function getHeatmaps(connection: Connection, startDate: Date, endDate: Dat
 }
 
 export default {
-    getHeatmaps
+    getHeatmapChart
 }

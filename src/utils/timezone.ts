@@ -1,4 +1,4 @@
-function shiftHeatMapsHours(heatmaps: number[][], timeZoneOffset: number) {
+function shiftHeatmapsHours(heatmaps: number[][], timeZoneOffset: number) {
     let shiftedHour, shiftedDay = 0;
     const heatmapsTimezone: number[][] = [];
     if (timeZoneOffset > 0) {
@@ -28,6 +28,6 @@ function shiftHeatMapsHours(heatmaps: number[][], timeZoneOffset: number) {
 }
 
 export default {
-    shiftHeatMapsHours
+    shiftHeatmapsHours
 }
 
