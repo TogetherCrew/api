@@ -96,6 +96,27 @@ describe('Guild routes', () => {
 
         })
 
+        test('should return 200 and line graph data (testing no for empty data) if req data is ok', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+
+            await heatmapService.createHeatMaps(connection, [heatmapOne]);
+            const res = await request(app)
+                .post(`/api/v1/heatmaps/${guildOne.guildId}/line-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date("2023-02-21"), endDate: new Date("2023-02-24") })
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                categories: [],
+                series: [],
+                emojis: 0,
+                messages: 0,
+                msgPercentageChange: 0,
+                emojiPercentageChange: 0
+            });
+        })
+
         test('should return 401 if access token is missing', async () => {
             await request(app)
                 .post(`/api/v1/heatmaps/${guildOne.guildId}/line-graph`)
