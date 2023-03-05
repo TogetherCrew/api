@@ -1,7 +1,7 @@
 import { Connection } from 'mongoose';
 
 /**
- * get heatmap chart data
+ * get heatmap chart 
  * @param {Connection} connection
  * @param {Date} startDate
  * @param {Date} endDate
@@ -67,9 +67,248 @@ async function getHeatmapChart(connection: Connection, startDate: Date, endDate:
         console.log(err);
         return [];
     }
+}
+
+
+/**
+ * get line graph 
+ * @param {Connection} connection
+ * @param {Date} startDate
+ * @param {Date} endDate
+ * @returns {Object}
+ */
+async function lineGraph(connection: Connection, startDate: Date, endDate: Date) {
+    try {
+        const heatmaps = await connection.models.HeatMap.aggregate([
+            {
+                $project: {
+                    _id: 0,
+                    date: { $convert: { input: "$date", to: "date" } },
+                    lone_messages: 1,
+                    thr_messages: 1,
+                    replier: 1,
+                    reacter: 1
+                }
+            },
+            {
+                $match: {
+                    date: {
+                        $gte: new Date(startDate),
+                        $lte: new Date(endDate)
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    monthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+                }
+            },
+            {
+                $project: {
+                    day_month: {
+                        $concat: [
+                            { $dateToString: { format: "%d", date: "$date" } },
+                            " ",
+                            {
+                                $arrayElemAt: [
+                                    "$monthNames",
+                                    { $subtract: [{ $month: "$date" }, 1] }
+                                ]
+                            }
+                        ]
+                    },
+                    total_lone_messages: {
+                        $reduce: {
+                            input: "$lone_messages",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    total_thr_messages: {
+                        $reduce: {
+                            input: "$thr_messages",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    total_replier: {
+                        $reduce: {
+                            input: "$replier",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    emojis: {
+                        $reduce: {
+                            input: "$reacter",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    }
+                }
+            },
+            {
+                $sort: { date: 1 }
+            },
+            {
+                $group: {
+                    _id: null,
+                    day_month: { $push: "$day_month" },
+                    emojis: { $push: "$emojis" },
+                    messages: {
+                        $push: {
+                            $sum: ["$total_lone_messages", "$total_thr_messages", "$total_replier"]
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    categories: "$day_month",
+                    series: [
+                        { name: "emojis", data: "$emojis" },
+                        { name: "messages", data: "$messages" }
+                    ],
+                    emojis: {
+                        $reduce: {
+                            input: "$emojis",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    messages: {
+                        $reduce: {
+                            input: "$messages",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    }
+                }
+            }
+        ]);
+
+        const diffInMs = Math.abs(endDate.getTime() - startDate.getTime());
+        const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+        const numDaysToSubtract = diffInDays;
+
+        const pastHeatmaps = await connection.models.HeatMap.aggregate([
+            {
+                $project: {
+                    _id: 0,
+                    lone_messages: 1,
+                    thr_messages: 1,
+                    replier: 1,
+                    reacter: 1,
+                    date: { $convert: { input: "$date", to: "date" } },
+
+                }
+            },
+            {
+                $match: {
+                    date: {
+                        $gte: new Date(startDate.setDate(startDate.getDate() - numDaysToSubtract)),
+                        $lte: new Date(endDate.setDate(endDate.getDate() - (numDaysToSubtract + 1)))
+                    }
+                }
+            },
+
+            {
+                $project: {
+                    date: 1,
+                    total_lone_messages: {
+                        $reduce: {
+                            input: "$lone_messages",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    total_thr_messages: {
+                        $reduce: {
+                            input: "$thr_messages",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    total_replier: {
+                        $reduce: {
+                            input: "$replier",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    emojis: {
+                        $reduce: {
+                            input: "$reacter",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    }
+                }
+            },
+            {
+                $group: {
+                    date: { $push: "$date" },
+                    _id: null,
+                    emojis: { $push: "$emojis" },
+                    messages: {
+                        $push: {
+                            $sum: ["$total_lone_messages", "$total_thr_messages", "$total_replier"]
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    date: 1,
+                    emojis: {
+                        $reduce: {
+                            input: "$emojis",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    messages: {
+                        $reduce: {
+                            input: "$messages",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    }
+                }
+            }
+        ]
+
+        );
+
+
+        let msgPercentageChange = 0;
+        let emojiPercentageChange = 0;
+
+        if (heatmaps[0] && pastHeatmaps[0] && pastHeatmaps[0].messages !== 0) {
+            msgPercentageChange = ((heatmaps[0].messages - pastHeatmaps[0].messages) / pastHeatmaps[0].messages) * 100;
+        }
+
+        if (heatmaps[0] && pastHeatmaps[0] && pastHeatmaps[0].emojis !== 0) {
+            emojiPercentageChange = ((heatmaps[0].emojis - pastHeatmaps[0].emojis) / pastHeatmaps[0].emojis) * 100;
+        }
+
+        return {
+            ...heatmaps[0],
+            msgPercentageChange,
+            emojiPercentageChange
+        }
+
+    } catch (err) {
+        console.log(err);
+        return [];
+    }
 
 }
+
 
 export default {
-    getHeatmapChart
+    getHeatmapChart,
+    lineGraph
 }
+
