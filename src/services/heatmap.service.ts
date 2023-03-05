@@ -188,6 +188,17 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
             }
         ]);
 
+        if (heatmaps.length === 0) {
+            return {
+                categories: [],
+                series: [],
+                emojis: 0,
+                messages: 0,
+                msgPercentageChange: 0,
+                emojiPercentageChange: 0
+
+            }
+        }
         const diffInMs = Math.abs(endDate.getTime() - startDate.getTime());
         const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
         const numDaysToSubtract = diffInDays;
@@ -301,7 +312,15 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
 
     } catch (err) {
         console.log(err);
-        return [];
+        return {
+            categories: [],
+            series: [],
+            emojis: 0,
+            messages: 0,
+            msgPercentageChange: 0,
+            emojiPercentageChange: 0
+
+        }
     }
 
 }
