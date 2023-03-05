@@ -20,9 +20,9 @@ const heatmapChart = catchAsync(async function (req: IAuthRequest, res: Response
 });
 
 const lineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
-    // if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
-    //     throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    // }
+    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    }
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     const heatmaps = await heatmapService.lineGraph(connection, req.body.startDate, req.body.endDate);
     res.send(heatmaps);
