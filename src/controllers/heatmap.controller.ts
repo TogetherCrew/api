@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { guildService, heatmapService } from '../services';
 import { IAuthRequest } from '../interfaces/request.interface';
-import { catchAsync, ApiError, timezone, array } from "../utils";
+import { catchAsync, ApiError, timezone, charts } from "../utils";
 import { databaseService } from 'tc-dbcomm'
 import httpStatus from 'http-status';
 import config from '../config';
@@ -15,7 +15,7 @@ const heatmapChart = catchAsync(async function (req: IAuthRequest, res: Response
     let heatmaps = await heatmapService.getHeatmapChart(connection, req.body.startDate, req.body.endDate);
     const timeZoneOffset = parseInt(moment().tz(req.body.timeZone).format('Z'));
     heatmaps = timezone.shiftHeatmapsHours(heatmaps, timeZoneOffset);
-    heatmaps = array.fillEmptyElemetns(heatmaps);
+    heatmaps = charts.fillHeatmapChart(heatmaps);
     res.send(heatmaps);
 });
 
@@ -24,8 +24,9 @@ const lineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
     }
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
-    const heatmaps = await heatmapService.lineGraph(connection, req.body.startDate, req.body.endDate);
-    res.send(heatmaps);
+    let lineGraph = await heatmapService.lineGraph(connection, req.body.startDate, req.body.endDate);
+    lineGraph = charts.fillLineGraph(lineGraph, req.body.startDate, req.body.endDate);
+    res.send(lineGraph);
 });
 
 
