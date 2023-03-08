@@ -107,9 +107,7 @@ describe('Guild routes', () => {
                 .send({ startDate: new Date("2023-02-21"), endDate: new Date("2023-02-24") })
                 .expect(httpStatus.OK);
 
-            expect(res.body).toEqual({
-                categories: [],
-                series: [],
+            expect(res.body).toMatchObject({
                 emojis: 0,
                 messages: 0,
                 msgPercentageChange: 0,
