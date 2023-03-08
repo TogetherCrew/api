@@ -78,6 +78,8 @@ async function getHeatmapChart(connection: Connection, startDate: Date, endDate:
  * @returns {Object}
  */
 async function lineGraph(connection: Connection, startDate: Date, endDate: Date) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
     try {
         const heatmaps = await connection.models.HeatMap.aggregate([
             {
@@ -93,8 +95,8 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
             {
                 $match: {
                     date: {
-                        $gte: new Date(startDate),
-                        $lte: new Date(endDate)
+                        $gte: new Date(start),
+                        $lte: new Date(end)
                     }
                 }
             },
@@ -199,10 +201,9 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
 
             }
         }
-        const diffInMs = Math.abs(endDate.getTime() - startDate.getTime());
+        const diffInMs = Math.abs(end.getTime() - start.getTime());
         const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
         const numDaysToSubtract = diffInDays;
-
         const pastHeatmaps = await connection.models.HeatMap.aggregate([
             {
                 $project: {
@@ -218,8 +219,8 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
             {
                 $match: {
                     date: {
-                        $gte: new Date(startDate.setDate(startDate.getDate() - numDaysToSubtract)),
-                        $lte: new Date(endDate.setDate(endDate.getDate() - (numDaysToSubtract + 1)))
+                        $gte: new Date(start.setDate(start.getDate() - numDaysToSubtract)),
+                        $lte: new Date(end.setDate(end.getDate() - (numDaysToSubtract + 1)))
                     }
                 }
             },
