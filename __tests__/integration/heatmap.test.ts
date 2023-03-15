@@ -15,10 +15,23 @@ setupTestDB();
 describe('Guild routes', () => {
     const connection = databaseService.connectionFactory(guildOne.guildId, config.mongoose.botURL);
     describe('POST /api/v1/heatmaps/:guildId/heatmap-chart', () => {
+        let requestBody: {
+            startDate: Date,
+            endDate: Date,
+            timeZone: string,
+            channelIds: Array<string>
+        };
         beforeEach(async () => {
             await connection.dropDatabase();
+            requestBody = {
+                startDate: new Date("2023-01-22"),
+                endDate: new Date("2023-01-24"),
+                timeZone: "Asia/Tehran", channelIds: []
+
+            };
         });
-        test('should return 200 and heatmap chart data if req data is ok', async () => {
+
+        test('should return 200 and filter heatmap chart base on date if req data is ok', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
@@ -26,23 +39,38 @@ describe('Guild routes', () => {
             const res = await request(app)
                 .post(`/api/v1/heatmaps/${guildOne.guildId}/heatmap-chart`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send({ startDate: new Date("2023-01-21"), endDate: new Date("2023-01-24"), timeZone: "Asia/Tehran" })
+                .send(requestBody)
                 .expect(httpStatus.OK);
 
             expect(res.body.length).toBe(168);
-            expect(res.body[3][2]).toBe(3)
-            expect(res.body[26][2]).toBe(6)
-            expect(res.body[27][2]).toBe(3)
+            expect(res.body[3][2]).toBe(48)
+            expect(res.body[27][2]).toBe(6)
             expect(res.body[50][2]).toBe(6)
 
         })
 
+        test('should return 200 and filter heatmap chart base on date and channelId if req data is ok', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
 
+            await heatmapService.createHeatMaps(connection, [heatmapOne, heatmapTwo]);
+            requestBody.startDate = new Date("2023-01-20");
+            requestBody.endDate = new Date("2023-01-22");
+            requestBody.channelIds = ["1012430565959553148", "1012430565959553149"]
+            const res = await request(app)
+                .post(`/api/v1/heatmaps/${guildOne.guildId}/heatmap-chart`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send(requestBody)
+                .expect(httpStatus.OK);
+
+            expect(res.body.length).toBe(168);
+            expect(res.body[3][2]).toBe(48)
+        })
 
         test('should return 401 if access token is missing', async () => {
             await request(app)
                 .post(`/api/v1/heatmaps/${guildOne.guildId}/heatmap-chart`)
-                .send({ startDate: new Date(), endDate: new Date(), timeZone: "Asia/Tehran" })
+                .send(requestBody)
                 .expect(httpStatus.UNAUTHORIZED);
         })
 
@@ -51,7 +79,7 @@ describe('Guild routes', () => {
             await request(app)
                 .post(`/api/v1/heatmaps/${guildOne.guildId}/heatmap-chart`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send({ startDate: new Date(), endDate: new Date(), timeZone: "Asia/Tehran" })
+                .send(requestBody)
                 .expect(httpStatus.NOT_FOUND);
         })
     })
@@ -71,7 +99,7 @@ describe('Guild routes', () => {
                 .send({ startDate: new Date("2023-01-21"), endDate: new Date("2023-01-24") })
                 .expect(httpStatus.OK);
 
-            expect(res.body.messages).toBe(18);
+            expect(res.body.messages).toBe(60);
             expect(res.body.emojis).toBe(9);
             expect(res.body.msgPercentageChange).toBe(0);
             expect(res.body.emojiPercentageChange).toBe(0);
@@ -89,14 +117,14 @@ describe('Guild routes', () => {
                 .send({ startDate: new Date("2023-01-21"), endDate: new Date("2023-01-24") })
                 .expect(httpStatus.OK);
 
-            expect(res.body.messages).toBe(18);
+            expect(res.body.messages).toBe(60);
             expect(res.body.emojis).toBe(9);
-            expect(res.body.msgPercentageChange).toBe(100);
+            expect(res.body.msgPercentageChange).toBe(200);
             expect(res.body.emojiPercentageChange).toBe(-50);
 
         })
 
-        test('should return 200 and line graph data (testing no for empty data) if req data is ok', async () => {
+        test('should return 200 and line graph data (testing for empty data) if req data is ok', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
