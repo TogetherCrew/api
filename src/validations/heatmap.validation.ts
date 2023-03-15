@@ -7,7 +7,8 @@ const heatmapChart = {
     body: Joi.object().required().keys({
         startDate: Joi.date().required(),
         endDate: Joi.date().required(),
-        timeZone: Joi.string().required()
+        timeZone: Joi.string().required(),
+        channelIds: Joi.array().items(Joi.string()).required()
     }),
 };
 

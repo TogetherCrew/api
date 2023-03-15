@@ -140,7 +140,17 @@ describe('Guild routes', () => {
                 isInProgress: guildOne.isInProgress,
                 isDisconnected: guildOne.isDisconnected,
                 connectedAt: expect.anything(),
-                icon: guildOne.icon
+                icon: guildOne.icon,
+                action: {
+                    activeAccounts: 1,
+                    activeInteractions: 1,
+                    connectedAccounts: 5,
+                    connectedInteractions: 5
+                },
+                window: {
+                    periodDiration: 7,
+                    periodStep: 1,
+                },
             });
         })
 
@@ -440,7 +450,17 @@ describe('Guild routes', () => {
                 isInProgress: guildOne.isInProgress,
                 isDisconnected: guildOne.isDisconnected,
                 connectedAt: expect.anything(),
-                icon: guildOne.icon
+                icon: guildOne.icon,
+                action: {
+                    activeAccounts: 1,
+                    activeInteractions: 1,
+                    connectedAccounts: 5,
+                    connectedInteractions: 5
+                },
+                window: {
+                    periodDiration: 7,
+                    periodStep: 1,
+                },
             });
         });
 

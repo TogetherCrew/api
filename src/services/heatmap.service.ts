@@ -1,13 +1,13 @@
 import { Connection } from 'mongoose';
-
+import { IHeatmapChartRequestBody } from '../interfaces/request.interface';
 /**
  * get heatmap chart 
  * @param {Connection} connection
- * @param {Date} startDate
- * @param {Date} endDate
+ * @param {IHeatmapChartRequestBody} Body
  * @returns {Array<Array<number>>}
  */
-async function getHeatmapChart(connection: Connection, startDate: Date, endDate: Date) {
+async function getHeatmapChart(connection: Connection, Body: IHeatmapChartRequestBody) {
+    const { startDate, endDate, channelIds } = Body;
     try {
         const heatmaps = await connection.models.HeatMap.aggregate([
 
@@ -20,17 +20,24 @@ async function getHeatmapChart(connection: Connection, startDate: Date, endDate:
                     lone_messages: 1,
                     thr_messages: 1,
                     replier: 1,
+                    channelId: 1
 
                 }
             },
 
-            // Stage2 : find heatmaps between startDate and endDate
+            // Stage2: find heatmaps between startDate and endDate and filter by channelIds if it's not empty
             {
                 $match: {
-                    'date': {
-                        $gte: new Date(startDate),
-                        $lte: new Date(endDate)
-                    }
+                    $and: [
+                        { date: { $gte: new Date(startDate) } },
+                        { date: { $lte: new Date(endDate) } },
+                        {
+                            $or: [
+                                { channelId: { $in: channelIds } },
+                                { $expr: { $eq: [channelIds, []] } }
+                            ]
+                        }
+                    ]
                 }
             },
 
