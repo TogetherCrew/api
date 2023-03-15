@@ -12,7 +12,7 @@ const heatmapChart = catchAsync(async function (req: IAuthRequest, res: Response
         throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
     }
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
-    let heatmaps = await heatmapService.getHeatmapChart(connection, req.body.startDate, req.body.endDate);
+    let heatmaps = await heatmapService.getHeatmapChart(connection, req.body);
     const timeZoneOffset = parseInt(moment().tz(req.body.timeZone).format('Z'));
     heatmaps = timezone.shiftHeatmapsHours(heatmaps, timeZoneOffset);
     heatmaps = charts.fillHeatmapChart(heatmaps);
