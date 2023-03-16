@@ -5,7 +5,7 @@ import { catchAsync, ApiError, pick, sort } from "../utils";
 import httpStatus from 'http-status';
 import config from '../config';
 import { scopes, permissions } from '../config/dicord';
-import { IDiscordUser, IDiscordOathBotCallback } from 'tc-dbcomm';
+import { IDiscordUser, IDiscordOathBotCallback } from 'tc_dbcomm';
 import querystring from 'querystring';
 
 const getGuilds = catchAsync(async function (req: IAuthRequest, res: Response) {

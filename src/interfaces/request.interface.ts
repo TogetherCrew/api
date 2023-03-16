@@ -1,4 +1,4 @@
-import { IUser } from "tc-dbcomm";
+import { IUser } from "tc_dbcomm";
 import { Request } from "express";
 
 export interface IAuthRequest extends Request {

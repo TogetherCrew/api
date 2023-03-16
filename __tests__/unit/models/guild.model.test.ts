@@ -1,4 +1,4 @@
-import { Guild, IGuild } from 'tc-dbcomm';
+import { Guild, IGuild } from 'tc_dbcomm';
 
 import moment from "moment";
 
