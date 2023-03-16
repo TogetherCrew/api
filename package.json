@@ -35,7 +35,7 @@
     "passport-jwt": "^4.0.0",
     "swagger-jsdoc": "^6.2.5",
     "swagger-ui-express": "^4.6.0",
-    "tc-dbcomm": "github:RnDAO/tc-dbComm",
+    "tc_dbcomm": "^1.0.0",
     "validator": "^13.7.0"
   },
   "devDependencies": {

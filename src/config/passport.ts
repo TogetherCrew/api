@@ -2,7 +2,7 @@
 import passportJwt from 'passport-jwt'
 import config from './index';
 import { tokenTypes } from './tokens';
-import { User } from 'tc-dbcomm';
+import { User } from 'tc_dbcomm';
 
 interface VerifiedCallback {
     (error: any, user?: any, info?: any): void;

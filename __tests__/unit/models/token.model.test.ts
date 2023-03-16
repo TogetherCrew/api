@@ -1,4 +1,4 @@
-import { Token, IToken } from 'tc-dbcomm';
+import { Token, IToken } from 'tc_dbcomm';
 
 import moment from "moment";
 

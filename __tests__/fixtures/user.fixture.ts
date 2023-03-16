@@ -1,5 +1,5 @@
 import { Types } from "mongoose"
-import { User } from 'tc-dbcomm';
+import { User } from 'tc_dbcomm';
 
 
 export const userOne = {
