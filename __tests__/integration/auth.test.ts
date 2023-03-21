@@ -8,9 +8,9 @@ import setupTestDB from '../utils/setupTestDB';
 import { tokenTypes } from '../../src/config/tokens';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { authService, userService } from '../../src/services';
-import { Token } from 'tc-dbcomm';
+import { Token } from 'tc_dbcomm';
 import { guildOne, guildTwo, insertGuilds } from '../fixtures/guilds.fixture';
-import { Guild } from 'tc-dbcomm';
+import { Guild } from 'tc_dbcomm';
 
 setupTestDB();
 

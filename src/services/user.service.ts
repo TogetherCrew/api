@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import { Snowflake } from 'discord.js';
-import { IDiscordUser, IUser, User } from 'tc-dbcomm';
+import { IDiscordUser, IUser, User } from 'tc_dbcomm';
 import { ApiError } from '../utils';
 import httpStatus = require('http-status');
 import { IUserUpdateBody } from '../interfaces/user.interface';

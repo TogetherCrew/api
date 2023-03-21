@@ -5,7 +5,7 @@ import tokenService from './token.service';
 import userService from './user.service';
 import { tokenTypes } from '../config/tokens';
 import { ApiError } from '../utils';
-import { Token, IDiscordOathBotCallback } from 'tc-dbcomm';
+import { Token, IDiscordOathBotCallback } from 'tc_dbcomm';
 /**
  * exchange code with access token
  * @param {string} code

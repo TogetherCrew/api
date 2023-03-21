@@ -9,7 +9,7 @@ import { discordResponseGuildOne, guildOne, guildTwo, guildThree, guildFour, ins
 import { discordResponseChannels, discordResponseChannelOne } from '../fixtures/channels.fixture';
 import { IGuildUpdateBody } from '../../src/interfaces/guild.interface';
 import { guildService, authService, userService } from '../../src/services';
-import { Guild } from 'tc-dbcomm';
+import { Guild } from 'tc_dbcomm';
 setupTestDB();
 
 describe('Guild routes', () => {
@@ -140,7 +140,17 @@ describe('Guild routes', () => {
                 isInProgress: guildOne.isInProgress,
                 isDisconnected: guildOne.isDisconnected,
                 connectedAt: expect.anything(),
-                icon: guildOne.icon
+                icon: guildOne.icon,
+                action: {
+                    activeAccounts: 1,
+                    activeInteractions: 1,
+                    connectedAccounts: 5,
+                    connectedInteractions: 5
+                },
+                window: {
+                    periodDiration: 7,
+                    periodStep: 1,
+                },
             });
         })
 
@@ -440,7 +450,17 @@ describe('Guild routes', () => {
                 isInProgress: guildOne.isInProgress,
                 isDisconnected: guildOne.isDisconnected,
                 connectedAt: expect.anything(),
-                icon: guildOne.icon
+                icon: guildOne.icon,
+                action: {
+                    activeAccounts: 1,
+                    activeInteractions: 1,
+                    connectedAccounts: 5,
+                    connectedInteractions: 5
+                },
+                window: {
+                    periodDiration: 7,
+                    periodStep: 1,
+                },
             });
         });
 

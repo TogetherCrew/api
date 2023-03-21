@@ -3,7 +3,7 @@ import catchAsync from "./catchAsync";
 import pick from './pick';
 import sort from "./sort";
 import timezone from "./timezone";
-import array from './array';
+import charts from './charts';
 
 export {
     ApiError,
@@ -11,5 +11,5 @@ export {
     pick,
     sort,
     timezone,
-    array
+    charts
 }

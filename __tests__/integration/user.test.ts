@@ -7,7 +7,7 @@ import { userOneAccessToken } from '../fixtures/token.fixture';
 import { discordResponseGuildOne, discordResponseGuildTwo, discordResponseGuildThree } from '../fixtures/guilds.fixture';
 import { IUserUpdateBody } from '../../src/interfaces/user.interface';
 import { userService, tokenService } from '../../src/services';
-import { User } from 'tc-dbcomm';
+import { User } from 'tc_dbcomm';
 setupTestDB();
 
 describe('User routes', () => {
