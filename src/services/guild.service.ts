@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import fetch from 'node-fetch';
 import { Snowflake } from 'discord.js';
 import config from '../config';
@@ -100,22 +101,26 @@ async function getGuildFromDiscordAPI(guildId: Snowflake) {
 }
 
 /**
- * Get guild channels
+ * Get visible guild channels
  * @param {Snowflake} guildId
  * @returns {Promise<Array<IDiscordGuild>>}
  */
 async function getGuildChannels(guildId: Snowflake) {
     try {
-        const response = await fetch(`https://discord.com/api/guilds/${guildId}/channels`, {
+        const response = await fetch(`https://discord.com/api/guilds/${guildId}/channels?`, {
             method: 'GET',
             headers: { 'Authorization': `Bot ${config.discord.botToken}` }
         });
-        const json = await response.json();
+        const channels = await response.json();
         // Note: {message: '401: Unauthorized', code:0} means that we have not access to guild channels
-        if (json.message) {
+        if (channels.message) {
             throw new Error();
         }
-        return json;
+        const visibleChannels = channels.filter((channel: any) => {
+          const permissions = channel.permission_overwrites.find((permission: any) => permission.id === channel.guild_id);
+          return permissions ? permissions.allow & 0x400 : true;
+        }).filter((channel: any) => channel.type === 0);
+        return visibleChannels;
     } catch (err) {
         throw new ApiError(590, 'Can not fetch from discord API');
     }
