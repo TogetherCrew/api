@@ -12,7 +12,7 @@ import config from '../../src/config';
 
 setupTestDB();
 
-describe('Guild routes', () => {
+describe('Heatmap routes', () => {
     const connection = databaseService.connectionFactory(guildOne.guildId, config.mongoose.botURL);
     describe('POST /api/v1/heatmaps/:guildId/heatmap-chart', () => {
         let requestBody: {
