@@ -81,7 +81,7 @@ async function activeMembersLineGraph(connection: Connection, startDate: Date, e
                 },
 
 
-                tot_active_members: {
+                total_tot_active_members: {
                     $sum: {
                         $map: {
                             input: "$tot_active_members",
@@ -92,7 +92,7 @@ async function activeMembersLineGraph(connection: Connection, startDate: Date, e
                         }
                     }
                 },
-                newly_active: {
+                total_newly_active: {
                     $sum: {
                         $map: {
                             input: "$newly_active",
@@ -103,7 +103,7 @@ async function activeMembersLineGraph(connection: Connection, startDate: Date, e
                         }
                     }
                 },
-                consistently_active: {
+                total_consistently_active: {
                     $sum: {
                         $map: {
                             input: "$consistently_active",
@@ -114,7 +114,7 @@ async function activeMembersLineGraph(connection: Connection, startDate: Date, e
                         }
                     }
                 },
-                vital_members: {
+                total_vital_members: {
                     $sum: {
                         $map: {
                             input: "$vital_members",
@@ -125,7 +125,7 @@ async function activeMembersLineGraph(connection: Connection, startDate: Date, e
                         }
                     }
                 },
-                became_disengaged: {
+                total_became_disengaged: {
                     $sum: {
                         $map: {
                             input: "$became_disengaged",
@@ -138,27 +138,28 @@ async function activeMembersLineGraph(connection: Connection, startDate: Date, e
                 },
             }
         },
-        // Stage 5: Sort documents by date
         {
             $sort: { date: 1 }
         },
         {
             $group: {
                 _id: null,
-                total_tot_active_members: {
-                    $sum: "$tot_active_members"
+                day_month: { $push: "$day_month" },
+
+                activeMembers: {
+                    $sum: "$total_tot_active_members"
                 },
-                total_newly_active: {
-                    $sum: "$newly_active"
+                newlyActive: {
+                    $sum: "$total_newly_active"
                 },
-                total_consistently_active: {
-                    $sum: "$consistently_active"
+                consistentlyActive: {
+                    $sum: "$total_consistently_active"
                 },
-                total_vital_members: {
-                    $sum: "$vital_members"
+                vitalMembers: {
+                    $sum: "$total_vital_members"
                 },
-                total_became_disengaged: {
-                    $sum: "$became_disengaged"
+                becameDisengaged: {
+                    $sum: "$total_became_disengaged"
                 }
 
             }
