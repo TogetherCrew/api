@@ -2,7 +2,7 @@ import express from "express";
 import { memberActivityController } from "../../controllers";
 import { memberActivityValidation } from '../../validations';
 
-import { auth, validate } from '../../middlewares';
+import { validate } from '../../middlewares';
 const router = express.Router();
 
 // Routes

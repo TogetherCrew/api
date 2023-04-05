@@ -9,45 +9,16 @@ import config from '../config';
 
 
 const activeMembersCompositionLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
-    // if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
-    //     throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    // }
-    // const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
-    // const activeMembersLineGraph = await memberActivityService.activeMembersLineGraph(connection, req.body.startDate, req.body.endDate);
-    // activeMembersLineGraph = charts.fillLineGraph(activeMembersLineGraph, req.body.startDate, req.body.endDate);
-
-    const mockData = {
-        categories: ['21 Jan', '22 Jan', '23 Jan', '24 Jan', '25 Jan', '26 Jan', '27 Jan'],
-        series: [
-            { name: 'totActiveMembers', data: [2, 4, 6, 8, 10, 2, 4] },
-            { name: 'newlyActive', data: [2, 4, 6, 8, 10, 2, 4] },
-            { name: 'consistentlyActive', data: [2, 4, 6, 8, 10, 2, 4] },
-            { name: 'vitalMembers', data: [2, 4, 6, 8, 10, 2, 4] },
-            { name: 'becameDisengaged', data: [2, 4, 6, 8, 10, 2, 4] }
-
-        ],
-        totActiveMembers: 36,
-        newlyActive: 36,
-        consistentlyActive: 36,
-        vitalMembers: 36,
-        becameDisengaged: 36,
-        totActiveMembersPercentageChange: 100,
-        newlyActivePercentageChange: 100,
-        consistentlyActivePercentageChange: 100,
-        vitalMembersPercentageChange: 100,
-        becameDisengagedPercentageChange: 100,
+    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
     }
-    res.send(mockData);
+    const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
+    let activeMembersLineGraph = await memberActivityService.activeMembersCompositionLineGraph(connection, req.body.startDate, req.body.endDate);
+    activeMembersLineGraph = charts.fillActiveMembersCompositionLineGraph(activeMembersLineGraph, req.body.startDate, req.body.endDate);
+    res.send(activeMembersLineGraph);
 });
 
 const activeMembersOnboardingLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
-    // if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
-    //     throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    // }
-    // const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
-    // const activeMembersLineGraph = await memberActivityService.activeMembersLineGraph(connection, req.body.startDate, req.body.endDate);
-    // activeMembersLineGraph = charts.fillLineGraph(activeMembersLineGraph, req.body.startDate, req.body.endDate);
-
     const mockData = {
         categories: ['21 Jan', '22 Jan', '23 Jan', '24 Jan', '25 Jan', '26 Jan', '27 Jan'],
         series: [
