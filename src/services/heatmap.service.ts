@@ -90,6 +90,7 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
     try {
         const heatmaps = await connection.models.HeatMap.aggregate([
             {
+                // Stage 1: Convert date from string to date type and extract needed data
                 $project: {
                     _id: 0,
                     date: { $convert: { input: "$date", to: "date" } },
@@ -99,6 +100,8 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
                     reacter: 1
                 }
             },
+
+            // Stage 2: Filter documents based on date range
             {
                 $match: {
                     date: {
@@ -107,11 +110,13 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
                     }
                 }
             },
+            // Stage 3: Add month names array for later use
             {
                 $addFields: {
                     monthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
                 }
             },
+            // Stage 4: Calculate statistics and concatenate day-month field
             {
                 $project: {
                     day_month: {
@@ -156,9 +161,11 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
                     }
                 }
             },
+            // Stage 5: Sort documents by date
             {
                 $sort: { date: 1 }
             },
+            // Stage 6: Group all documents and compute summary statistics
             {
                 $group: {
                     _id: null,
@@ -171,6 +178,7 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
                     }
                 }
             },
+            // Stage 7: Transform group data into final format for charting
             {
                 $project: {
                     _id: 0,
