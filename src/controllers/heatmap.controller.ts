@@ -25,7 +25,7 @@ const lineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
     }
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     let lineGraph = await heatmapService.lineGraph(connection, req.body.startDate, req.body.endDate);
-    lineGraph = charts.fillLineGraph(lineGraph, req.body.startDate, req.body.endDate);
+    lineGraph = charts.fillHeatmapLineGraph(lineGraph, req.body.startDate, req.body.endDate);
     res.send(lineGraph);
 });
 
