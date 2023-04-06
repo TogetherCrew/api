@@ -1,5 +1,5 @@
 export const memberActivityOne = {
-    date: "2023-01-23T00:00:00",
+    date: new Date("2023-01-23T00:00:00"),
     all_active: ["nimatorabiv#2903", "nimatorabiv#2903"],
     all_new_active: ["nimatorabiv#2903"],
     all_consistent: [],
@@ -15,7 +15,7 @@ export const memberActivityOne = {
 }
 
 export const memberActivityTwo = {
-    date: "2023-01-22T00:00:00",
+    date: new Date("2023-01-22T00:00:00"),
     all_active: ["nimatorabiv#2903", "nimatorabiv#2903", "nimatorabiv#2903", "nimatorabiv#2903"],
     all_new_active: ["nimatorabiv#2903"],
     all_consistent: [],
@@ -31,8 +31,8 @@ export const memberActivityTwo = {
 }
 
 
-export const memberActivitythree = {
-    date: "2023-01-20T00:00:00",
+export const memberActivityThree = {
+    date: new Date("2023-01-20T00:00:00"),
     all_active: ["nimatorabiv#2903"],
     all_new_active: [],
     all_consistent: [],
@@ -48,7 +48,7 @@ export const memberActivitythree = {
 }
 
 export const memberActivityFour = {
-    date: "2023-01-17T00:00:00",
+    date: new Date("2023-01-19T00:00:00"),
     all_active: ["nimatorabiv#2903", "nimatorabiv#2903"],
     all_new_active: [],
     all_consistent: [],
@@ -65,7 +65,7 @@ export const memberActivityFour = {
 
 
 export const memberActivityFive = {
-    date: "2022-01-17T00:00:00",
+    date: new Date("2022-01-22T00:00:00"),
     all_active: ["nimatorabiv#2903", "nimatorabiv#2903", "nimatorabiv#2903", "nimatorabiv#2903", "nimatorabiv#2903", "nimatorabiv#2903"],
     all_new_active: [],
     all_consistent: [],
@@ -79,3 +79,4 @@ export const memberActivityFive = {
     all_returned: [],
     all_still_active: []
 }
+
