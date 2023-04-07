@@ -95,8 +95,53 @@ function fillActiveMembersCompositionLineGraph(lineGraph: any, startDate: Date, 
     }
     return chartData;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function fillDisengagedMembersCompositionLineGraph(lineGraph: any, startDate: Date, endDate: Date) {
+    const chartData = {
+        categories: [] as string[],
+        series: [] as { name: string, data: number[] }[],
+        becameDisengaged: lineGraph.becameDisengaged,
+        wereNewlyActive: lineGraph.wereNewlyActive,
+        wereConsistentlyActive: lineGraph.wereConsistentlyActive,
+        wereVitalMembers: lineGraph.wereVitalMembers,
+        becameDisengagedPercentageChange: lineGraph.becameDisengagedPercentageChange,
+        wereNewlyActivePercentageChange: lineGraph.wereNewlyActivePercentageChange,
+        wereConsistentlyActivePercentageChange: lineGraph.wereConsistentlyActivePercentageChange,
+        wereVitalMembersPercentageChange: lineGraph.wereVitalMembersPercentageChange,
+    };
+    let currentDate = moment(startDate);
+    const stopDate = moment(endDate);
+    while (currentDate <= stopDate) {
+        chartData.categories.push(currentDate.format('DD MMM'));
+        currentDate = moment(currentDate).add(1, 'days');
+    }
+
+    chartData.series = [
+        { name: 'becameDisengaged', data: new Array(chartData.categories.length).fill(0) },
+        { name: 'wereNewlyActive', data: new Array(chartData.categories.length).fill(0) },
+        { name: 'wereConsistentlyActive', data: new Array(chartData.categories.length).fill(0) },
+        { name: 'wereVitalMembers', data: new Array(chartData.categories.length).fill(0) },
+    ];
+
+
+
+    for (let i = 0; i < lineGraph.categories.length; i++) {
+        const category = lineGraph.categories[i];
+        const chartIndex = chartData.categories.indexOf(category);
+        if (chartIndex >= 0) {
+            for (let j = 0; j < chartData.series.length; j++) {
+                chartData.series[j].data[chartIndex] = lineGraph.series[j].data[i];
+            }
+        }
+    }
+    return chartData;
+}
+
+
 export default {
     fillHeatmapChart,
     fillHeatmapLineGraph,
-    fillActiveMembersCompositionLineGraph
+    fillActiveMembersCompositionLineGraph,
+    fillDisengagedMembersCompositionLineGraph
 }

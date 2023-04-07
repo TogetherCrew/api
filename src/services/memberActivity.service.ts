@@ -8,7 +8,6 @@ import { Connection } from 'mongoose';
  * @returns {Object}
  */
 async function activeMembersCompositionLineGraph(connection: Connection, startDate: Date, endDate: Date) {
-
     const start = new Date(startDate);
     const end = new Date(endDate);
 
@@ -201,7 +200,6 @@ async function activeMembersCompositionLineGraph(connection: Connection, startDa
             {
                 $group: {
                     _id: null,
-                    day_month: { $push: "$day_month" },
                     totActiveMembers: { $push: "$tot_active_members" },
                     newlyActive: { $push: "$newly_active" },
                     consistentlyActive: { $push: "$consistently_active" },
@@ -305,12 +303,286 @@ async function activeMembersCompositionLineGraph(connection: Connection, startDa
 
         }
     }
+}
 
 
+/**
+ * disengaged members line graph 
+ * @param {Connection} connection
+ * @param {Date} startDate
+ * @param {Date} endDate
+ * @returns {Object}
+ */
+async function disengagedMembersCompositionLineGraph(connection: Connection, startDate: Date, endDate: Date) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    try {
+        const disengagedActivities = await connection.models.MemberActivity.aggregate([
+            // Stage 1: Convert date from string to date type and extract needed data
+            {
+                $project: {
+                    _id: 0,
+                    date: { $convert: { input: "$date", to: "date" } },
+                    all_new_disengaged: 1,
+                    all_disengaged_were_newly_active: 1,
+                    all_disengaged_were_consistenly_active: 1,
+                    all_disengaged_were_vital: 1,
+                }
+            },
+
+            // Stage 2: Filter documents based on date range
+            {
+                $match: {
+                    date: {
+                        $gte: new Date(start),
+                        $lte: new Date(end)
+                    }
+                }
+            },
+
+            // Stage 3: Add month names array for later use
+            {
+                $addFields: {
+                    monthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+                }
+            },
+
+            // Stage 4: Calculate statistics and concatenate day - month field
+            {
+                $project: {
+                    day_month: {
+                        $concat: [
+                            { $dateToString: { format: "%d", date: "$date" } },
+                            " ",
+                            {
+                                $arrayElemAt: [
+                                    "$monthNames",
+                                    { $subtract: [{ $month: "$date" }, 1] }
+                                ]
+                            }
+                        ]
+                    },
+                    became_disengaged: { $size: "$all_new_disengaged" },
+                    were_newly_active: { $size: "$all_disengaged_were_newly_active" },
+                    were_consistently_active: { $size: "$all_disengaged_were_consistenly_active" },
+                    were_vital_members: { $size: "$all_disengaged_were_vital" },
+                }
+            },
+
+            // Stage 5: Sort documents by date
+            {
+                $sort: { date: 1 }
+            },
+
+            // Stage 6: Group all documents and compute summary statistics
+            {
+                $group: {
+                    _id: null,
+                    day_month: { $push: "$day_month" },
+                    becameDisengaged: { $push: "$became_disengaged" },
+                    wereNewlyActive: { $push: "$were_newly_active" },
+                    wereConsistentlyActive: { $push: "$were_consistently_active" },
+                    wereVitalMembers: { $push: "$were_vital_members" },
+                }
+            },
+
+            // Stage 7: Transform group data into final format for charting
+            {
+                $project: {
+                    _id: 0,
+                    categories: "$day_month",
+                    series: [
+                        { name: "becameDisengaged", data: "$becameDisengaged" },
+                        { name: "wereNewlyActive", data: "$wereNewlyActive" },
+                        { name: "wereConsistentlyActive", data: "$wereConsistentlyActive" },
+                        { name: "wereVitalMembers", data: "$wereVitalMembers" },
+                    ],
+                    becameDisengaged: {
+                        $reduce: {
+                            input: "$becameDisengaged",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    wereNewlyActive: {
+                        $reduce: {
+                            input: "$wereNewlyActive",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    wereConsistentlyActive: {
+                        $reduce: {
+                            input: "$wereConsistentlyActive",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    wereVitalMembers: {
+                        $reduce: {
+                            input: "$wereVitalMembers",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                }
+            }
+        ]);
+
+
+        if (disengagedActivities.length === 0) {
+            return {
+                categories: [],
+                series: [],
+                becameDisengaged: 0,
+                wereNewlyActive: 0,
+                wereConsistentlyActive: 0,
+                wereVitalMembers: 0,
+                becameDisengagedPercentageChange: 0,
+                wereNewlyActivePercentageChange: 0,
+                wereConsistentlyActivePercentageChange: 0,
+                wereVitalMembersPercentageChange: 0,
+
+            }
+        }
+
+        const diffInMs = Math.abs(end.getTime() - start.getTime());
+        const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+        const numDaysToSubtract = diffInDays;
+
+
+        const pastDisengagedActivities = await connection.models.MemberActivity.aggregate([
+            // Stage 1: Convert date from string to date type and extract needed data
+            {
+                $project: {
+                    _id: 0,
+                    date: { $convert: { input: "$date", to: "date" } },
+                    all_new_disengaged: 1,
+                    all_disengaged_were_newly_active: 1,
+                    all_disengaged_were_consistenly_active: 1,
+                    all_disengaged_were_vital: 1,
+                }
+            },
+
+            // Stage 2: Filter documents based on date range
+            {
+                $match: {
+                    date: {
+                        $gte: new Date(start.setDate(start.getDate() - numDaysToSubtract)),
+                        $lte: new Date(end.setDate(end.getDate() - (numDaysToSubtract + 1)))
+                    }
+                }
+            },
+
+
+            // Stage 3: Calculate statistics
+            {
+                $project: {
+                    date: 1,
+                    became_disengaged: { $size: "$all_new_disengaged" },
+                    were_newly_active: { $size: "$all_disengaged_were_newly_active" },
+                    were_consistently_active: { $size: "$all_disengaged_were_consistenly_active" },
+                    were_vital_members: { $size: "$all_disengaged_were_vital" },
+                }
+            },
+
+            // Stage 4: Group all documents and compute summary statistics
+            {
+                $group: {
+                    _id: null,
+                    becameDisengaged: { $push: "$became_disengaged" },
+                    wereNewlyActive: { $push: "$were_newly_active" },
+                    wereConsistentlyActive: { $push: "$were_consistently_active" },
+                    wereVitalMembers: { $push: "$were_vital_members" },
+
+                }
+            },
+
+            // Stage 5: Transform group data into final format for charting
+            {
+                $project: {
+                    _id: 0,
+                    date: 1,
+                    becameDisengaged: {
+                        $reduce: {
+                            input: "$becameDisengaged",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    wereNewlyActive: {
+                        $reduce: {
+                            input: "$wereNewlyActive",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    wereConsistentlyActive: {
+                        $reduce: {
+                            input: "$wereConsistentlyActive",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    wereVitalMembers: {
+                        $reduce: {
+                            input: "$wereVitalMembers",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                }
+            }
+
+        ]);
+
+        let becameDisengagedPercentageChange = 0;
+        let wereNewlyActivePercentageChange = 0;
+        let wereConsistentlyActivePercentageChange = 0;
+        let wereVitalMembersPercentageChange = 0;
+
+        if (disengagedActivities[0] && pastDisengagedActivities[0] && pastDisengagedActivities[0].becameDisengaged !== 0) {
+            becameDisengagedPercentageChange = ((disengagedActivities[0].becameDisengaged - pastDisengagedActivities[0].becameDisengaged) / pastDisengagedActivities[0].becameDisengaged) * 100;
+        }
+        if (disengagedActivities[0] && pastDisengagedActivities[0] && pastDisengagedActivities[0].wereNewlyActive !== 0) {
+            wereNewlyActivePercentageChange = ((disengagedActivities[0].wereNewlyActive - pastDisengagedActivities[0].wereNewlyActive) / pastDisengagedActivities[0].wereNewlyActive) * 100;
+        }
+        if (disengagedActivities[0] && pastDisengagedActivities[0] && pastDisengagedActivities[0].wereConsistentlyActive !== 0) {
+            wereConsistentlyActivePercentageChange = ((disengagedActivities[0].wereConsistentlyActive - pastDisengagedActivities[0].wereConsistentlyActive) / pastDisengagedActivities[0].wereConsistentlyActive) * 100;
+        }
+        if (disengagedActivities[0] && pastDisengagedActivities[0] && pastDisengagedActivities[0].wereVitalMembers !== 0) {
+            wereVitalMembersPercentageChange = ((disengagedActivities[0].wereVitalMembers - pastDisengagedActivities[0].wereVitalMembers) / pastDisengagedActivities[0].wereVitalMembers) * 100;
+        }
+
+        return {
+            ...disengagedActivities[0],
+            becameDisengagedPercentageChange,
+            wereNewlyActivePercentageChange,
+            wereConsistentlyActivePercentageChange,
+            wereVitalMembersPercentageChange,
+        }
+    } catch (err) {
+        console.log(err);
+        return {
+            categories: [],
+            series: [],
+            becameDisengaged: 0,
+            wereNewlyActive: 0,
+            wereConsistentlyActive: 0,
+            wereVitalMembers: 0,
+            becameDisengagedPercentageChange: 0,
+            wereNewlyActivePercentageChange: 0,
+            wereConsistentlyActivePercentageChange: 0,
+            wereVitalMembersPercentageChange: 0,
+
+        }
+    }
 }
 
 
 export default {
     activeMembersCompositionLineGraph,
+    disengagedMembersCompositionLineGraph
 }
 
