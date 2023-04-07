@@ -110,12 +110,14 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
                     }
                 }
             },
+
             // Stage 3: Add month names array for later use
             {
                 $addFields: {
                     monthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
                 }
             },
+
             // Stage 4: Calculate statistics and concatenate day-month field
             {
                 $project: {

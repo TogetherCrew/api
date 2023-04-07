@@ -7,205 +7,310 @@ import { Connection } from 'mongoose';
  * @param {Date} endDate
  * @returns {Object}
  */
-async function activeMembersLineGraph(connection: Connection, startDate: Date, endDate: Date) {
+async function activeMembersCompositionLineGraph(connection: Connection, startDate: Date, endDate: Date) {
 
     const start = new Date(startDate);
     const end = new Date(endDate);
 
-    console.log(start, end)
-    // try {
-    const heatmaps = await connection.models.MemberActivity.aggregate([
-        {
-            $addFields: {
-                tot_active_members: {
-                    $objectToArray: "$all_active"
-                },
-                newly_active: {
-                    $objectToArray: "$all_new_active"
-                },
-                consistently_active: {
-                    $objectToArray: "$all_consistent"
-                },
-                vital_members: {
-                    $objectToArray: "$all_vital"
-                },
-                became_disengaged: {
-                    $objectToArray: "$all_new_disengaged"
-                },
-            }
-        },
+    try {
+        const memeberActivities = await connection.models.MemberActivity.aggregate([
+            // Stage 1: Convert date from string to date type and extract needed data
+            {
+                $project: {
+                    _id: 0,
+                    date: { $convert: { input: "$date", to: "date" } },
+                    all_active: 1,
+                    all_new_active: 1,
+                    all_consistent: 1,
+                    all_vital: 1,
+                    all_new_disengaged: 1
+                }
+            },
 
-        {
+            // Stage 2: Filter documents based on date range
+            {
+                $match: {
+                    date: {
+                        $gte: new Date(start),
+                        $lte: new Date(end)
+                    }
+                }
+            },
 
-            $project: {
-                _id: 0,
-                // date: { $convert: { input: "$date", to: "date", } },
-                first_end_date: 1,
-                tot_active_members: 1,
-                newly_active: 1,
-                consistently_active: 1,
-                vital_members: 1,
-                became_disengaged: 1
-            }
-        },
+            // Stage 3: Add month names array for later use
+            {
+                $addFields: {
+                    monthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+                }
+            },
 
-        {
-            $match: {
-                first_end_date: {
-                    $gte: new Date(start),
-                    $lte: new Date(end)
+            // Stage 4: Calculate statistics and concatenate day - month field
+            {
+                $project: {
+                    day_month: {
+                        $concat: [
+                            { $dateToString: { format: "%d", date: "$date" } },
+                            " ",
+                            {
+                                $arrayElemAt: [
+                                    "$monthNames",
+                                    { $subtract: [{ $month: "$date" }, 1] }
+                                ]
+                            }
+                        ]
+                    },
+                    tot_active_members: { $size: "$all_active" },
+                    newly_active: { $size: "$all_new_active" },
+                    consistently_active: { $size: "$all_consistent" },
+                    vital_members: { $size: "$all_vital" },
+                    became_disengaged: { $size: "$all_new_disengaged" },
+                }
+            },
+
+            // Stage 5: Sort documents by date
+            {
+                $sort: { date: 1 }
+            },
+
+            // Stage 6: Group all documents and compute summary statistics
+            {
+                $group: {
+                    _id: null,
+                    day_month: { $push: "$day_month" },
+                    totActiveMembers: { $push: "$tot_active_members" },
+                    newlyActive: { $push: "$newly_active" },
+                    consistentlyActive: { $push: "$consistently_active" },
+                    vitalMembers: { $push: "$vital_members" },
+                    becameDisengaged: { $push: "$became_disengaged" },
+
+                }
+            },
+
+            // Stage 7: Transform group data into final format for charting
+            {
+                $project: {
+                    _id: 0,
+                    categories: "$day_month",
+                    series: [
+                        { name: "totActiveMembers", data: "$totActiveMembers" },
+                        { name: "newlyActive", data: "$newlyActive" },
+                        { name: "consistentlyActive", data: "$consistentlyActive" },
+                        { name: "vitalMembers", data: "$vitalMembers" },
+                        { name: "becameDisengaged", data: "$becameDisengaged" }
+                    ],
+                    totActiveMembers: {
+                        $reduce: {
+                            input: "$totActiveMembers",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    newlyActive: {
+                        $reduce: {
+                            input: "$newlyActive",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    consistentlyActive: {
+                        $reduce: {
+                            input: "$consistentlyActive",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    vitalMembers: {
+                        $reduce: {
+                            input: "$vitalMembers",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    becameDisengaged: {
+                        $reduce: {
+                            input: "$becameDisengaged",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    }
                 }
             }
-        },
+        ]);
 
-        {
-            $addFields: {
-                monthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+        if (memeberActivities.length === 0) {
+            return {
+                categories: [],
+                series: [],
+                totActiveMembers: 0,
+                newlyActive: 0,
+                consistentlyActive: 0,
+                vitalMembers: 0,
+                becameDisengaged: 0,
+                totActiveMembersPercentageChange: 0,
+                newlyActivePercentageChange: 0,
+                consistentlyActivePercentageChange: 0,
+                vitalMembersPercentageChange: 0,
+                becameDisengagedPercentageChange: 0,
+
             }
-        },
+        }
+        const diffInMs = Math.abs(end.getTime() - start.getTime());
+        const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+        const numDaysToSubtract = diffInDays;
 
 
-        {
-            $project: {
-                day_month: {
-                    $concat: [
-                        { $dateToString: { format: "%d", date: "$first_end_date" } },
-                        " ",
-                        {
-                            $arrayElemAt: [
-                                "$monthNames",
-                                { $subtract: [{ $month: "$first_end_date" }, 1] }
-                            ]
-                        }
-                    ]
-                },
-
-
-                total_tot_active_members: {
-                    $sum: {
-                        $map: {
-                            input: "$tot_active_members",
-                            as: "item",
-                            in: {
-                                $size: "$$item.v"
-                            }
-                        }
-                    }
-                },
-                total_newly_active: {
-                    $sum: {
-                        $map: {
-                            input: "$newly_active",
-                            as: "item",
-                            in: {
-                                $size: "$$item.v"
-                            }
-                        }
-                    }
-                },
-                total_consistently_active: {
-                    $sum: {
-                        $map: {
-                            input: "$consistently_active",
-                            as: "item",
-                            in: {
-                                $size: "$$item.v"
-                            }
-                        }
-                    }
-                },
-                total_vital_members: {
-                    $sum: {
-                        $map: {
-                            input: "$vital_members",
-                            as: "item",
-                            in: {
-                                $size: "$$item.v"
-                            }
-                        }
-                    }
-                },
-                total_became_disengaged: {
-                    $sum: {
-                        $map: {
-                            input: "$became_disengaged",
-                            as: "item",
-                            in: {
-                                $size: "$$item.v"
-                            }
-                        }
-                    }
-                },
-            }
-        },
-        {
-            $sort: { date: 1 }
-        },
-        {
-            $group: {
-                _id: null,
-                day_month: { $push: "$day_month" },
-
-                activeMembers: {
-                    $sum: "$total_tot_active_members"
-                },
-                newlyActive: {
-                    $sum: "$total_newly_active"
-                },
-                consistentlyActive: {
-                    $sum: "$total_consistently_active"
-                },
-                vitalMembers: {
-                    $sum: "$total_vital_members"
-                },
-                becameDisengaged: {
-                    $sum: "$total_became_disengaged"
+        const pastMemeberActivities = await connection.models.MemberActivity.aggregate([
+            // Stage 1: Convert date from string to date type and extract needed data
+            {
+                $project: {
+                    _id: 0,
+                    date: { $convert: { input: "$date", to: "date" } },
+                    all_active: 1,
+                    all_new_active: 1,
+                    all_consistent: 1,
+                    all_vital: 1,
+                    all_new_disengaged: 1
                 }
+            },
 
+            // Stage 2: Filter documents based on date range
+            {
+                $match: {
+                    date: {
+                        $gte: new Date(start.setDate(start.getDate() - numDaysToSubtract)),
+                        $lte: new Date(end.setDate(end.getDate() - (numDaysToSubtract + 1)))
+                    }
+                }
+            },
+
+
+            // Stage 3: Calculate statistics
+            {
+                $project: {
+                    date: 1,
+                    tot_active_members: { $size: "$all_active" },
+                    newly_active: { $size: "$all_new_active" },
+                    consistently_active: { $size: "$all_consistent" },
+                    vital_members: { $size: "$all_vital" },
+                    became_disengaged: { $size: "$all_new_disengaged" },
+                }
+            },
+
+            // Stage 4: Group all documents and compute summary statistics
+            {
+                $group: {
+                    _id: null,
+                    day_month: { $push: "$day_month" },
+                    totActiveMembers: { $push: "$tot_active_members" },
+                    newlyActive: { $push: "$newly_active" },
+                    consistentlyActive: { $push: "$consistently_active" },
+                    vitalMembers: { $push: "$vital_members" },
+                    becameDisengaged: { $push: "$became_disengaged" },
+
+                }
+            },
+
+            // Stage 5: Transform group data into final format for charting
+            {
+                $project: {
+                    _id: 0,
+                    date: 1,
+                    totActiveMembers: {
+                        $reduce: {
+                            input: "$totActiveMembers",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    newlyActive: {
+                        $reduce: {
+                            input: "$newlyActive",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    consistentlyActive: {
+                        $reduce: {
+                            input: "$consistentlyActive",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    vitalMembers: {
+                        $reduce: {
+                            input: "$vitalMembers",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    becameDisengaged: {
+                        $reduce: {
+                            input: "$becameDisengaged",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    }
+                }
             }
-        },
-        // Stage 5: Sort documents by date
-        // {
-        //     $sort: { date: 1 }
-        // },
-    ]);
 
-    console.log(heatmaps)
+        ]);
 
-    //     let msgPercentageChange = 0;
-    //     let emojiPercentageChange = 0;
+        let totActiveMembersPercentageChange = 0;
+        let newlyActivePercentageChange = 0;
+        let consistentlyActivePercentageChange = 0;
+        let vitalMembersPercentageChange = 0;
+        let becameDisengagedPercentageChange = 0;
 
-    //     if (heatmaps[0] && pastHeatmaps[0] && pastHeatmaps[0].messages !== 0) {
-    //         msgPercentageChange = ((heatmaps[0].messages - pastHeatmaps[0].messages) / pastHeatmaps[0].messages) * 100;
-    //     }
 
-    //     if (heatmaps[0] && pastHeatmaps[0] && pastHeatmaps[0].emojis !== 0) {
-    //         emojiPercentageChange = ((heatmaps[0].emojis - pastHeatmaps[0].emojis) / pastHeatmaps[0].emojis) * 100;
-    //     }
+        if (memeberActivities[0] && pastMemeberActivities[0] && pastMemeberActivities[0].totActiveMembers !== 0) {
+            totActiveMembersPercentageChange = ((memeberActivities[0].totActiveMembers - pastMemeberActivities[0].totActiveMembers) / pastMemeberActivities[0].totActiveMembers) * 100;
+        }
+        if (memeberActivities[0] && pastMemeberActivities[0] && pastMemeberActivities[0].newlyActive !== 0) {
+            newlyActivePercentageChange = ((memeberActivities[0].newlyActive - pastMemeberActivities[0].newlyActive) / pastMemeberActivities[0].newlyActive) * 100;
+        }
+        if (memeberActivities[0] && pastMemeberActivities[0] && pastMemeberActivities[0].consistentlyActive !== 0) {
+            consistentlyActivePercentageChange = ((memeberActivities[0].consistentlyActive - pastMemeberActivities[0].consistentlyActive) / pastMemeberActivities[0].consistentlyActive) * 100;
+        }
+        if (memeberActivities[0] && pastMemeberActivities[0] && pastMemeberActivities[0].vitalMembers !== 0) {
+            vitalMembersPercentageChange = ((memeberActivities[0].vitalMembers - pastMemeberActivities[0].vitalMembers) / pastMemeberActivities[0].vitalMembers) * 100;
+        }
+        if (memeberActivities[0] && pastMemeberActivities[0] && pastMemeberActivities[0].becameDisengaged !== 0) {
+            becameDisengagedPercentageChange = ((memeberActivities[0].becameDisengaged - pastMemeberActivities[0].becameDisengaged) / pastMemeberActivities[0].becameDisengaged) * 100;
+        }
 
-    //     return {
-    //         ...heatmaps[0],
-    //         msgPercentageChange,
-    //         emojiPercentageChange
-    //     }
+        return {
+            ...memeberActivities[0],
+            totActiveMembersPercentageChange,
+            newlyActivePercentageChange,
+            consistentlyActivePercentageChange,
+            vitalMembersPercentageChange,
+            becameDisengagedPercentageChange
+        }
+    } catch (err) {
+        console.log(err);
+        return {
+            categories: [],
+            series: [],
+            totActiveMembers: 0,
+            newlyActive: 0,
+            consistentlyActive: 0,
+            vitalMembers: 0,
+            becameDisengaged: 0,
+            totActiveMembersPercentageChange: 0,
+            newlyActivePercentageChange: 0,
+            consistentlyActivePercentageChange: 0,
+            vitalMembersPercentageChange: 0,
+            becameDisengagedPercentageChange: 0,
 
-    // } catch (err) {
-    //     console.log(err);
-    //     return {
-    //         categories: [],
-    //         series: [],
-    //         emojis: 0,
-    //         messages: 0,
-    //         msgPercentageChange: 0,
-    //         emojiPercentageChange: 0
+        }
+    }
 
-    //     }
-    // }
 
 }
 
 
 export default {
-    activeMembersLineGraph,
+    activeMembersCompositionLineGraph,
 }
 

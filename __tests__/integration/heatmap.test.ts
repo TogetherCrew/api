@@ -12,7 +12,7 @@ import config from '../../src/config';
 
 setupTestDB();
 
-describe('Guild routes', () => {
+describe('Heatmap routes', () => {
     const connection = databaseService.connectionFactory(guildOne.guildId, config.mongoose.botURL);
     describe('POST /api/v1/heatmaps/:guildId/heatmap-chart', () => {
         let requestBody: {
@@ -99,11 +99,12 @@ describe('Guild routes', () => {
                 .send({ startDate: new Date("2023-01-21"), endDate: new Date("2023-01-24") })
                 .expect(httpStatus.OK);
 
-            expect(res.body.messages).toBe(60);
-            expect(res.body.emojis).toBe(9);
-            expect(res.body.msgPercentageChange).toBe(0);
-            expect(res.body.emojiPercentageChange).toBe(0);
-
+            expect(res.body).toMatchObject({
+                messages: 60,
+                emojis: 9,
+                msgPercentageChange: 0,
+                emojiPercentageChange: 0
+            });
         })
 
         test('should return 200 and line graph data (testing percentage change) if req data is ok', async () => {
@@ -117,10 +118,12 @@ describe('Guild routes', () => {
                 .send({ startDate: new Date("2023-01-21"), endDate: new Date("2023-01-24") })
                 .expect(httpStatus.OK);
 
-            expect(res.body.messages).toBe(60);
-            expect(res.body.emojis).toBe(9);
-            expect(res.body.msgPercentageChange).toBe(200);
-            expect(res.body.emojiPercentageChange).toBe(-50);
+            expect(res.body).toMatchObject({
+                messages: 60,
+                emojis: 9,
+                msgPercentageChange: 200,
+                emojiPercentageChange: -50
+            });
 
         })
 
