@@ -131,7 +131,7 @@ describe('member-activity routes', () => {
                 wereConsistentlyActive: 0,
                 wereVitalMembers: 2,
                 becameDisengagedPercentageChange: 0,
-                wereNewlyActivePercentageChange: 100,
+                wereNewlyActivePercentageChange: 0,
                 wereConsistentlyActivePercentageChange: 0,
                 wereVitalMembersPercentageChange: 0,
             });
@@ -155,7 +155,7 @@ describe('member-activity routes', () => {
                 wereConsistentlyActive: 0,
                 wereVitalMembers: 2,
                 becameDisengagedPercentageChange: 0,
-                wereNewlyActivePercentageChange: 0,
+                wereNewlyActivePercentageChange: 100,
                 wereConsistentlyActivePercentageChange: 0,
                 wereVitalMembersPercentageChange: -66.66666666666666,
             });
