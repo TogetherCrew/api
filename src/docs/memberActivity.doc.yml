@@ -3,7 +3,7 @@ paths:
     post:
       tags:
         - [Member-Activity]
-      summary: Get data for memeber activity composition line graph 
+      summary: Get data for active members composition line graph 
       security:
         - bearerAuth: []
       parameters:
@@ -73,6 +73,84 @@ paths:
                   becameDisengagedPercentageChange:
                     type: number
                   
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
+  /api/v1/member-activity/{guildId}/disengaged-members-composition-line-graph:
+    post:
+      tags:
+        - [Member-Activity]
+      summary: Get data for disengaged memebres composition line graph 
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: guildId
+          required: true
+          schema:
+            type: string
+          description: Guild Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startDate:
+                  type: string
+                  format: date-time     
+                endDate:
+                  type: string
+                  format: date-time        
+              example:
+                startDate: "2023-01-17T13:02:10.911+00:00"
+                endDate: "2023-01-29T10:50:01.513Z"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      type: string
+                  series:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        data:
+                          type: array
+                          items:
+                            type: number
+                  becameDisengaged:
+                    type: number
+                  wereNewlyActive:
+                    type: number
+                  wereConsistentlyActive:
+                    type: number
+                  wereVitalMembers:
+                    type: number
+                  becameDisengagedPercentageChange:
+                    type: number
+                  wereNewlyActivePercentageChange:
+                    type: number
+                  wereConsistentlyActivePercentageChange:
+                    type: number
+                  wereVitalMembersPercentageChange:
+                    type: number
         "400":
           description: Bad Request
           $ref: "#/components/responses/BadRequest"
