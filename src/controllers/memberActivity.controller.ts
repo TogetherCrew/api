@@ -39,8 +39,22 @@ const activeMembersOnboardingLineGraph = catchAsync(async function (req: IAuthRe
     res.send(mockData);
 });
 
+
+const disengagedMembersOnboardingLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
+    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    }
+    const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
+    let disengagedMembersLineGraph = await memberActivityService.disengagedMembersCompositionLineGraph(connection, req.body.startDate, req.body.endDate);
+    disengagedMembersLineGraph = charts.fillDisengagedMembersCompositionLineGraph(disengagedMembersLineGraph, req.body.startDate, req.body.endDate);
+    res.send(disengagedMembersLineGraph);
+});
+
+
+
 export default {
     activeMembersCompositionLineGraph,
-    activeMembersOnboardingLineGraph
+    activeMembersOnboardingLineGraph,
+    disengagedMembersOnboardingLineGraph
 }
 
