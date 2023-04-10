@@ -27,13 +27,14 @@ async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscor
             body: new URLSearchParams(data),
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         })
-        const json = await response.json();
-        // Note: {message: '401: Unauthorized', code:0} means that we have not discord auth tokens
-        if (json.message) {
+        if (response.ok) {
             throw new Error();
         }
-        return json;
+        return await response.json();
     } catch (err) {
+        console.log(1)
+        console.log(err)
+
         throw new ApiError(590, 'Can not fetch from discord API');
     }
 }
@@ -62,6 +63,8 @@ async function refreshDiscordAuth(refreshToken: string): Promise<IDiscordOathBot
         }
         return await response.json();
     } catch (err) {
+        console.log(2)
+        console.log(err)
         throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Can not fetch from discord API');
     }
 }
