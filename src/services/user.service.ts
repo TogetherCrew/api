@@ -29,9 +29,11 @@ async function getUserFromDiscordAPI(accessToken: string): Promise<IDiscordUser>
             headers: { 'Authorization': `Bearer ${accessToken}` }
         });
         if (response.ok) {
+            return await response.json();
+        }
+        else {
             throw new Error();
         }
-        return await response.json();
     } catch (err) {
         throw new ApiError(590, 'Can not fetch from discord API');
     }
@@ -59,9 +61,11 @@ async function getCurrentUserGuilds(accessToken: string) {
             headers: { 'Authorization': `Bearer ${accessToken}` }
         });
         if (response.ok) {
+            return await response.json();
+        }
+        else {
             throw new Error();
         }
-        return await response.json();
     } catch (err) {
         throw new ApiError(590, 'Can not fetch from discord API');
     }

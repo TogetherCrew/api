@@ -28,13 +28,12 @@ async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscor
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         })
         if (response.ok) {
+            return await response.json();
+        }
+        else {
             throw new Error();
         }
-        return await response.json();
     } catch (err) {
-        console.log(1)
-        console.log(err)
-
         throw new ApiError(590, 'Can not fetch from discord API');
     }
 }
@@ -59,12 +58,12 @@ async function refreshDiscordAuth(refreshToken: string): Promise<IDiscordOathBot
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         })
         if (response.ok) {
+            return await response.json();
+        }
+        else {
             throw new Error();
         }
-        return await response.json();
     } catch (err) {
-        console.log(2)
-        console.log(err)
         throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Can not fetch from discord API');
     }
 }

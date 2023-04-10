@@ -90,9 +90,11 @@ async function getGuildFromDiscordAPI(guildId: Snowflake) {
             headers: { 'Authorization': `Bot ${config.discord.botToken}` }
         });
         if (response.ok) {
+            return await response.json();
+        }
+        else {
             throw new Error();
         }
-        return await response.json();
     } catch (err) {
         throw new ApiError(590, 'Can not fetch from discord API');
     }
@@ -110,9 +112,11 @@ async function getGuildChannels(guildId: Snowflake) {
             headers: { 'Authorization': `Bot ${config.discord.botToken}` }
         });
         if (response.ok) {
+            return await response.json();
+        }
+        else {
             throw new Error();
         }
-        return await response.json();
     } catch (err) {
         throw new ApiError(590, 'Can not fetch from discord API');
     }
