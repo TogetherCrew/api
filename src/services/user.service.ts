@@ -28,12 +28,10 @@ async function getUserFromDiscordAPI(accessToken: string): Promise<IDiscordUser>
             method: 'GET',
             headers: { 'Authorization': `Bearer ${accessToken}` }
         });
-        const json = await response.json();
-        // Note: {message: '401: Unauthorized', code:0} means that we have not access to user
-        if (json.message) {
+        if (response.ok) {
             throw new Error();
         }
-        return json;
+        return await response.json();
     } catch (err) {
         throw new ApiError(590, 'Can not fetch from discord API');
     }
@@ -60,12 +58,10 @@ async function getCurrentUserGuilds(accessToken: string) {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${accessToken}` }
         });
-        const json = await response.json();
-        // Note: {message: '401: Unauthorized', code:0} means that we have not access to guild
-        if (json.message) {
+        if (response.ok) {
             throw new Error();
         }
-        return json;
+        return await response.json();
     } catch (err) {
         throw new ApiError(590, 'Can not fetch from discord API');
     }

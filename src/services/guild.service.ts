@@ -89,19 +89,17 @@ async function getGuildFromDiscordAPI(guildId: Snowflake) {
             method: 'GET',
             headers: { 'Authorization': `Bot ${config.discord.botToken}` }
         });
-        const json = await response.json();
-        // Note: {message: '401: Unauthorized', code:0} means that we have not access to guild channels
-        if (json.message) {
+        if (response.ok) {
             throw new Error();
         }
-        return json;
+        return await response.json();
     } catch (err) {
         throw new ApiError(590, 'Can not fetch from discord API');
     }
 }
 
 /**
- * Get visible guild channels
+ * Get guild channels
  * @param {Snowflake} guildId
  * @returns {Promise<Array<IDiscordGuild>>}
  */
@@ -111,20 +109,15 @@ async function getGuildChannels(guildId: Snowflake) {
             method: 'GET',
             headers: { 'Authorization': `Bot ${config.discord.botToken}` }
         });
-        const channels = await response.json();
-        // Note: {message: '401: Unauthorized', code:0} means that we have not access to guild channels
-        if (channels.message) {
+        if (response.ok) {
             throw new Error();
         }
-        const visibleChannels = channels.filter((channel: any) => {
-          const permissions = channel.permission_overwrites.find((permission: any) => permission.id === channel.guild_id);
-          return permissions ? permissions.allow & 0x400 : true;
-        }).filter((channel: any) => channel.type === 0);
-        return visibleChannels;
+        return await response.json();
     } catch (err) {
         throw new ApiError(590, 'Can not fetch from discord API');
     }
 }
+
 
 /**
  * query guilds
