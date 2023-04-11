@@ -140,7 +140,7 @@ async function queryGuilds(filter: object, options: object) {
  * @param {Snowflake} guildId
  * @returns {Promise<IDiscordGuildMember>}
  */
-async function getGuildMemberbyDiscordIdAndGuildId(guildId: Snowflake, discordId: Snowflake) {
+async function getGuildMemberFromDiscordAPI(guildId: Snowflake, discordId: Snowflake) {
     try {
         const response = await fetch(`https://discord.com/api/guilds/${guildId}/members/${discordId}`, {
             method: 'GET',
@@ -172,6 +172,6 @@ export default {
     getGuildFromDiscordAPI,
     queryGuilds,
     deleteGuild,
-    getGuildMemberbyDiscordIdAndGuildId
+    getGuildMemberFromDiscordAPI
 }
 
