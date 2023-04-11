@@ -2,7 +2,7 @@
 import fetch from 'node-fetch';
 import { Snowflake } from 'discord.js';
 import config from '../config';
-import { Guild, IDiscordGuild, IDiscordGuildMember, IDiscordUser } from 'tc_dbcomm';
+import { Guild, IDiscordGuild } from 'tc_dbcomm';
 import { IGuildUpdateBody } from '../interfaces/guild.interface'
 import { ApiError } from '../utils';
 import httpStatus = require('http-status');
@@ -107,7 +107,6 @@ async function getGuildFromDiscordAPI(guildId: Snowflake) {
  */
 async function getGuildChannels(guildId: Snowflake) {
     try {
-        console.log(await getBotMember(guildId))
         const response = await fetch(`https://discord.com/api/guilds/${guildId}/channels?`, {
             method: 'GET',
             headers: { 'Authorization': `Bot ${config.discord.botToken}` }
@@ -143,7 +142,7 @@ async function queryGuilds(filter: object, options: object) {
  */
 async function getGuildMemberbyDiscordIdAndGuildId(guildId: Snowflake, discordId: Snowflake) {
     try {
-        const response = await fetch(`https://discord.com/api/v10/guilds/${guildId}/members/${discordId}`, {
+        const response = await fetch(`https://discord.com/api/guilds/${guildId}/members/${discordId}`, {
             method: 'GET',
             headers: { 'Authorization': `Bot ${config.discord.botToken}` }
         });
@@ -161,27 +160,6 @@ async function getGuildMemberbyDiscordIdAndGuildId(guildId: Snowflake, discordId
 
 
 
-async function getBotMember(guildId: string) {
-    try {
-        let response: any = await fetch('https://discord.com/api/v10/users/@me', {
-            method: 'GET',
-            headers: { 'Authorization': `Bot ${config.discord.botToken}` }
-        });
-
-        if (response.ok) {
-            response = await response.json();
-
-            console.log(await getGuildMemberbyDiscordIdAndGuildId(guildId, response.id))
-        }
-        else {
-            throw new Error();
-        }
-    } catch (err) {
-        throw new ApiError(590, 'Can not fetch from discord API');
-    }
-
-
-}
 
 
 export default {
