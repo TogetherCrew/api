@@ -201,4 +201,77 @@ describe('member-activity routes', () => {
         })
     })
 
+    describe('POST /api/v1/member-activity/:guildId/inactive-members-line-graph', () => {
+        beforeEach(async () => {
+            await connection.dropDatabase();
+        });
+        test('should return 200 and disengaged members composition line graph data if req data is ok', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+
+            await memberActivityService.createMemberActivities(connection, [memberActivityOne, memberActivityTwo, memberActivityFive]);
+            const res = await request(app)
+                .post(`/api/v1/member-activity/${guildOne.guildId}/inactive-members-line-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date("2023-01-21"), endDate: new Date("2023-01-24") })
+                .expect(httpStatus.OK);
+
+            expect(res.body).toMatchObject({
+                returned: 6,
+                returnedPercentageChange: 0
+            });
+        })
+
+
+        test('should return 200 and  disengaged members composition line graph data (testing percentage change) if req data is ok', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+
+            await memberActivityService.createMemberActivities(connection, [memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour, memberActivityFive]);
+            const res = await request(app)
+                .post(`/api/v1/member-activity/${guildOne.guildId}/inactive-members-line-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date("2023-01-21"), endDate: new Date("2023-01-24") })
+                .expect(httpStatus.OK);
+
+            expect(res.body).toMatchObject({
+                returned: 6,
+                returnedPercentageChange: 100
+            });
+        })
+
+        test('should return 200 and  disengaged members composition line graph data (testing for empty data) if req data is ok', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+
+            await memberActivityService.createMemberActivities(connection, [memberActivityOne]);
+            const res = await request(app)
+                .post(`/api/v1/member-activity/${guildOne.guildId}/inactive-members-line-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date("2023-02-21"), endDate: new Date("2023-02-24") })
+                .expect(httpStatus.OK);
+
+            expect(res.body).toMatchObject({
+                returned: 0,
+                returnedPercentageChange: 0
+            });
+        })
+
+        test('should return 401 if access token is missing', async () => {
+            await request(app)
+                .post(`/api/v1/member-activity/${guildOne.guildId}/inactive-members-line-graph`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.UNAUTHORIZED);
+        })
+
+        test('should return 404 if guild not found', async () => {
+            await insertUsers([userOne]);
+            await request(app)
+                .post(`/api/v1/member-activity/${guildOne.guildId}/inactive-members-line-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.NOT_FOUND);
+        })
+    })
+
 });

@@ -318,7 +318,7 @@ async function disengagedMembersCompositionLineGraph(connection: Connection, sta
     const end = new Date(endDate);
 
     try {
-        const disengagedActivities = await connection.models.MemberActivity.aggregate([
+        const membersActivities = await connection.models.MemberActivity.aggregate([
             // Stage 1: Convert date from string to date type and extract needed data
             {
                 $project: {
@@ -431,7 +431,7 @@ async function disengagedMembersCompositionLineGraph(connection: Connection, sta
         ]);
 
 
-        if (disengagedActivities.length === 0) {
+        if (membersActivities.length === 0) {
             return {
                 categories: [],
                 series: [],
@@ -452,7 +452,7 @@ async function disengagedMembersCompositionLineGraph(connection: Connection, sta
         const numDaysToSubtract = diffInDays;
 
 
-        const pastDisengagedActivities = await connection.models.MemberActivity.aggregate([
+        const pastMembersActivities = await connection.models.MemberActivity.aggregate([
             // Stage 1: Convert date from string to date type and extract needed data
             {
                 $project: {
@@ -542,21 +542,21 @@ async function disengagedMembersCompositionLineGraph(connection: Connection, sta
         let wereConsistentlyActivePercentageChange = 0;
         let wereVitalMembersPercentageChange = 0;
 
-        if (disengagedActivities[0] && pastDisengagedActivities[0] && pastDisengagedActivities[0].becameDisengaged !== 0) {
-            becameDisengagedPercentageChange = ((disengagedActivities[0].becameDisengaged - pastDisengagedActivities[0].becameDisengaged) / pastDisengagedActivities[0].becameDisengaged) * 100;
+        if (membersActivities[0] && pastMembersActivities[0] && pastMembersActivities[0].becameDisengaged !== 0) {
+            becameDisengagedPercentageChange = ((membersActivities[0].becameDisengaged - pastMembersActivities[0].becameDisengaged) / pastMembersActivities[0].becameDisengaged) * 100;
         }
-        if (disengagedActivities[0] && pastDisengagedActivities[0] && pastDisengagedActivities[0].wereNewlyActive !== 0) {
-            wereNewlyActivePercentageChange = ((disengagedActivities[0].wereNewlyActive - pastDisengagedActivities[0].wereNewlyActive) / pastDisengagedActivities[0].wereNewlyActive) * 100;
+        if (membersActivities[0] && pastMembersActivities[0] && pastMembersActivities[0].wereNewlyActive !== 0) {
+            wereNewlyActivePercentageChange = ((membersActivities[0].wereNewlyActive - pastMembersActivities[0].wereNewlyActive) / pastMembersActivities[0].wereNewlyActive) * 100;
         }
-        if (disengagedActivities[0] && pastDisengagedActivities[0] && pastDisengagedActivities[0].wereConsistentlyActive !== 0) {
-            wereConsistentlyActivePercentageChange = ((disengagedActivities[0].wereConsistentlyActive - pastDisengagedActivities[0].wereConsistentlyActive) / pastDisengagedActivities[0].wereConsistentlyActive) * 100;
+        if (membersActivities[0] && pastMembersActivities[0] && pastMembersActivities[0].wereConsistentlyActive !== 0) {
+            wereConsistentlyActivePercentageChange = ((membersActivities[0].wereConsistentlyActive - pastMembersActivities[0].wereConsistentlyActive) / pastMembersActivities[0].wereConsistentlyActive) * 100;
         }
-        if (disengagedActivities[0] && pastDisengagedActivities[0] && pastDisengagedActivities[0].wereVitalMembers !== 0) {
-            wereVitalMembersPercentageChange = ((disengagedActivities[0].wereVitalMembers - pastDisengagedActivities[0].wereVitalMembers) / pastDisengagedActivities[0].wereVitalMembers) * 100;
+        if (membersActivities[0] && pastMembersActivities[0] && pastMembersActivities[0].wereVitalMembers !== 0) {
+            wereVitalMembersPercentageChange = ((membersActivities[0].wereVitalMembers - pastMembersActivities[0].wereVitalMembers) / pastMembersActivities[0].wereVitalMembers) * 100;
         }
 
         return {
-            ...disengagedActivities[0],
+            ...membersActivities[0],
             becameDisengagedPercentageChange,
             wereNewlyActivePercentageChange,
             wereConsistentlyActivePercentageChange,
@@ -580,9 +580,191 @@ async function disengagedMembersCompositionLineGraph(connection: Connection, sta
     }
 }
 
+/**
+ * inactive members line graph 
+ * @param {Connection} connection
+ * @param {Date} startDate
+ * @param {Date} endDate
+ * @returns {Object}
+ */
+async function inactiveMembersLineGraph(connection: Connection, startDate: Date, endDate: Date) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    try {
+        const memeberActivities = await connection.models.MemberActivity.aggregate([
+            // Stage 1: Convert date from string to date type and extract needed data
+            {
+                $project: {
+                    _id: 0,
+                    date: { $convert: { input: "$date", to: "date" } },
+                    all_returned: 1,
+                }
+            },
+
+            // Stage 2: Filter documents based on date range
+            {
+                $match: {
+                    date: {
+                        $gte: new Date(start),
+                        $lte: new Date(end)
+                    }
+                }
+            },
+
+            // Stage 3: Add month names array for later use
+            {
+                $addFields: {
+                    monthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+                }
+            },
+
+            // Stage 4: Calculate statistics and concatenate day - month field
+            {
+                $project: {
+                    day_month: {
+                        $concat: [
+                            { $dateToString: { format: "%d", date: "$date" } },
+                            " ",
+                            {
+                                $arrayElemAt: [
+                                    "$monthNames",
+                                    { $subtract: [{ $month: "$date" }, 1] }
+                                ]
+                            }
+                        ]
+                    },
+                    returned: { $size: "$all_returned" },
+                }
+            },
+
+            // Stage 5: Sort documents by date
+            {
+                $sort: { date: 1 }
+            },
+
+            // Stage 6: Group all documents and compute summary statistics
+            {
+                $group: {
+                    _id: null,
+                    day_month: { $push: "$day_month" },
+                    returned: { $push: "$returned" },
+                }
+            },
+
+            // Stage 7: Transform group data into final format for charting
+            {
+                $project: {
+                    _id: 0,
+                    categories: "$day_month",
+                    series: [
+                        { name: "returned", data: "$returned" }
+                    ],
+                    returned: {
+                        $reduce: {
+                            input: "$returned",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    }
+                }
+            }
+        ]);
+
+
+        if (memeberActivities.length === 0) {
+            return {
+                categories: [],
+                series: [],
+                returned: 0,
+                returnedPercentageChange: 0,
+            }
+        }
+
+        const diffInMs = Math.abs(end.getTime() - start.getTime());
+        const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+        const numDaysToSubtract = diffInDays;
+
+
+        const pastMemeberActivities = await connection.models.MemberActivity.aggregate([
+            // Stage 1: Convert date from string to date type and extract needed data
+            {
+                $project: {
+                    _id: 0,
+                    date: { $convert: { input: "$date", to: "date" } },
+                    all_returned: 1,
+                }
+            },
+
+            // Stage 2: Filter documents based on date range
+            {
+                $match: {
+                    date: {
+                        $gte: new Date(start.setDate(start.getDate() - numDaysToSubtract)),
+                        $lte: new Date(end.setDate(end.getDate() - (numDaysToSubtract + 1)))
+                    }
+                }
+            },
+
+
+            // Stage 3: Calculate statistics
+            {
+                $project: {
+                    date: 1,
+                    returned: { $size: "$all_returned" },
+                }
+            },
+
+            // Stage 4: Group all documents and compute summary statistics
+            {
+                $group: {
+                    _id: null,
+                    returned: { $push: "$returned" },
+                }
+            },
+
+            // Stage 5: Transform group data into final format for charting
+            {
+                $project: {
+                    _id: 0,
+                    date: 1,
+                    returned: {
+                        $reduce: {
+                            input: "$returned",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    }
+                }
+            }
+
+        ]);
+
+        let returnedPercentageChange = 0;
+
+        if (memeberActivities[0] && pastMemeberActivities[0] && pastMemeberActivities[0].returned !== 0) {
+            returnedPercentageChange = ((memeberActivities[0].returned - pastMemeberActivities[0].returned) / pastMemeberActivities[0].returned) * 100;
+        }
+
+
+        return {
+            ...memeberActivities[0],
+            returnedPercentageChange
+        }
+    } catch (err) {
+        console.log(err);
+        return {
+            categories: [],
+            series: [],
+            returned: 0,
+            returnedPercentageChange: 0,
+        }
+    }
+}
 
 export default {
     activeMembersCompositionLineGraph,
-    disengagedMembersCompositionLineGraph
+    disengagedMembersCompositionLineGraph,
+    inactiveMembersLineGraph
 }
 
