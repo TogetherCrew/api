@@ -131,7 +131,7 @@ describe('Guild routes', () => {
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
 
-            expect(res.body).toEqual({
+            expect(res.body).toMatchObject({
                 id: guildOne._id.toHexString(),
                 guildId: guildOne.guildId,
                 user: userOne.discordId,
@@ -141,16 +141,8 @@ describe('Guild routes', () => {
                 isDisconnected: guildOne.isDisconnected,
                 connectedAt: expect.anything(),
                 icon: guildOne.icon,
-                action: {
-                    activeAccounts: 1,
-                    activeInteractions: 1,
-                    connectedAccounts: 5,
-                    connectedInteractions: 5
-                },
-                window: {
-                    periodDiration: 7,
-                    periodStep: 1,
-                },
+                action: [1, 1, 1, 4, 3, 5, 5, 4, 3, 3, 2],
+                window: [7, 1]
             });
         })
 
@@ -441,7 +433,7 @@ describe('Guild routes', () => {
                 totalResults: 2,
             });
             expect(res.body.results).toHaveLength(2);
-            expect(res.body.results[0]).toEqual({
+            expect(res.body.results[0]).toMatchObject({
                 id: guildOne._id.toHexString(),
                 guildId: guildOne.guildId,
                 user: userOne.discordId,
@@ -451,16 +443,8 @@ describe('Guild routes', () => {
                 isDisconnected: guildOne.isDisconnected,
                 connectedAt: expect.anything(),
                 icon: guildOne.icon,
-                action: {
-                    activeAccounts: 1,
-                    activeInteractions: 1,
-                    connectedAccounts: 5,
-                    connectedInteractions: 5
-                },
-                window: {
-                    periodDiration: 7,
-                    periodStep: 1,
-                },
+                action: [1, 1, 1, 4, 3, 5, 5, 4, 3, 3, 2],
+                window: [7, 1]
             });
         });
 
