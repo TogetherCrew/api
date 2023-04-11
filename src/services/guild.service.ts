@@ -2,10 +2,11 @@
 import fetch from 'node-fetch';
 import { Snowflake } from 'discord.js';
 import config from '../config';
-import { Guild, IDiscordGuild, IDiscordGuildMember } from 'tc_dbcomm';
+import { Guild, IDiscordGuild, IDiscordGuildMember, IDiscordChannel } from 'tc_dbcomm';
 import { IGuildUpdateBody } from '../interfaces/guild.interface'
 import { ApiError } from '../utils';
 import httpStatus = require('http-status');
+import userService from './user.service';
 
 /**
  * Create guild base on discord guild
@@ -103,9 +104,9 @@ async function getGuildFromDiscordAPI(guildId: Snowflake) {
 /**
  * Get guild channels
  * @param {Snowflake} guildId
- * @returns {Promise<Array<IDiscordGuild>>}
+ * @returns {Promise<Array<IDiscordChannel>>}
  */
-async function getGuildChannelsFromDiscordAPI(guildId: Snowflake) {
+async function getGuildChannelsFromDiscordAPI(guildId: Snowflake): Promise<Array<IDiscordChannel>> {
     try {
         const response = await fetch(`https://discord.com/api/guilds/${guildId}/channels?`, {
             method: 'GET',
@@ -157,10 +158,6 @@ async function getGuildMemberFromDiscordAPI(guildId: Snowflake, discordId: Snowf
         throw new ApiError(590, 'Can not fetch from discord API');
     }
 }
-
-
-
-
 
 export default {
     createGuild,

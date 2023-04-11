@@ -41,9 +41,68 @@ const getGuildChannels = catchAsync(async function (req: IAuthRequest, res: Resp
     if (! await guildService.isBotAddedToGuild(req.params.guildId, req.user.discordId)) {
         throw new ApiError(httpStatus.BAD_REQUEST, 'Please add the RnDAO bot to your server');
     }
-    const channels = await guildService.getGuildChannels(req.params.guildId);
-    const sortedChannels = await sort.sortChannels(channels);
-    res.send(sortedChannels)
+    const channels = await guildService.getGuildChannelsFromDiscordAPI(req.params.guildId);
+    // console.log(channels)
+    const botUser = await userService.getBotFromDiscordAPI();
+    const botMember = await guildService.getGuildMemberFromDiscordAPI(req.params.guildId, botUser.id);
+
+    const botRoles = botMember.roles;
+
+    // console.log(channels, botMember)
+    for (let i = 0; i < channels.length; i++) {
+        let botPermissions = 0;
+        const permissionOverwrites = channels[i]?.permission_overwrites ?? [];
+        for (let j = 0; j < permissionOverwrites.length; j++) {
+            // if (botRoles.includes(permissionOverwrites[j].id) || permissionOverwrites[j].id === req.params.guildId) {
+            //     botPerms |= permissionOverwrites[j].allow;
+            //     botPerms &= permissionOverwrites[j].deny;
+            // }
+
+
+            if (botRoles.includes(permissionOverwrites[j].id)) {
+                // console.log(1)
+                // console.log(permissionOverwrites[j].allow & 66560)
+
+                // botPermissions  |= permissionOverwrites[j].allow;
+                // console.log(botPermissions )
+                // botPerms |= permissionOverwrites[j].allow;
+                // console.log(botPermissions )
+
+                botPermissions = permissionOverwrites[j].allow;
+                console.log(botPermissions)
+                console.log(botPermissions & 65536)
+                if (botPermissions & 4096) {
+                    console.log(true)
+                }
+            }
+
+
+
+        }
+
+        const canReadMessageHistory = (botPermissions & (1 << 22)) !== 0; // Check if the bot has READ_MESSAGE_HISTORY permission
+
+        console.log(`${channels[i].name}: ${canReadMessageHistory ? 'Can Read Message History' : 'Cannot Read Message History'}`);
+    }
+
+    // for (const channel of channels) {
+    //     if (channel.type === 0) { // Check if the channel is a text channel
+    //         let botPerms = 0;
+
+    //         for (const overwrite of channel.permission_overwrites) {
+    //             if (botRoles.includes(overwrite.id) || overwrite.id === guildId) {
+    //                 botPerms |= overwrite.allow;
+    //                 botPerms &= ~overwrite.deny;
+    //             }
+    //         }
+
+    //         const canReadMessageHistory = (botPerms & (1 << 22)) !== 0; // Check if the bot has READ_MESSAGE_HISTORY permission
+
+    //         console.log(`${channel.name}: ${canReadMessageHistory ? 'Can Read Message History' : 'Cannot Read Message History'}`);
+    //     }
+    // }
+    // const sortedChannels = await sort.sortChannels(channels);
+    res.send(channels)
 });
 
 
@@ -109,4 +168,3 @@ export default {
     connectGuild,
     connectGuildCallback
 }
-

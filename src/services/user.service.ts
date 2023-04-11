@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import { Snowflake } from 'discord.js';
+import config from '../config';
 import { IDiscordUser, IUser, User } from 'tc_dbcomm';
 import { ApiError } from '../utils';
 import httpStatus = require('http-status');
@@ -27,6 +28,29 @@ async function getUserFromDiscordAPI(accessToken: string): Promise<IDiscordUser>
         const response = await fetch('https://discord.com/api/users/@me', {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        if (response.ok) {
+            return await response.json();
+        }
+        else {
+            throw new Error();
+        }
+    } catch (err) {
+        throw new ApiError(590, 'Can not fetch from discord API');
+    }
+}
+
+
+/**
+ * get user data from discord api by access token
+ * @param {String} accessToken
+ * @returns {Promise<IDiscordUser>}
+ */
+async function getBotFromDiscordAPI(): Promise<IDiscordUser> {
+    try {
+        const response = await fetch('https://discord.com/api/users/@me', {
+            method: 'GET',
+            headers: { 'Authorization': `Bot ${config.discord.botToken}` }
         });
         if (response.ok) {
             return await response.json();
@@ -94,10 +118,10 @@ async function updateUserByDiscordId(discordId: Snowflake, updateBody: IUserUpda
 }
 
 
-
 export default {
     createUser,
     getUserFromDiscordAPI,
+    getBotFromDiscordAPI,
     getUserByDiscordId,
     getCurrentUserGuilds,
     updateUserByDiscordId
