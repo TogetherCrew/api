@@ -2,7 +2,7 @@
 import fetch from 'node-fetch';
 import { Snowflake } from 'discord.js';
 import config from '../config';
-import { Guild, IDiscordGuild } from 'tc_dbcomm';
+import { Guild, IDiscordGuild, IDiscordGuildMember } from 'tc_dbcomm';
 import { IGuildUpdateBody } from '../interfaces/guild.interface'
 import { ApiError } from '../utils';
 import httpStatus = require('http-status');
@@ -105,7 +105,7 @@ async function getGuildFromDiscordAPI(guildId: Snowflake) {
  * @param {Snowflake} guildId
  * @returns {Promise<Array<IDiscordGuild>>}
  */
-async function getGuildChannels(guildId: Snowflake) {
+async function getGuildChannelsFromDiscordAPI(guildId: Snowflake) {
     try {
         const response = await fetch(`https://discord.com/api/guilds/${guildId}/channels?`, {
             method: 'GET',
@@ -140,7 +140,7 @@ async function queryGuilds(filter: object, options: object) {
  * @param {Snowflake} guildId
  * @returns {Promise<IDiscordGuildMember>}
  */
-async function getGuildMemberFromDiscordAPI(guildId: Snowflake, discordId: Snowflake) {
+async function getGuildMemberFromDiscordAPI(guildId: Snowflake, discordId: Snowflake): Promise<IDiscordGuildMember> {
     try {
         const response = await fetch(`https://discord.com/api/guilds/${guildId}/members/${discordId}`, {
             method: 'GET',
@@ -165,7 +165,7 @@ async function getGuildMemberFromDiscordAPI(guildId: Snowflake, discordId: Snowf
 export default {
     createGuild,
     getGuildByGuildId,
-    getGuildChannels,
+    getGuildChannelsFromDiscordAPI,
     updateGuild,
     isBotAddedToGuild,
     getGuild,
