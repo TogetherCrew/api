@@ -205,7 +205,7 @@ describe('member-activity routes', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
         });
-        test('should return 200 and disengaged members composition line graph data if req data is ok', async () => {
+        test('should return 200 and inactive members line graph data if req data is ok', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
@@ -223,7 +223,7 @@ describe('member-activity routes', () => {
         })
 
 
-        test('should return 200 and  disengaged members composition line graph data (testing percentage change) if req data is ok', async () => {
+        test('should return 200 and inactive members line graph data (testing percentage change) if req data is ok', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
@@ -240,7 +240,7 @@ describe('member-activity routes', () => {
             });
         })
 
-        test('should return 200 and  disengaged members composition line graph data (testing for empty data) if req data is ok', async () => {
+        test('should return 200 and inactive members line graph data (testing for empty data) if req data is ok', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
