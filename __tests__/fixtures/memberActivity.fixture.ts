@@ -15,7 +15,6 @@ export const memberActivityOne = {
     all_disengaged_were_newly_active: ["nimatorabiv#2903", "nimatorabiv#2903"],
     all_disengaged_were_consistenly_active: [],
     all_disengaged_were_vital: ["nimatorabiv#2903"],
-
 }
 
 export const memberActivityTwo = {
