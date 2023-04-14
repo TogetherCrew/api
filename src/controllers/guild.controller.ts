@@ -109,4 +109,3 @@ export default {
     connectGuild,
     connectGuildCallback
 }
-

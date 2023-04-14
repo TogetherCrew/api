@@ -1,7 +1,7 @@
 const scopes = {
-    tryNow: "bot applications.commands identify email guilds",
+    tryNow: "bot identify email guilds",
     login: "identify",
-    connectGuild: "bot applications.commands",
+    connectGuild: "bot",
 };
 
 const permissions = {

@@ -2,10 +2,11 @@
 import fetch from 'node-fetch';
 import { Snowflake } from 'discord.js';
 import config from '../config';
-import { Guild, IDiscordGuild } from 'tc_dbcomm';
+import { Guild, IDiscordGuild, IDiscordGuildMember, IDiscordChannel } from 'tc_dbcomm';
 import { IGuildUpdateBody } from '../interfaces/guild.interface'
 import { ApiError } from '../utils';
 import httpStatus = require('http-status');
+import userService from './user.service';
 
 /**
  * Create guild base on discord guild
@@ -89,12 +90,12 @@ async function getGuildFromDiscordAPI(guildId: Snowflake) {
             method: 'GET',
             headers: { 'Authorization': `Bot ${config.discord.botToken}` }
         });
-        const json = await response.json();
-        // Note: {message: '401: Unauthorized', code:0} means that we have not access to guild channels
-        if (json.message) {
+        if (response.ok) {
+            return await response.json();
+        }
+        else {
             throw new Error();
         }
-        return json;
     } catch (err) {
         throw new ApiError(590, 'Can not fetch from discord API');
     }
@@ -122,6 +123,7 @@ async function getGuildChannels(guildId: Snowflake) {
     }
 }
 
+
 /**
  * query guilds
  * @param {Object} filter 
@@ -133,6 +135,28 @@ async function queryGuilds(filter: object, options: object) {
 }
 
 
+/**
+ * get guild member by guildId and discordId
+ * @param {Snowflake} guildId
+ * @returns {Promise<IDiscordGuildMember>}
+ */
+async function getGuildMemberFromDiscordAPI(guildId: Snowflake, discordId: Snowflake): Promise<IDiscordGuildMember> {
+    try {
+        const response = await fetch(`https://discord.com/api/guilds/${guildId}/members/${discordId}`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bot ${config.discord.botToken}` }
+        });
+
+        if (response.ok) {
+            return await response.json();
+        }
+        else {
+            throw new Error();
+        }
+    } catch (err) {
+        throw new ApiError(590, 'Can not fetch from discord API');
+    }
+}
 
 export default {
     createGuild,
@@ -143,5 +167,7 @@ export default {
     getGuild,
     getGuildFromDiscordAPI,
     queryGuilds,
-    deleteGuild
+    deleteGuild,
+    getGuildMemberFromDiscordAPI
 }
+

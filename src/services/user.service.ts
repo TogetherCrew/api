@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import { Snowflake } from 'discord.js';
+import config from '../config';
 import { IDiscordUser, IUser, User } from 'tc_dbcomm';
 import { ApiError } from '../utils';
 import httpStatus = require('http-status');
@@ -28,12 +29,35 @@ async function getUserFromDiscordAPI(accessToken: string): Promise<IDiscordUser>
             method: 'GET',
             headers: { 'Authorization': `Bearer ${accessToken}` }
         });
-        const json = await response.json();
-        // Note: {message: '401: Unauthorized', code:0} means that we have not access to user
-        if (json.message) {
+        if (response.ok) {
+            return await response.json();
+        }
+        else {
             throw new Error();
         }
-        return json;
+    } catch (err) {
+        throw new ApiError(590, 'Can not fetch from discord API');
+    }
+}
+
+
+/**
+ * get user data from discord api by access token
+ * @param {String} accessToken
+ * @returns {Promise<IDiscordUser>}
+ */
+async function getBotFromDiscordAPI(): Promise<IDiscordUser> {
+    try {
+        const response = await fetch('https://discord.com/api/users/@me', {
+            method: 'GET',
+            headers: { 'Authorization': `Bot ${config.discord.botToken}` }
+        });
+        if (response.ok) {
+            return await response.json();
+        }
+        else {
+            throw new Error();
+        }
     } catch (err) {
         throw new ApiError(590, 'Can not fetch from discord API');
     }
@@ -60,12 +84,12 @@ async function getCurrentUserGuilds(accessToken: string) {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${accessToken}` }
         });
-        const json = await response.json();
-        // Note: {message: '401: Unauthorized', code:0} means that we have not access to guild
-        if (json.message) {
+        if (response.ok) {
+            return await response.json();
+        }
+        else {
             throw new Error();
         }
-        return json;
     } catch (err) {
         throw new ApiError(590, 'Can not fetch from discord API');
     }
@@ -94,10 +118,10 @@ async function updateUserByDiscordId(discordId: Snowflake, updateBody: IUserUpda
 }
 
 
-
 export default {
     createUser,
     getUserFromDiscordAPI,
+    getBotFromDiscordAPI,
     getUserByDiscordId,
     getCurrentUserGuilds,
     updateUserByDiscordId
