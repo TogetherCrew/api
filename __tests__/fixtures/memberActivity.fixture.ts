@@ -10,21 +10,20 @@ export const memberActivityOne = {
     all_paused: [],
     all_disengaged: [],
     all_unpaused: [],
-    all_returned: [],
+    all_returned: ["nimatorabiv#2903", "nimatorabiv#2903"],
     all_still_active: [],
     all_disengaged_were_newly_active: ["nimatorabiv#2903", "nimatorabiv#2903"],
     all_disengaged_were_consistenly_active: [],
     all_disengaged_were_vital: ["nimatorabiv#2903"],
-
 }
 
 export const memberActivityTwo = {
     date: new Date("2023-01-22T00:00:00"),
-    all_active: ["nimatorabiv#2903", "nimatorabiv#2903", "nimatorabiv#2903", "nimatorabiv#2903"],
-    all_new_active: ["nimatorabiv#2903"],
+    all_active: [],
+    all_new_active: [],
     all_consistent: [],
-    all_vital: ["nimatorabiv#2903"],
-    all_new_disengaged: ["nimatorabiv#2903"],
+    all_vital: [],
+    all_new_disengaged: [],
     all_arrived: [],
     all_connected: [],
     all_paused: [],
@@ -32,9 +31,9 @@ export const memberActivityTwo = {
     all_unpaused: [],
     all_returned: [],
     all_still_active: [],
-    all_disengaged_were_newly_active: ["nimatorabiv#2903", "nimatorabiv#2903", "nimatorabiv#2903", "nimatorabiv#2903"],
+    all_disengaged_were_newly_active: [],
     all_disengaged_were_consistenly_active: [],
-    all_disengaged_were_vital: ["nimatorabiv#2903"],
+    all_disengaged_were_vital: [],
 }
 
 
@@ -50,7 +49,7 @@ export const memberActivityThree = {
     all_paused: [],
     all_disengaged: [],
     all_unpaused: [],
-    all_returned: [],
+    all_returned: ["nimatorabiv#2903", "nimatorabiv#2903"],
     all_still_active: [],
     all_disengaged_were_newly_active: ["nimatorabiv#2903"],
     all_disengaged_were_consistenly_active: [],
@@ -69,7 +68,7 @@ export const memberActivityFour = {
     all_paused: [],
     all_disengaged: [],
     all_unpaused: [],
-    all_returned: [],
+    all_returned: ["nimatorabiv#2903"],
     all_still_active: [],
     all_disengaged_were_newly_active: ["nimatorabiv#2903", "nimatorabiv#2903"],
     all_disengaged_were_consistenly_active: [],

@@ -4,7 +4,7 @@ import app from '../../src/app';
 import setupTestDB from '../utils/setupTestDB';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
-import { heatmapOne, heatmapTwo, heatmapThree, heatmapFour } from '../fixtures/heatmap.fixture';
+import { heatmapOne, heatmapTwo, heatmapThree } from '../fixtures/heatmap.fixture';
 import { guildOne, insertGuilds } from '../fixtures/guilds.fixture';
 import { heatmapService, databaseService } from 'tc_dbcomm';
 import config from '../../src/config';
@@ -92,16 +92,16 @@ describe('Heatmap routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await heatmapService.createHeatMaps(connection, [heatmapOne, heatmapTwo]);
+            await heatmapService.createHeatMaps(connection, [heatmapTwo, heatmapThree]);
             const res = await request(app)
                 .post(`/api/v1/heatmaps/${guildOne.guildId}/line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send({ startDate: new Date("2023-01-21"), endDate: new Date("2023-01-24") })
+                .send({ startDate: new Date("2023-01-20"), endDate: new Date("2023-01-24") })
                 .expect(httpStatus.OK);
 
             expect(res.body).toMatchObject({
-                messages: 60,
-                emojis: 9,
+                messages: 48,
+                emojis: 6,
                 msgPercentageChange: 0,
                 emojiPercentageChange: 0
             });
@@ -111,17 +111,17 @@ describe('Heatmap routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await heatmapService.createHeatMaps(connection, [heatmapOne, heatmapTwo, heatmapThree, heatmapFour]);
+            await heatmapService.createHeatMaps(connection, [heatmapOne, heatmapTwo, heatmapThree]);
             const res = await request(app)
                 .post(`/api/v1/heatmaps/${guildOne.guildId}/line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send({ startDate: new Date("2023-01-21"), endDate: new Date("2023-01-24") })
+                .send({ startDate: new Date("2023-01-20"), endDate: new Date("2023-01-24") })
                 .expect(httpStatus.OK);
 
             expect(res.body).toMatchObject({
-                messages: 60,
-                emojis: 9,
-                msgPercentageChange: 200,
+                messages: 12,
+                emojis: 3,
+                msgPercentageChange: -75,
                 emojiPercentageChange: -50
             });
 
