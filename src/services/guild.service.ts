@@ -116,11 +116,7 @@ async function getGuildChannels(guildId: Snowflake) {
         if (channels.message) {
             throw new Error();
         }
-        const visibleChannels = channels.filter((channel: any) => {
-          const permissions = channel.permission_overwrites.find((permission: any) => permission.id === channel.guild_id);
-          return permissions ? permissions.allow & 0x400 : true;
-        }).filter((channel: any) => channel.type === 0);
-        return visibleChannels;
+        return channels;
     } catch (err) {
         throw new ApiError(590, 'Can not fetch from discord API');
     }
