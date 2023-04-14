@@ -10,3 +10,13 @@ export interface IGuildUpdateBody {
     period?: Date,
     isDisconnected?: boolean,
 }
+
+
+export interface IPermissionOverwrite {
+    id: string,
+    type: number,
+    allow: string,
+    deny: string,
+    allow_new: string,
+    deny_new: string
+}
