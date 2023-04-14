@@ -89,8 +89,8 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
     const end = new Date(endDate);
     try {
         const heatmaps = await connection.models.HeatMap.aggregate([
+            // Stage 1: Convert date from string to date type and extract needed data
             {
-                // Stage 1: Convert date from string to date type and extract needed data
                 $project: {
                     _id: 0,
                     date: { $convert: { input: "$date", to: "date" } },
@@ -163,11 +163,13 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
                     }
                 }
             },
-            // Stage 5: Sort documents by date
+
+            // Stage 5: Sort documents by day_month
             {
-                $sort: { date: 1 }
+                $sort: { day_month: 1 }
             },
-            // Stage 6: Group all documents and compute summary statistics
+
+            // Stage 6: Group all documents and keep the arrays
             {
                 $group: {
                     _id: null,
@@ -177,9 +179,16 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
                         $push: {
                             $sum: ["$total_lone_messages", "$total_thr_messages", "$total_replier"]
                         }
-                    }
+                    },
+
+                    // Store last and second-to-last document values                    
+                    lastEmojis: { $last: "$emojis" },
+                    lastTotalLoneMessages: { $last: "$total_lone_messages" },
+                    lastTotalThrMessages: { $last: "$total_thr_messages" },
+                    lastTotalReplier: { $last: "$total_replier" }
                 }
             },
+
             // Stage 7: Transform group data into final format for charting
             {
                 $project: {
@@ -189,19 +198,54 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
                         { name: "emojis", data: "$emojis" },
                         { name: "messages", data: "$messages" }
                     ],
-                    emojis: {
-                        $reduce: {
-                            input: "$emojis",
-                            initialValue: 0,
-                            in: { $sum: ["$$value", "$$this"] }
+                    // Use the last document values
+                    emojis: "$lastEmojis",
+                    messages: {
+                        $sum: {
+                            $add: [
+                                { $ifNull: ["$lastTotalLoneMessages", 0] },
+                                { $ifNull: ["$lastTotalThrMessages", 0] },
+                                { $ifNull: ["$lastTotalReplier", 0] }
+                            ]
                         }
                     },
-                    messages: {
-                        $reduce: {
-                            input: "$messages",
-                            initialValue: 0,
-                            in: { $sum: ["$$value", "$$this"] }
-                        }
+                    emojiPercentageChange: {
+                        $cond: [
+                            { $eq: [{ $arrayElemAt: ["$emojis", -2] }, 0] }, 0,
+                            {
+                                $multiply: [
+                                    {
+                                        $divide: [
+                                            { $subtract: ["$lastEmojis", { $arrayElemAt: ["$emojis", -2] }] },
+                                            { $arrayElemAt: ["$emojis", -2] }
+                                        ]
+                                    }, 100]
+                            }
+                        ]
+                    },
+                    msgPercentageChange: {
+                        $cond: [
+                            { $eq: [{ $arrayElemAt: ["$messages", -2] }, 0] }, 0,
+                            {
+                                $multiply: [
+                                    {
+                                        $divide: [
+                                            {
+                                                $subtract: [{
+                                                    $sum: {
+                                                        $add: [
+                                                            { $ifNull: ["$lastTotalLoneMessages", 0] },
+                                                            { $ifNull: ["$lastTotalThrMessages", 0] },
+                                                            { $ifNull: ["$lastTotalReplier", 0] }
+                                                        ]
+                                                    }
+                                                }, { $arrayElemAt: ["$messages", -2] }]
+                                            },
+                                            { $arrayElemAt: ["$messages", -2] }
+                                        ]
+                                    }, 100]
+                            }
+                        ]
                     }
                 }
             }
@@ -218,114 +262,9 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
 
             }
         }
-        const diffInMs = Math.abs(end.getTime() - start.getTime());
-        const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
-        const numDaysToSubtract = diffInDays;
-        const pastHeatmaps = await connection.models.HeatMap.aggregate([
-            {
-                $project: {
-                    _id: 0,
-                    lone_messages: 1,
-                    thr_messages: 1,
-                    replier: 1,
-                    reacter: 1,
-                    date: { $convert: { input: "$date", to: "date" } },
-
-                }
-            },
-            {
-                $match: {
-                    date: {
-                        $gte: new Date(start.setDate(start.getDate() - numDaysToSubtract)),
-                        $lte: new Date(end.setDate(end.getDate() - (numDaysToSubtract + 1)))
-                    }
-                }
-            },
-
-            {
-                $project: {
-                    date: 1,
-                    total_lone_messages: {
-                        $reduce: {
-                            input: "$lone_messages",
-                            initialValue: 0,
-                            in: { $sum: ["$$value", "$$this"] }
-                        }
-                    },
-                    total_thr_messages: {
-                        $reduce: {
-                            input: "$thr_messages",
-                            initialValue: 0,
-                            in: { $sum: ["$$value", "$$this"] }
-                        }
-                    },
-                    total_replier: {
-                        $reduce: {
-                            input: "$replier",
-                            initialValue: 0,
-                            in: { $sum: ["$$value", "$$this"] }
-                        }
-                    },
-                    emojis: {
-                        $reduce: {
-                            input: "$reacter",
-                            initialValue: 0,
-                            in: { $sum: ["$$value", "$$this"] }
-                        }
-                    }
-                }
-            },
-            {
-                $group: {
-                    date: { $push: "$date" },
-                    _id: null,
-                    emojis: { $push: "$emojis" },
-                    messages: {
-                        $push: {
-                            $sum: ["$total_lone_messages", "$total_thr_messages", "$total_replier"]
-                        }
-                    }
-                }
-            },
-            {
-                $project: {
-                    date: 1,
-                    emojis: {
-                        $reduce: {
-                            input: "$emojis",
-                            initialValue: 0,
-                            in: { $sum: ["$$value", "$$this"] }
-                        }
-                    },
-                    messages: {
-                        $reduce: {
-                            input: "$messages",
-                            initialValue: 0,
-                            in: { $sum: ["$$value", "$$this"] }
-                        }
-                    }
-                }
-            }
-        ]
-
-        );
-
-
-        let msgPercentageChange = 0;
-        let emojiPercentageChange = 0;
-
-        if (heatmaps[0] && pastHeatmaps[0] && pastHeatmaps[0].messages !== 0) {
-            msgPercentageChange = ((heatmaps[0].messages - pastHeatmaps[0].messages) / pastHeatmaps[0].messages) * 100;
-        }
-
-        if (heatmaps[0] && pastHeatmaps[0] && pastHeatmaps[0].emojis !== 0) {
-            emojiPercentageChange = ((heatmaps[0].emojis - pastHeatmaps[0].emojis) / pastHeatmaps[0].emojis) * 100;
-        }
 
         return {
             ...heatmaps[0],
-            msgPercentageChange,
-            emojiPercentageChange
         }
 
     } catch (err) {
