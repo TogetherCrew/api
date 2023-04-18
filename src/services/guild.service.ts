@@ -138,7 +138,6 @@ async function getGuildChannelsFromDiscordJS(guildId: Snowflake) {
         }
         const botMember = await guild.members.fetch(client.user.id);
         const channels = await guild.channels.cache
-            .filter((channel) => channel.type !== ChannelType.GuildVoice)
             .map((channel) => {
                 const botPermissions = channel.permissionsFor(botMember);
                 const canReadMessageHistoryAndViewChannel = botPermissions.has([PermissionsBitField.Flags.ReadMessageHistory, PermissionsBitField.Flags.ViewChannel]);
