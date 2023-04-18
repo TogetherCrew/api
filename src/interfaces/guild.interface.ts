@@ -14,7 +14,7 @@ export interface IGuildUpdateBody {
 
 export interface IPermissionOverwrite {
     id: string,
-    type: number,
+    type: 'role' | 'member';
     allow: string,
     deny: string,
     allow_new: string,

@@ -23,23 +23,21 @@ function sortHeatmap(a: Array<number>, b: Array<number>) {
 async function sortChannels(channels: Array<any>) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sortedChannels: Array<any> = [];
-    let i, j, m = 0;
-    for (i = 0; i < channels.length; i++) {
-        if (channels[i].parent_id === null) {
-            sortedChannels.push({ id: channels[i].id, title: channels[i].name, subChannels: [] });
-            //  TODO: Remove channel from array
-            for (j = 0; j < channels.length; j++) {
-                if (sortedChannels[m].id === channels[j].parent_id) {
-                    sortedChannels[m].subChannels.push(channels[j]);
-                    //  TODO: Remove channel from array
-                }
+    for (const channel of channels) {
+        if (channel.parent_id === null) {
+            const subChannels = channels.filter((c) => c.parent_id === channel.id);
+            if (subChannels.length > 0) {
+                sortedChannels.push({
+                    id: channel.id,
+                    title: channel.name,
+                    subChannels: subChannels,
+                });
             }
-            m++;
         }
     }
+
     return sortedChannels;
 }
-
 
 
 export default {
