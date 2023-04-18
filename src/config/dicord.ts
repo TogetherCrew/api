@@ -5,14 +5,7 @@ async function getDiscordClient() {
     const client = new Client({
         intents: [GatewayIntentBits.Guilds],
     });
-
-    await client.login(config.discord.botToken);
-
-    await client.on('ready', () => {
-        console.log(`Logged in as BEHZAD!`);
-    });
-
-    return client;
+    return await client.login(config.discord.botToken);
 }
 
 const scopes = {
