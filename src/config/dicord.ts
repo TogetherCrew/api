@@ -5,7 +5,8 @@ async function getDiscordClient() {
     const client = new Client({
         intents: [GatewayIntentBits.Guilds],
     });
-    return await client.login(config.discord.botToken);
+    await client.login(config.discord.botToken);
+    return client;
 }
 
 const scopes = {

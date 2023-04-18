@@ -130,10 +130,6 @@ async function getGuildChannelsFromDiscordAPI(guildId: Snowflake): Promise<Array
  * @returns {Promise<Array<IDiscordChannel>>}
  */
 async function getGuildChannelsFromDiscordJS(guildId: Snowflake) {
-
-
-
-
     try {
         const client = await getDiscordClient();
         const guild = await client.guilds.fetch(guildId);
