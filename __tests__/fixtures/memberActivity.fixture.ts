@@ -77,7 +77,7 @@ export const memberActivityFour = {
 
 
 export const memberActivityFive = {
-    date: new Date("2023-04-07T00:00:00"),
+    date: new Date("2023-04-01T00:00:00"),
     all_active: ["A",],
     all_new_active: ["A", "B"],
     all_consistent: [],
@@ -96,7 +96,7 @@ export const memberActivityFive = {
 }
 
 export const memberActivitySix = {
-    date: new Date("2023-04-01T00:00:00"),
+    date: new Date("2023-01-01T00:00:00"),
     all_active: [],
     all_new_active: ["A",],
     all_consistent: [],
@@ -115,7 +115,7 @@ export const memberActivitySix = {
 }
 
 export const memberActivitySeven = {
-    date: new Date("2023-04-07T00:00:00"),
+    date: new Date("2023-06-01T00:00:00"),
     all_active: ["A",],
     all_new_active: ["A", "B"],
     all_consistent: [],
@@ -134,7 +134,7 @@ export const memberActivitySeven = {
 }
 
 export const memberActivityEight = {
-    date: new Date("2023-04-01T00:00:00"),
+    date: new Date("2023-01-01T00:00:00"),
     all_active: [],
     all_new_active: ["A",],
     all_consistent: [],
@@ -153,7 +153,7 @@ export const memberActivityEight = {
 }
 
 export const memberActivityNine = {
-    date: new Date("2023-04-07T00:00:00"),
+    date: new Date("2023-06-01T00:00:00"),
     all_active: ["A",],
     all_new_active: ["A", "B"],
     all_consistent: [],
@@ -172,7 +172,7 @@ export const memberActivityNine = {
 }
 
 export const memberActivityTen = {
-    date: new Date("2023-04-01T00:00:00"),
+    date: new Date("2022-06-01T00:00:00"),
     all_active: [],
     all_new_active: ["A",],
     all_consistent: [],
