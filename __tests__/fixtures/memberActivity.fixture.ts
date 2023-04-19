@@ -38,7 +38,7 @@ export const memberActivityTwo = {
 
 
 export const memberActivityThree = {
-    date: new Date("2023-04-07T00:00:00"),
+    date: new Date("2023-03-31T00:00:00"),
     all_active: ["A",],
     all_new_active: ["A", "B"],
     all_consistent: [],
@@ -57,7 +57,7 @@ export const memberActivityThree = {
 }
 
 export const memberActivityFour = {
-    date: new Date("2023-04-01T00:00:00"),
+    date: new Date("2023-02-28T00:00:00"),
     all_active: [],
     all_new_active: ["A",],
     all_consistent: [],
