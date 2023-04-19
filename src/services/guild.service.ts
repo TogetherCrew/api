@@ -7,7 +7,7 @@ import { IGuildUpdateBody } from '../interfaces/guild.interface'
 import { ApiError } from '../utils';
 import httpStatus = require('http-status');
 import { getDiscordClient } from '../config/dicord';
-import { PermissionsBitField, ChannelType } from 'discord.js'
+import { PermissionsBitField } from 'discord.js'
 
 /**
  * Create guild base on discord guild

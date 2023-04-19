@@ -217,7 +217,7 @@ paths:
       tags:
         - [Guild]
       summary: Get guild's channels by guildId
-      description: Used [this](https://discord.com/developers/docs/resources/user#get-current-user-guilds) Discord API
+      description: Used the discordjs library. for each channel we will check the bot has the Read message history and view channel permission or not .categories with zero subChannels will remove from the response
       security:
         - bearerAuth: []
       parameters:
@@ -247,34 +247,22 @@ paths:
                       items:
                         type: object
                         properties:
-                          guild_id: 
+                          id: 
                             type: Snowflake
-                          type: 
-                            type: number
                           name: 
                             type: string
-                          position: 
-                            type: number
-                          flags: 
-                            type: number
+                          canReadMessageHistoryAndViewChannel: 
+                            type: boolean
                           parent_id: 
                             type: Snowflake
-                          Permission_overwrites: 
-                            type: array
-                            items:
-                              type: string
                 example:
                     id: "80351110224678914"
                     title: "channel B"
                     subChannels: [{
                         id: "80351110224678912",
-                        guild_id: "80351110224678913",
-                        type: 4,
                         name: "channel C",
-                        position: 0,
-                        flags: 0,
                         parent_id: "80351110224678914",
-                        Permission_overwrites: [],
+                        canReadMessageHistoryAndViewChannel: true,
                       }]
         "400":
           description: Bad Request
