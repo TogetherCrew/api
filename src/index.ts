@@ -13,4 +13,3 @@ mongoose.connect(config.mongoose.serverURL)
             console.log(`Listening on ${config.port}`);
         });
     });
-

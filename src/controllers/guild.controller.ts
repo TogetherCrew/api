@@ -1,6 +1,7 @@
 import { Response, Request } from 'express';
 import { guildService, userService, authService } from '../services';
 import { IAuthRequest } from '../interfaces/request.interface';
+
 import { catchAsync, ApiError, pick, sort } from "../utils";
 import httpStatus from 'http-status';
 import config from '../config';
@@ -41,7 +42,7 @@ const getGuildChannels = catchAsync(async function (req: IAuthRequest, res: Resp
     if (! await guildService.isBotAddedToGuild(req.params.guildId, req.user.discordId)) {
         throw new ApiError(httpStatus.BAD_REQUEST, 'Please add the RnDAO bot to your server');
     }
-    const channels = await guildService.getGuildChannels(req.params.guildId);
+    const channels = await guildService.getGuildChannelsFromDiscordJS(req.params.guildId);
     const sortedChannels = await sort.sortChannels(channels);
     res.send(sortedChannels)
 });

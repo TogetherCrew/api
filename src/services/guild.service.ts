@@ -2,11 +2,12 @@
 import fetch from 'node-fetch';
 import { Snowflake } from 'discord.js';
 import config from '../config';
-import { Guild, IDiscordGuild, IDiscordGuildMember, IDiscordChannel } from 'tc_dbcomm';
+import { Guild, IDiscordGuild, IDiscordGuildMember } from 'tc_dbcomm';
 import { IGuildUpdateBody } from '../interfaces/guild.interface'
 import { ApiError } from '../utils';
 import httpStatus = require('http-status');
-import userService from './user.service';
+import { getDiscordClient } from '../config/dicord';
+import { PermissionsBitField } from 'discord.js'
 
 /**
  * Create guild base on discord guild
@@ -123,6 +124,35 @@ async function getGuildChannels(guildId: Snowflake) {
     }
 }
 
+/**
+ * Get guild channels
+ * @param {Snowflake} guildId
+ * @returns {Promise<Array<IDiscordChannel>>}
+ */
+async function getGuildChannelsFromDiscordJS(guildId: Snowflake) {
+    try {
+        const client = await getDiscordClient();
+        const guild = await client.guilds.fetch(guildId);
+        if (!client.user) {
+            throw new Error();
+        }
+        const botMember = await guild.members.fetch(client.user.id);
+        const channels = await guild.channels.cache
+            .map((channel) => {
+                const botPermissions = channel.permissionsFor(botMember);
+                const canReadMessageHistoryAndViewChannel = botPermissions.has([PermissionsBitField.Flags.ReadMessageHistory, PermissionsBitField.Flags.ViewChannel]);
+                return {
+                    id: channel.id,
+                    name: channel.name,
+                    parent_id: channel.parentId,
+                    canReadMessageHistoryAndViewChannel
+                };
+            });
+        return channels;
+    } catch (err) {
+        throw new ApiError(590, 'Can not fetch from discord API');
+    }
+}
 
 /**
  * query guilds
@@ -168,6 +198,7 @@ export default {
     getGuildFromDiscordAPI,
     queryGuilds,
     deleteGuild,
-    getGuildMemberFromDiscordAPI
+    getGuildMemberFromDiscordAPI,
+    getGuildChannelsFromDiscordJS
 }
 
