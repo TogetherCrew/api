@@ -185,7 +185,6 @@ describe('member-activity routes', () => {
                 .expect(httpStatus.NOT_FOUND);
         })
     })
-
     describe('POST /api/v1/member-activity/:guildId/disengaged-members-composition-line-graph', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
@@ -345,7 +344,6 @@ describe('member-activity routes', () => {
                 .expect(httpStatus.NOT_FOUND);
         })
     })
-
     describe('POST /api/v1/member-activity/:guildId/inactive-members-line-graph', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
@@ -469,5 +467,4 @@ describe('member-activity routes', () => {
                 .expect(httpStatus.NOT_FOUND);
         })
     })
-
 });

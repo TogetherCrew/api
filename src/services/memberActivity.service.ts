@@ -88,8 +88,6 @@ async function activeMembersCompositionLineGraph(connection: Connection, startDa
                     lastConsistentlyActive: { $last: "$consistently_active" },
                     lastVitalMembers: { $last: "$vital_members" },
                     lastBecameDisengaged: { $last: "$became_disengaged" },
-
-
                 }
             },
 
