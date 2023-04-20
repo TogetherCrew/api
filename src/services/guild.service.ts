@@ -114,8 +114,10 @@ async function getGuildChannels(guildId: Snowflake) {
             headers: { 'Authorization': `Bot ${config.discord.botToken}` }
         });
         const channels = await response.json();
-        // Note: {message: '401: Unauthorized', code:0} means that we have not access to guild channels
-        if (channels.message) {
+        if (response.ok) {
+            return await response.json();
+        }
+        else {
             throw new Error();
         }
         return channels;
@@ -137,8 +139,9 @@ async function getGuildChannelsFromDiscordJS(guildId: Snowflake) {
             throw new Error();
         }
         const botMember = await guild.members.fetch(client.user.id);
-        const channels = await guild.channels.cache
-            .map((channel) => {
+        const channels = await guild.channels.fetch();
+        const channelData = channels.map((channel) => {
+            if (channel) {
                 const botPermissions = channel.permissionsFor(botMember);
                 const canReadMessageHistoryAndViewChannel = botPermissions.has([PermissionsBitField.Flags.ReadMessageHistory, PermissionsBitField.Flags.ViewChannel]);
                 return {
@@ -147,8 +150,10 @@ async function getGuildChannelsFromDiscordJS(guildId: Snowflake) {
                     parent_id: channel.parentId,
                     canReadMessageHistoryAndViewChannel
                 };
-            });
-        return channels;
+            }
+
+        });
+        return channelData;
     } catch (err) {
         throw new ApiError(590, 'Can not fetch from discord API');
     }
