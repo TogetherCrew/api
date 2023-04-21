@@ -1,4 +1,5 @@
 import { Connection } from 'mongoose';
+import { date, math } from '../utils';
 
 /**
  * active members line graph 
@@ -46,6 +47,7 @@ async function activeMembersCompositionLineGraph(connection: Connection, startDa
             // Stage 4: Calculate statistics and concatenate day - month field
             {
                 $project: {
+                    date: 1,
                     day_month: {
                         $concat: [
                             { $dateToString: { format: "%d", date: "$date" } },
@@ -66,9 +68,9 @@ async function activeMembersCompositionLineGraph(connection: Connection, startDa
                 }
             },
 
-            // Stage 5: Sort documents by day_month
+            // Stage 5: Sort documents by date
             {
-                $sort: { day_month: 1 }
+                $sort: { date: 1 }
             },
 
             // Stage 6: Group all documents and keep the arrays
@@ -109,72 +111,6 @@ async function activeMembersCompositionLineGraph(connection: Connection, startDa
                     consistentlyActive: "$lastConsistentlyActive",
                     vitalMembers: "$lastVitalMembers",
                     becameDisengaged: "$lastBecameDisengaged",
-                    totActiveMembersPercentageChange: {
-                        $cond: [
-                            { $eq: [{ $arrayElemAt: ["$totActiveMembers", -2] }, 0] }, 0,
-                            {
-                                $multiply: [
-                                    {
-                                        $divide: [
-                                            { $subtract: ["$lastTotActiveMembers", { $arrayElemAt: ["$totActiveMembers", -2] }] },
-                                            { $arrayElemAt: ["$totActiveMembers", -2] }
-                                        ]
-                                    }, 100]
-                            }
-                        ]
-                    },
-                    newlyActivePercentageChange: {
-                        $cond: [
-                            { $eq: [{ $arrayElemAt: ["$newlyActive", -2] }, 0] }, 0,
-                            {
-                                $multiply: [
-                                    {
-                                        $divide: [
-                                            { $subtract: ["$lastNewlyActive", { $arrayElemAt: ["$newlyActive", -2] }] },
-                                            { $arrayElemAt: ["$newlyActive", -2] }]
-                                    }, 100]
-                            }
-                        ]
-                    },
-                    consistentlyActivePercentageChange: {
-                        $cond: [
-                            { $eq: [{ $arrayElemAt: ["$consistentlyActive", -2] }, 0] }, 0,
-                            {
-                                $multiply: [
-                                    {
-                                        $divide: [
-                                            { $subtract: ["$lastConsistentlyActive", { $arrayElemAt: ["$consistentlyActive", -2] }] },
-                                            { $arrayElemAt: ["$consistentlyActive", -2] }]
-                                    }, 100]
-                            }
-                        ]
-                    },
-                    vitalMembersPercentageChange: {
-                        $cond: [
-                            { $eq: [{ $arrayElemAt: ["$vitalMembers", -2] }, 0] }, 0,
-                            {
-                                $multiply: [
-                                    {
-                                        $divide: [
-                                            { $subtract: ["$lastVitalMembers", { $arrayElemAt: ["$vitalMembers", -2] }] },
-                                            { $arrayElemAt: ["$vitalMembers", -2] }]
-                                    }, 100]
-                            }
-                        ]
-                    },
-                    becameDisengagedPercentageChange: {
-                        $cond: [
-                            { $eq: [{ $arrayElemAt: ["$becameDisengaged", -2] }, 0] }, 0,
-                            {
-                                $multiply: [
-                                    {
-                                        $divide: [
-                                            { $subtract: ["$lastBecameDisengaged", { $arrayElemAt: ["$becameDisengaged", -2] }] },
-                                            { $arrayElemAt: ["$becameDisengaged", -2] }]
-                                    }, 100]
-                            }
-                        ]
-                    },
                 }
             }
         ]);
@@ -197,8 +133,62 @@ async function activeMembersCompositionLineGraph(connection: Connection, startDa
             }
         }
 
+        const adjustedDate = date.calculateAdjustedDate(startDate, endDate, membersActivities[0].categories[membersActivities[0].categories.length - 1]);
+        const AdjustedMemberActivity = await connection.models.MemberActivity.aggregate([
+            // Stage 1: Convert date from string to date type and extract needed data
+            {
+                $project: {
+                    _id: 0,
+                    date: { $convert: { input: "$date", to: "date" } },
+                    all_active: 1,
+                    all_new_active: 1,
+                    all_consistent: 1,
+                    all_vital: 1,
+                    all_new_disengaged: 1
+                }
+            },
+
+            // Stage 2: Filter documents based on date range
+            {
+                $match: {
+                    date: new Date(adjustedDate)
+                }
+            },
+
+
+            // Stage 3: Calculate statistics and concatenate day - month field
+            {
+                $project: {
+                    totActiveMembers: { $size: "$all_active" },
+                    newlyActive: { $size: "$all_new_active" },
+                    consistentlyActive: { $size: "$all_consistent" },
+                    vitalMembers: { $size: "$all_vital" },
+                    becameDisengaged: { $size: "$all_new_disengaged" },
+                }
+            },
+        ]);
+
+
+
+        if (AdjustedMemberActivity.length === 0) {
+            return {
+                ...membersActivities[0],
+                totActiveMembersPercentageChange: 0,
+                newlyActivePercentageChange: 0,
+                consistentlyActivePercentageChange: 0,
+                vitalMembersPercentageChange: 0,
+                becameDisengagedPercentageChange: 0,
+            }
+        }
+
+
         return {
-            ...membersActivities[0]
+            ...membersActivities[0],
+            totActiveMembersPercentageChange: math.calculatePercentageChange(AdjustedMemberActivity[0].totActiveMembers, membersActivities[0].totActiveMembers),
+            newlyActivePercentageChange: math.calculatePercentageChange(AdjustedMemberActivity[0].newlyActive, membersActivities[0].newlyActive),
+            consistentlyActivePercentageChange: math.calculatePercentageChange(AdjustedMemberActivity[0].consistentlyActive, membersActivities[0].consistentlyActive),
+            vitalMembersPercentageChange: math.calculatePercentageChange(AdjustedMemberActivity[0].vitalMembers, membersActivities[0].vitalMembers),
+            becameDisengagedPercentageChange: math.calculatePercentageChange(AdjustedMemberActivity[0].becameDisengaged, membersActivities[0].becameDisengaged),
         }
 
     } catch (err) {
@@ -268,6 +258,7 @@ async function disengagedMembersCompositionLineGraph(connection: Connection, sta
             // Stage 4: Calculate statistics and concatenate day - month field
             {
                 $project: {
+                    date: 1,
                     day_month: {
                         $concat: [
                             { $dateToString: { format: "%d", date: "$date" } },
@@ -287,9 +278,9 @@ async function disengagedMembersCompositionLineGraph(connection: Connection, sta
                 }
             },
 
-            // Stage 5: Sort documents by day_month
+            // Stage 5: Sort documents by date
             {
-                $sort: { day_month: 1 }
+                $sort: { date: 1 }
             },
 
             // Stage 6: Group all documents and keep the arrays
@@ -326,59 +317,6 @@ async function disengagedMembersCompositionLineGraph(connection: Connection, sta
                     wereNewlyActive: "$lastWereNewlyActive",
                     wereConsistentlyActive: "$lastWereConsistentlyActive",
                     wereVitalMembers: "$lastWereVitalMembers",
-                    becameDisengagedPercentageChange: {
-                        $cond: [
-                            { $eq: [{ $arrayElemAt: ["$becameDisengaged", -2] }, 0] }, 0,
-                            {
-                                $multiply: [
-                                    {
-                                        $divide: [
-                                            { $subtract: ["$lastBecameDisengaged", { $arrayElemAt: ["$becameDisengaged", -2] }] },
-                                            { $arrayElemAt: ["$becameDisengaged", -2] }
-                                        ]
-                                    }, 100]
-                            }
-                        ]
-                    },
-                    wereNewlyActivePercentageChange: {
-                        $cond: [
-                            { $eq: [{ $arrayElemAt: ["$wereNewlyActive", -2] }, 0] }, 0,
-                            {
-                                $multiply: [
-                                    {
-                                        $divide: [
-                                            { $subtract: ["$lastWereNewlyActive", { $arrayElemAt: ["$wereNewlyActive", -2] }] },
-                                            { $arrayElemAt: ["$wereNewlyActive", -2] }]
-                                    }, 100]
-                            }
-                        ]
-                    },
-                    wereConsistentlyActivePercentageChange: {
-                        $cond: [
-                            { $eq: [{ $arrayElemAt: ["$wereConsistentlyActive", -2] }, 0] }, 0,
-                            {
-                                $multiply: [
-                                    {
-                                        $divide: [
-                                            { $subtract: ["$lastWereConsistentlyActive", { $arrayElemAt: ["$wereConsistentlyActive", -2] }] },
-                                            { $arrayElemAt: ["$wereConsistentlyActive", -2] }]
-                                    }, 100]
-                            }
-                        ]
-                    },
-                    wereVitalMembersPercentageChange: {
-                        $cond: [
-                            { $eq: [{ $arrayElemAt: ["$wereVitalMembers", -2] }, 0] }, 0,
-                            {
-                                $multiply: [
-                                    {
-                                        $divide: [
-                                            { $subtract: ["$lastWereVitalMembers", { $arrayElemAt: ["$wereVitalMembers", -2] }] },
-                                            { $arrayElemAt: ["$wereVitalMembers", -2] }]
-                                    }, 100]
-                            }
-                        ]
-                    }
                 }
             }
         ]);
@@ -399,8 +337,56 @@ async function disengagedMembersCompositionLineGraph(connection: Connection, sta
             }
         }
 
+        const adjustedDate = date.calculateAdjustedDate(startDate, endDate, membersActivities[0].categories[membersActivities[0].categories.length - 1]);
+        const AdjustedMemberActivity = await connection.models.MemberActivity.aggregate([
+            // Stage 1: Convert date from string to date type and extract needed data
+            {
+                $project: {
+                    _id: 0,
+                    date: { $convert: { input: "$date", to: "date" } },
+                    all_new_disengaged: 1,
+                    all_disengaged_were_newly_active: 1,
+                    all_disengaged_were_consistenly_active: 1,
+                    all_disengaged_were_vital: 1,
+                }
+            },
+
+            // Stage 2: Filter documents based on date range
+            {
+                $match: {
+                    date: new Date(adjustedDate)
+                }
+            },
+
+
+            // Stage 3: Calculate statistics and concatenate day - month field
+            {
+                $project: {
+                    becameDisengaged: { $size: "$all_new_disengaged" },
+                    wereNewlyActive: { $size: "$all_disengaged_were_newly_active" },
+                    wereConsistentlyActive: { $size: "$all_disengaged_were_consistenly_active" },
+                    wereVitalMembers: { $size: "$all_disengaged_were_vital" },
+                }
+            },
+        ]);
+
+        if (AdjustedMemberActivity.length === 0) {
+            return {
+                ...membersActivities[0],
+                becameDisengagedPercentageChange: 0,
+                wereNewlyActivePercentageChange: 0,
+                wereConsistentlyActivePercentageChange: 0,
+                wereVitalMembersPercentageChange: 0,
+            }
+        }
+
+
         return {
-            ...membersActivities[0]
+            ...membersActivities[0],
+            becameDisengagedPercentageChange: math.calculatePercentageChange(AdjustedMemberActivity[0].becameDisengaged, membersActivities[0].becameDisengaged),
+            wereNewlyActivePercentageChange: math.calculatePercentageChange(AdjustedMemberActivity[0].wereNewlyActive, membersActivities[0].wereNewlyActive),
+            wereConsistentlyActivePercentageChange: math.calculatePercentageChange(AdjustedMemberActivity[0].wereConsistentlyActive, membersActivities[0].wereConsistentlyActive),
+            wereVitalMembersPercentageChange: math.calculatePercentageChange(AdjustedMemberActivity[0].wereVitalMembers, membersActivities[0].wereVitalMembers),
         }
     } catch (err) {
         console.log(err);
@@ -462,6 +448,7 @@ async function inactiveMembersLineGraph(connection: Connection, startDate: Date,
             // Stage 4: Calculate statistics and concatenate day - month field
             {
                 $project: {
+                    date: 1,
                     day_month: {
                         $concat: [
                             { $dateToString: { format: "%d", date: "$date" } },
@@ -478,9 +465,9 @@ async function inactiveMembersLineGraph(connection: Connection, startDate: Date,
                 }
             },
 
-            // Stage 5: Sort documents by day_month
+            // Stage 5: Sort documents by date
             {
-                $sort: { day_month: 1 }
+                $sort: { date: 1 }
             },
 
             // Stage 6: Group all documents and keep the arrays
@@ -505,21 +492,7 @@ async function inactiveMembersLineGraph(connection: Connection, startDate: Date,
                         { name: "returned", data: "$returned" }
                     ],
                     // Use the last document values
-                    returned: "$lastReturned",
-                    returnedPercentageChange: {
-                        $cond: [
-                            { $eq: [{ $arrayElemAt: ["$returned", -2] }, 0] }, 0,
-                            {
-                                $multiply: [
-                                    {
-                                        $divide: [
-                                            { $subtract: ["$lastReturned", { $arrayElemAt: ["$returned", -2] }] },
-                                            { $arrayElemAt: ["$returned", -2] }
-                                        ]
-                                    }, 100]
-                            }
-                        ]
-                    }
+                    returned: "$lastReturned"
                 }
             }
         ]);
@@ -536,8 +509,46 @@ async function inactiveMembersLineGraph(connection: Connection, startDate: Date,
             }
         }
 
+        const adjustedDate = date.calculateAdjustedDate(startDate, endDate, membersActivities[0].categories[membersActivities[0].categories.length - 1]);
+        const AdjustedMemberActivity = await connection.models.MemberActivity.aggregate([
+            // Stage 1: Convert date from string to date type and extract needed data
+            {
+                $project: {
+                    _id: 0,
+                    date: { $convert: { input: "$date", to: "date" } },
+                    all_returned: 1,
+
+                }
+            },
+
+            // Stage 2: Filter documents based on date range
+            {
+                $match: {
+                    date: new Date(adjustedDate)
+                }
+            },
+
+
+            // Stage 3: Calculate statistics and concatenate day - month field
+            {
+                $project: {
+                    returned: { $size: "$all_returned" },
+
+                }
+            },
+        ]);
+
+        if (AdjustedMemberActivity.length === 0) {
+            return {
+                ...membersActivities[0],
+                returnedPercentageChange: 0
+            }
+        }
+
+
         return {
             ...membersActivities[0],
+            returnedPercentageChange: math.calculatePercentageChange(AdjustedMemberActivity[0].returned, membersActivities[0].returned)
         }
     } catch (err) {
         console.log(err);
