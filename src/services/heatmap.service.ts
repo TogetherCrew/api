@@ -1,5 +1,7 @@
 import { Connection } from 'mongoose';
 import { IHeatmapChartRequestBody } from '../interfaces/request.interface';
+import { date, math } from '../utils';
+
 /**
  * get heatmap chart 
  * @param {Connection} connection
@@ -121,6 +123,7 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
             // Stage 4: Calculate statistics and concatenate day-month field
             {
                 $project: {
+                    date: 1,
                     day_month: {
                         $concat: [
                             { $dateToString: { format: "%d", date: "$date" } },
@@ -164,10 +167,11 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
                 }
             },
 
-            // Stage 5: Sort documents by day_month
+            // Stage 5: Sort documents by date
             {
-                $sort: { day_month: 1 }
+                $sort: { date: 1 }
             },
+
 
             // Stage 6: Group all documents and keep the arrays
             {
@@ -208,44 +212,6 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
                                 { $ifNull: ["$lastTotalReplier", 0] }
                             ]
                         }
-                    },
-                    emojiPercentageChange: {
-                        $cond: [
-                            { $eq: [{ $arrayElemAt: ["$emojis", -2] }, 0] }, 0,
-                            {
-                                $multiply: [
-                                    {
-                                        $divide: [
-                                            { $subtract: ["$lastEmojis", { $arrayElemAt: ["$emojis", -2] }] },
-                                            { $arrayElemAt: ["$emojis", -2] }
-                                        ]
-                                    }, 100]
-                            }
-                        ]
-                    },
-                    msgPercentageChange: {
-                        $cond: [
-                            { $eq: [{ $arrayElemAt: ["$messages", -2] }, 0] }, 0,
-                            {
-                                $multiply: [
-                                    {
-                                        $divide: [
-                                            {
-                                                $subtract: [{
-                                                    $sum: {
-                                                        $add: [
-                                                            { $ifNull: ["$lastTotalLoneMessages", 0] },
-                                                            { $ifNull: ["$lastTotalThrMessages", 0] },
-                                                            { $ifNull: ["$lastTotalReplier", 0] }
-                                                        ]
-                                                    }
-                                                }, { $arrayElemAt: ["$messages", -2] }]
-                                            },
-                                            { $arrayElemAt: ["$messages", -2] }
-                                        ]
-                                    }, 100]
-                            }
-                        ]
                     }
                 }
             }
@@ -263,8 +229,76 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
             }
         }
 
+        const adjustedDate = date.calculateAdjustedDate(startDate, endDate, heatmaps[0].categories[heatmaps[0].categories.length - 1]);
+        const adjustedHeatmap = await connection.models.HeatMap.aggregate([
+            // Stage 1: Convert date from string to date type and extract needed data
+            {
+                $project: {
+                    _id: 0,
+                    date: { $convert: { input: "$date", to: "date" } },
+                    lone_messages: 1,
+                    thr_messages: 1,
+                    replier: 1,
+                    reacter: 1
+                }
+            },
+
+            // Stage 2: Filter documents based on date
+            {
+                $match: {
+                    date: new Date(adjustedDate)
+                }
+            },
+
+
+            // Stage 3: Calculate statistics and concatenate day-month field
+            {
+                $project: {
+                    total_lone_messages: {
+                        $reduce: {
+                            input: "$lone_messages",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    total_thr_messages: {
+                        $reduce: {
+                            input: "$thr_messages",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    total_replier: {
+                        $reduce: {
+                            input: "$replier",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    },
+                    emojis: {
+                        $reduce: {
+                            input: "$reacter",
+                            initialValue: 0,
+                            in: { $sum: ["$$value", "$$this"] }
+                        }
+                    }
+                }
+            },
+
+        ]);
+
+        if (adjustedHeatmap.length === 0) {
+            return {
+                ...heatmaps[0],
+                msgPercentageChange: 0,
+                emojiPercentageChange: 0
+            }
+        }
+
         return {
             ...heatmaps[0],
+            msgPercentageChange: math.calculatePercentageChange((adjustedHeatmap[0].total_lone_messages + adjustedHeatmap[0].total_thr_messages + adjustedHeatmap[0].total_replier), heatmaps[0].messages),
+            emojiPercentageChange: math.calculatePercentageChange(adjustedHeatmap[0].emojis, heatmaps[0].emojis)
         }
 
     } catch (err) {
