@@ -27,7 +27,7 @@ async function activeMembersCompositionLineGraph(connection: Connection, startDa
                 }
             },
 
-            // Stage 2: Filter documents based on date range
+            // Stage 2: Filter documents based on date
             {
                 $match: {
                     date: {
@@ -351,7 +351,7 @@ async function disengagedMembersCompositionLineGraph(connection: Connection, sta
                 }
             },
 
-            // Stage 2: Filter documents based on date range
+            // Stage 2: Filter documents based on date
             {
                 $match: {
                     date: new Date(adjustedDate)
@@ -521,7 +521,7 @@ async function inactiveMembersLineGraph(connection: Connection, startDate: Date,
                 }
             },
 
-            // Stage 2: Filter documents based on date range
+            // Stage 2: Filter documents based on date
             {
                 $match: {
                     date: new Date(adjustedDate)
