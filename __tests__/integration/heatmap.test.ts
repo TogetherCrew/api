@@ -4,7 +4,7 @@ import app from '../../src/app';
 import setupTestDB from '../utils/setupTestDB';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
-import { heatmapOne, heatmapTwo, heatmapThree } from '../fixtures/heatmap.fixture';
+import { heatmapOne, heatmapTwo, heatmapThree, heatmapFour, heatmapFive, heatmapSix, heatmapSeven, heatmapEight, heatmapNine, heatmapTen, heatmapEleven, heatmapTwelve } from '../fixtures/heatmap.fixture';
 import { guildOne, insertGuilds } from '../fixtures/guilds.fixture';
 import { heatmapService, databaseService } from 'tc_dbcomm';
 import config from '../../src/config';
@@ -88,59 +88,134 @@ describe('Heatmap routes', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
         });
-        test('should return 200 and line graph data if req data is ok', async () => {
+        test('should return 200 and line graph data for last seven days period if req data is ok', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await heatmapService.createHeatMaps(connection, [heatmapTwo, heatmapThree]);
+            await heatmapService.createHeatMaps(connection, [heatmapThree, heatmapFour, heatmapTen]);
             const res = await request(app)
                 .post(`/api/v1/heatmaps/${guildOne.guildId}/line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send({ startDate: new Date("2023-01-20"), endDate: new Date("2023-01-24") })
+                .send({ startDate: new Date("2023-04-01"), endDate: new Date("2023-04-07") })
                 .expect(httpStatus.OK);
 
             expect(res.body).toMatchObject({
-                messages: 48,
+                messages: 0,
+                emojis: 0,
+                msgPercentageChange: 0,
+                emojiPercentageChange: 0
+            });
+        })
+
+        test('should return 200 and line graph data for one month period if req data is ok', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+
+            await heatmapService.createHeatMaps(connection, [heatmapFive, heatmapSix]);
+            const res = await request(app)
+                .post(`/api/v1/heatmaps/${guildOne.guildId}/line-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date("2023-02-28"), endDate: new Date("2023-03-31") })
+                .expect(httpStatus.OK);
+
+            expect(res.body).toMatchObject({
+                messages: 6,
                 emojis: 6,
                 msgPercentageChange: 0,
                 emojiPercentageChange: 0
             });
         })
 
-        test('should return 200 and line graph data (testing percentage change) if req data is ok', async () => {
+        test('should return 200 and line graph data for three month period if req data is ok', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await heatmapService.createHeatMaps(connection, [heatmapOne, heatmapTwo, heatmapThree]);
+            await heatmapService.createHeatMaps(connection, [heatmapSeven, heatmapEight]);
             const res = await request(app)
                 .post(`/api/v1/heatmaps/${guildOne.guildId}/line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send({ startDate: new Date("2023-01-20"), endDate: new Date("2023-01-24") })
+                .send({ startDate: new Date("2023-01-01"), endDate: new Date("2023-04-01") })
                 .expect(httpStatus.OK);
 
             expect(res.body).toMatchObject({
-                messages: 12,
+                messages: 6,
+                emojis: 6,
+                msgPercentageChange: 200,
+                emojiPercentageChange: 200
+            });
+        })
+
+        test('should return 200 and line graph data for last six month period if req data is ok', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+
+            await heatmapService.createHeatMaps(connection, [heatmapNine, heatmapTen]);
+            const res = await request(app)
+                .post(`/api/v1/heatmaps/${guildOne.guildId}/line-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date("2023-01-01"), endDate: new Date("2023-07-01") })
+                .expect(httpStatus.OK);
+
+            expect(res.body).toMatchObject({
+                messages: 6,
+                emojis: 6,
+                msgPercentageChange: 0,
+                emojiPercentageChange: 0
+            });
+        })
+
+        test('should return 200 and line graph data for last seven days period if req data is ok', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+
+            await heatmapService.createHeatMaps(connection, [heatmapEleven, heatmapTwelve]);
+            const res = await request(app)
+                .post(`/api/v1/heatmaps/${guildOne.guildId}/line-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date("2022-06-01"), endDate: new Date("2023-06-01") })
+                .expect(httpStatus.OK);
+
+            expect(res.body).toMatchObject({
+                messages: 3,
                 emojis: 3,
-                msgPercentageChange: -75,
+                msgPercentageChange: -50,
                 emojiPercentageChange: -50
             });
-
         })
 
         test('should return 200 and line graph data (testing for empty data) if req data is ok', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await heatmapService.createHeatMaps(connection, [heatmapOne]);
+            await heatmapService.createHeatMaps(connection, [heatmapThree]);
             const res = await request(app)
                 .post(`/api/v1/heatmaps/${guildOne.guildId}/line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send({ startDate: new Date("2023-02-21"), endDate: new Date("2023-02-24") })
+                .send({ startDate: new Date("2021-02-21"), endDate: new Date("2022-02-24") })
                 .expect(httpStatus.OK);
 
             expect(res.body).toMatchObject({
                 emojis: 0,
                 messages: 0,
+                msgPercentageChange: 0,
+                emojiPercentageChange: 0
+            });
+        })
+
+        test('should return 200 and line graph data (testing for empty adjustedDate document) if req data is ok', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+
+            await heatmapService.createHeatMaps(connection, [heatmapFive]);
+            const res = await request(app)
+                .post(`/api/v1/heatmaps/${guildOne.guildId}/line-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date("2023-03-01"), endDate: new Date("2023-04-01") })
+                .expect(httpStatus.OK);
+
+            expect(res.body).toMatchObject({
+                emojis: 6,
+                messages: 6,
                 msgPercentageChange: 0,
                 emojiPercentageChange: 0
             });
