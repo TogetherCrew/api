@@ -50,7 +50,7 @@ const getGuildChannels = catchAsync(async function (req: IAuthRequest, res: Resp
 
 
 const connectGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
-    res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.connectGuild}&response_type=code&scope=${scopes.connectGuild}&permissions=${permissions.ViewChannels}`);
+    res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.connectGuild}&response_type=code&scope=${scopes.connectGuild}&permissions=${permissions.ViewChannels | permissions.readMessageHistory}}`);
 });
 
 const connectGuildCallback = catchAsync(async function (req: Request, res: Response) {
