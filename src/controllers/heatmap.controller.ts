@@ -14,7 +14,10 @@ const heatmapChart = catchAsync(async function (req: IAuthRequest, res: Response
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     let heatmaps = await heatmapService.getHeatmapChart(connection, req.body);
     const timeZoneOffset = parseInt(moment().tz(req.body.timeZone).format('Z'));
-    heatmaps = date.shiftHeatmapsHours(heatmaps, timeZoneOffset);
+
+    if (timeZoneOffset !== 0) {
+        heatmaps = date.shiftHeatmapsHours(heatmaps, timeZoneOffset);
+    }
     heatmaps = charts.fillHeatmapChart(heatmaps);
     res.send(heatmaps);
 });
