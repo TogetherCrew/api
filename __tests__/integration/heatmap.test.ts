@@ -27,7 +27,7 @@ describe('Heatmap routes', () => {
                 startDate: new Date("2023-01-01"),
                 endDate: new Date("2023-01-31"),
                 timeZone: "Universal", // 0
-                channelIds: []
+                channelIds: ["1012430565959553148", "1012430565959553211", "1012430565959553149"]
 
             };
         });
@@ -115,6 +115,26 @@ describe('Heatmap routes', () => {
 
             expect(res.body[27]).toEqual([1, 4, 0])
             expect(res.body[47]).toEqual([1, 24, 0])
+        })
+
+        test('should return 200 and empty chart data if channelIds is empty req data is ok', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+
+            await heatmapService.createHeatMaps(connection, [heatmapOne, heatmapTwo, heatmapThirteen]);
+            requestBody.startDate = new Date("2023-01-20");
+            requestBody.endDate = new Date("2023-01-22");
+            requestBody.channelIds = []
+            const res = await request(app)
+                .post(`/api/v1/heatmaps/${guildOne.guildId}/heatmap-chart`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send(requestBody)
+                .expect(httpStatus.OK);
+
+            expect(res.body.length).toBe(168);
+
+            const valuePattern = expect.arrayContaining([expect.anything(), expect.anything(), 0]);
+            expect(res.body).toEqual(expect.arrayContaining(Array(168).fill(valuePattern)));
         })
 
         test('should return 401 if access token is missing', async () => {

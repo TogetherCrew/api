@@ -1,13 +1,13 @@
 import { Response, Request } from 'express';
 import { guildService, userService, authService } from '../services';
 import { IAuthRequest } from '../interfaces/request.interface';
-
 import { catchAsync, ApiError, pick, sort } from "../utils";
 import httpStatus from 'http-status';
 import config from '../config';
 import { scopes, permissions } from '../config/dicord';
 import { IDiscordUser, IDiscordOathBotCallback } from 'tc_dbcomm';
 import querystring from 'querystring';
+import { ICustomChannel } from '../interfaces/guild.interface';
 
 const getGuilds = catchAsync(async function (req: IAuthRequest, res: Response) {
     const filter = pick(req.query, ['isDisconnected', 'isInProgress']);
@@ -38,14 +38,42 @@ const getGuildFromDiscordAPI = catchAsync(async function (req: IAuthRequest, res
     res.send(guild)
 });
 
-const getGuildChannels = catchAsync(async function (req: IAuthRequest, res: Response) {
+const getChannels = catchAsync(async function (req: IAuthRequest, res: Response) {
     if (! await guildService.isBotAddedToGuild(req.params.guildId, req.user.discordId)) {
         throw new ApiError(httpStatus.BAD_REQUEST, 'Please add the RnDAO bot to your server');
     }
-    const channels = await guildService.getGuildChannelsFromDiscordJS(req.params.guildId);
+    const channels = await guildService.getChannelsFromDiscordJS(req.params.guildId);
     const sortedChannels = await sort.sortChannels(channels);
     res.send(sortedChannels)
 });
+
+
+const getSelectedChannels = catchAsync(async function (req: IAuthRequest, res: Response) {
+    const guild = await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId });
+    if (!guild) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Please add the RnDAO bot to your server');
+    }
+    if (guild.selectedChannels && guild.selectedChannels.length > 0) {
+        const channels = await guildService.getChannelsFromDiscordJS(req.params.guildId);
+        let sortedChannels = await sort.sortChannels(channels);
+        sortedChannels = sortedChannels
+            .filter(category => {
+                const selectedSubChannels = category.subChannels.filter((channel: ICustomChannel) => guild.selectedChannels?.some(selected => selected.channelId === channel.id));
+                return selectedSubChannels.length > 0;
+            })
+            .map(category => {
+                return {
+                    id: category.id,
+                    title: category.title,
+                    subChannels: category.subChannels.filter((channel: ICustomChannel) => guild.selectedChannels?.some(selected => selected.channelId === channel.id))
+                }
+            });
+        res.send(sortedChannels)
+    } else {
+        res.send([]);
+    }
+});
+
 
 
 
@@ -101,7 +129,8 @@ const disconnectGuild = catchAsync(async function (req: IAuthRequest, res: Respo
 });
 
 export default {
-    getGuildChannels,
+    getChannels,
+    getSelectedChannels,
     getGuild,
     updateGuild,
     getGuildFromDiscordAPI,
