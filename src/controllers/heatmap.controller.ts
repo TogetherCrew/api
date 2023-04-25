@@ -11,6 +11,9 @@ const heatmapChart = catchAsync(async function (req: IAuthRequest, res: Response
     if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
     }
+    if (req.body.channelIds.length === 0) {
+        return res.send(charts.fillHeatmapChart([]))
+    }
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     let heatmaps = await heatmapService.getHeatmapChart(connection, req.body);
     const timeZoneOffset = parseInt(moment().tz(req.body.timeZone).format('Z'));
