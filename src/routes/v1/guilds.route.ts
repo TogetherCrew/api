@@ -12,7 +12,9 @@ router.get('/', auth(), validate(guildValidation.getGuilds), guildController.get
 router.get('/connect', guildController.connectGuild);
 router.get('/connect/callback', guildController.connectGuildCallback);
 
-router.get('/:guildId/channels', auth(), validate(guildValidation.getGuildChannels), guildController.getGuildChannels);
+router.get('/:guildId/channels', auth(), validate(guildValidation.getChannels), guildController.getChannels);
+router.get('/:guildId/selected-channels', auth(), validate(guildValidation.getSelectedChannels), guildController.getSelectedChannels);
+
 router.post('/:guildId/disconnect', auth(), validate(guildValidation.disconnectGuild), guildController.disconnectGuild);
 
 router.route('/:guildId')
