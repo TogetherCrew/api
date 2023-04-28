@@ -722,7 +722,7 @@ describe('Guild routes', () => {
             await insertGuilds([guildOne]);
             await request(app)
                 .patch(`/api/v1/guilds/bridge-api/${guildOne.guildId}`)
-                .set('API-Key', `${config.bridgeAPIKeys.tcDAOlytics}`)
+                .set('API-Key', `${config.bridgeAPIKeys}`)
                 .send(updateBody)
                 .expect(httpStatus.NO_CONTENT);
 
@@ -741,7 +741,7 @@ describe('Guild routes', () => {
         test('should return 404 if guild not found', async () => {
             await request(app)
                 .patch(`/api/v1/guilds/bridge-api/${guildOne.guildId}`)
-                .set('API-Key', `${config.bridgeAPIKeys.tcDAOlytics}`)
+                .set('API-Key', `${config.bridgeAPIKeys}`)
                 .send(updateBody)
                 .expect(httpStatus.NOT_FOUND);
         })
@@ -751,7 +751,7 @@ describe('Guild routes', () => {
             const updateBody = { isInProgress: ':)' };
             await request(app)
                 .patch(`/api/v1/guilds/bridge-api/${guildOne.guildId}`)
-                .set('API-Key', `${config.bridgeAPIKeys.tcDAOlytics}`)
+                .set('API-Key', `${config.bridgeAPIKeys}`)
                 .send(updateBody)
                 .expect(httpStatus.BAD_REQUEST);
         });
