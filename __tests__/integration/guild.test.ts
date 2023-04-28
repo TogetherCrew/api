@@ -10,6 +10,8 @@ import { discordResponseChannels, discordResponseChannelOne } from '../fixtures/
 import { IGuildUpdateBody } from '../../src/interfaces/guild.interface';
 import { guildService, authService, userService } from '../../src/services';
 import { Guild } from 'tc_dbcomm';
+import config from '../../src/config';
+
 setupTestDB();
 
 describe('Guild routes', () => {
@@ -708,5 +710,51 @@ describe('Guild routes', () => {
             expect(res.body.results[0].id).toBe(guildTwo._id.toHexString());
         });
     });
+
+    describe('PATCH /api/v1/guilds/bridge-api/:guildId', () => {
+        let updateBody: IGuildUpdateBody;
+        beforeEach(() => {
+            updateBody = {
+                isInProgress: false,
+            };
+        });
+        test('should return 200 and successfully update guild if data is ok', async () => {
+            await insertGuilds([guildOne]);
+            await request(app)
+                .patch(`/api/v1/guilds/bridge-api/${guildOne.guildId}`)
+                .set('API-Key', `${config.bridgeAPIKeys.tcDAOlytics}`)
+                .send(updateBody)
+                .expect(httpStatus.NO_CONTENT);
+
+            const dbGuild = await Guild.findById(guildOne._id);
+            expect(dbGuild).toBeDefined();
+            expect(dbGuild).toMatchObject({ isInProgress: updateBody.isInProgress });
+        })
+
+        test('should return 401 if api key is missing', async () => {
+            await request(app)
+                .patch(`/api/v1/guilds/bridge-api/${guildOne.guildId}`)
+                .send(updateBody)
+                .expect(httpStatus.UNAUTHORIZED);
+        })
+
+        test('should return 404 if guild not found', async () => {
+            await request(app)
+                .patch(`/api/v1/guilds/bridge-api/${guildOne.guildId}`)
+                .set('API-Key', `${config.bridgeAPIKeys.tcDAOlytics}`)
+                .send(updateBody)
+                .expect(httpStatus.NOT_FOUND);
+        })
+
+
+        test('should return 400 if isInProgress is invalid', async () => {
+            const updateBody = { isInProgress: ':)' };
+            await request(app)
+                .patch(`/api/v1/guilds/bridge-api/${guildOne.guildId}`)
+                .set('API-Key', `${config.bridgeAPIKeys.tcDAOlytics}`)
+                .send(updateBody)
+                .expect(httpStatus.BAD_REQUEST);
+        });
+    })
 
 });
