@@ -22,7 +22,7 @@ const envVarsSchema = Joi.object()
         FRONTEND_URL: Joi.string().required().description('frontend URL'),
         NOTION_API_KEY: Joi.string().required().description('notion api key'),
         NOTION_DATABASE_ID: Joi.string().required().description('notion database id'),
-        TC_DAOLYTICS_API_KEY: Joi.string().required().description('tc-DAOlytics api key')
+        BRIDGE_API_KEY: Joi.string().required().description('bridge api key')
 
     })
     .unknown();
@@ -37,10 +37,10 @@ export default {
     env: envVars.NODE_ENV,
     port: envVars.PORT,
     mongoose: {
-        serverURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}/${envVars.DB_NAME}`,
-        botURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}`,
-        // serverURL: `mongodb://127.0.0.1:27017/RnDAO-${envVars.NODE_ENV}`,
-        // botURL: "mongodb://127.0.0.1:27017"
+        // serverURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}/${envVars.DB_NAME}`,
+        // botURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}`,
+        serverURL: `mongodb://127.0.0.1:27017/RnDAO-${envVars.NODE_ENV}`,
+        botURL: "mongodb://127.0.0.1:27017"
     },
     discord: {
         clientId: envVars.DISCROD_CLIENT_ID,
@@ -66,7 +66,5 @@ export default {
         apiKey: envVars.NOTION_API_KEY,
         databaseId: envVars.NOTION_DATABASE_ID
     },
-    bridgeAPIKeys: {
-        tcDAOlytics: envVars.TC_DAOLYTICS_API_KEY
-    }
+    bridgeAPIKeys: envVars.BRIDGE_API_KEY
 }

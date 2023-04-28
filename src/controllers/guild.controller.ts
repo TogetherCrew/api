@@ -128,6 +128,11 @@ const disconnectGuild = catchAsync(async function (req: IAuthRequest, res: Respo
     res.status(httpStatus.NO_CONTENT).send();
 });
 
+const updateGuildByBridge = catchAsync(async function (req: IAuthRequest, res: Response) {
+    await guildService.updateGuild({ guildId: req.params.guildId }, req.body);
+    res.status(httpStatus.NO_CONTENT).send();
+});
+
 export default {
     getChannels,
     getSelectedChannels,
@@ -137,5 +142,6 @@ export default {
     getGuilds,
     disconnectGuild,
     connectGuild,
-    connectGuildCallback
+    connectGuildCallback,
+    updateGuildByBridge
 }
