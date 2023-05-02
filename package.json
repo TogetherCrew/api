@@ -14,13 +14,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@discordjs/rest": "^1.7.0",
     "@notionhq/client": "^2.2.3",
     "@sentry/node": "^7.50.0",
     "babel-jest": "^29.3.1",
     "compression": "^1.7.4",
     "copyfiles": "^2.4.1",
     "cors": "^2.8.5",
-    "discord.js": "^14.7.1",
+    "discord-api-types": "^0.37.39",
+    "discord.js": "^14.9.0",
     "express": "^4.18.2",
     "express-rate-limit": "^6.7.0",
     "helmet": "^6.0.1",
@@ -36,7 +38,7 @@
     "passport-jwt": "^4.0.0",
     "swagger-jsdoc": "^6.2.5",
     "swagger-ui-express": "^4.6.0",
-    "tc_dbcomm": "^1.0.5",
+    "tc_dbcomm": "^1.0.8",
     "validator": "^13.7.0"
   },
   "devDependencies": {

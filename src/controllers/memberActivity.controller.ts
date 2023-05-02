@@ -40,7 +40,7 @@ const activeMembersOnboardingLineGraph = catchAsync(async function (req: IAuthRe
 });
 
 
-const disengagedMembersOnboardingLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
+const disengagedMembersCompositionLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
     if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
     }
@@ -51,10 +51,21 @@ const disengagedMembersOnboardingLineGraph = catchAsync(async function (req: IAu
 });
 
 
+const inactiveMembersLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
+    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    }
+    const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
+    let inactiveMembersLineGraph = await memberActivityService.inactiveMembersLineGraph(connection, req.body.startDate, req.body.endDate);
+    inactiveMembersLineGraph = charts.fillInactiveMembersLineGraph(inactiveMembersLineGraph, req.body.startDate, req.body.endDate);
+    res.send(inactiveMembersLineGraph);
+});
+
 
 export default {
     activeMembersCompositionLineGraph,
     activeMembersOnboardingLineGraph,
-    disengagedMembersOnboardingLineGraph
+    disengagedMembersCompositionLineGraph,
+    inactiveMembersLineGraph
 }
 

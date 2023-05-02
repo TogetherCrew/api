@@ -1,3 +1,5 @@
+import moment from "moment";
+
 function shiftHeatmapsHours(heatmaps: number[][], timeZoneOffset: number) {
     let shiftedHour, shiftedDay = 0;
     const heatmapsTimezone: number[][] = [];
@@ -27,7 +29,35 @@ function shiftHeatmapsHours(heatmaps: number[][], timeZoneOffset: number) {
     return heatmapsTimezone;
 }
 
-export default {
-    shiftHeatmapsHours
+function calculateAdjustedDate(startDate: Date, endDate: Date, dayMonth: string) {
+    const start = moment(startDate);
+    const end = moment(endDate);
+    // Parse dayMonth into a moment object
+    const dayMonthMoment = moment(dayMonth + ' ' + end.year(), 'DD MMM YYYY');
+
+    // Calculate the period between start and end dates in months
+    const periodInMonths = end.diff(start, 'months', true);
+
+    // Calculate the adjusted date based on the period type
+    let adjustedDate: moment.Moment;
+    if (periodInMonths < 1) {
+        adjustedDate = moment(dayMonthMoment).subtract(7, 'days');
+    } else if (periodInMonths < 3) {
+        adjustedDate = moment(dayMonthMoment).subtract(1, 'months');
+    } else if (periodInMonths < 6) {
+        adjustedDate = moment(dayMonthMoment).subtract(3, 'months');
+    } else if (periodInMonths < 12) {
+        adjustedDate = moment(dayMonthMoment).subtract(6, 'months');
+    } else {
+        adjustedDate = moment(dayMonthMoment).subtract(1, 'years');
+    }
+    return adjustedDate.format('YYYY-MM-DD');
 }
+
+export default {
+    shiftHeatmapsHours,
+    calculateAdjustedDate
+}
+
+
 
