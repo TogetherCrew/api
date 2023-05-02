@@ -59,6 +59,15 @@ const getSelectedChannels = {
     })
 };
 
+const updateGuildByBridge = {
+    params: Joi.object().required().keys({
+        guildId: Joi.string().required()
+    }),
+    body: Joi.object().required().keys({
+        isInProgress: Joi.boolean().required()
+    }),
+};
+
 export default {
     getSelectedChannels,
     getChannels,
@@ -66,5 +75,6 @@ export default {
     getGuild,
     getGuildFromDiscordAPI,
     getGuilds,
-    disconnectGuild
+    disconnectGuild,
+    updateGuildByBridge
 }

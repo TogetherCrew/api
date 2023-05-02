@@ -394,6 +394,43 @@ paths:
           $ref: "#/components/responses/NotFound"
 
 
-
-
+  /api/v1/guilds/bridge-api/{guildId}:
+    patch:
+      tags:
+        - [Guild]
+      summary: Update guild by bridge
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: path
+          name: guildId
+          required: true
+          schema:
+            type: string
+          description: Guild Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isInProgress:
+                  type: boolean
+              example:
+                isInProgress:  false
+          
+      responses:
+        "204":
+          description: No Content
+          $ref: "#/components/responses/NoContent" 
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
 
