@@ -23,6 +23,8 @@ const envVarsSchema = Joi.object()
         NOTION_API_KEY: Joi.string().required().description('notion api key'),
         NOTION_DATABASE_ID: Joi.string().required().description('notion database id'),
         SENTRY_DSN: Joi.string().required().description('sentry dsn'),
+        SENTRY_ENV: Joi.string().valid('production', 'development', 'test').required(),
+
     })
     .unknown();
 
@@ -66,6 +68,7 @@ export default {
         databaseId: envVars.NOTION_DATABASE_ID
     },
     sentry: {
-        dsn: envVars.SENTRY_DSN
+        dsn: envVars.SENTRY_DSN,
+        env: envVars.SENTRY_ENV
     }
 }
