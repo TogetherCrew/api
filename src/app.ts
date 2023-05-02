@@ -14,7 +14,10 @@ import routes from "./routes/v1";
 const app: Application = express();
 
 // Initial Sentry
-Sentry.init({ dsn: config.sentry.dsn, tracesSampleRate: 1.0, 
+Sentry.init({ 
+    dsn: config.sentry.dsn, 
+    environment: config.sentry.env,
+    tracesSampleRate: 1.0, 
     integrations: [
         // enable HTTP calls tracing
         new Sentry.Integrations.Http({ tracing: true }),
