@@ -2,7 +2,7 @@ import express from "express";
 import { guildController } from "../../controllers";
 import { guildValidation } from '../../validations';
 
-import { auth, validate, apiKey } from '../../middlewares';
+import { auth, validate } from '../../middlewares';
 const router = express.Router();
 
 // Routes
@@ -22,8 +22,6 @@ router.route('/:guildId')
     .patch(auth(), validate(guildValidation.updateGuild), guildController.updateGuild);
 
 router.get('/discord-api/:guildId', auth(), validate(guildValidation.getGuildFromDiscordAPI), guildController.getGuildFromDiscordAPI);
-
-router.patch('/bridge-api/:guildId', apiKey(), validate(guildValidation.updateGuildByBridge), guildController.updateGuildByBridge);
 
 export default router;
 

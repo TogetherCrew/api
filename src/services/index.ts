@@ -5,7 +5,6 @@ import guildService from './guild.service';
 import heatmapService from './heatmap.service';
 import memberActivityService from './memberActivity.service';
 import channelService from './channel.service';
-import bridgeService from './bridge.service';
 
 export {
     userService,
@@ -14,6 +13,5 @@ export {
     guildService,
     heatmapService,
     memberActivityService,
-    channelService,
-    bridgeService
+    channelService
 }

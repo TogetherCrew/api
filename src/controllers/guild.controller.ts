@@ -1,5 +1,5 @@
 import { Response, Request } from 'express';
-import { guildService, userService, authService, bridgeService } from '../services';
+import { guildService, userService, authService } from '../services';
 import { IAuthRequest } from '../interfaces/request.interface';
 import { catchAsync, ApiError, pick, sort } from "../utils";
 import httpStatus from 'http-status';
@@ -7,7 +7,7 @@ import config from '../config';
 import { scopes, permissions } from '../config/dicord';
 import { IDiscordUser, IDiscordOathBotCallback } from 'tc_dbcomm';
 import querystring from 'querystring';
-import { ICustomChannel, IGuildUpdateBody } from '../interfaces/guild.interface';
+import { ICustomChannel } from '../interfaces/guild.interface';
 
 const getGuilds = catchAsync(async function (req: IAuthRequest, res: Response) {
     const filter = pick(req.query, ['isDisconnected', 'isInProgress']);
@@ -26,10 +26,7 @@ const getGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
 });
 
 const updateGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
-    const { selectedChannels }: IGuildUpdateBody = req.body;
-    if (selectedChannels) req.body.isInProgress = true;
     const guild = await guildService.updateGuild({ guildId: req.params.guildId, user: req.user.discordId }, req.body);
-    if (selectedChannels) await bridgeService.notifyTheAnalyzerWhenSelectedChannelsChanged(req.params.guildId);
     res.send(guild);
 });
 
@@ -131,11 +128,6 @@ const disconnectGuild = catchAsync(async function (req: IAuthRequest, res: Respo
     res.status(httpStatus.NO_CONTENT).send();
 });
 
-const updateGuildByBridge = catchAsync(async function (req: IAuthRequest, res: Response) {
-    await guildService.updateGuild({ guildId: req.params.guildId }, req.body);
-    res.status(httpStatus.NO_CONTENT).send();
-});
-
 export default {
     getChannels,
     getSelectedChannels,
@@ -145,6 +137,5 @@ export default {
     getGuilds,
     disconnectGuild,
     connectGuild,
-    connectGuildCallback,
-    updateGuildByBridge
+    connectGuildCallback
 }

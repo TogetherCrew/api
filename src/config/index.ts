@@ -22,8 +22,6 @@ const envVarsSchema = Joi.object()
         FRONTEND_URL: Joi.string().required().description('frontend URL'),
         NOTION_API_KEY: Joi.string().required().description('notion api key'),
         NOTION_DATABASE_ID: Joi.string().required().description('notion database id'),
-        BRIDGE_API_KEY: Joi.string().required().description('bridge api key'),
-        ANALYZER_APP_URI: Joi.string().required().description('analyzer app uri')
 
     })
     .unknown();
@@ -66,7 +64,5 @@ export default {
     notion: {
         apiKey: envVars.NOTION_API_KEY,
         databaseId: envVars.NOTION_DATABASE_ID
-    },
-    bridgeAPIKeys: envVars.BRIDGE_API_KEY,
-    analyzerAppURI: envVars.ANALYZER_APP_URI
+    }
 }

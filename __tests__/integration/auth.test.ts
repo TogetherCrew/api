@@ -9,7 +9,7 @@ import { tokenTypes } from '../../src/config/tokens';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { authService, userService } from '../../src/services';
 import { Token } from 'tc_dbcomm';
-import { guildOne, insertGuilds } from '../fixtures/guilds.fixture';
+import { guildOne, guildTwo, insertGuilds } from '../fixtures/guilds.fixture';
 import { Guild } from 'tc_dbcomm';
 
 setupTestDB();
