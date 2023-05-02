@@ -8,7 +8,7 @@ import { userOneAccessToken } from '../fixtures/token.fixture';
 import { discordResponseGuildOne, guildOne, guildTwo, guildThree, guildFour, guildFive, insertGuilds } from '../fixtures/guilds.fixture';
 import { discordResponseChannels, discordResponseChannelOne } from '../fixtures/channels.fixture';
 import { IGuildUpdateBody } from '../../src/interfaces/guild.interface';
-import { guildService, authService, userService } from '../../src/services';
+import { guildService, authService, userService, bridgeService } from '../../src/services';
 import { Guild } from 'tc_dbcomm';
 import config from '../../src/config';
 
@@ -391,7 +391,7 @@ describe('Guild routes', () => {
 
     describe('PATCH /api/v1/guilds/:guildId', () => {
         let updateBody: IGuildUpdateBody;
-
+        bridgeService.notifyTheAnalyzerWhenSelectedChannelsChanged = jest.fn().mockReturnValue(null);
         beforeEach(() => {
             updateBody = {
                 period: moment("2022-02-01 08:30:26.127Z").toDate(),
