@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import app from './app';
 import config from './config';
+import RabbitMQ from '@togethercrew.dev/tc-messagebroker';
 
 mongoose.set("strictQuery", false);
 
@@ -13,3 +14,7 @@ mongoose.connect(config.mongoose.serverURL)
             console.log(`Listening on ${config.port}`);
         });
     });
+
+RabbitMQ.connect(config.rabbitMQ.url, config.rabbitMQ.queueName).then(() => {
+    console.log("Connected to RabbitMQ!")
+})
