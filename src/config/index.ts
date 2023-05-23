@@ -13,6 +13,7 @@ const envVarsSchema = Joi.object()
         RABBIT_PORT: Joi.string().required().description('RabbitMQ port'),
         RABBIT_USER: Joi.string().required().description('RabbitMQ username'),
         RABBIT_PASSWORD: Joi.string().required().description('RabbitMQ password'),
+        RABBIT_QUEUE_NAME: Joi.string().required().description('RabbitMQ queue name'),
         DISCROD_CLIENT_ID: Joi.string().required().description('Discord clinet id'),
         DISCORD_CLIENT_SECRET: Joi.string().required().description('Discord clinet secret'),
         DISCORD_BOT_TOKEN: Joi.string().required().description('Discord bot token'),
@@ -47,6 +48,7 @@ export default {
     },
     rabbitMQ: {
         url: `amqp://${envVars.RABBIT_USER}:${envVars.RABBIT_PASSWORD}@${envVars.RABBIT_HOST}:${envVars.RABBIT_PORT}`,
+        queueName: envVars.RABBIT_QUEUE_NAME
     },
     discord: {
         clientId: envVars.DISCROD_CLIENT_ID,
