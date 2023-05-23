@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      target: test
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3000
+      - MONGODB_HOST=mongo
+      - MONGODB_PORT=27017
+      - MONGODB_USER=root
+      - MONGODB_PASS=pass
+      - REDIS_QUEUE_HOST=redis
+      - REDIS_QUEUE_PORT=6379
+      - RABBITMQ_HOST=localhost
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=root
+      - RABBITMQ_PASS=pass
+    volumes:
+      - ./coverage:/project/coverage
+    depends_on:
+      - redis
+      - mongo
+  redis:
+    image: "redis:alpine"
+  mongo:
+    image: "mongo"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=pass
+  rabbitmq:
+    image: "rabbitmq:3-management-alpine"
+    environment:
+      - RABBITMQ_DEFAULT_USER=root
+      - RABBITMQ_DEFAULT_PASS=pass
