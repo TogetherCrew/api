@@ -10,6 +10,7 @@ services:
       - PORT=3000
       - DB_HOST=mongo
       - DB_PORT=27017
+      - DB_NAME=db
       - DB_USER=root
       - DB_PASSWORD=pass
       - REDIS_QUEUE_HOST=redis
