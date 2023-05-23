@@ -20,6 +20,7 @@ services:
       - RABBITMQ_USER=root
       - RABBITMQ_PASS=pass
       - DISCROD_CLIENT_ID=abc
+      - DISCORD_CLIENT_SECRET=abc
       - DISCORD_BOT_TOKEN=abc
       - DISCORD_TRY_NOW_CALLBACK_URI=abc
       - DISCORD_LOGIN_CALLBACK_URI=abc
