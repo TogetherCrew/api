@@ -8,16 +8,28 @@ services:
       dockerfile: Dockerfile
     environment:
       - PORT=3000
-      - MONGODB_HOST=mongo
-      - MONGODB_PORT=27017
-      - MONGODB_USER=root
-      - MONGODB_PASS=pass
+      - DB_HOST=mongo
+      - DB_PORT=27017
+      - DB_USER=root
+      - DB_PASSWORD=pass
       - REDIS_QUEUE_HOST=redis
       - REDIS_QUEUE_PORT=6379
       - RABBITMQ_HOST=localhost
       - RABBITMQ_PORT=5672
       - RABBITMQ_USER=root
       - RABBITMQ_PASS=pass
+      - DISCROD_CLIENT_ID=abc
+      - DISCORD_BOT_TOKEN=abc
+      - DISCORD_TRY_NOW_CALLBACK_URI=abc
+      - DISCORD_LOGIN_CALLBACK_URI=abc
+      - DISCORD_CONNECT_GUILD_CALLBACK_URI=abc
+      - JWT_SECRET=abc
+      - JWT_ACCESS_EXPIRATION_MINUTES=999
+      - JWT_REFRESH_EXPIRATION_DAYS=90
+      - JWT_DISCORD_REFRESH_EXPIRATION_DAYS=90
+      - FRONTEND_URL=abc
+      - NOTION_API_KEY=abc
+      - NOTION_DATABASE_ID=abc
     volumes:
       - ./coverage:/project/coverage
     depends_on:
