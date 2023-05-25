@@ -1,6 +1,9 @@
 # ServerComm
 All communcation between front-end and DB
 
+[![Maintainability](https://api.codeclimate.com/v1/badges/a3f4a30c736bae992234/maintainability)](https://codeclimate.com/github/RnDAO/tc-serverComm/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/a3f4a30c736bae992234/test_coverage)](https://codeclimate.com/github/RnDAO/tc-serverComm/test_coverage)
+
 ## Installation
 
 Clone the repo
