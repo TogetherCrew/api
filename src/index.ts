@@ -1,11 +1,12 @@
 import mongoose from "mongoose";
 import app from './app';
 import config from './config';
-import RabbitMQ from '@togethercrew.dev/tc-messagebroker';
+import RabbitMQ, { MBConnection } from '@togethercrew.dev/tc-messagebroker';
 
 mongoose.set("strictQuery", false);
 
 // Connect to MongoDB
+MBConnection.connect(config.mongoose.dbURL)
 mongoose.connect(config.mongoose.serverURL)
     .then(() => {
         console.log('Connected to MongoDB!');
