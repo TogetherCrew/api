@@ -61,7 +61,7 @@ async function updateGuild(filter: object, updateBody: IGuildUpdateBody) {
     if(updateBody.period || updateBody.selectedChannels){
         const saga = await MBConnection.models.Saga.create({
             status: Status.NOT_STARTED,
-            data: { guildId: "guild.guildId" },
+            data: { guildId: guild.guildId },
             choreography: ChoreographyDict.DISCORD_UPDATE_CHANNELS
         })
         
