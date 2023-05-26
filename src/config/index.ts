@@ -43,8 +43,11 @@ export default {
     mongoose: {
         serverURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}/${envVars.DB_NAME}`,
         botURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}`,
+        dbURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}`,
         // serverURL: `mongodb://127.0.0.1:27017/RnDAO-${envVars.NODE_ENV}`,
-        // botURL: "mongodb://127.0.0.1:27017"
+        // botURL: "mongodb://127.0.0.1:27017",
+        // dbURL: "mongodb://127.0.0.1:27017"
+
       },
     rabbitMQ: {
         url: `amqp://${envVars.RABBIT_USER}:${envVars.RABBIT_PASSWORD}@${envVars.RABBIT_HOST}:${envVars.RABBIT_PORT}`,
