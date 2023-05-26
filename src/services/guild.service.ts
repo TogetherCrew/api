@@ -2,6 +2,7 @@
 import fetch from 'node-fetch';
 import { Snowflake } from 'discord.js';
 import config from '../config';
+import { MBConnection, Status, ChoreographyDict } from '@togethercrew.dev/tc-messagebroker';
 import { Guild, IDiscordGuild, IDiscordGuildMember } from 'tc_dbcomm';
 import { IGuildUpdateBody } from '../interfaces/guild.interface'
 import { ApiError } from '../utils';
@@ -55,6 +56,19 @@ async function updateGuild(filter: object, updateBody: IGuildUpdateBody) {
     }
     Object.assign(guild, updateBody);
     await guild.save();
+
+    // fire an event for bot only if `period` or `selectedChannels` is changed
+    if(updateBody.period || updateBody.selectedChannels){
+        const saga = await MBConnection.models.Saga.create({
+            status: Status.NOT_STARTED,
+            data: { guildId: guild.guildId },
+            choreography: ChoreographyDict.DISCORD_UPDATE_CHANNELS
+        })
+        
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        await saga.next(() => { })
+    }
+
     return guild;
 }
 
