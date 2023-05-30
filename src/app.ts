@@ -2,37 +2,17 @@ import express, { Application } from "express";
 import helmet from "helmet";
 import compression from "compression";
 import passport from "passport";
-import * as Sentry from "@sentry/node";
-import config from './config';
 import { jwtStrategy } from "./config/passport";
 import cors from "cors";
 import httpStatus from "http-status";
 import { error } from "./middlewares";
 import { ApiError } from "./utils";
 import routes from "./routes/v1";
+import { InitSentry, InitSentryErrorHandler } from "./middlewares/sentry";
 
 const app: Application = express();
 
-// Initial Sentry
-Sentry.init({ 
-    dsn: config.sentry.dsn, 
-    environment: config.sentry.env,
-    tracesSampleRate: 1.0, 
-    integrations: [
-        // enable HTTP calls tracing
-        new Sentry.Integrations.Http({ tracing: true }),
-        // enable Express.js middleware tracing
-        new Sentry.Integrations.Express({ app }),
-        // Automatically instrument Node.js libraries and frameworks
-        ...Sentry.autoDiscoverNodePerformanceMonitoringIntegrations(),
-    ] 
-});
-
-// Sentry Logger - The request handler must be the first middleware on the app
-app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
-
-// Sentry Tracer - TracingHandler creates a trace for every incoming request
-app.use(Sentry.Handlers.tracingHandler() as express.RequestHandler);
+InitSentry(app)
 
 // set security HTTP headers
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
@@ -61,8 +41,7 @@ app.use((req, res, next) => {
     next(new ApiError(httpStatus.NOT_FOUND, 'Not found'));
 });
 
-// Sentry Logger - The error handler must be before any other error middleware and after all controllers
-app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler);
+InitSentryErrorHandler(app)
 
 app.use(error.errorConverter);
 app.use(error.errorHandler);
