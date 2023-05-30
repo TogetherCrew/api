@@ -9,6 +9,7 @@ import { ApiError } from '../utils';
 import httpStatus = require('http-status');
 import { getDiscordClient } from '../config/dicord';
 import { PermissionsBitField } from 'discord.js'
+import { crateAndStartGuildSaga } from './saga.service';
 
 /**
  * Create guild base on discord guild
@@ -17,12 +18,17 @@ import { PermissionsBitField } from 'discord.js'
  * @returns {Promise<IGuild>}
  */
 async function createGuild(data: IDiscordGuild, discordId: Snowflake) {
-    return Guild.create({
+    const guild = await Guild.create({
         guildId: data.id,
         user: discordId,
         name: data.name,
         icon: data.icon
     });
+
+    await crateAndStartGuildSaga(guild.guildId, false)
+
+
+    return guild
 }
 
 /**
@@ -59,14 +65,7 @@ async function updateGuild(filter: object, updateBody: IGuildUpdateBody) {
 
     // fire an event for bot only if `period` or `selectedChannels` is changed
     if(updateBody.period || updateBody.selectedChannels){
-        const saga = await MBConnection.models.Saga.create({
-            status: Status.NOT_STARTED,
-            data: { guildId: guild.guildId },
-            choreography: ChoreographyDict.DISCORD_UPDATE_CHANNELS
-        })
-        
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        await saga.next(() => { })
+        await crateAndStartGuildSaga(guild.guildId, false)
     }
 
     return guild;
