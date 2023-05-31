@@ -8,7 +8,7 @@ import { userOneAccessToken } from '../fixtures/token.fixture';
 import { discordResponseGuildOne, guildOne, guildTwo, guildThree, guildFour, guildFive, insertGuilds } from '../fixtures/guilds.fixture';
 import { discordResponseChannels, discordResponseChannelOne } from '../fixtures/channels.fixture';
 import { IGuildUpdateBody } from '../../src/interfaces/guild.interface';
-import { guildService, authService, userService } from '../../src/services';
+import { guildService, authService, userService, sagaService } from '../../src/services';
 import { Guild } from 'tc_dbcomm';
 setupTestDB();
 
@@ -380,7 +380,7 @@ describe('Guild routes', () => {
         test('should return 400 if disconnectType is invalid', async () => {
             await insertUsers([userOne]);
             await request(app)
-                .patch(`/api/v1/guilds/${guildOne.guildId}`)
+                .post(`/api/v1/guilds/${guildOne.guildId}/disconnect`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send({ disconnectType: ':/' })
                 .expect(httpStatus.BAD_REQUEST);
@@ -389,7 +389,6 @@ describe('Guild routes', () => {
 
     describe('PATCH /api/v1/guilds/:guildId', () => {
         let updateBody: IGuildUpdateBody;
-
         beforeEach(() => {
             updateBody = {
                 period: moment("2022-02-01 08:30:26.127Z").toDate(),
@@ -401,6 +400,8 @@ describe('Guild routes', () => {
                 ],
                 isDisconnected: false
             };
+            sagaService.createAndStartGuildSaga = jest.fn().mockReturnValue({});
+
         });
         test('should return 200 and successfully update guild if data is ok', async () => {
             await insertUsers([userOne]);
