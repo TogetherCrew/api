@@ -9,7 +9,7 @@ import { authTokens } from '../interfaces/token.interface'
 import querystring from 'querystring';
 
 const tryNow = catchAsync(async function (req: Request, res: Response) {
-    res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.tryNow}&response_type=code&scope=${scopes.tryNow}&permissions=${permissions.ViewChannels}`);
+    res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.tryNow}&response_type=code&scope=${scopes.tryNow}&permissions=${permissions.ViewChannels | permissions.readMessageHistory}`);
 });
 
 const tryNowCallback = catchAsync(async function (req: Request, res: Response) {
