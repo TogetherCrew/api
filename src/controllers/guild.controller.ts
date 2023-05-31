@@ -26,10 +26,19 @@ const getGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
 });
 
 const updateGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
-    const guild = await guildService.updateGuild({ guildId: req.params.guildId, user: req.user.discordId }, req.body);
+    const guild = await guildService.updateGuild({ guildId: req.params.guildId }, req.body);
+    // const guild = await guildService.updateGuild({ guildId: req.params.guildId, user: req.user.discordId }, req.body);
+
     res.send(guild);
 });
 
+const getGuildFromDiscordAPI = catchAsync(async function (req: IAuthRequest, res: Response) {
+    if (! await guildService.isBotAddedToGuild(req.params.guildId, req.user.discordId)) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Please add the RnDAO bot to your server');
+    }
+    const guild = await guildService.getGuildFromDiscordAPI(req.params.guildId);
+    res.send(guild)
+});
 
 const getChannels = catchAsync(async function (req: IAuthRequest, res: Response) {
     if (! await guildService.isBotAddedToGuild(req.params.guildId, req.user.discordId)) {
@@ -113,7 +122,7 @@ const connectGuildCallback = catchAsync(async function (req: Request, res: Respo
 
 const disconnectGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
     if (req.body.disconnectType === "soft") {
-        await guildService.updateGuild({ guildId: req.params.guildId, user: req.user.discordId }, { isDisconnected: true })
+        await guildService.updateGuild({ guildId: req.params.guildId, user: req.user.discordId }, { isDisconnected: true });
     }
     else if (req.body.disconnectType === "hard") {
         await guildService.deleteGuild({ guildId: req.params.guildId, user: req.user.discordId })
@@ -126,6 +135,7 @@ export default {
     getSelectedChannels,
     getGuild,
     updateGuild,
+    getGuildFromDiscordAPI,
     getGuilds,
     disconnectGuild,
     connectGuild,

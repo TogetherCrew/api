@@ -20,8 +20,10 @@ router.post('/:guildId/disconnect', auth(), validate(guildValidation.disconnectG
 
 router.route('/:guildId')
     .get(auth(), validate(guildValidation.getGuild), guildController.getGuild)
-    .patch(auth(), validate(guildValidation.updateGuild), guildController.updateGuild);
+    // .patch(auth(), validate(guildValidation.updateGuild), guildController.updateGuild);
+    .patch(validate(guildValidation.updateGuild), guildController.updateGuild);
 
+router.get('/discord-api/:guildId', auth(), validate(guildValidation.getGuildFromDiscordAPI), guildController.getGuildFromDiscordAPI);
 
 // Events
 RabbitMQ.onEvent(Event.SERVER_API.UPDATE_GUILD, (msg) => {

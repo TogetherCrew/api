@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/node";
 import { Application, RequestHandler, ErrorRequestHandler } from "express";
-import config from "src/config";
+import config from "../config";
 
 function InitSentry(app: Application) {
     // Initial Sentry
@@ -18,7 +18,7 @@ function InitSentry(app: Application) {
         ]
     });
 
-    // Sentry Logger - The request handler must be the first middleware on the app
+    //  Logger - The request handler must be the first middleware on the app
     app.use(Sentry.Handlers.requestHandler() as RequestHandler);
 
     // Sentry Tracer - TracingHandler creates a trace for every incoming request

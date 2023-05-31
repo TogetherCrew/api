@@ -47,7 +47,7 @@ async function getGuildByGuildId(guildId: Snowflake) {
 async function getGuild(filter: object) {
     return Guild.findOne(filter);
 }
-
+import { ChoreographyDict, MBConnection, Status } from "@togethercrew.dev/tc-messagebroker"
 /**
  * update guild by guildId
  * @param {Object} filter
@@ -59,6 +59,8 @@ async function updateGuild(filter: object, updateBody: IGuildUpdateBody) {
     if (!guild) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
     }
+    console.log(MBConnection.models)
+
     Object.assign(guild, updateBody);
     await guild.save();
 
@@ -66,7 +68,6 @@ async function updateGuild(filter: object, updateBody: IGuildUpdateBody) {
     if (updateBody.period || updateBody.selectedChannels) {
         await sagaService.createAndStartGuildSaga(guild.guildId, false)
     }
-
     return guild;
 }
 

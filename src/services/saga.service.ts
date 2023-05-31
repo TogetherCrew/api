@@ -9,8 +9,6 @@ async function createAndStartGuildSaga(guildId: string, created: boolean) {
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     await saga.start(() => { })
-
-    return saga
 }
 
 export default {

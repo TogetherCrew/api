@@ -100,8 +100,8 @@ paths:
       tags:
         - [Guild]
       summary: Update guild by guildId
-      security:
-        - bearerAuth: []
+      # security:
+      #   - bearerAuth: []
       parameters:
         - in: path
           name: guildId

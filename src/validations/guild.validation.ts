@@ -39,6 +39,14 @@ const disconnectGuild = {
     }),
 };
 
+const getGuildFromDiscordAPI = {
+    params: Joi.object().required().keys({
+        guildId: Joi.string().required()
+    })
+};
+
+
+
 const getChannels = {
     params: Joi.object().required().keys({
         guildId: Joi.string().required()
@@ -56,6 +64,7 @@ export default {
     getChannels,
     updateGuild,
     getGuild,
+    getGuildFromDiscordAPI,
     getGuilds,
     disconnectGuild
 }
