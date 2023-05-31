@@ -30,13 +30,6 @@ const updateGuild = catchAsync(async function (req: IAuthRequest, res: Response)
     res.send(guild);
 });
 
-const getGuildFromDiscordAPI = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (! await guildService.isBotAddedToGuild(req.params.guildId, req.user.discordId)) {
-        throw new ApiError(httpStatus.BAD_REQUEST, 'Please add the RnDAO bot to your server');
-    }
-    const guild = await guildService.getGuildFromDiscordAPI(req.params.guildId);
-    res.send(guild)
-});
 
 const getChannels = catchAsync(async function (req: IAuthRequest, res: Response) {
     if (! await guildService.isBotAddedToGuild(req.params.guildId, req.user.discordId)) {
@@ -133,7 +126,6 @@ export default {
     getSelectedChannels,
     getGuild,
     updateGuild,
-    getGuildFromDiscordAPI,
     getGuilds,
     disconnectGuild,
     connectGuild,
