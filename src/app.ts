@@ -5,14 +5,13 @@ import passport from "passport";
 import { jwtStrategy } from "./config/passport";
 import cors from "cors";
 import httpStatus from "http-status";
-import { error } from "./middlewares";
+import { error, sentry } from "./middlewares";
 import { ApiError } from "./utils";
 import routes from "./routes/v1";
-import { InitSentry, InitSentryErrorHandler } from "./middlewares/sentry";
 
 const app: Application = express();
 
-InitSentry(app)
+sentry.InitSentry(app)
 
 // set security HTTP headers
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
@@ -41,7 +40,7 @@ app.use((req, res, next) => {
     next(new ApiError(httpStatus.NOT_FOUND, 'Not found'));
 });
 
-InitSentryErrorHandler(app)
+sentry.InitSentryErrorHandler(app)
 
 app.use(error.errorConverter);
 app.use(error.errorHandler);
