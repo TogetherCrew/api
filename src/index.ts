@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import app from './app';
 import config from './config';
-import RabbitMQ, { MBConnection } from '@togethercrew.dev/tc-messagebroker';
+import RabbitMQ, { MBConnection, Queue } from '@togethercrew.dev/tc-messagebroker';
 
 mongoose.set("strictQuery", false);
 
@@ -16,6 +16,6 @@ mongoose.connect(config.mongoose.serverURL)
         });
     });
 
-RabbitMQ.connect(config.rabbitMQ.url, config.rabbitMQ.queueName).then(() => {
+RabbitMQ.connect(config.rabbitMQ.url, Queue.SERVER_API).then(() => {
     console.log("Connected to RabbitMQ!")
 })

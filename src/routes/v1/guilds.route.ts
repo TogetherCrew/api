@@ -3,6 +3,7 @@ import { guildController } from "../../controllers";
 import { guildValidation } from '../../validations';
 
 import { auth, validate } from '../../middlewares';
+import RabbitMQ, { Event } from "@togethercrew.dev/tc-messagebroker";
 const router = express.Router();
 
 // Routes
@@ -22,6 +23,12 @@ router.route('/:guildId')
     .patch(auth(), validate(guildValidation.updateGuild), guildController.updateGuild);
 
 router.get('/discord-api/:guildId', auth(), validate(guildValidation.getGuildFromDiscordAPI), guildController.getGuildFromDiscordAPI);
+
+
+// Events
+RabbitMQ.onEvent(Event.SERVER_API.UPDATE_GUILD, (msg) => {
+    console.log(`Received a message on event ${Event.SERVER_API.UPDATE_GUILD} : `, msg)
+})
 
 export default router;
 
