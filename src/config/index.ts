@@ -28,9 +28,6 @@ const envVarsSchema = Joi.object()
         NOTION_DATABASE_ID: Joi.string().required().description('notion database id'),
         SENTRY_DSN: Joi.string().required().description('sentry dsn'),
         SENTRY_ENV: Joi.string().valid('production', 'development', 'test').required(),
-        BRIDGE_API_KEY: Joi.string().required().description('bridge api key'),
-        ANALYZER_APP_URI: Joi.string().required().description('analyzer app uri')
-
     })
     .unknown();
 
@@ -47,11 +44,11 @@ export default {
         serverURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}/${envVars.DB_NAME}`,
         botURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}`,
         dbURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}`,
-        // serverURL: `mongodb://127.0.0.1:27017/RnDAO-${envVars.NODE_ENV}`,
+        // serverURL: `mongodb://127.0.0.1:27017/RnDAO-local`,
         // botURL: "mongodb://127.0.0.1:27017",
         // dbURL: "mongodb://127.0.0.1:27017"
 
-      },
+    },
     rabbitMQ: {
         url: `amqp://${envVars.RABBIT_USER}:${envVars.RABBIT_PASSWORD}@${envVars.RABBIT_HOST}:${envVars.RABBIT_PORT}`,
     },
@@ -83,6 +80,4 @@ export default {
         dsn: envVars.SENTRY_DSN,
         env: envVars.SENTRY_ENV
     },
-    bridgeAPIKeys: envVars.BRIDGE_API_KEY,
-    analyzerAppURI: envVars.ANALYZER_APP_URI
 }

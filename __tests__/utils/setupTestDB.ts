@@ -1,10 +1,12 @@
 import mongoose from "mongoose";
 import config from "../../src/config";
+import { MBConnection } from '@togethercrew.dev/tc-messagebroker';
 
 const setupTestDB = () => {
     beforeAll(async () => {
         mongoose.set("strictQuery", false);
         await mongoose.connect(config.mongoose.serverURL);
+        await MBConnection.connect(config.mongoose.dbURL)
     });
 
     beforeEach(async () => {

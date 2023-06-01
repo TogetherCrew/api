@@ -2,14 +2,13 @@
 import fetch from 'node-fetch';
 import { Snowflake } from 'discord.js';
 import config from '../config';
-import { MBConnection, Status, ChoreographyDict } from '@togethercrew.dev/tc-messagebroker';
 import { Guild, IDiscordGuild, IDiscordGuildMember } from 'tc_dbcomm';
 import { IGuildUpdateBody } from '../interfaces/guild.interface'
 import { ApiError } from '../utils';
 import httpStatus = require('http-status');
 import { getDiscordClient } from '../config/dicord';
 import { PermissionsBitField } from 'discord.js'
-import { crateAndStartGuildSaga } from './saga.service';
+import sagaService from './saga.service';
 
 /**
  * Create guild base on discord guild
@@ -25,9 +24,7 @@ async function createGuild(data: IDiscordGuild, discordId: Snowflake) {
         icon: data.icon
     });
 
-    await crateAndStartGuildSaga(guild.guildId, false)
-
-
+    await sagaService.createAndStartGuildSaga(guild.guildId, 'true')
     return guild
 }
 
@@ -48,7 +45,6 @@ async function getGuildByGuildId(guildId: Snowflake) {
 async function getGuild(filter: object) {
     return Guild.findOne(filter);
 }
-
 /**
  * update guild by guildId
  * @param {Object} filter
@@ -64,10 +60,9 @@ async function updateGuild(filter: object, updateBody: IGuildUpdateBody) {
     await guild.save();
 
     // fire an event for bot only if `period` or `selectedChannels` is changed
-    if(updateBody.period || updateBody.selectedChannels){
-        await crateAndStartGuildSaga(guild.guildId, false)
+    if (updateBody.period || updateBody.selectedChannels) {
+        await sagaService.createAndStartGuildSaga(guild.guildId, 'false')
     }
-
     return guild;
 }
 

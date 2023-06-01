@@ -120,7 +120,7 @@ const connectGuildCallback = catchAsync(async function (req: Request, res: Respo
 
 const disconnectGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
     if (req.body.disconnectType === "soft") {
-        await guildService.updateGuild({ guildId: req.params.guildId, user: req.user.discordId }, { isDisconnected: true })
+        await guildService.updateGuild({ guildId: req.params.guildId, user: req.user.discordId }, { isDisconnected: true });
     }
     else if (req.body.disconnectType === "hard") {
         await guildService.deleteGuild({ guildId: req.params.guildId, user: req.user.discordId })
