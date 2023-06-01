@@ -1,6 +1,6 @@
 import { ChoreographyDict, MBConnection, Status } from "@togethercrew.dev/tc-messagebroker"
 
-async function createAndStartGuildSaga(guildId: string, created: boolean) {
+async function createAndStartGuildSaga(guildId: string, created: string) {
     const saga = await MBConnection.models.Saga.create({
         status: Status.NOT_STARTED,
         data: { guildId, created },

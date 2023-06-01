@@ -26,9 +26,7 @@ const getGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
 });
 
 const updateGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
-    const guild = await guildService.updateGuild({ guildId: req.params.guildId }, req.body);
-    // const guild = await guildService.updateGuild({ guildId: req.params.guildId, user: req.user.discordId }, req.body);
-
+    const guild = await guildService.updateGuild({ guildId: req.params.guildId, user: req.user.discordId }, req.body);
     res.send(guild);
 });
 

@@ -19,4 +19,3 @@ mongoose.connect(config.mongoose.serverURL)
 RabbitMQ.connect(config.rabbitMQ.url, Queue.SERVER_API).then(() => {
     console.log("Connected to RabbitMQ!")
 })
-
