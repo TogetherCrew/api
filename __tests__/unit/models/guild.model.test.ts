@@ -1,4 +1,4 @@
-import { Guild, IGuild } from 'tc_dbcomm';
+import { Guild, IGuild } from '@togethercrew.dev/db';
 
 import moment from "moment";
 

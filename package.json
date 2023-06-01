@@ -17,6 +17,7 @@
     "@discordjs/rest": "^1.7.0",
     "@notionhq/client": "^2.2.3",
     "@sentry/node": "^7.50.0",
+    "@togethercrew.dev/db": "^2.3.6",
     "@togethercrew.dev/tc-messagebroker": "^0.0.36",
     "babel-jest": "^29.3.1",
     "compression": "^1.7.4",
@@ -39,7 +40,6 @@
     "passport-jwt": "^4.0.0",
     "swagger-jsdoc": "^6.2.5",
     "swagger-ui-express": "^4.6.0",
-    "tc_dbcomm": "^2.3.3",
     "validator": "^13.7.0"
   },
   "devDependencies": {

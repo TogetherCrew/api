@@ -6,7 +6,7 @@ import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour, memberActivityFive, memberActivitySix, memberActivitySeven, memberActivityEight, memberActivityNine, memberActivityTen } from '../fixtures/memberActivity.fixture';
 import { guildOne, insertGuilds } from '../fixtures/guilds.fixture';
-import { memberActivityService, databaseService } from 'tc_dbcomm';
+import { memberActivityService, databaseService } from '@togethercrew.dev/db';
 import config from '../../src/config';
 
 

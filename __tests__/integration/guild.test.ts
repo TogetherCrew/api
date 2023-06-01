@@ -9,7 +9,7 @@ import { discordResponseGuildOne, guildOne, guildTwo, guildThree, guildFour, gui
 import { discordResponseChannels, discordResponseChannelOne } from '../fixtures/channels.fixture';
 import { IGuildUpdateBody } from '../../src/interfaces/guild.interface';
 import { guildService, authService, userService, sagaService } from '../../src/services';
-import { Guild } from 'tc_dbcomm';
+import { Guild } from '@togethercrew.dev/db';
 setupTestDB();
 
 describe('Guild routes', () => {

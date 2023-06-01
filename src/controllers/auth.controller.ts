@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import config from '../config';
 import { scopes, permissions } from '../config/dicord'
 import { userService, authService, tokenService, guildService } from '../services';
-import { IDiscordUser, IDiscordOathBotCallback } from 'tc_dbcomm';
+import { IDiscordUser, IDiscordOathBotCallback } from '@togethercrew.dev/db';
 import { catchAsync } from "../utils";
 import { authTokens } from '../interfaces/token.interface'
 import querystring from 'querystring';
