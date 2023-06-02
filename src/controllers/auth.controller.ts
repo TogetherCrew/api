@@ -55,6 +55,7 @@ const tryNowCallback = catchAsync(async function (req: Request, res: Response) {
         });
         res.redirect(`${config.frontend.url}/callback?` + query);
     } catch (err) {
+        console.log(err)
         const query = querystring.stringify({
             "statusCode": 490
         });
