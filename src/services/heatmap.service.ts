@@ -54,7 +54,7 @@ async function getHeatmapChart(connection: Connection, Body: IHeatmapChartReques
             // Stage4 : extract needed data
             {
                 $project: {
-                    'dayOfWeek': { $add: [{ $dayOfWeek: "$date" }, -1] },
+                    'dayOfWeek': { $dayOfWeek: "$date" },
                     'hour': { $add: ['$arrayIndex', 1] },
                     'interactions': { $add: ['$thr_messages', { $arrayElemAt: ['$lone_messages', '$arrayIndex'] }, { $arrayElemAt: ['$replier', '$arrayIndex'] }] },
                 }
