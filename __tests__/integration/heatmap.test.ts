@@ -6,7 +6,7 @@ import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { heatmapOne, heatmapTwo, heatmapThree, heatmapFour, heatmapFive, heatmapSix, heatmapSeven, heatmapEight, heatmapNine, heatmapTen, heatmapEleven, heatmapTwelve, heatmapThirteen } from '../fixtures/heatmap.fixture';
 import { guildOne, insertGuilds } from '../fixtures/guilds.fixture';
-import { heatmapService, databaseService } from 'tc_dbcomm';
+import { heatmapService, databaseService } from '@togethercrew.dev/db';
 import config from '../../src/config';
 
 

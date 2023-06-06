@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import { Snowflake } from 'discord.js';
 import config from '../config';
-import { IDiscordUser, IUser, User } from 'tc_dbcomm';
+import { IDiscordUser, IUser, User } from '@togethercrew.dev/db';
 import { ApiError } from '../utils';
 import httpStatus = require('http-status');
 import { IUserUpdateBody } from '../interfaces/user.interface';

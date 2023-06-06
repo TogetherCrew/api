@@ -1,4 +1,4 @@
-import { User, IUser } from 'tc_dbcomm';
+import { User, IUser } from '@togethercrew.dev/db';
 
 describe('User model', () => {
     describe('User validation', () => {

@@ -2,7 +2,7 @@
 import fetch from 'node-fetch';
 import { Snowflake } from 'discord.js';
 import config from '../config';
-import { Guild, IDiscordGuild, IDiscordGuildMember } from 'tc_dbcomm';
+import { Guild, IDiscordGuild, IDiscordGuildMember } from '@togethercrew.dev/db';
 import { IGuildUpdateBody } from '../interfaces/guild.interface'
 import { ApiError } from '../utils';
 import httpStatus = require('http-status');

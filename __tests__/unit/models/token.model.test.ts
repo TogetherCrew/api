@@ -1,4 +1,4 @@
-import { Token, IToken } from 'tc_dbcomm';
+import { Token, IToken } from '@togethercrew.dev/db';
 
 import moment from "moment";
 

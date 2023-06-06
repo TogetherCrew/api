@@ -1,5 +1,5 @@
 import { Types } from "mongoose"
-import { User } from 'tc_dbcomm';
+import { User } from '@togethercrew.dev/db';
 
 
 export const userOne = {

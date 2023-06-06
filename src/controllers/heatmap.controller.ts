@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { guildService, heatmapService } from '../services';
 import { IAuthRequest } from '../interfaces/request.interface';
 import { catchAsync, ApiError, date, charts } from "../utils";
-import { databaseService } from 'tc_dbcomm'
+import { databaseService } from '@togethercrew.dev/db'
 import httpStatus from 'http-status';
 import config from '../config';
 import moment from 'moment-timezone';

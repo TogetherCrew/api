@@ -5,7 +5,7 @@ import { catchAsync, ApiError, pick, sort } from "../utils";
 import httpStatus from 'http-status';
 import config from '../config';
 import { scopes, permissions } from '../config/dicord';
-import { IDiscordUser, IDiscordOathBotCallback } from 'tc_dbcomm';
+import { IDiscordUser, IDiscordOathBotCallback } from '@togethercrew.dev/db';
 import querystring from 'querystring';
 import { ICustomChannel } from '../interfaces/guild.interface';
 

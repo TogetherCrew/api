@@ -1,4 +1,4 @@
-import { Guild } from "tc_dbcomm";
+import { Guild } from "@togethercrew.dev/db";
 import { userOne, userTwo } from "./user.fixture";
 import { Types } from "mongoose"
 

@@ -6,7 +6,7 @@ import config from '../config';
 import { tokenTypes } from '../config/tokens';
 import { ApiError } from '../utils';
 import authService from './auth.service';
-import { IDiscordOathBotCallback, IToken, Token } from 'tc_dbcomm';
+import { IDiscordOathBotCallback, IToken, Token } from '@togethercrew.dev/db';
 import { authTokens } from '../interfaces/token.interface';
 
 /**
