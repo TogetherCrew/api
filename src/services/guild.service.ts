@@ -24,7 +24,7 @@ async function createGuild(data: IDiscordGuild, discordId: Snowflake) {
         icon: data.icon
     });
 
-    await sagaService.createAndStartGuildSaga(guild.guildId, 'true')
+    await sagaService.createAndStartGuildSaga(guild.guildId, true)
     return guild
 }
 
@@ -61,7 +61,7 @@ async function updateGuild(filter: object, updateBody: IGuildUpdateBody) {
 
     // fire an event for bot only if `period` or `selectedChannels` is changed
     if (updateBody.period || updateBody.selectedChannels) {
-        await sagaService.createAndStartGuildSaga(guild.guildId, 'false')
+        await sagaService.createAndStartGuildSaga(guild.guildId, false)
     }
     return guild;
 }
