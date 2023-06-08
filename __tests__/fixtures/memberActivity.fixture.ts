@@ -1,3 +1,5 @@
+import { Connection } from 'mongoose';
+
 export const memberActivityOne = {
     date: new Date("2023-04-07"),
     all_active: ["A",],
@@ -190,3 +192,6 @@ export const memberActivityTen = {
     all_disengaged_were_vital: ["A", "B", "C", "D"],
 }
 
+export const insertMemberActivities = async function <Type>(memberActivities: Array<Type>, connection: Connection) {
+    await connection.models.MemberActivity.insertMany(memberActivities.map((memberActivity) => (memberActivity)));
+};
