@@ -92,9 +92,9 @@ paths:
         "401":
           description: Unauthorized
           $ref: "#/components/responses/Unauthorized"
-        "404":
-          description: NotFound
-          $ref: "#/components/responses/NotFound"
+        "440":
+          description: Oops, something went wrong! Could you please try logging in
+          $ref: "#/components/responses/Oops_Something_Went_Wrong_Could_You_Please_Try_Logging_In"
 
     patch:
       tags:
@@ -151,10 +151,9 @@ paths:
         "401":
           description: Unauthorized
           $ref: "#/components/responses/Unauthorized"
-        "404":
-          description: NotFound
-          $ref: "#/components/responses/NotFound"
-
+        "440":
+          description: Oops, something went wrong! Could you please try logging in
+          $ref: "#/components/responses/Oops_Something_Went_Wrong_Could_You_Please_Try_Logging_In"
 
   /api/v1/guilds/discord-api/{guildId}:
     get:
@@ -204,13 +203,15 @@ paths:
         "400":
           description: Bad Request
           $ref: "#/components/responses/BadRequest"
+        "440":
+          description: Oops, something went wrong! Could you please try logging in
+          $ref: "#/components/responses/Oops_Something_Went_Wrong_Could_You_Please_Try_Logging_In"
         "401":
           description: Unauthorized
           $ref: "#/components/responses/Unauthorized"
         "590":
           description: Can not fetch from discord API
           $ref: "#/components/responses/Can_Not_Fetch_From_Discord_API"
-
 
   /api/v1/guilds/{guildId}/channels:
     get:
@@ -267,6 +268,9 @@ paths:
         "400":
           description: Bad Request
           $ref: "#/components/responses/BadRequest"
+        "440":
+          description: Oops, something went wrong! Could you please try logging in
+          $ref: "#/components/responses/Oops_Something_Went_Wrong_Could_You_Please_Try_Logging_In"
         "401":
           description: Unauthorized
           $ref: "#/components/responses/Unauthorized"
@@ -329,14 +333,15 @@ paths:
         "400":
           description: Bad Request
           $ref: "#/components/responses/BadRequest"
+        "440":
+          description: Oops, something went wrong! Could you please try logging in
+          $ref: "#/components/responses/Oops_Something_Went_Wrong_Could_You_Please_Try_Logging_In"
         "401":
           description: Unauthorized
           $ref: "#/components/responses/Unauthorized"
         "590":
           description: Can not fetch from discord API
           $ref: "#/components/responses/Can_Not_Fetch_From_Discord_API"
-
-
 
   /api/v1/guilds/connect:
     get:
@@ -389,9 +394,9 @@ paths:
         "401":
           description: Unauthorized
           $ref: "#/components/responses/Unauthorized"
-        "404":
-          description: NotFound
-          $ref: "#/components/responses/NotFound"
+        "440":
+          description: Oops, something went wrong! Could you please try logging in
+          $ref: "#/components/responses/Oops_Something_Went_Wrong_Could_You_Please_Try_Logging_In"
 
 
 
