@@ -5,7 +5,6 @@ import config from '../config';
 import { Guild, IDiscordGuild, IDiscordGuildMember } from '@togethercrew.dev/db';
 import { IGuildUpdateBody } from '../interfaces/guild.interface'
 import { ApiError } from '../utils';
-import httpStatus = require('http-status');
 import { getDiscordClient } from '../config/dicord';
 import { PermissionsBitField } from 'discord.js'
 import sagaService from './saga.service';
@@ -54,7 +53,7 @@ async function getGuild(filter: object) {
 async function updateGuild(filter: object, updateBody: IGuildUpdateBody) {
     const guild = await Guild.findOne(filter);
     if (!guild) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+        throw new ApiError(440, 'Oops, something went wrong! Could you please try logging in');
     }
     Object.assign(guild, updateBody);
     await guild.save();
