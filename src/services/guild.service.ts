@@ -75,19 +75,6 @@ async function deleteGuild(filter: object) {
     await Guild.deleteOne(filter)
 }
 
-
-/**
- * check if our bot is added to guild
- * @param {Snowflake} guildId
- * @param {Snowflake} userDiscordId
- * @returns {Boolean}
- */
-async function isBotAddedToGuild(guildId: Snowflake, userDiscordId: Snowflake) {
-    const guild = await Guild.findOne({ guildId, user: userDiscordId });
-    return guild ? true : false
-}
-
-
 /**
  * Get guild from discord API
  * @param {Snowflake} guildId
@@ -206,7 +193,6 @@ export default {
     getGuildByGuildId,
     getChannels,
     updateGuild,
-    isBotAddedToGuild,
     getGuild,
     getGuildFromDiscordAPI,
     queryGuilds,
