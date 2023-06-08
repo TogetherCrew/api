@@ -122,6 +122,21 @@ components:
           example:
             code: 590
             message: Can not fetch from discord API
+    # ********440********
+    Oops_Something_Went_Wrong_Could_You_Please_Try_Logging_In:
+      description: Oops, something went wrong! Could you please try logging in
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: number
+              message:
+                type: string
+          example:
+            code: 440
+            message: Oops, something went wrong! Could you please try logging in
 
 
 

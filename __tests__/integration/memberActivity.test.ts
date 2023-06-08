@@ -4,9 +4,9 @@ import app from '../../src/app';
 import setupTestDB from '../utils/setupTestDB';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
-import { memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour, memberActivityFive, memberActivitySix, memberActivitySeven, memberActivityEight, memberActivityNine, memberActivityTen } from '../fixtures/memberActivity.fixture';
+import { memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour, memberActivityFive, memberActivitySix, memberActivitySeven, memberActivityEight, memberActivityNine, memberActivityTen, insertMemberActivities } from '../fixtures/memberActivity.fixture';
 import { guildOne, insertGuilds } from '../fixtures/guilds.fixture';
-import { memberActivityService, databaseService } from '@togethercrew.dev/db';
+import { databaseService } from '@togethercrew.dev/db';
 import config from '../../src/config';
 
 
@@ -22,7 +22,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await memberActivityService.createMemberActivities(connection, [memberActivityOne, memberActivityTwo, memberActivityTen]);
+            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityTen], connection);
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -47,7 +47,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await memberActivityService.createMemberActivities(connection, [memberActivityThree, memberActivityFour]);
+            await insertMemberActivities([memberActivityThree, memberActivityFour], connection);
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -72,7 +72,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await memberActivityService.createMemberActivities(connection, [memberActivityFive, memberActivitySix]);
+            await insertMemberActivities([memberActivityFive, memberActivitySix], connection);
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -97,7 +97,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await memberActivityService.createMemberActivities(connection, [memberActivitySeven, memberActivityEight]);
+            await insertMemberActivities([memberActivitySeven, memberActivityEight], connection);
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -123,7 +123,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await memberActivityService.createMemberActivities(connection, [memberActivityNine, memberActivityTen]);
+            await insertMemberActivities([memberActivityNine, memberActivityTen], connection);
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -148,7 +148,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await memberActivityService.createMemberActivities(connection, [memberActivityOne]);
+            await insertMemberActivities([memberActivityOne], connection);
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -173,7 +173,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await memberActivityService.createMemberActivities(connection, [memberActivityOne]);
+            await insertMemberActivities([memberActivityOne], connection);
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -219,7 +219,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await memberActivityService.createMemberActivities(connection, [memberActivityOne, memberActivityTwo, memberActivityTen]);
+            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityTen], connection);
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -242,7 +242,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await memberActivityService.createMemberActivities(connection, [memberActivityThree, memberActivityFour]);
+            await insertMemberActivities([memberActivityThree, memberActivityFour], connection);
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -265,7 +265,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await memberActivityService.createMemberActivities(connection, [memberActivityFive, memberActivitySix]);
+            await insertMemberActivities([memberActivityFive, memberActivitySix], connection);
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -288,7 +288,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await memberActivityService.createMemberActivities(connection, [memberActivitySeven, memberActivityEight]);
+            await insertMemberActivities([memberActivitySeven, memberActivityEight], connection);
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -311,7 +311,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await memberActivityService.createMemberActivities(connection, [memberActivityNine, memberActivityTen]);
+            await insertMemberActivities([memberActivityNine, memberActivityTen], connection);
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -335,7 +335,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await memberActivityService.createMemberActivities(connection, [memberActivityOne]);
+            await insertMemberActivities([memberActivityOne], connection);
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -358,7 +358,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await memberActivityService.createMemberActivities(connection, [memberActivityOne]);
+            await insertMemberActivities([memberActivityOne], connection);
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -401,7 +401,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await memberActivityService.createMemberActivities(connection, [memberActivityOne, memberActivityTwo, memberActivityTen]);
+            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityTen], connection);
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/inactive-members-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -419,7 +419,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await memberActivityService.createMemberActivities(connection, [memberActivityThree, memberActivityFour]);
+            await insertMemberActivities([memberActivityThree, memberActivityFour], connection);
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/inactive-members-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -436,7 +436,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await memberActivityService.createMemberActivities(connection, [memberActivityFive, memberActivitySix]);
+            await insertMemberActivities([memberActivityFive, memberActivitySix], connection);
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/inactive-members-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -453,7 +453,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await memberActivityService.createMemberActivities(connection, [memberActivitySeven, memberActivityEight]);
+            await insertMemberActivities([memberActivitySeven, memberActivityEight], connection);
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/inactive-members-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -470,7 +470,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await memberActivityService.createMemberActivities(connection, [memberActivityNine, memberActivityTen]);
+            await insertMemberActivities([memberActivityNine, memberActivityTen], connection);
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/inactive-members-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -487,7 +487,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await memberActivityService.createMemberActivities(connection, [memberActivityOne]);
+            await insertMemberActivities([memberActivityOne], connection);
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/inactive-members-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -504,7 +504,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await memberActivityService.createMemberActivities(connection, [memberActivityOne]);
+            await insertMemberActivities([memberActivityOne], connection);
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/inactive-members-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
