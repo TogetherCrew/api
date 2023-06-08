@@ -229,7 +229,7 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
             }
         }
 
-        const adjustedDate = date.calculateAdjustedDate(startDate, endDate, heatmaps[0].categories[heatmaps[0].categories.length - 1]);
+        const adjustedDate = date.calculateAdjustedDate(endDate, heatmaps[0].categories[heatmaps[0].categories.length - 1]);
         const adjustedHeatmap = await connection.models.HeatMap.aggregate([
             // Stage 1: Convert date from string to date type and extract needed data
             {
