@@ -4,7 +4,7 @@ import app from '../../src/app';
 import setupTestDB from '../utils/setupTestDB';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
-import { heatmapOne, heatmapTwo, heatmapThree, heatmapFour, heatmapFive, insertHeatmaps } from '../fixtures/heatmap.fixture';
+import { heatmapOne, heatmapTwo, heatmapThree, heatmapFour, heatmapFive, insertHeatmaps, heatmapSix, heatmapSeven, heatmapEight } from '../fixtures/heatmap.fixture';
 import { guildOne, insertGuilds } from '../fixtures/guilds.fixture';
 import { databaseService } from '@togethercrew.dev/db';
 import config from '../../src/config';
@@ -160,7 +160,7 @@ describe('Heatmap routes', () => {
         test('should return 200 and line graph data if req data is ok', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
-            await insertHeatmaps([heatmapThree, heatmapFour, heatmapFive], connection);
+            await insertHeatmaps([heatmapThree, heatmapFour, heatmapFive, heatmapSix, heatmapSeven, heatmapEight], connection);
             const res = await request(app)
                 .post(`/api/v1/heatmaps/${guildOne.guildId}/line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -168,11 +168,17 @@ describe('Heatmap routes', () => {
                 .expect(httpStatus.OK);
 
             expect(res.body).toMatchObject({
-                messages: 100,
-                emojis: 50,
+                messages: 200,
+                emojis: 100,
                 msgPercentageChange: 100,
-                emojiPercentageChange: "N/A"
+                emojiPercentageChange: 100
             });
+
+            expect(res.body.categories).toEqual(['01 Apr', '02 Apr', '03 Apr', '04 Apr', '05 Apr', '06 Apr', '07 Apr']);
+            expect(res.body.series[0].name).toBe('emojis');
+            expect(res.body.series[1].name).toBe('messages');
+            expect(res.body.series[0].data).toEqual([1000, 0, 0, 0, 0, 0, 100]);
+            expect(res.body.series[1].data).toEqual([1000, 0, 0, 0, 0, 0, 200]);
         })
 
         test('should return 200 and line graph data (testing for empty data) if req data is ok', async () => {
