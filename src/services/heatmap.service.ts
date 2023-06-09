@@ -173,48 +173,51 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
             },
 
 
-            // Stage 6: Group all documents and keep the arrays
+            // Stage 6: Group documents by day and compute summary statistics
             {
                 $group: {
-                    _id: null,
-                    day_month: { $push: "$day_month" },
-                    emojis: { $push: "$emojis" },
-                    messages: {
-                        $push: {
-                            $sum: ["$total_lone_messages", "$total_thr_messages", "$total_replier"]
-                        }
-                    },
-
-                    // Store last and second-to-last document values                    
-                    lastEmojis: { $last: "$emojis" },
-                    lastTotalLoneMessages: { $last: "$total_lone_messages" },
-                    lastTotalThrMessages: { $last: "$total_thr_messages" },
-                    lastTotalReplier: { $last: "$total_replier" }
+                    _id: "$day_month",
+                    emojis: { $sum: "$emojis" },
+                    messages: { $sum: { $sum: ["$total_lone_messages", "$total_thr_messages", "$total_replier"] } }
                 }
             },
 
-            // Stage 7: Transform group data into final format for charting
+
+            // Stage 7: Sort documents by date
+            {
+                $sort: { _id: 1 }
+            },
+
+            // Stage 8: Transform group data into final format for charting
+            {
+                $group: {
+                    _id: null,
+                    categories: { $push: "$_id" },
+                    emojis: { $push: "$emojis" },
+                    messages: { $push: "$messages" },
+                    // totalEmojis: { $sum: "$emojis" },
+                    // totalMessages: { $sum: "$messages" }
+                    lastMessages: { $last: "$messages" },
+                    lastEmojis: { $last: "$emojis" },
+                }
+
+            },
+            // Stage 9: Project data into final format
             {
                 $project: {
                     _id: 0,
-                    categories: "$day_month",
+                    categories: "$categories",
                     series: [
                         { name: "emojis", data: "$emojis" },
                         { name: "messages", data: "$messages" }
                     ],
-                    // Use the last document values
                     emojis: "$lastEmojis",
-                    messages: {
-                        $sum: {
-                            $add: [
-                                { $ifNull: ["$lastTotalLoneMessages", 0] },
-                                { $ifNull: ["$lastTotalThrMessages", 0] },
-                                { $ifNull: ["$lastTotalReplier", 0] }
-                            ]
-                        }
-                    }
+                    messages: "$lastMessages"
                 }
             }
+
+
+
         ]);
 
         if (heatmaps.length === 0) {
@@ -246,9 +249,13 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
             // Stage 2: Filter documents based on date
             {
                 $match: {
-                    date: new Date(adjustedDate)
+                    date: {
+                        $gte: new Date(adjustedDate),
+                        $lt: new Date(new Date(adjustedDate).getTime() + 24 * 60 * 60 * 1000) // add one day in milliseconds
+                    }
                 }
             },
+
 
 
             // Stage 3: Calculate statistics and concatenate day-month field
@@ -285,6 +292,29 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
                 }
             },
 
+            // Stage 4: Group documents by null (aggregate all) and sum up all the values
+            {
+                $group: {
+                    _id: null, // Aggregate all documents
+                    total_lone_messages: { $sum: "$total_lone_messages" },
+                    total_thr_messages: { $sum: "$total_thr_messages" },
+                    total_replier: { $sum: "$total_replier" },
+                    total_emojis: { $sum: "$emojis" }
+                }
+            },
+            // Stage 5: Transform totals into 'messages' and 'emojis'
+            {
+                $project: {
+                    _id: 0,
+                    messages: {
+                        $add: ["$total_lone_messages", "$total_thr_messages", "$total_replier"]
+                    },
+                    emojis: "$total_emojis"
+                }
+            }
+
+
+
         ]);
 
         if (adjustedHeatmap.length === 0) {
@@ -297,7 +327,7 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
 
         return {
             ...heatmaps[0],
-            msgPercentageChange: math.calculatePercentageChange((adjustedHeatmap[0].total_lone_messages + adjustedHeatmap[0].total_thr_messages + adjustedHeatmap[0].total_replier), heatmaps[0].messages),
+            msgPercentageChange: math.calculatePercentageChange(adjustedHeatmap[0].messages, heatmaps[0].messages),
             emojiPercentageChange: math.calculatePercentageChange(adjustedHeatmap[0].emojis, heatmaps[0].emojis)
         }
 
