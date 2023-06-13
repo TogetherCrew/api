@@ -133,7 +133,7 @@ async function activeMembersCompositionLineGraph(connection: Connection, startDa
             }
         }
 
-        const adjustedDate = date.calculateAdjustedDate(startDate, endDate, membersActivities[0].categories[membersActivities[0].categories.length - 1]);
+        const adjustedDate = date.calculateAdjustedDate(endDate, membersActivities[0].categories[membersActivities[0].categories.length - 1]);
         const AdjustedMemberActivity = await connection.models.MemberActivity.aggregate([
             // Stage 1: Convert date from string to date type and extract needed data
             {
@@ -337,7 +337,7 @@ async function disengagedMembersCompositionLineGraph(connection: Connection, sta
             }
         }
 
-        const adjustedDate = date.calculateAdjustedDate(startDate, endDate, membersActivities[0].categories[membersActivities[0].categories.length - 1]);
+        const adjustedDate = date.calculateAdjustedDate(endDate, membersActivities[0].categories[membersActivities[0].categories.length - 1]);
         const AdjustedMemberActivity = await connection.models.MemberActivity.aggregate([
             // Stage 1: Convert date from string to date type and extract needed data
             {
@@ -509,7 +509,7 @@ async function inactiveMembersLineGraph(connection: Connection, startDate: Date,
             }
         }
 
-        const adjustedDate = date.calculateAdjustedDate(startDate, endDate, membersActivities[0].categories[membersActivities[0].categories.length - 1]);
+        const adjustedDate = date.calculateAdjustedDate(endDate, membersActivities[0].categories[membersActivities[0].categories.length - 1]);
         const AdjustedMemberActivity = await connection.models.MemberActivity.aggregate([
             // Stage 1: Convert date from string to date type and extract needed data
             {
