@@ -150,6 +150,74 @@ describe('member-activity routes', () => {
                 .expect(httpStatus.NOT_FOUND);
         })
     })
+
+    describe('POST /api/v1/member-activity/:guildId/active-members-onboarding-line-graph', () => {
+        beforeEach(async () => {
+            await connection.dropDatabase();
+        });
+        test('should return 200 and active members onboarding line graph data if req data is ok', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+
+            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree], connection);
+            const res = await request(app)
+                .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-line-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date("2023-04-01"), endDate: new Date("2023-04-07") })
+                .expect(httpStatus.OK);
+
+
+            expect(res.body).toMatchObject({
+                newlyActive: 2,
+                stillActive: 1,
+                dropped: 3,
+                joined: 1,
+                newlyActivePercentageChange: 100,
+                stillActivePercentageChange: 0,
+                droppedPercentageChange: "N/A",
+                joinedPercentageChange: -50,
+            });
+        })
+
+        test('should return 200 and ctive members onboarding line graph data (testing for empty data) if req data is ok', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+            const res = await request(app)
+                .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-line-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date("2023-04-01"), endDate: new Date("2023-04-07") })
+                .expect(httpStatus.OK);
+
+
+            expect(res.body).toMatchObject({
+                newlyActive: 0,
+                stillActive: 0,
+                dropped: 0,
+                joined: 0,
+                newlyActivePercentageChange: 0,
+                stillActivePercentageChange: 0,
+                droppedPercentageChange: 0,
+                joinedPercentageChange: 0,
+            });
+        })
+
+        test('should return 401 if access token is missing', async () => {
+            await request(app)
+                .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-line-graph`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.UNAUTHORIZED);
+        })
+
+        test('should return 404 if guild not found', async () => {
+            await insertUsers([userOne]);
+            await request(app)
+                .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-line-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.NOT_FOUND);
+        })
+    })
+
     describe('POST /api/v1/member-activity/:guildId/inactive-members-line-graph', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
