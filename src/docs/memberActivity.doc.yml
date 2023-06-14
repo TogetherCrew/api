@@ -225,3 +225,83 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
+
+  /api/v1/member-activity/{guildId}/active-members-onboarding-line-graph:
+    post:
+      tags:
+        - [Member-Activity]
+      summary: Get data for active members onboarding line graph 
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: guildId
+          required: true
+          schema:
+            type: string
+          description: Guild Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startDate:
+                  type: string
+                  format: date-time     
+                endDate:
+                  type: string
+                  format: date-time        
+              example:
+                startDate: "2023-01-17T13:02:10.911+00:00"
+                endDate: "2023-01-29T10:50:01.513Z"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      type: string
+                  series:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        data:
+                          type: array
+                          items:
+                            type: number
+                  newlyActive:
+                    type: number
+                  stillActive:
+                    type: number
+                  dropped:
+                    type: number
+                  joined:
+                    type: number
+                  newlyActivePercentageChange:
+                    type: number
+                  stillActivePercentageChange:
+                    type: number
+                  droppedPercentageChange:
+                    type: number
+                  joinedPercentageChange:
+                    type: number
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
+        
