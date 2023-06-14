@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { guildService, memberActivityService } from '../services';
 import { IAuthRequest } from '../interfaces/request.interface';
 import { catchAsync, ApiError, charts } from "../utils";
-import { databaseService } from 'tc_dbcomm'
+import { databaseService } from '@togethercrew.dev/db'
 import httpStatus from 'http-status';
 import config from '../config';
 
@@ -13,34 +13,23 @@ const activeMembersCompositionLineGraph = catchAsync(async function (req: IAuthR
         throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
     }
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
-    let activeMembersLineGraph = await memberActivityService.activeMembersCompositionLineGraph(connection, req.body.startDate, req.body.endDate);
-    activeMembersLineGraph = charts.fillActiveMembersCompositionLineGraph(activeMembersLineGraph, req.body.startDate, req.body.endDate);
-    res.send(activeMembersLineGraph);
+    let activeMembersCompositionLineGraph = await memberActivityService.activeMembersCompositionLineGraph(connection, req.body.startDate, req.body.endDate);
+    activeMembersCompositionLineGraph = charts.fillActiveMembersCompositionLineGraph(activeMembersCompositionLineGraph, req.body.startDate, req.body.endDate);
+    res.send(activeMembersCompositionLineGraph);
 });
 
 const activeMembersOnboardingLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
-    const mockData = {
-        categories: ['21 Jan', '22 Jan', '23 Jan', '24 Jan', '25 Jan', '26 Jan', '27 Jan'],
-        series: [
-            { name: 'joined', data: [2, 4, 6, 8, 10, 2, 4] },
-            { name: 'newlyActive', data: [2, 4, 6, 8, 10, 2, 4] },
-            { name: 'stillActive', data: [2, 4, 6, 8, 10, 2, 4] },
-            { name: 'dropped', data: [2, 4, 6, 8, 10, 2, 4] }
-        ],
-        joined: 36,
-        newlyActive: 36,
-        stillActive: 36,
-        dropped: 36,
-        joinedPercentageChange: 100,
-        newlyActivePercentageChange: 100,
-        stillActivePercentageChange: 100,
-        droppedPercentageChange: 100,
+    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
     }
-    res.send(mockData);
+    const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
+    let activeMembersOnboardingLineGraph = await memberActivityService.activeMembersOnboardingLineGraph(connection, req.body.startDate, req.body.endDate);
+    activeMembersOnboardingLineGraph = charts.fillActiveMembersOnboardingLineGraph(activeMembersOnboardingLineGraph, req.body.startDate, req.body.endDate);
+    res.send(activeMembersOnboardingLineGraph);
 });
 
 
-const disengagedMembersOnboardingLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
+const disengagedMembersCompositionLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
     if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
     }
@@ -51,10 +40,21 @@ const disengagedMembersOnboardingLineGraph = catchAsync(async function (req: IAu
 });
 
 
+const inactiveMembersLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
+    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    }
+    const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
+    let inactiveMembersLineGraph = await memberActivityService.inactiveMembersLineGraph(connection, req.body.startDate, req.body.endDate);
+    inactiveMembersLineGraph = charts.fillInactiveMembersLineGraph(inactiveMembersLineGraph, req.body.startDate, req.body.endDate);
+    res.send(inactiveMembersLineGraph);
+});
+
 
 export default {
     activeMembersCompositionLineGraph,
     activeMembersOnboardingLineGraph,
-    disengagedMembersOnboardingLineGraph
+    disengagedMembersCompositionLineGraph,
+    inactiveMembersLineGraph
 }
 

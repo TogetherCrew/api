@@ -3,13 +3,13 @@ import { Request, Response } from 'express';
 import config from '../config';
 import { scopes, permissions } from '../config/dicord'
 import { userService, authService, tokenService, guildService } from '../services';
-import { IDiscordUser, IDiscordOathBotCallback } from 'tc_dbcomm';
+import { IDiscordUser, IDiscordOathBotCallback } from '@togethercrew.dev/db';
 import { catchAsync } from "../utils";
 import { authTokens } from '../interfaces/token.interface'
 import querystring from 'querystring';
 
 const tryNow = catchAsync(async function (req: Request, res: Response) {
-    res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.tryNow}&response_type=code&scope=${scopes.tryNow}&permissions=${permissions.ViewChannels}`);
+    res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.tryNow}&response_type=code&scope=${scopes.tryNow}&permissions=${permissions.ViewChannels | permissions.readMessageHistory}`);
 });
 
 const tryNowCallback = catchAsync(async function (req: Request, res: Response) {
@@ -55,6 +55,7 @@ const tryNowCallback = catchAsync(async function (req: Request, res: Response) {
         });
         res.redirect(`${config.frontend.url}/callback?` + query);
     } catch (err) {
+        console.log(err)
         const query = querystring.stringify({
             "statusCode": 490
         });

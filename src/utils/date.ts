@@ -1,3 +1,5 @@
+import moment from "moment";
+
 function shiftHeatmapsHours(heatmaps: number[][], timeZoneOffset: number) {
     let shiftedHour, shiftedDay = 0;
     const heatmapsTimezone: number[][] = [];
@@ -27,7 +29,16 @@ function shiftHeatmapsHours(heatmaps: number[][], timeZoneOffset: number) {
     return heatmapsTimezone;
 }
 
-export default {
-    shiftHeatmapsHours
+function calculateAdjustedDate(endDate: Date, dayMonth: string) {
+    const end = moment(endDate);
+    const dayMonthMoment = moment(dayMonth + ' ' + end.year(), 'DD MMM YYYY');
+    return (moment(dayMonthMoment).subtract(7, 'days')).format('YYYY-MM-DD')
 }
+
+export default {
+    shiftHeatmapsHours,
+    calculateAdjustedDate
+}
+
+
 

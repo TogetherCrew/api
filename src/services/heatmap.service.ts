@@ -1,5 +1,7 @@
 import { Connection } from 'mongoose';
 import { IHeatmapChartRequestBody } from '../interfaces/request.interface';
+import { date, math } from '../utils';
+
 /**
  * get heatmap chart 
  * @param {Connection} connection
@@ -89,8 +91,8 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
     const end = new Date(endDate);
     try {
         const heatmaps = await connection.models.HeatMap.aggregate([
+            // Stage 1: Convert date from string to date type and extract needed data
             {
-                // Stage 1: Convert date from string to date type and extract needed data
                 $project: {
                     _id: 0,
                     date: { $convert: { input: "$date", to: "date" } },
@@ -121,6 +123,7 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
             // Stage 4: Calculate statistics and concatenate day-month field
             {
                 $project: {
+                    date: 1,
                     day_month: {
                         $concat: [
                             { $dateToString: { format: "%d", date: "$date" } },
@@ -163,48 +166,58 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
                     }
                 }
             },
+
             // Stage 5: Sort documents by date
             {
                 $sort: { date: 1 }
             },
-            // Stage 6: Group all documents and compute summary statistics
+
+
+            // Stage 6: Group documents by day and compute summary statistics
+            {
+                $group: {
+                    _id: "$day_month",
+                    emojis: { $sum: "$emojis" },
+                    messages: { $sum: { $sum: ["$total_lone_messages", "$total_thr_messages", "$total_replier"] } }
+                }
+            },
+
+
+            // Stage 7: Sort documents by date
+            {
+                $sort: { _id: 1 }
+            },
+
+            // Stage 8: Transform group data into final format for charting
             {
                 $group: {
                     _id: null,
-                    day_month: { $push: "$day_month" },
+                    categories: { $push: "$_id" },
                     emojis: { $push: "$emojis" },
-                    messages: {
-                        $push: {
-                            $sum: ["$total_lone_messages", "$total_thr_messages", "$total_replier"]
-                        }
-                    }
+                    messages: { $push: "$messages" },
+                    // totalEmojis: { $sum: "$emojis" },
+                    // totalMessages: { $sum: "$messages" }
+                    lastMessages: { $last: "$messages" },
+                    lastEmojis: { $last: "$emojis" },
                 }
+
             },
-            // Stage 7: Transform group data into final format for charting
+            // Stage 9: Project data into final format
             {
                 $project: {
                     _id: 0,
-                    categories: "$day_month",
+                    categories: "$categories",
                     series: [
                         { name: "emojis", data: "$emojis" },
                         { name: "messages", data: "$messages" }
                     ],
-                    emojis: {
-                        $reduce: {
-                            input: "$emojis",
-                            initialValue: 0,
-                            in: { $sum: ["$$value", "$$this"] }
-                        }
-                    },
-                    messages: {
-                        $reduce: {
-                            input: "$messages",
-                            initialValue: 0,
-                            in: { $sum: ["$$value", "$$this"] }
-                        }
-                    }
+                    emojis: "$lastEmojis",
+                    messages: "$lastMessages"
                 }
             }
+
+
+
         ]);
 
         if (heatmaps.length === 0) {
@@ -218,33 +231,36 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
 
             }
         }
-        const diffInMs = Math.abs(end.getTime() - start.getTime());
-        const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
-        const numDaysToSubtract = diffInDays;
-        const pastHeatmaps = await connection.models.HeatMap.aggregate([
+
+        const adjustedDate = date.calculateAdjustedDate(endDate, heatmaps[0].categories[heatmaps[0].categories.length - 1]);
+        const adjustedHeatmap = await connection.models.HeatMap.aggregate([
+            // Stage 1: Convert date from string to date type and extract needed data
             {
                 $project: {
                     _id: 0,
+                    date: { $convert: { input: "$date", to: "date" } },
                     lone_messages: 1,
                     thr_messages: 1,
                     replier: 1,
-                    reacter: 1,
-                    date: { $convert: { input: "$date", to: "date" } },
-
+                    reacter: 1
                 }
             },
+
+            // Stage 2: Filter documents based on date
             {
                 $match: {
                     date: {
-                        $gte: new Date(start.setDate(start.getDate() - numDaysToSubtract)),
-                        $lte: new Date(end.setDate(end.getDate() - (numDaysToSubtract + 1)))
+                        $gte: new Date(adjustedDate),
+                        $lt: new Date(new Date(adjustedDate).getTime() + 24 * 60 * 60 * 1000) // add one day in milliseconds
                     }
                 }
             },
 
+
+
+            // Stage 3: Calculate statistics and concatenate day-month field
             {
                 $project: {
-                    date: 1,
                     total_lone_messages: {
                         $reduce: {
                             input: "$lone_messages",
@@ -275,57 +291,44 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
                     }
                 }
             },
+
+            // Stage 4: Group documents by null (aggregate all) and sum up all the values
             {
                 $group: {
-                    date: { $push: "$date" },
-                    _id: null,
-                    emojis: { $push: "$emojis" },
-                    messages: {
-                        $push: {
-                            $sum: ["$total_lone_messages", "$total_thr_messages", "$total_replier"]
-                        }
-                    }
+                    _id: null, // Aggregate all documents
+                    total_lone_messages: { $sum: "$total_lone_messages" },
+                    total_thr_messages: { $sum: "$total_thr_messages" },
+                    total_replier: { $sum: "$total_replier" },
+                    total_emojis: { $sum: "$emojis" }
                 }
             },
+            // Stage 5: Transform totals into 'messages' and 'emojis'
             {
                 $project: {
-                    date: 1,
-                    emojis: {
-                        $reduce: {
-                            input: "$emojis",
-                            initialValue: 0,
-                            in: { $sum: ["$$value", "$$this"] }
-                        }
-                    },
+                    _id: 0,
                     messages: {
-                        $reduce: {
-                            input: "$messages",
-                            initialValue: 0,
-                            in: { $sum: ["$$value", "$$this"] }
-                        }
-                    }
+                        $add: ["$total_lone_messages", "$total_thr_messages", "$total_replier"]
+                    },
+                    emojis: "$total_emojis"
                 }
             }
-        ]
-
-        );
 
 
-        let msgPercentageChange = 0;
-        let emojiPercentageChange = 0;
 
-        if (heatmaps[0] && pastHeatmaps[0] && pastHeatmaps[0].messages !== 0) {
-            msgPercentageChange = ((heatmaps[0].messages - pastHeatmaps[0].messages) / pastHeatmaps[0].messages) * 100;
-        }
+        ]);
 
-        if (heatmaps[0] && pastHeatmaps[0] && pastHeatmaps[0].emojis !== 0) {
-            emojiPercentageChange = ((heatmaps[0].emojis - pastHeatmaps[0].emojis) / pastHeatmaps[0].emojis) * 100;
+        if (adjustedHeatmap.length === 0) {
+            return {
+                ...heatmaps[0],
+                msgPercentageChange: 0,
+                emojiPercentageChange: 0
+            }
         }
 
         return {
             ...heatmaps[0],
-            msgPercentageChange,
-            emojiPercentageChange
+            msgPercentageChange: math.calculatePercentageChange(adjustedHeatmap[0].messages, heatmaps[0].messages),
+            emojiPercentageChange: math.calculatePercentageChange(adjustedHeatmap[0].emojis, heatmaps[0].emojis)
         }
 
     } catch (err) {

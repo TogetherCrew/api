@@ -1,4 +1,4 @@
-import { Guild } from "tc_dbcomm";
+import { Guild } from "@togethercrew.dev/db";
 import { userOne, userTwo } from "./user.fixture";
 import { Types } from "mongoose"
 
@@ -80,6 +80,33 @@ export const guildFour = {
     icon: 'IconFour'
 }
 
+export const guildFive = {
+    _id: new Types.ObjectId(),
+    guildId: "681946187490000999",
+    user: userOne.discordId,
+    name: 'guildFive',
+    isDisconnected: false,
+    isInProgress: true,
+    icon: 'IconFive',
+    selectedChannels: [
+        {
+            channelId: '915944557605163008',
+            channelName: 'one'
+        },
+        {
+            channelId: '920707473369878589',
+            channelName: 'two'
+        },
+        {
+            channelId: '915917066496774165',
+            channelName: 'three'
+        },
+    ]
+}
+
+
 export const insertGuilds = async function <Type>(guilds: Array<Type>) {
     await Guild.insertMany(guilds.map((guild) => (guild)));
 };
+
+

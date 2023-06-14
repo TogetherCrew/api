@@ -5,11 +5,11 @@ import app from '../../src/app';
 import setupTestDB from '../utils/setupTestDB';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
-import { discordResponseGuildOne, guildOne, guildTwo, guildThree, guildFour, insertGuilds } from '../fixtures/guilds.fixture';
+import { discordResponseGuildOne, guildOne, guildTwo, guildThree, guildFour, guildFive, insertGuilds } from '../fixtures/guilds.fixture';
 import { discordResponseChannels, discordResponseChannelOne } from '../fixtures/channels.fixture';
 import { IGuildUpdateBody } from '../../src/interfaces/guild.interface';
-import { guildService, authService, userService } from '../../src/services';
-import { Guild } from 'tc_dbcomm';
+import { guildService, authService, userService, sagaService } from '../../src/services';
+import { Guild } from '@togethercrew.dev/db';
 setupTestDB();
 
 describe('Guild routes', () => {
@@ -17,11 +17,10 @@ describe('Guild routes', () => {
 
     describe('GET /api/v1/guilds/:guildId/channels', () => {
         beforeEach(() => {
-            guildService.getGuildChannels = jest.fn().mockReturnValue(discordResponseChannels);
-            guildService.isBotAddedToGuild = jest.fn().mockReturnValue(true);
+            guildService.getChannelsFromDiscordJS = jest.fn().mockReturnValue(discordResponseChannels);
         });
 
-        test('should return 200 and array of channels of guild', async () => {
+        test('should return 200 and array of channels of the guild', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
             const res = await request(app)
@@ -30,11 +29,105 @@ describe('Guild routes', () => {
                 .send()
                 .expect(httpStatus.OK);
 
-            expect(res.body).toHaveLength(4);
+            expect(res.body).toHaveLength(3);
             expect(res.body[0].subChannels).toHaveLength(2);
             expect(res.body[1].subChannels).toHaveLength(2);
             expect(res.body[2].subChannels).toHaveLength(2);
-            expect(res.body[3].subChannels).toHaveLength(0);
+
+            expect(res.body[0]).toEqual({
+                id: "915914985140531241",
+                title: "┏━┫COMMUNITY┣━━━━┓",
+                subChannels: [{
+                    id: "915944557605163008",
+                    name: "💬・general-chat",
+                    parent_id: "915914985140531241",
+                    guild_id: "915914985140531240",
+                    canReadMessageHistoryAndViewChannel: true
+                },
+                {
+                    id: "920707473369878589",
+                    name: "📖・learning-together",
+                    parent_id: "915914985140531241",
+                    guild_id: "915914985140531240",
+                    canReadMessageHistoryAndViewChannel: true
+                }]
+            });
+
+
+            expect(res.body[1]).toEqual({
+                id: "928623723190292520",
+                title: "┏━┫WELCOME┣━━━━┓",
+                subChannels: [{
+                    id: "915917066496774165",
+                    name: "👋・introductions",
+                    parent_id: "928623723190292520",
+                    guild_id: "915914985140531240",
+                    canReadMessageHistoryAndViewChannel: true
+                },
+                {
+                    id: "921468460062605334",
+                    name: "☝・start-here",
+                    parent_id: "928623723190292520",
+                    guild_id: "915914985140531240",
+                    canReadMessageHistoryAndViewChannel: true
+                }]
+            });
+            expect(res.body[2]).toEqual({
+                id: "928627624585072640",
+                title: "┏━┫CONTRIBUTE┣━━━┓",
+                subChannels: [{
+                    id: "930049272693530674",
+                    name: "😎・meeting room",
+                    parent_id: "928627624585072640",
+                    guild_id: "915914985140531240",
+                    canReadMessageHistoryAndViewChannel: true
+                },
+                {
+                    id: "930488542168248390",
+                    name: "🗺・official-links",
+                    parent_id: "928627624585072640",
+                    guild_id: "915914985140531240",
+                    canReadMessageHistoryAndViewChannel: true
+                }]
+            });
+
+
+        })
+        test('should return 440 if did not find guild with guildId and relative user', async () => {
+            await insertUsers([userOne]);
+            await request(app)
+                .get(`/api/v1/guilds/${discordResponseGuildOne.id}/channels`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send()
+                .expect(440);
+
+        })
+        test('should return 401 if access token is missing', async () => {
+            await insertUsers([userOne]);
+            await request(app)
+                .get(`/api/v1/guilds/${discordResponseGuildOne.id}/channels`)
+                .send()
+                .expect(httpStatus.UNAUTHORIZED);
+        })
+    })
+
+    describe('GET /api/v1/guilds/:guildId/selected-channels', () => {
+        beforeEach(() => {
+            guildService.getChannelsFromDiscordJS = jest.fn().mockReturnValue(discordResponseChannels);
+        });
+
+        test('should return 200 and array of selected channels of the guild', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildFive]);
+            const res = await request(app)
+                .get(`/api/v1/guilds/${guildFive.guildId}/selected-channels`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toHaveLength(2);
+            expect(res.body[0].subChannels).toHaveLength(2);
+            expect(res.body[1].subChannels).toHaveLength(1);
 
 
             expect(res.body[0]).toEqual({
@@ -44,13 +137,15 @@ describe('Guild routes', () => {
                     id: "915944557605163008",
                     name: "💬・general-chat",
                     parent_id: "915914985140531241",
-                    guild_id: "915914985140531240"
+                    guild_id: "915914985140531240",
+                    canReadMessageHistoryAndViewChannel: true
                 },
                 {
                     id: "920707473369878589",
                     name: "📖・learning-together",
                     parent_id: "915914985140531241",
-                    guild_id: "915914985140531240"
+                    guild_id: "915914985140531240",
+                    canReadMessageHistoryAndViewChannel: true
                 },]
             });
             expect(res.body[1]).toEqual({
@@ -60,64 +155,39 @@ describe('Guild routes', () => {
                     id: "915917066496774165",
                     name: "👋・introductions",
                     parent_id: "928623723190292520",
-                    guild_id: "915914985140531240"
-                },
-                {
-                    id: "921468460062605334",
-                    name: "☝・start-here",
-                    parent_id: "928623723190292520",
-                    guild_id: "915914985140531240"
-                },]
-            });
-            expect(res.body[2]).toEqual({
-                id: "928627624585072640",
-                title: "┏━┫CONTRIBUTE┣━━━┓",
-                subChannels: [{
-                    id: "930049272693530674",
-                    name: "😎・meeting room",
-                    parent_id: "928627624585072640",
-                    guild_id: "915914985140531240"
-                },
-                {
-                    id: "930488542168248390",
-                    name: "🗺・official-links",
-                    parent_id: "928627624585072640",
-                    guild_id: "915914985140531240"
+                    guild_id: "915914985140531240",
+                    canReadMessageHistoryAndViewChannel: true
                 }]
             });
 
-            expect(res.body[3]).toEqual({
-                id: "930488542168248590",
-                title: "🗺・DAO",
-                subChannels: []
-            });
-
         })
-        test('should return 400 if bot is not added to guild', async () => {
-            guildService.isBotAddedToGuild = jest.fn().mockReturnValue(false);
+
+        test('should return 200 and empty array if selected channels of the guild is empty', async () => {
             await insertUsers([userOne]);
-            await request(app)
-                .get(`/api/v1/guilds/${discordResponseGuildOne.id}/channels`)
+            await insertGuilds([guildOne]);
+            const res = await request(app)
+                .get(`/api/v1/guilds/${guildOne.guildId}/selected-channels`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
-                .expect(httpStatus.BAD_REQUEST);
+                .expect(httpStatus.OK);
+
+            expect(res.body).toHaveLength(0);
+        })
+
+        test('should return 440 if did not find guild with guildId and relative user', async () => {
+            await insertUsers([userOne]);
+            await request(app)
+                .get(`/api/v1/guilds/${guildFive.guildId}/selected-channels`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send()
+                .expect(440);
         })
         test('should return 401 if access token is missing', async () => {
             await insertUsers([userOne]);
             await request(app)
-                .get(`/api/v1/guilds/${discordResponseGuildOne.id}/channels`)
+                .get(`/api/v1/guilds/${guildFive.guildId}/selected-channels`)
                 .send()
                 .expect(httpStatus.UNAUTHORIZED);
-        })
-        test('should return 400 if can not fetch guild channels', async () => {
-            guildService.isBotAddedToGuild = jest.fn().mockReturnValue(false);
-            await insertUsers([userOne]);
-            await request(app)
-                .get(`/api/v1/guilds/${discordResponseGuildOne.id}/channels`)
-                .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send()
-                .expect(httpStatus.BAD_REQUEST);
-
         })
     })
 
@@ -141,7 +211,7 @@ describe('Guild routes', () => {
                 isDisconnected: guildOne.isDisconnected,
                 connectedAt: expect.anything(),
                 icon: guildOne.icon,
-                action: [1, 1, 1, 4, 3, 5, 5, 4, 3, 3, 2],
+                action: [1, 1, 1, 4, 3, 5, 5, 4, 3, 3, 2, 2, 1],
                 window: [7, 1]
             });
         })
@@ -154,14 +224,13 @@ describe('Guild routes', () => {
                 .get(`/api/v1/guilds/${guildOne.guildId}`)
                 .expect(httpStatus.UNAUTHORIZED);
         })
-
-        test('should return 404 if guild not found', async () => {
+        test('should return 440 if did not find guild with guildId and relative user', async () => {
             await insertUsers([userOne]);
-
             await request(app)
                 .get(`/api/v1/guilds/${guildOne.guildId}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .expect(httpStatus.NOT_FOUND);
+                .send()
+                .expect(440);
         })
     })
 
@@ -236,7 +305,6 @@ describe('Guild routes', () => {
         })
     })
 
-
     describe('POST /api/v1/guilds/:guildId/disconnect', () => {
         test('should return 200 and soft disconnect the guild if req data is ok', async () => {
             await insertUsers([userOne]);
@@ -276,18 +344,18 @@ describe('Guild routes', () => {
                 .expect(httpStatus.UNAUTHORIZED);
         })
 
-        test('should return 404 if guild not found', async () => {
+        test('should return 440 if did not find guild with guildId and relative user', async () => {
             await insertUsers([userOne]);
             await request(app)
                 .post(`/api/v1/guilds/${guildOne.guildId}/disconnect`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send({ disconnectType: 'soft' })
-                .expect(httpStatus.NOT_FOUND);
+                .expect(440);
         })
         test('should return 400 if disconnectType is invalid', async () => {
             await insertUsers([userOne]);
             await request(app)
-                .patch(`/api/v1/guilds/${guildOne.guildId}`)
+                .post(`/api/v1/guilds/${guildOne.guildId}/disconnect`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send({ disconnectType: ':/' })
                 .expect(httpStatus.BAD_REQUEST);
@@ -296,7 +364,6 @@ describe('Guild routes', () => {
 
     describe('PATCH /api/v1/guilds/:guildId', () => {
         let updateBody: IGuildUpdateBody;
-
         beforeEach(() => {
             updateBody = {
                 period: moment("2022-02-01 08:30:26.127Z").toDate(),
@@ -308,6 +375,8 @@ describe('Guild routes', () => {
                 ],
                 isDisconnected: false
             };
+            sagaService.createAndStartGuildSaga = jest.fn().mockReturnValue({});
+
         });
         test('should return 200 and successfully update guild if data is ok', async () => {
             await insertUsers([userOne]);
@@ -342,14 +411,14 @@ describe('Guild routes', () => {
                 .expect(httpStatus.UNAUTHORIZED);
         })
 
-        test('should return 404 if guild not found', async () => {
+        test('should return 440 if did not find guild with guildId and relative user', async () => {
             await insertUsers([userOne]);
 
             await request(app)
                 .patch(`/api/v1/guilds/${guildOne.guildId}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send(updateBody)
-                .expect(httpStatus.NOT_FOUND);
+                .expect(440);
         })
 
 
@@ -379,7 +448,6 @@ describe('Guild routes', () => {
     describe('GET /api/v1/guilds/discord-api/:guildId', () => {
         beforeEach(() => {
             guildService.getGuildFromDiscordAPI = jest.fn().mockReturnValue(discordResponseGuildOne);
-            guildService.isBotAddedToGuild = jest.fn().mockReturnValue(true);
         });
 
         test('should return 200 and the guild object (from Discord API) if data is ok', async () => {
@@ -403,14 +471,13 @@ describe('Guild routes', () => {
                 .expect(httpStatus.UNAUTHORIZED);
         })
 
-        test('should return 400 if can not fetch guild channels', async () => {
-            guildService.isBotAddedToGuild = jest.fn().mockReturnValue(false);
+        test('should return 440 if did not find guild with guildId and relative user', async () => {
             await insertUsers([userOne]);
             await request(app)
                 .get(`/api/v1/guilds/discord-api/${guildOne.guildId}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
-                .expect(httpStatus.BAD_REQUEST);
+                .expect(440);
 
         })
     })
@@ -443,7 +510,7 @@ describe('Guild routes', () => {
                 isDisconnected: guildOne.isDisconnected,
                 connectedAt: expect.anything(),
                 icon: guildOne.icon,
-                action: [1, 1, 1, 4, 3, 5, 5, 4, 3, 3, 2],
+                action: [1, 1, 1, 4, 3, 5, 5, 4, 3, 3, 2, 2, 1],
                 window: [7, 1]
             });
         });

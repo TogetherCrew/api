@@ -6,9 +6,9 @@ import config from '../../src/config'
 setupTestDB();
 
 describe('Notion routes', () => {
-    beforeEach(() => {
-        jest.resetModules()
-    });
+    // beforeEach(() => {
+    //     jest.resetModules()
+    // });
 
     describe('GET /api/v1/notion/databases', () => {
         test('should return 200 and database object if req data is ok', async () => {

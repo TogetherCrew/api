@@ -47,14 +47,21 @@ const getGuildFromDiscordAPI = {
 
 
 
-const getGuildChannels = {
+const getChannels = {
+    params: Joi.object().required().keys({
+        guildId: Joi.string().required()
+    })
+};
+
+const getSelectedChannels = {
     params: Joi.object().required().keys({
         guildId: Joi.string().required()
     })
 };
 
 export default {
-    getGuildChannels,
+    getSelectedChannels,
+    getChannels,
     updateGuild,
     getGuild,
     getGuildFromDiscordAPI,

@@ -92,9 +92,9 @@ paths:
         "401":
           description: Unauthorized
           $ref: "#/components/responses/Unauthorized"
-        "404":
-          description: NotFound
-          $ref: "#/components/responses/NotFound"
+        "440":
+          description: Oops, something went wrong! Could you please try logging in
+          $ref: "#/components/responses/Oops_Something_Went_Wrong_Could_You_Please_Try_Logging_In"
 
     patch:
       tags:
@@ -151,10 +151,9 @@ paths:
         "401":
           description: Unauthorized
           $ref: "#/components/responses/Unauthorized"
-        "404":
-          description: NotFound
-          $ref: "#/components/responses/NotFound"
-
+        "440":
+          description: Oops, something went wrong! Could you please try logging in
+          $ref: "#/components/responses/Oops_Something_Went_Wrong_Could_You_Please_Try_Logging_In"
 
   /api/v1/guilds/discord-api/{guildId}:
     get:
@@ -204,6 +203,9 @@ paths:
         "400":
           description: Bad Request
           $ref: "#/components/responses/BadRequest"
+        "440":
+          description: Oops, something went wrong! Could you please try logging in
+          $ref: "#/components/responses/Oops_Something_Went_Wrong_Could_You_Please_Try_Logging_In"
         "401":
           description: Unauthorized
           $ref: "#/components/responses/Unauthorized"
@@ -211,13 +213,12 @@ paths:
           description: Can not fetch from discord API
           $ref: "#/components/responses/Can_Not_Fetch_From_Discord_API"
 
-
   /api/v1/guilds/{guildId}/channels:
     get:
       tags:
         - [Guild]
-      summary: Get guild's channels by guildId
-      description: Used [this](https://discord.com/developers/docs/resources/user#get-current-user-guilds) Discord API
+      summary: Get channels by guildId
+      description: Used the discordjs library. for each channel we will check the bot has the Read message history and view channel permission or not .categories with zero subChannels will remove from the response
       security:
         - bearerAuth: []
       parameters:
@@ -247,38 +248,29 @@ paths:
                       items:
                         type: object
                         properties:
-                          guild_id: 
+                          id: 
                             type: Snowflake
-                          type: 
-                            type: number
                           name: 
                             type: string
-                          position: 
-                            type: number
-                          flags: 
-                            type: number
+                          canReadMessageHistoryAndViewChannel: 
+                            type: boolean
                           parent_id: 
                             type: Snowflake
-                          Permission_overwrites: 
-                            type: array
-                            items:
-                              type: string
                 example:
                     id: "80351110224678914"
                     title: "channel B"
                     subChannels: [{
                         id: "80351110224678912",
-                        guild_id: "80351110224678913",
-                        type: 4,
                         name: "channel C",
-                        position: 0,
-                        flags: 0,
                         parent_id: "80351110224678914",
-                        Permission_overwrites: [],
+                        canReadMessageHistoryAndViewChannel: true,
                       }]
         "400":
           description: Bad Request
           $ref: "#/components/responses/BadRequest"
+        "440":
+          description: Oops, something went wrong! Could you please try logging in
+          $ref: "#/components/responses/Oops_Something_Went_Wrong_Could_You_Please_Try_Logging_In"
         "401":
           description: Unauthorized
           $ref: "#/components/responses/Unauthorized"
@@ -286,8 +278,70 @@ paths:
           description: Can not fetch from discord API
           $ref: "#/components/responses/Can_Not_Fetch_From_Discord_API"
 
-
-
+  /api/v1/guilds/{guildId}/selected-channels:
+    get:
+      tags:
+        - [Guild]
+      summary: Get selected channels by guildId
+      description: Used the discordjs library.it will filter the channel list base on the selected channel of the guild.categories with zero subChannels will remove from the response
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: guildId
+          required: true
+          schema:
+            type: string
+          description: Guild Id
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  type: object
+                  properties: 
+                    id: 
+                      type: string
+                      format: Snowflake
+                    title: 
+                      type: string
+                    subChannels: 
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id: 
+                            type: Snowflake
+                          name: 
+                            type: string
+                          canReadMessageHistoryAndViewChannel: 
+                            type: boolean
+                          parent_id: 
+                            type: Snowflake
+                example:
+                    id: "80351110224678914"
+                    title: "channel B"
+                    subChannels: [{
+                        id: "80351110224678912",
+                        name: "channel C",
+                        parent_id: "80351110224678914",
+                        canReadMessageHistoryAndViewChannel: true,
+                      }]
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "440":
+          description: Oops, something went wrong! Could you please try logging in
+          $ref: "#/components/responses/Oops_Something_Went_Wrong_Could_You_Please_Try_Logging_In"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "590":
+          description: Can not fetch from discord API
+          $ref: "#/components/responses/Can_Not_Fetch_From_Discord_API"
 
   /api/v1/guilds/connect:
     get:
@@ -340,9 +394,9 @@ paths:
         "401":
           description: Unauthorized
           $ref: "#/components/responses/Unauthorized"
-        "404":
-          description: NotFound
-          $ref: "#/components/responses/NotFound"
+        "440":
+          description: Oops, something went wrong! Could you please try logging in
+          $ref: "#/components/responses/Oops_Something_Went_Wrong_Could_You_Please_Try_Logging_In"
 
 
 

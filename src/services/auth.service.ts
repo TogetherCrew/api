@@ -5,7 +5,7 @@ import tokenService from './token.service';
 import userService from './user.service';
 import { tokenTypes } from '../config/tokens';
 import { ApiError } from '../utils';
-import { Token, IDiscordOathBotCallback } from 'tc_dbcomm';
+import { Token, IDiscordOathBotCallback } from '@togethercrew.dev/db';
 /**
  * exchange code with access token
  * @param {string} code
@@ -27,12 +27,12 @@ async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscor
             body: new URLSearchParams(data),
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         })
-        const json = await response.json();
-        // Note: {message: '401: Unauthorized', code:0} means that we have not discord auth tokens
-        if (json.message) {
+        if (response.ok) {
+            return await response.json();
+        }
+        else {
             throw new Error();
         }
-        return json;
     } catch (err) {
         throw new ApiError(590, 'Can not fetch from discord API');
     }
@@ -57,12 +57,12 @@ async function refreshDiscordAuth(refreshToken: string): Promise<IDiscordOathBot
             body: new URLSearchParams(data),
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         })
-        const json = await response.json();
-        // Note: {message: '401: Unauthorized', code:0} means that we have not discord auth tokens
-        if (json.message) {
+        if (response.ok) {
+            return await response.json();
+        }
+        else {
             throw new Error();
         }
-        return json;
     } catch (err) {
         throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Can not fetch from discord API');
     }

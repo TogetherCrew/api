@@ -4,6 +4,8 @@ import tokenService from './token.service';
 import guildService from './guild.service';
 import heatmapService from './heatmap.service';
 import memberActivityService from './memberActivity.service';
+import channelService from './channel.service';
+import sagaService from './saga.service';
 
 export {
     userService,
@@ -11,5 +13,7 @@ export {
     tokenService,
     guildService,
     heatmapService,
-    memberActivityService
+    memberActivityService,
+    channelService,
+    sagaService
 }
