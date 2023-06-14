@@ -12,6 +12,18 @@ async function createAndStartGuildSaga(guildId: Snowflake, created: boolean) {
     await saga.start(() => { })
 }
 
+async function createAndStartFetchMemberSaga(guildId: Snowflake) {
+    const saga = await MBConnection.models.Saga.create({
+        status: Status.NOT_STARTED,
+        data: { guildId },
+        choreography: ChoreographyDict //! waiting for package update
+    })
+
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    await saga.start(() => { })
+}
+
 export default {
-    createAndStartGuildSaga
+    createAndStartGuildSaga,
+    createAndStartFetchMemberSaga
 }
