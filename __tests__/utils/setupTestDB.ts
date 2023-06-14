@@ -1,12 +1,13 @@
 import mongoose from "mongoose";
 import config from "../../src/config";
-import { MBConnection } from '@togethercrew.dev/tc-messagebroker';
+import RabbitMQ, { MBConnection, Queue } from '@togethercrew.dev/tc-messagebroker';
 
 const setupTestDB = () => {
     beforeAll(async () => {
         mongoose.set("strictQuery", false);
         await mongoose.connect(config.mongoose.serverURL);
-        await MBConnection.connect(config.mongoose.dbURL)
+        await MBConnection.connect(config.mongoose.dbURL);
+        RabbitMQ.connect(config.rabbitMQ.url, Queue.SERVER_API)
     });
 
     beforeEach(async () => {

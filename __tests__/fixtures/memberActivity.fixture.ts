@@ -55,6 +55,24 @@ export const memberActivityThree = {
     all_disengaged_were_vital: ["A", "B", "C", "D"],
 }
 
+export const memberActivityFour = {
+    date: new Date("2023-04-01"),
+    all_active: [],
+    all_new_active: ["A",],
+    all_consistent: [],
+    all_vital: ["A"],
+    all_new_disengaged: ["A"],
+    all_disengaged: [],
+    all_unpaused: [],
+    all_returned: ["A", "A"],
+    all_still_active: ["A"],
+    all_dropped: [],
+    all_joined: ["A",],
+    all_disengaged_were_newly_active: ["A"],
+    all_disengaged_were_consistenly_active: [],
+    all_disengaged_were_vital: ["A"],
+}
+
 export const insertMemberActivities = async function <Type>(memberActivities: Array<Type>, connection: Connection) {
     await connection.models.MemberActivity.insertMany(memberActivities.map((memberActivity) => (memberActivity)));
 };
