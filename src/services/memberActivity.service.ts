@@ -2,7 +2,7 @@ import { Connection } from 'mongoose';
 import { date, math } from '../utils';
 
 /**
- * active members line graph 
+ * active members composition line graph 
  * @param {Connection} connection
  * @param {Date} startDate
  * @param {Date} endDate
@@ -151,7 +151,10 @@ async function activeMembersCompositionLineGraph(connection: Connection, startDa
             // Stage 2: Filter documents based on date range
             {
                 $match: {
-                    date: new Date(adjustedDate)
+                    date: {
+                        $gte: new Date(adjustedDate),
+                        $lt: new Date(new Date(adjustedDate).getTime() + 24 * 60 * 60 * 1000) // add one day in milliseconds
+                    }
                 }
             },
 
@@ -173,11 +176,11 @@ async function activeMembersCompositionLineGraph(connection: Connection, startDa
         if (AdjustedMemberActivity.length === 0) {
             return {
                 ...membersActivities[0],
-                totActiveMembersPercentageChange: 0,
-                newlyActivePercentageChange: 0,
-                consistentlyActivePercentageChange: 0,
-                vitalMembersPercentageChange: 0,
-                becameDisengagedPercentageChange: 0,
+                totActiveMembersPercentageChange: "N/A",
+                newlyActivePercentageChange: "N/A",
+                consistentlyActivePercentageChange: "N/A",
+                vitalMembersPercentageChange: "N/A",
+                becameDisengagedPercentageChange: "N/A",
             }
         }
 
@@ -211,6 +214,199 @@ async function activeMembersCompositionLineGraph(connection: Connection, startDa
     }
 }
 
+/**
+ * active members onboarding line graph 
+ * @param {Connection} connection
+ * @param {Date} startDate
+ * @param {Date} endDate
+ * @returns {Object}
+ */
+async function activeMembersOnboardingLineGraph(connection: Connection, startDate: Date, endDate: Date) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    try {
+        const membersActivities = await connection.models.MemberActivity.aggregate([
+            // Stage 1: Convert date from string to date type and extract needed data
+            {
+                $project: {
+                    _id: 0,
+                    date: { $convert: { input: "$date", to: "date" } },
+                    all_joined: 1,
+                    all_new_active: 1,
+                    all_still_active: 1,
+                    all_dropped: 1,
+                }
+            },
+
+            // Stage 2: Filter documents based on date
+            {
+                $match: {
+                    date: {
+                        $gte: new Date(start),
+                        $lte: new Date(end)
+                    }
+                }
+            },
+
+            // Stage 3: Add month names array for later use
+            {
+                $addFields: {
+                    monthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+                }
+            },
+
+            // Stage 4: Calculate statistics and concatenate day - month field
+            {
+                $project: {
+                    date: 1,
+                    day_month: {
+                        $concat: [
+                            { $dateToString: { format: "%d", date: "$date" } },
+                            " ",
+                            {
+                                $arrayElemAt: [
+                                    "$monthNames",
+                                    { $subtract: [{ $month: "$date" }, 1] }
+                                ]
+                            }
+                        ]
+                    },
+                    joined: { $size: "$all_joined" },
+                    newly_active: { $size: "$all_new_active" },
+                    still_active: { $size: "$all_still_active" },
+                    dropped: { $size: "$all_dropped" },
+                }
+            },
+
+            // Stage 5: Sort documents by date
+            {
+                $sort: { date: 1 }
+            },
+
+            // Stage 6: Group all documents and keep the arrays
+            {
+                $group: {
+                    _id: null,
+                    day_month: { $push: "$day_month" },
+                    joined: { $push: "$joined" },
+                    newlyActive: { $push: "$newly_active" },
+                    stillActive: { $push: "$still_active" },
+                    dropped: { $push: "$dropped" },
+
+                    // Store last and second-to-last document values                    
+                    lastJoined: { $last: "$joined" },
+                    lastNewlyActive: { $last: "$newly_active" },
+                    lastStillActive: { $last: "$still_active" },
+                    lastDropped: { $last: "$dropped" },
+                }
+            },
+
+            // Stage 7: Transform group data into final format for charting
+            {
+                $project: {
+                    _id: 0,
+                    categories: "$day_month",
+                    series: [
+                        { name: "joined", data: "$joined" },
+                        { name: "newlyActive", data: "$newlyActive" },
+                        { name: "stillActive", data: "$stillActive" },
+                        { name: "dropped", data: "$dropped" },
+                    ],
+                    // Use the last document values
+                    joined: "$lastJoined",
+                    newlyActive: "$lastNewlyActive",
+                    stillActive: "$lastStillActive",
+                    dropped: "$lastDropped",
+                }
+            }
+        ]);
+
+        if (membersActivities.length === 0) {
+            return {
+                categories: [],
+                series: [],
+                joined: 0,
+                newlyActive: 0,
+                stillActive: 0,
+                dropped: 0,
+                joinedPercentageChange: 0,
+                newlyActivePercentageChange: 0,
+                stillActivePercentageChange: 0,
+                droppedPercentageChange: 0,
+            }
+        }
+        const adjustedDate = date.calculateAdjustedDate(endDate, membersActivities[0].categories[membersActivities[0].categories.length - 1]);
+        const AdjustedMemberActivity = await connection.models.MemberActivity.aggregate([
+            // Stage 1: Convert date from string to date type and extract needed data
+            {
+                $project: {
+                    _id: 0,
+                    date: { $convert: { input: "$date", to: "date" } },
+                    all_joined: 1,
+                    all_new_active: 1,
+                    all_still_active: 1,
+                    all_dropped: 1,
+                }
+            },
+
+            // Stage 2: Filter documents based on date range
+            {
+                $match: {
+                    date: {
+                        $gte: new Date(adjustedDate),
+                        $lt: new Date(new Date(adjustedDate).getTime() + 24 * 60 * 60 * 1000) // add one day in milliseconds
+                    }
+                }
+            },
+
+
+            // Stage 3: Calculate statistics and concatenate day - month field
+            {
+                $project: {
+                    joined: { $size: "$all_joined" },
+                    newlyActive: { $size: "$all_new_active" },
+                    stillActive: { $size: "$all_still_active" },
+                    dropped: { $size: "$all_dropped" },
+                }
+            },
+        ]);
+
+        if (AdjustedMemberActivity.length === 0) {
+            return {
+                ...membersActivities[0],
+                joinedPercentageChange: "N/A",
+                newlyActivePercentageChange: "N/A",
+                stillActivePercentageChange: "N/A",
+                droppedPercentageChange: "N/A",
+            }
+        }
+
+
+        return {
+            ...membersActivities[0],
+            joinedPercentageChange: math.calculatePercentageChange(AdjustedMemberActivity[0].joined, membersActivities[0].joined),
+            newlyActivePercentageChange: math.calculatePercentageChange(AdjustedMemberActivity[0].newlyActive, membersActivities[0].newlyActive),
+            stillActivePercentageChange: math.calculatePercentageChange(AdjustedMemberActivity[0].stillActive, membersActivities[0].stillActive),
+            droppedPercentageChange: math.calculatePercentageChange(AdjustedMemberActivity[0].dropped, membersActivities[0].dropped),
+        }
+
+    } catch (err) {
+        console.log(err);
+        return {
+            categories: [],
+            series: [],
+            joined: 0,
+            newlyActive: 0,
+            stillActive: 0,
+            dropped: 0,
+            joinedPercentageChange: 0,
+            newlyActivePercentageChange: 0,
+            stillActivePercentageChange: 0,
+            droppedPercentageChange: 0
+        }
+    }
+}
 
 /**
  * disengaged members line graph 
@@ -354,7 +550,10 @@ async function disengagedMembersCompositionLineGraph(connection: Connection, sta
             // Stage 2: Filter documents based on date
             {
                 $match: {
-                    date: new Date(adjustedDate)
+                    date: {
+                        $gte: new Date(adjustedDate),
+                        $lt: new Date(new Date(adjustedDate).getTime() + 24 * 60 * 60 * 1000) // add one day in milliseconds
+                    }
                 }
             },
 
@@ -373,10 +572,10 @@ async function disengagedMembersCompositionLineGraph(connection: Connection, sta
         if (AdjustedMemberActivity.length === 0) {
             return {
                 ...membersActivities[0],
-                becameDisengagedPercentageChange: 0,
-                wereNewlyActivePercentageChange: 0,
-                wereConsistentlyActivePercentageChange: 0,
-                wereVitalMembersPercentageChange: 0,
+                becameDisengagedPercentageChange: "N/A",
+                wereNewlyActivePercentageChange: "N/A",
+                wereConsistentlyActivePercentageChange: "N/A",
+                wereVitalMembersPercentageChange: "N/A",
             }
         }
 
@@ -524,7 +723,10 @@ async function inactiveMembersLineGraph(connection: Connection, startDate: Date,
             // Stage 2: Filter documents based on date
             {
                 $match: {
-                    date: new Date(adjustedDate)
+                    date: {
+                        $gte: new Date(adjustedDate),
+                        $lt: new Date(new Date(adjustedDate).getTime() + 24 * 60 * 60 * 1000) // add one day in milliseconds
+                    }
                 }
             },
 
@@ -541,7 +743,7 @@ async function inactiveMembersLineGraph(connection: Connection, startDate: Date,
         if (AdjustedMemberActivity.length === 0) {
             return {
                 ...membersActivities[0],
-                returnedPercentageChange: 0
+                returnedPercentageChange: "N/A"
             }
         }
 
@@ -564,6 +766,7 @@ async function inactiveMembersLineGraph(connection: Connection, startDate: Date,
 export default {
     activeMembersCompositionLineGraph,
     disengagedMembersCompositionLineGraph,
-    inactiveMembersLineGraph
+    inactiveMembersLineGraph,
+    activeMembersOnboardingLineGraph
 }
 

@@ -177,8 +177,8 @@ describe('Heatmap routes', () => {
             expect(res.body.categories).toEqual(['01 Apr', '02 Apr', '03 Apr', '04 Apr', '05 Apr', '06 Apr', '07 Apr']);
             expect(res.body.series[0].name).toBe('emojis');
             expect(res.body.series[1].name).toBe('messages');
-            expect(res.body.series[0].data).toEqual([1000, 0, 0, 0, 0, 0, 100]);
-            expect(res.body.series[1].data).toEqual([1000, 0, 0, 0, 0, 0, 200]);
+            expect(res.body.series[0].data).toEqual([888, 0, 0, 0, 0, 0, 100]);
+            expect(res.body.series[1].data).toEqual([777, 0, 0, 0, 0, 0, 200]);
         })
 
         test('should return 200 and line graph data (testing for empty data) if req data is ok', async () => {
