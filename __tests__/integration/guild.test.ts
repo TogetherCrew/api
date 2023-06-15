@@ -7,6 +7,7 @@ import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { discordResponseGuildOne, guildOne, guildTwo, guildThree, guildFour, guildFive, insertGuilds } from '../fixtures/guilds.fixture';
 import { discordResponseChannels, discordResponseChannelOne } from '../fixtures/channels.fixture';
+import { discordRoleOne, discordRoleTwo, discordRoleThree } from '../fixtures/discord.roles.fixture';
 import { IGuildUpdateBody } from '../../src/interfaces/guild.interface';
 import { guildService, authService, userService, sagaService } from '../../src/services';
 import { Guild } from '@togethercrew.dev/db';
@@ -682,5 +683,44 @@ describe('Guild routes', () => {
             expect(res.body.results[0].id).toBe(guildTwo._id.toHexString());
         });
     });
+
+    describe('GET /api/v1/guilds/discord-api/:guildId/roles', () => {
+        test('should return 200 and array of roles of the guild if data is ok', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+            guildService.getGuildRolesFromDiscordAPI = jest.fn().mockReturnValue([discordRoleOne, discordRoleTwo, discordRoleThree]);
+            const res = await request(app)
+                .get(`/api/v1/guilds/discord-api/${guildOne.guildId}/roles`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .expect(httpStatus.OK);
+
+            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results[0].id).toBe(discordRoleOne.id);
+            expect(res.body.results[1].id).toBe(discordRoleTwo.id);
+            expect(res.body.results[2].id).toBe(discordRoleThree.id);
+        })
+
+        test('should return 401 if access token is missing', async () => {
+            await insertUsers([userOne]);
+            await request(app)
+                .get(`/api/v1/guilds/discord-api/${guildOne.guildId}/roles`)
+                .expect(httpStatus.UNAUTHORIZED);
+        })
+        test('should return 400 if guild id is not valid', async () => {
+            await insertUsers([userOne]);
+            await request(app)
+                .get(`/api/v1/guilds/discord-api/1234/roles`)
+                .expect(httpStatus.UNAUTHORIZED);
+        })
+
+        test('should return 440 if did not find guild with guildId and relative user', async () => {
+            await insertUsers([userOne]);
+            await request(app)
+                .get(`/api/v1/guilds/discord-api/${guildOne.guildId}/roles`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send()
+                .expect(440);
+        })
+    })
 
 });
