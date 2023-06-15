@@ -24,10 +24,5 @@ router.route('/:guildId')
 router.get('/discord-api/:guildId', auth(), validate(guildValidation.getGuildFromDiscordAPI), guildController.getGuildFromDiscordAPI);
 router.get('/discord-api/:guildId/roles', auth(), validate(guildValidation.getGuildRolesFromDiscordAPI), guildController.getGuildRolesFromDiscordAPI);
 
-// Events
-// RabbitMQ.onEvent(Event.SERVER_API.UPDATE_GUILD, (msg) => {
-//     console.log(`Received a message on event ${Event.SERVER_API.UPDATE_GUILD} : `, msg)
-// })
-
 export default router;
 
