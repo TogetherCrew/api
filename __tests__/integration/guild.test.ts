@@ -694,10 +694,10 @@ describe('Guild routes', () => {
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
 
-            expect(res.body.results).toHaveLength(3);
-            expect(res.body.results[0].id).toBe(discordRoleOne.id);
-            expect(res.body.results[1].id).toBe(discordRoleTwo.id);
-            expect(res.body.results[2].id).toBe(discordRoleThree.id);
+            expect(res.body).toHaveLength(3);
+            expect(res.body[0].id).toBe(discordRoleOne.id);
+            expect(res.body[1].id).toBe(discordRoleTwo.id);
+            expect(res.body[2].id).toBe(discordRoleThree.id);
         })
 
         test('should return 401 if access token is missing', async () => {
