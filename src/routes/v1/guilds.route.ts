@@ -22,7 +22,7 @@ router.route('/:guildId')
     .patch(auth(), validate(guildValidation.updateGuild), guildController.updateGuild);
 
 router.get('/discord-api/:guildId', auth(), validate(guildValidation.getGuildFromDiscordAPI), guildController.getGuildFromDiscordAPI);
-router.get('/discord-api/:guildId/roles', validate(guildValidation.getGuildRolesFromDiscordAPI), guildController.getGuildRolesFromDiscordAPI);
+router.get('/discord-api/:guildId/roles', auth(), validate(guildValidation.getGuildRolesFromDiscordAPI), guildController.getGuildRolesFromDiscordAPI);
 
 // Events
 // RabbitMQ.onEvent(Event.SERVER_API.UPDATE_GUILD, (msg) => {
