@@ -763,10 +763,45 @@ async function inactiveMembersLineGraph(connection: Connection, startDate: Date,
     }
 }
 
+function buildProjectStageBasedOnActivityComposition(fields: Array<string>) {
+    const initialStage: any = {
+        _id: 0,
+        all: { $setUnion: [] }
+    };
+
+    const finalStage = fields.reduce((stage, field) => {
+        stage[field] = `$${field}`;
+        stage.all.$setUnion.push(`$${field}`);
+        return stage;
+    }, initialStage);
+
+    return finalStage;
+}
+
+/**
+ * get member activiy 
+ * @param {Connection} connection
+ * @param {Any} activityComposition
+ * @returns {Object}
+ */
+async function getActiveMembersCompositionDoc(connection: Connection, activityComposition: any) {
+    const fields = (activityComposition === undefined || activityComposition.length === 0) ? ["all_active", "all_new_active", "all_consistent", "all_vital", "all_new_disengaged"] : activityComposition;
+    console.log(activityComposition, fields)
+
+    const projectStage = buildProjectStageBasedOnActivityComposition(fields);
+    const lastDocument = await connection.models.MemberActivity.aggregate([
+        { $sort: { date: -1 } },
+        { $limit: 1 },
+        { $project: projectStage }
+    ]);
+    return lastDocument
+}
+
 export default {
     activeMembersCompositionLineGraph,
     disengagedMembersCompositionLineGraph,
     inactiveMembersLineGraph,
-    activeMembersOnboardingLineGraph
+    activeMembersOnboardingLineGraph,
+    getActiveMembersCompositionDoc
 }
 

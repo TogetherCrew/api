@@ -312,4 +312,28 @@ describe('member-activity routes', () => {
                 .expect(httpStatus.NOT_FOUND);
         })
     })
+
+
+    describe('POST /api/v1/member-activity/:guildId/active-members-composition-table', () => {
+        beforeEach(async () => {
+            await connection.dropDatabase();
+        });
+        test('should return 200 and inactive members line graph data if req data is ok', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+
+            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
+            const res = await request(app)
+                .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
+                // .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send()
+                .expect(httpStatus.OK);
+
+            console.log(res.body)
+            expect(true).toBe(true)
+
+
+        })
+
+    })
 });
