@@ -38,6 +38,14 @@ const getGuildFromDiscordAPI = catchAsync(async function (req: IAuthRequest, res
     res.send(guild)
 });
 
+const getGuildRolesFromDiscordAPI = catchAsync(async function (req: IAuthRequest, res: Response) {
+    // if (! await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+    //     throw new ApiError(440, 'Oops, something went wrong! Could you please try logging in');
+    // }
+    const roles = await guildService.getGuildRolesFromDiscordAPI(req.params.guildId);
+    res.send(roles.map((role: any) => { return { name: role.name, id: role.id, color: role.color } }))
+});
+
 const getChannels = catchAsync(async function (req: IAuthRequest, res: Response) {
     if (! await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
         throw new ApiError(440, 'Oops, something went wrong! Could you please try logging in');
@@ -134,6 +142,7 @@ export default {
     getGuild,
     updateGuild,
     getGuildFromDiscordAPI,
+    getGuildRolesFromDiscordAPI,
     getGuilds,
     disconnectGuild,
     connectGuild,
