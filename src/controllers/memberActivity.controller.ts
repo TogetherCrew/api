@@ -81,6 +81,8 @@ const memberInteractionsGraph = catchAsync(async function (req: IAuthRequest, re
     const { records } = neo4jData;
     const userIds: string[] = [] // Our Graph DB does not have the names of users, so we load them all and push them to an array we want to send to front-end 
     let makedUpRecords = records.reduce((preRecords: any[], record) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         const { _fieldLookup, _fields } = record
         const a = _fields[_fieldLookup['a']]
         const r = _fields[_fieldLookup['r']]
