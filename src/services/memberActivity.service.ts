@@ -1,6 +1,6 @@
 import { Connection } from 'mongoose';
 import { date, math } from '../utils';
-import { IGuildMember } from 'tc_dbcomm';
+import { IGuildMember } from '@togethercrew.dev/db';
 
 /**
  * active members composition line graph 
