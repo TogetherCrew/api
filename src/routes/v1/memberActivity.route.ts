@@ -11,7 +11,7 @@ router.post('/:guildId/active-members-onboarding-line-graph', auth(), validate(m
 router.post('/:guildId/disengaged-members-composition-line-graph', auth(), validate(memberActivityValidation.disengagedMembersCompositionLineGraph), memberActivityController.disengagedMembersCompositionLineGraph);
 router.post('/:guildId/inactive-members-line-graph', auth(), validate(memberActivityValidation.inactiveMembersLineGraph), memberActivityController.inactiveMembersLineGraph);
 
-router.post('/:guildId/active-members-composition-table', validate(memberActivityValidation.activeMembersCompositionTable), memberActivityController.activeMembersCompositionTable);
+router.post('/:guildId/active-members-composition-table', auth(), validate(memberActivityValidation.activeMembersCompositionTable), memberActivityController.activeMembersCompositionTable);
 
 export default router;
 

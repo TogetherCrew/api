@@ -4,7 +4,7 @@
  * @returns {Array}
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function sortChannels(channels: Array<any>) {
+function sortChannels(channels: Array<any>) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sortedChannels: Array<any> = [];
     for (const channel of channels) {
@@ -23,7 +23,20 @@ async function sortChannels(channels: Array<any>) {
     return sortedChannels;
 }
 
+function sortByHandler(sortBy: string): Record<string, 1 | -1> {
+    let sortParams: Record<string, 1 | -1> = {};
+    sortParams = sortBy.split(',').reduce((acc, curr) => {
+        const [field, order] = curr.split(':');
+        acc[field] = order === 'desc' ? -1 : 1;
+        return acc;
+    }, sortParams);
+    return sortParams;
+}
+
+
+
 
 export default {
-    sortChannels
+    sortChannels,
+    sortByHandler
 }

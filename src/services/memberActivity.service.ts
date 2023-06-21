@@ -1,5 +1,6 @@
 import { Connection } from 'mongoose';
 import { date, math } from '../utils';
+import { IGuildMember } from 'tc_dbcomm';
 
 /**
  * active members composition line graph 
@@ -763,9 +764,19 @@ async function inactiveMembersLineGraph(connection: Connection, startDate: Date,
     }
 }
 
+/**
+ * Constructs a projection stage object for MongoDB aggregation pipeline based on the provided activity composition fields.
+ * 
+ * @param {Array<string>} fields - The activity composition fields to include in the projection. Each field corresponds to a property in the database documents.
+ * @returns {Stage} The projection stage object. It includes a '_id' field set to '0', an 'all' field with an empty '$setUnion', and additional fields based on the 'fields' parameter. Each additional field is prefixed with a '$'.
+ */
 function buildProjectStageBasedOnActivityComposition(fields: Array<string>) {
-    const initialStage: any = {
-        _id: 0,
+    const initialStage: {
+        _id: string;
+        all: { $setUnion: Array<string> };
+        [key: string]: string | { $setUnion: Array<string> }
+    } = {
+        _id: "0",
         all: { $setUnion: [] }
     };
 
@@ -779,29 +790,59 @@ function buildProjectStageBasedOnActivityComposition(fields: Array<string>) {
 }
 
 /**
- * get member activiy 
+ * get last member activity document for usage of active member compostion table 
  * @param {Connection} connection
  * @param {Any} activityComposition
  * @returns {Object}
  */
-async function getActiveMembersCompositionDoc(connection: Connection, activityComposition: any) {
-    const fields = (activityComposition === undefined || activityComposition.length === 0) ? ["all_active", "all_new_active", "all_consistent", "all_vital", "all_new_disengaged"] : activityComposition;
-    console.log(activityComposition, fields)
-
-    const projectStage = buildProjectStageBasedOnActivityComposition(fields);
-    const lastDocument = await connection.models.MemberActivity.aggregate([
-        { $sort: { date: -1 } },
-        { $limit: 1 },
-        { $project: projectStage }
-    ]);
-    return lastDocument
+async function getLastDocumentForActiveMembersCompositionTable(connection: Connection, activityComposition: Array<string>) {
+    try {
+        const fields = (activityComposition === undefined || activityComposition.length === 0) ? ["all_active", "all_new_active", "all_consistent", "all_vital", "all_new_disengaged"] : activityComposition;
+        const projectStage = buildProjectStageBasedOnActivityComposition(fields);
+        const lastDocument = await connection.models.MemberActivity.aggregate([
+            { $sort: { date: -1 } },
+            { $limit: 1 },
+            { $project: projectStage }
+        ]);
+        return lastDocument[0]
+    } catch (err) {
+        console.log(err)
+    }
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getActivityComposition(guildMember: IGuildMember, memberActivity: any) {
+    const activityCompositions = [];
+    if (memberActivity.all_new_active && memberActivity.all_new_active.includes(guildMember.discordId)) {
+        activityCompositions.push("newlyActive");
+    }
+
+    if (memberActivity.all_new_disengaged && memberActivity.all_new_disengaged.includes(guildMember.discordId)) {
+        activityCompositions.push("becameDisengaged");
+    }
+
+    if (memberActivity.all_active && memberActivity.all_active.includes(guildMember.discordId)) {
+        activityCompositions.push("totActiveMembers");
+    }
+
+    if (memberActivity.all_consistent && memberActivity.all_consistent.includes(guildMember.discordId)) {
+        activityCompositions.push("consistentlyActive");
+    }
+
+    if (memberActivity.all_vital && memberActivity.all_vital.includes(guildMember.discordId)) {
+        activityCompositions.push("vitalMembers");
+    }
+
+    return activityCompositions;
+}
+
 
 export default {
     activeMembersCompositionLineGraph,
     disengagedMembersCompositionLineGraph,
     inactiveMembersLineGraph,
     activeMembersOnboardingLineGraph,
-    getActiveMembersCompositionDoc
+    getLastDocumentForActiveMembersCompositionTable,
+    getActivityComposition
 }
 
