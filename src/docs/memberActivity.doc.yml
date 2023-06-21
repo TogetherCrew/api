@@ -225,10 +225,10 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
-  /api/v1/member-activity/{guildId}/member-interactions-graph:
+  /api/v1/member-activity/{guildId}/members-interactions-graph:
     tags:
       - [Member-Activity]
-    summary: Get data for active member interactions graph 
+    summary: Get data for active members interactions graph 
     security:
       - bearerAuth: []
     get:
