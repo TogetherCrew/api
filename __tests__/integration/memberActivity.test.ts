@@ -428,7 +428,7 @@ describe('member-activity routes', () => {
             res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .query({ activityComposition: ["others"] })
+                .query({ activityComposition: ["others", "all_new_disengaged"] })
                 .send()
                 .expect(httpStatus.OK);
 
