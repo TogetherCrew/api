@@ -7,9 +7,9 @@ import { tokenService } from '../../src/services';
 import setupTestDB from '../utils/setupTestDB';
 import { tokenTypes } from '../../src/config/tokens';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
-import { authService, userService } from '../../src/services';
+import { authService, userService, sagaService } from '../../src/services';
 import { Token } from '@togethercrew.dev/db';
-import { guildOne, guildTwo, insertGuilds } from '../fixtures/guilds.fixture';
+import { guildOne, insertGuilds } from '../fixtures/guilds.fixture';
 import { Guild } from '@togethercrew.dev/db';
 
 setupTestDB();
@@ -25,6 +25,7 @@ describe('Auth routes', () => {
     })
 
     describe('GET /api/v1/auth/try-now/callback', () => {
+        sagaService.createAndStartGuildSaga = jest.fn().mockReturnValue({});
         authService.exchangeCode = jest.fn().mockReturnValue({
             access_token: 'mockAccess',
             expires_in: 604800,

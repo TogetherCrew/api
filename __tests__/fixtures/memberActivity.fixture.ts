@@ -3,7 +3,7 @@ import { Connection } from 'mongoose';
 export const memberActivityOne = {
     date: new Date("2023-04-07"),
     all_active: ["123456789",],
-    all_new_active: ["123456789", "987654321"],
+    all_new_active: ["123456789", "987654321", "555555555"],
     all_consistent: [],
     all_vital: [],
     all_new_disengaged: ["123456789"],
