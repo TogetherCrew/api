@@ -226,6 +226,11 @@ paths:
           description: NotFound
           $ref: "#/components/responses/NotFound"
   /api/v1/member-activity/{guildId}/member-interactions-graph:
+    tags:
+      - [Member-Activity]
+    summary: Get data for active member interactions graph 
+    security:
+      - bearerAuth: []
     get:
       tags:
         - [Member-Activity]
@@ -237,6 +242,13 @@ paths:
           schema:
             type: string
           description: Guild Id
+    responses:
+      "401":
+        description: Unauthorized
+        $ref: "#/components/responses/Unauthorized"
+      "404":
+        description: NotFound
+        $ref: "#/components/responses/NotFound"
 
   /api/v1/member-activity/{guildId}/active-members-onboarding-line-graph:
     post:
