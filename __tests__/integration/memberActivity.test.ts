@@ -312,4 +312,36 @@ describe('member-activity routes', () => {
                 .expect(httpStatus.NOT_FOUND);
         })
     })
+
+    describe('POST /api/v1/member-activity/:guildId/members-interactions-graph', () => {
+        beforeEach(async () => {
+            await connection.dropDatabase();
+        });
+
+        test('should return 200 and member interaction graph data if req data is ok', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+
+            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
+            const res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/members-interactions-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .expect(httpStatus.OK);
+
+        })
+        test('should return 401 if access token is missing', async () => {
+            await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/members-interactions-graph`)
+                .expect(httpStatus.UNAUTHORIZED);
+        })
+
+        test('should return 404 if guild not found', async () => {
+            await insertUsers([userOne]);
+            await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/members-interactions-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .expect(httpStatus.NOT_FOUND);
+        })
+    })
+
 });
