@@ -225,3 +225,18 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
+  /api/v1/member-activity/{guildId}/member-interactions-graph:
+    get:
+      tags:
+        - [Member-Activity]
+      summary: Get data for member interactions graph 
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: guildId
+          required: true
+          schema:
+            type: string
+          description: Guild Id
+          
