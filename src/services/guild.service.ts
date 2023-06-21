@@ -97,6 +97,28 @@ async function getGuildFromDiscordAPI(guildId: Snowflake) {
 }
 
 /**
+ * Get guild roles from discord API
+ * @param {Snowflake} guildId
+ * @returns {Promise<IDiscordGuild>}
+ */
+async function getGuildRolesFromDiscordAPI(guildId: Snowflake) {
+    try {
+        const response = await fetch(`https://discord.com/api/guilds/${guildId}/roles`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bot ${config.discord.botToken}` }
+        });
+        if (response.ok) {
+            return await response.json();
+        }
+        else {
+            throw new Error();
+        }
+    } catch (err) {
+        throw new ApiError(590, 'Can not fetch from discord API');
+    }
+}
+
+/**
  * Get visible guild channels
  * @param {Snowflake} guildId
  * @returns {Promise<Array<IDiscordGuild>>}
@@ -197,6 +219,7 @@ export default {
     queryGuilds,
     deleteGuild,
     getGuildMemberFromDiscordAPI,
+    getGuildRolesFromDiscordAPI,
     getChannelsFromDiscordJS
 }
 
