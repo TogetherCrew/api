@@ -20,7 +20,7 @@ const getGuilds = catchAsync(async function (req: IAuthRequest, res: Response) {
 const getGuild = catchAsync(async function (req: IAuthRequest, res: Response) {
     const guild = await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId });
     if (!guild) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+        throw new ApiError(440, 'Oops, something went wrong! Could you please try logging in');
     }
     res.send(guild);
 });
@@ -31,16 +31,16 @@ const updateGuild = catchAsync(async function (req: IAuthRequest, res: Response)
 });
 
 const getGuildFromDiscordAPI = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (! await guildService.isBotAddedToGuild(req.params.guildId, req.user.discordId)) {
-        throw new ApiError(httpStatus.BAD_REQUEST, 'Please add the RnDAO bot to your server');
+    if (! await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+        throw new ApiError(440, 'Oops, something went wrong! Could you please try logging in');
     }
     const guild = await guildService.getGuildFromDiscordAPI(req.params.guildId);
     res.send(guild)
 });
 
 const getChannels = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (! await guildService.isBotAddedToGuild(req.params.guildId, req.user.discordId)) {
-        throw new ApiError(httpStatus.BAD_REQUEST, 'Please add the RnDAO bot to your server');
+    if (! await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+        throw new ApiError(440, 'Oops, something went wrong! Could you please try logging in');
     }
     const channels = await guildService.getChannelsFromDiscordJS(req.params.guildId);
     const sortedChannels = await sort.sortChannels(channels);
@@ -51,7 +51,7 @@ const getChannels = catchAsync(async function (req: IAuthRequest, res: Response)
 const getSelectedChannels = catchAsync(async function (req: IAuthRequest, res: Response) {
     const guild = await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId });
     if (!guild) {
-        throw new ApiError(httpStatus.BAD_REQUEST, 'Please add the RnDAO bot to your server');
+        throw new ApiError(440, 'Oops, something went wrong! Could you please try logging in');
     }
     if (guild.selectedChannels && guild.selectedChannels.length > 0) {
         const channels = await guildService.getChannelsFromDiscordJS(req.params.guildId);

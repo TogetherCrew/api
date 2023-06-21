@@ -18,7 +18,6 @@ describe('Guild routes', () => {
     describe('GET /api/v1/guilds/:guildId/channels', () => {
         beforeEach(() => {
             guildService.getChannelsFromDiscordJS = jest.fn().mockReturnValue(discordResponseChannels);
-            guildService.isBotAddedToGuild = jest.fn().mockReturnValue(true);
         });
 
         test('should return 200 and array of channels of the guild', async () => {
@@ -94,14 +93,14 @@ describe('Guild routes', () => {
 
 
         })
-        test('should return 400 if bot is not added to guild', async () => {
-            guildService.isBotAddedToGuild = jest.fn().mockReturnValue(false);
+        test('should return 440 if did not find guild with guildId and relative user', async () => {
             await insertUsers([userOne]);
             await request(app)
                 .get(`/api/v1/guilds/${discordResponseGuildOne.id}/channels`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
-                .expect(httpStatus.BAD_REQUEST);
+                .expect(440);
+
         })
         test('should return 401 if access token is missing', async () => {
             await insertUsers([userOne]);
@@ -110,22 +109,11 @@ describe('Guild routes', () => {
                 .send()
                 .expect(httpStatus.UNAUTHORIZED);
         })
-        test('should return 400 if can not fetch guild channels', async () => {
-            guildService.isBotAddedToGuild = jest.fn().mockReturnValue(false);
-            await insertUsers([userOne]);
-            await request(app)
-                .get(`/api/v1/guilds/${discordResponseGuildOne.id}/channels`)
-                .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send()
-                .expect(httpStatus.BAD_REQUEST);
-
-        })
     })
 
     describe('GET /api/v1/guilds/:guildId/selected-channels', () => {
         beforeEach(() => {
             guildService.getChannelsFromDiscordJS = jest.fn().mockReturnValue(discordResponseChannels);
-            guildService.isBotAddedToGuild = jest.fn().mockReturnValue(true);
         });
 
         test('should return 200 and array of selected channels of the guild', async () => {
@@ -186,14 +174,13 @@ describe('Guild routes', () => {
             expect(res.body).toHaveLength(0);
         })
 
-        test('should return 400 if bot is not added to guild', async () => {
-            guildService.isBotAddedToGuild = jest.fn().mockReturnValue(false);
+        test('should return 440 if did not find guild with guildId and relative user', async () => {
             await insertUsers([userOne]);
             await request(app)
                 .get(`/api/v1/guilds/${guildFive.guildId}/selected-channels`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
-                .expect(httpStatus.BAD_REQUEST);
+                .expect(440);
         })
         test('should return 401 if access token is missing', async () => {
             await insertUsers([userOne]);
@@ -201,16 +188,6 @@ describe('Guild routes', () => {
                 .get(`/api/v1/guilds/${guildFive.guildId}/selected-channels`)
                 .send()
                 .expect(httpStatus.UNAUTHORIZED);
-        })
-        test('should return 400 if can not fetch guild channels', async () => {
-            guildService.isBotAddedToGuild = jest.fn().mockReturnValue(false);
-            await insertUsers([userOne]);
-            await request(app)
-                .get(`/api/v1/guilds/${guildFive.guildId}/selected-channels`)
-                .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send()
-                .expect(httpStatus.BAD_REQUEST);
-
         })
     })
 
@@ -234,7 +211,7 @@ describe('Guild routes', () => {
                 isDisconnected: guildOne.isDisconnected,
                 connectedAt: expect.anything(),
                 icon: guildOne.icon,
-                action: [1, 1, 1, 4, 3, 5, 5, 4, 3, 3, 2],
+                action: [1, 1, 1, 4, 3, 5, 5, 4, 3, 3, 2, 2, 1],
                 window: [7, 1]
             });
         })
@@ -247,14 +224,13 @@ describe('Guild routes', () => {
                 .get(`/api/v1/guilds/${guildOne.guildId}`)
                 .expect(httpStatus.UNAUTHORIZED);
         })
-
-        test('should return 404 if guild not found', async () => {
+        test('should return 440 if did not find guild with guildId and relative user', async () => {
             await insertUsers([userOne]);
-
             await request(app)
                 .get(`/api/v1/guilds/${guildOne.guildId}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .expect(httpStatus.NOT_FOUND);
+                .send()
+                .expect(440);
         })
     })
 
@@ -329,7 +305,6 @@ describe('Guild routes', () => {
         })
     })
 
-
     describe('POST /api/v1/guilds/:guildId/disconnect', () => {
         test('should return 200 and soft disconnect the guild if req data is ok', async () => {
             await insertUsers([userOne]);
@@ -369,13 +344,13 @@ describe('Guild routes', () => {
                 .expect(httpStatus.UNAUTHORIZED);
         })
 
-        test('should return 404 if guild not found', async () => {
+        test('should return 440 if did not find guild with guildId and relative user', async () => {
             await insertUsers([userOne]);
             await request(app)
                 .post(`/api/v1/guilds/${guildOne.guildId}/disconnect`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send({ disconnectType: 'soft' })
-                .expect(httpStatus.NOT_FOUND);
+                .expect(440);
         })
         test('should return 400 if disconnectType is invalid', async () => {
             await insertUsers([userOne]);
@@ -436,14 +411,14 @@ describe('Guild routes', () => {
                 .expect(httpStatus.UNAUTHORIZED);
         })
 
-        test('should return 404 if guild not found', async () => {
+        test('should return 440 if did not find guild with guildId and relative user', async () => {
             await insertUsers([userOne]);
 
             await request(app)
                 .patch(`/api/v1/guilds/${guildOne.guildId}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send(updateBody)
-                .expect(httpStatus.NOT_FOUND);
+                .expect(440);
         })
 
 
@@ -473,7 +448,6 @@ describe('Guild routes', () => {
     describe('GET /api/v1/guilds/discord-api/:guildId', () => {
         beforeEach(() => {
             guildService.getGuildFromDiscordAPI = jest.fn().mockReturnValue(discordResponseGuildOne);
-            guildService.isBotAddedToGuild = jest.fn().mockReturnValue(true);
         });
 
         test('should return 200 and the guild object (from Discord API) if data is ok', async () => {
@@ -497,14 +471,13 @@ describe('Guild routes', () => {
                 .expect(httpStatus.UNAUTHORIZED);
         })
 
-        test('should return 400 if can not fetch guild channels', async () => {
-            guildService.isBotAddedToGuild = jest.fn().mockReturnValue(false);
+        test('should return 440 if did not find guild with guildId and relative user', async () => {
             await insertUsers([userOne]);
             await request(app)
                 .get(`/api/v1/guilds/discord-api/${guildOne.guildId}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
-                .expect(httpStatus.BAD_REQUEST);
+                .expect(440);
 
         })
     })
@@ -537,7 +510,7 @@ describe('Guild routes', () => {
                 isDisconnected: guildOne.isDisconnected,
                 connectedAt: expect.anything(),
                 icon: guildOne.icon,
-                action: [1, 1, 1, 4, 3, 5, 5, 4, 3, 3, 2],
+                action: [1, 1, 1, 4, 3, 5, 5, 4, 3, 3, 2, 2, 1],
                 window: [7, 1]
             });
         });
