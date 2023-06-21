@@ -304,4 +304,3 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
-        

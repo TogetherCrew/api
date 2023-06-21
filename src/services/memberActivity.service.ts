@@ -796,7 +796,7 @@ function buildProjectStageBasedOnActivityComposition(fields: Array<string>) {
  * @returns {Object}
  */
 async function getLastDocumentForActiveMembersCompositionTable(connection: Connection, activityComposition: Array<string>) {
-    const fields = (activityComposition === undefined || activityComposition.length === 0) ? ["all_active", "all_new_active", "all_consistent", "all_vital", "all_new_disengaged"] : activityComposition;
+    const fields = (activityComposition === undefined || activityComposition.length === 0 || activityComposition.includes('others')) ? ["all_active", "all_new_active", "all_consistent", "all_vital", "all_new_disengaged"] : activityComposition;
     const projectStage = buildProjectStageBasedOnActivityComposition(fields);
     const lastDocument = await connection.models.MemberActivity.aggregate([
         { $sort: { date: -1 } },

@@ -45,7 +45,7 @@ const activeMembersCompositionTable = {
         guildId: Joi.string().required()
     }),
     query: Joi.object().required().keys({
-        activityComposition: Joi.array().items(Joi.string().valid('all_active', 'all_new_active', 'all_consistent', 'all_vital', 'all_new_disengaged')).single(),
+        activityComposition: Joi.array().items(Joi.string().valid('all_active', 'all_new_active', 'all_consistent', 'all_vital', 'all_new_disengaged', 'others')).single(),
         roles: Joi.array().items(Joi.string()).single(),
         username: Joi.string(),
         sortBy: Joi.string(),

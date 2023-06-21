@@ -24,7 +24,7 @@ type Options = {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function queryGuildMembers(connection: Connection, filter: Filter, options: Options, memberActivity: any) {
-    const { roles, username } = filter;
+    const { roles, username, activityComposition } = filter;
     const { sortBy } = options;
     const limit = options.limit && parseInt(options.limit, 10) > 0 ? parseInt(options.limit, 10) : 10;
     const page = options.page && parseInt(options.page, 10) > 0 ? parseInt(options.page, 10) : 1;
@@ -35,6 +35,10 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
     const matchStage: any = {
         discordId: { $in: memberActivity.all },
     };
+
+    if (activityComposition && activityComposition.includes('others')) {
+        matchStage.discordId = { $nin: memberActivity.all };
+    }
 
     if (username) {
         matchStage.username = { $regex: username, $options: 'i' };

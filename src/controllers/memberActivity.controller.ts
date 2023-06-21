@@ -60,7 +60,6 @@ const activeMembersCompositionTable = catchAsync(async function (req: IAuthReque
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     const memberActivity = await memberActivityService.getLastDocumentForActiveMembersCompositionTable(connection, filter.activityComposition);
     const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options, memberActivity);
-
     const roles = await guildService.getGuildRolesFromDiscordAPI(req.params.guildId);
     if (guildMembers) {
         guildMemberService.addNeededDataForTable(guildMembers.results, roles, memberActivity);
