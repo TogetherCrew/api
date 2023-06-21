@@ -796,18 +796,15 @@ function buildProjectStageBasedOnActivityComposition(fields: Array<string>) {
  * @returns {Object}
  */
 async function getLastDocumentForActiveMembersCompositionTable(connection: Connection, activityComposition: Array<string>) {
-    try {
-        const fields = (activityComposition === undefined || activityComposition.length === 0) ? ["all_active", "all_new_active", "all_consistent", "all_vital", "all_new_disengaged"] : activityComposition;
-        const projectStage = buildProjectStageBasedOnActivityComposition(fields);
-        const lastDocument = await connection.models.MemberActivity.aggregate([
-            { $sort: { date: -1 } },
-            { $limit: 1 },
-            { $project: projectStage }
-        ]);
-        return lastDocument[0]
-    } catch (err) {
-        console.log(err)
-    }
+    const fields = (activityComposition === undefined || activityComposition.length === 0) ? ["all_active", "all_new_active", "all_consistent", "all_vital", "all_new_disengaged"] : activityComposition;
+    const projectStage = buildProjectStageBasedOnActivityComposition(fields);
+    const lastDocument = await connection.models.MemberActivity.aggregate([
+        { $sort: { date: -1 } },
+        { $limit: 1 },
+        { $project: projectStage }
+    ]);
+    return lastDocument[0]
+
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

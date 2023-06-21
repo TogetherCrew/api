@@ -24,67 +24,64 @@ type Options = {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function queryGuildMembers(connection: Connection, filter: Filter, options: Options, memberActivity: any) {
-    try {
-        const { roles, username } = filter;
-        const { sortBy } = options;
-        const limit = options.limit && parseInt(options.limit, 10) > 0 ? parseInt(options.limit, 10) : 10;
-        const page = options.page && parseInt(options.page, 10) > 0 ? parseInt(options.page, 10) : 1;
-        const sortParams: Record<string, 1 | -1> = sortBy ? sort.sortByHandler(sortBy) : { username: 1 };
+    const { roles, username } = filter;
+    const { sortBy } = options;
+    const limit = options.limit && parseInt(options.limit, 10) > 0 ? parseInt(options.limit, 10) : 10;
+    const page = options.page && parseInt(options.page, 10) > 0 ? parseInt(options.page, 10) : 1;
+    const sortParams: Record<string, 1 | -1> = sortBy ? sort.sortByHandler(sortBy) : { username: 1 };
 
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const matchStage: any = {
-            discordId: { $in: memberActivity.all },
-        };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const matchStage: any = {
+        discordId: { $in: memberActivity.all },
+    };
 
-        if (username) {
-            matchStage.username = { $regex: username, $options: 'i' };
-        }
-
-        if (roles && roles.length > 0) {
-            matchStage.roles = { $in: roles };
-        }
-
-        const totalResults = await connection.models.GuildMember.countDocuments(matchStage);
-
-        const results = await connection.models.GuildMember.aggregate([
-            {
-                $match: matchStage
-            },
-            {
-                $sort: sortParams
-            },
-            {
-                $skip: limit * (page - 1)
-            },
-            {
-                $limit: limit
-            },
-            {
-                $project: {
-                    discordId: 1,
-                    username: 1,
-                    discriminator: 1,
-                    roles: 1,
-                    avatar: 1,
-                    joinedAt: 1,
-                    _id: 0
-                }
-            }
-        ]);
-
-        const totalPages = Math.ceil(totalResults / limit);
-
-        return {
-            results,
-            limit,
-            page,
-            totalPages,
-            totalResults,
-        }
-    } catch (err) {
-        console.log(err)
+    if (username) {
+        matchStage.username = { $regex: username, $options: 'i' };
     }
+
+    if (roles && roles.length > 0) {
+        matchStage.roles = { $in: roles };
+    }
+
+    const totalResults = await connection.models.GuildMember.countDocuments(matchStage);
+
+    const results = await connection.models.GuildMember.aggregate([
+        {
+            $match: matchStage
+        },
+        {
+            $sort: sortParams
+        },
+        {
+            $skip: limit * (page - 1)
+        },
+        {
+            $limit: limit
+        },
+        {
+            $project: {
+                discordId: 1,
+                username: 1,
+                discriminator: 1,
+                roles: 1,
+                avatar: 1,
+                joinedAt: 1,
+                _id: 0
+            }
+        }
+    ]);
+
+    const totalPages = Math.ceil(totalResults / limit);
+
+    return {
+        results,
+        limit,
+        page,
+        totalPages,
+        totalResults,
+    }
+
 }
 
 /**
@@ -96,20 +93,16 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function addNeededDataForTable(guildMembers: Array<any>, roles: Array<Role>, memberActivity: any) {
-    try {
-        guildMembers.forEach((guildMember) => {
-            guildMember.roles = guildMember.roles.map((roleId: string) => {
-                const role = roles.find((role: Role) => role.id === roleId);
-                if (role) {
-                    return { id: role.id, color: role.color, name: role.name };
-                }
-            });
-            guildMember.username = guildMember.discriminator === "0" ? guildMember.username : guildMember.username + "#" + guildMember.discriminator;
-            guildMember.activityComposition = memberActivityService.getActivityComposition(guildMember, memberActivity)
+    guildMembers.forEach((guildMember) => {
+        guildMember.roles = guildMember.roles.map((roleId: string) => {
+            const role = roles.find((role: Role) => role.id === roleId);
+            if (role) {
+                return { id: role.id, color: role.color, name: role.name };
+            }
         });
-    } catch (err) {
-        console.log(err)
-    }
+        guildMember.username = guildMember.discriminator === "0" ? guildMember.username : guildMember.username + "#" + guildMember.discriminator;
+        guildMember.activityComposition = memberActivityService.getActivityComposition(guildMember, memberActivity)
+    });
 }
 
 
