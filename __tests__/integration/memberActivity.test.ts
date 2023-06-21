@@ -333,6 +333,7 @@ describe('member-activity routes', () => {
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(httpStatus.OK);
+
             expect(res.body).toEqual({
                 results: expect.any(Array),
                 page: 1,
@@ -404,7 +405,7 @@ describe('member-activity routes', () => {
             await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
 
-            const res = await request(app)
+            let res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ activityComposition: ["all_new_disengaged"] })
@@ -420,6 +421,27 @@ describe('member-activity routes', () => {
             });
             expect(res.body.results).toHaveLength(1);
             expect(res.body.results[0].discordId).toBe(guildMemberOne.discordId);
+
+
+
+
+            res = await request(app)
+                .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ activityComposition: ["others"] })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 1,
+            });
+
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
         })
 
         test('should correctly apply filter on roles field', async () => {
