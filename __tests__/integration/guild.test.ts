@@ -6,7 +6,7 @@ import setupTestDB from '../utils/setupTestDB';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { discordResponseGuildOne, guildOne, guildTwo, guildThree, guildFour, guildFive, insertGuilds } from '../fixtures/guilds.fixture';
-import { discordResponseChannels, discordResponseChannelOne } from '../fixtures/channels.fixture';
+import { discordResponseChannels1, discordResponseChannels2, discordResponseChannelOne } from '../fixtures/channels.fixture';
 import { discordRoleOne, discordRoleTwo, discordRoleThree } from '../fixtures/discord.roles.fixture';
 import { IGuildUpdateBody } from '../../src/interfaces/guild.interface';
 import { guildService, authService, userService, sagaService } from '../../src/services';
@@ -17,23 +17,21 @@ describe('Guild routes', () => {
 
 
     describe('GET /api/v1/guilds/:guildId/channels', () => {
-        beforeEach(() => {
-            guildService.getChannelsFromDiscordJS = jest.fn().mockReturnValue(discordResponseChannels);
-        });
-
         test('should return 200 and array of channels of the guild', async () => {
+            guildService.getChannelsFromDiscordJS = jest.fn().mockReturnValue(discordResponseChannels1);
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
-            const res = await request(app)
+            let res = await request(app)
                 .get(`/api/v1/guilds/${discordResponseGuildOne.id}/channels`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(httpStatus.OK);
 
-            expect(res.body).toHaveLength(3);
+            expect(res.body).toHaveLength(4);
             expect(res.body[0].subChannels).toHaveLength(2);
             expect(res.body[1].subChannels).toHaveLength(2);
             expect(res.body[2].subChannels).toHaveLength(2);
+            expect(res.body[3].subChannels).toHaveLength(2);
 
             expect(res.body[0]).toEqual({
                 id: "915914985140531241",
@@ -92,7 +90,32 @@ describe('Guild routes', () => {
                 }]
             });
 
+            expect(res.body[3]).toEqual({
+                id: "0",
+                title: "unCategorized",
+                subChannels: [{
+                    id: "9304885421682485901",
+                    name: "🗺・DAOX",
+                    parent_id: "9304885421682485901",
+                    guild_id: "915914985140531240",
+                    canReadMessageHistoryAndViewChannel: true
+                },
+                {
+                    id: "930488542168248590",
+                    name: "🗺・DAO",
+                    parent_id: "930488542168248590",
+                    guild_id: "915914985140531240",
+                    canReadMessageHistoryAndViewChannel: true
+                }]
+            });
 
+            guildService.getChannelsFromDiscordJS = jest.fn().mockReturnValue(discordResponseChannels2);
+            res = await request(app)
+                .get(`/api/v1/guilds/${discordResponseGuildOne.id}/channels`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send()
+                .expect(httpStatus.OK);
+            expect(res.body).toHaveLength(3);
         })
         test('should return 440 if did not find guild with guildId and relative user', async () => {
             await insertUsers([userOne]);
@@ -113,11 +136,8 @@ describe('Guild routes', () => {
     })
 
     describe('GET /api/v1/guilds/:guildId/selected-channels', () => {
-        beforeEach(() => {
-            guildService.getChannelsFromDiscordJS = jest.fn().mockReturnValue(discordResponseChannels);
-        });
-
         test('should return 200 and array of selected channels of the guild', async () => {
+            guildService.getChannelsFromDiscordJS = jest.fn().mockReturnValue(discordResponseChannels1);
             await insertUsers([userOne]);
             await insertGuilds([guildFive]);
             const res = await request(app)
@@ -160,7 +180,6 @@ describe('Guild routes', () => {
                     canReadMessageHistoryAndViewChannel: true
                 }]
             });
-
         })
 
         test('should return 200 and empty array if selected channels of the guild is empty', async () => {
