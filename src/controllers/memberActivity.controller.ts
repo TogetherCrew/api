@@ -54,13 +54,18 @@ const memberInteractionsGraph = catchAsync(async function (req: IAuthRequest, re
     if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
     }
-    const guildId = req.params.guildId
+    const guildId = req.params.guildId 
+
+    const oneWeekMilliseconds = 7 * 24 * 60 * 60 * 1000; // Number of milliseconds in a week
+    const currentDate = new Date();
+    const oneWeekAgo = new Date(currentDate.getTime() - oneWeekMilliseconds);
+    const oneWeekAgoEpoch = Math.floor(oneWeekAgo.getTime() / 1000); // Convert to seconds
 
     const memberInteractionQueryOne = `
         MATCH (a:DiscordAccount) -[r:INTERACTED]-(:DiscordAccount)
         WITH r, apoc.coll.zip(r.dates, r.weights) as date_weights
         SET r.weekly_weight = REDUCE(total=0, w in date_weights 
-        | CASE WHEN w[0] >= 1686125351.0 THEN total + w[1] ELSE total END);
+        | CASE WHEN w[0] >= ${oneWeekAgoEpoch} THEN total + w[1] ELSE total END);
         `
     const memberInteractionQueryTwo = `
         MATCH (a:DiscordAccount) -[r:INTERACTED]-> ()
@@ -68,7 +73,7 @@ const memberInteractionsGraph = catchAsync(async function (req: IAuthRequest, re
         SET a.weekly_interaction = interaction_count;
     `
     const memberInteractionQueryThree = `
-        MATCH (a:DiscordAccount) -[r:INTERACTED]-(b:DiscordAccount)
+        MATCH (a:DiscordAccount) -[r:INTERACTED]->(b:DiscordAccount)
         WITH a,r,b
         WHERE (a)-[:IS_MEMBER]->(:Guild {guildId:"${guildId}"}) 
         AND  (b)-[:IS_MEMBER]->(:Guild {guildId:"${guildId}"})
@@ -80,7 +85,7 @@ const memberInteractionsGraph = catchAsync(async function (req: IAuthRequest, re
 
     const { records } = neo4jData;
     const userIds: string[] = [] // Our Graph DB does not have the names of users, so we load them all and push them to an array we want to send to front-end 
-    let makedUpRecords = records.reduce((preRecords: any[], record) => {
+    let makedUpRecords = records.reduce( (preRecords: any[], record) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         const { _fieldLookup, _fields } = record
@@ -88,12 +93,12 @@ const memberInteractionsGraph = catchAsync(async function (req: IAuthRequest, re
         const r = _fields[_fieldLookup['r']]
         const b = _fields[_fieldLookup['b']]
         
-        const aWeeklyInteraction = a?.properties?.weekly_interaction?.low
+        const aWeeklyInteraction = a?.properties?.weekly_interaction
         const aUserId = a?.properties?.userId
 
-        const rWeeklyInteraction = r?.properties?.weekly_weight?.low
+        const rWeeklyInteraction = r?.properties?.weekly_weight
 
-        const bWeeklyInteraction = b?.properties?.weekly_interaction?.low
+        const bWeeklyInteraction = b?.properties?.weekly_interaction
         const bUserId = b?.properties?.userId
 
 
