@@ -326,9 +326,10 @@ describe('member-activity routes', () => {
         test('should return 200 and member interaction graph data if req data is ok', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
+            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
 
             await Neo4j.write("match (n) detach delete (n);")
-            await Neo4j.write(`MERGE (a:DiscordAccount {userId: "${userOne._id}"}) -[r:INTERACTED] -> (b:DiscordAccount {userId: "${userTwo._id}"})
+            await Neo4j.write(`MERGE (a:DiscordAccount {userId: "${guildMemberOne.discordId}"}) -[r:INTERACTED] -> (b:DiscordAccount {userId: "${guildMemberTwo.discordId}"})
                                 SET r.weights = [3444.0]
                                 SET r.dates = [1687434970.296297]
                                 SET r.createdAt = 1687434960.296297
@@ -349,9 +350,18 @@ describe('member-activity routes', () => {
 
             expect(Array.isArray(res.body)).toBe(true);
             expect(res.body).toHaveLength(2)
-            expect(res.body).toEqual(expect.arrayContaining([expect.objectContaining({width: 1})]))
-            expect(res.body).toEqual(expect.arrayContaining([expect.objectContaining({width: 3444})]))
-
+            expect(res.body).toEqual(expect.arrayContaining([({
+                from: { id: '123456789', radius: 3444, username: 'Behzad' },
+                to: { id: '987654321', radius: 1, username: 'Bi#1234' },
+                width: 3444
+              })
+            ]))
+            expect(res.body).toEqual(expect.arrayContaining([({
+                from: { id: '987654321', radius: 1, username: 'Bi#1234' },
+                to: { id: '123456789', radius: 3444, username: 'Behzad' },
+                width: 1
+              })
+            ]))
 
         })
         test('should return 401 if access token is missing', async () => {
