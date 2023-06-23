@@ -836,6 +836,7 @@ function getActivityComposition(guildMember: IGuildMember, memberActivity: any) 
 }
 
 async function getMembersInteractionsNetworkGraph(guildId: string, guildConnection: Connection){
+    // TODO: refactor function
 
     const oneWeekMilliseconds = 7 * 24 * 60 * 60 * 1000; // Number of milliseconds in a week
     const currentDate = new Date();
@@ -898,8 +899,8 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
         return preRecords
     }, [])
 
-    const userProjection = { discordId: 1, username: 1 }
-    const usersInfo = await guildConnection.models.GuildMember.find({}, { _id: 0, discordId: 1, username: 1 }) as typeof userProjection[]
+    const userProjection = { discordId: 1, username: 1, discriminator: 1 }
+    const usersInfo = await guildConnection.models.GuildMember.find({}, { _id: 0, ...userProjection })
 
     // insert username of user to the response object
     makedUpRecords = makedUpRecords.map(record => {
@@ -908,12 +909,17 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
         
         const fromUser = usersInfo.find(user => user.discordId === fromId)
         const fromUsername = fromUser?.username
+        const fromDiscriminator = fromUser?.discriminator
+        const fromFullUsername = fromDiscriminator === "0" ? fromUsername : fromUsername + "#" + fromDiscriminator
         
         const toUser = usersInfo.find(user => user.discordId === toId)
         const toUsername = toUser?.username
+        const toDiscriminator = toUser?.discriminator
+        const toFullUsername = toDiscriminator === "0" ? toUsername : toUsername + "#" + toDiscriminator
 
-        record.from.username = fromUsername || null
-        record.to.username = toUsername || null
+
+        record.from.username = fromFullUsername
+        record.to.username = toFullUsername
 
         return record
     })
