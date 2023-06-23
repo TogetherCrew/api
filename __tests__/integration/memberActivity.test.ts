@@ -2,12 +2,14 @@ import request from 'supertest';
 import httpStatus from 'http-status';
 import app from '../../src/app';
 import setupTestDB from '../utils/setupTestDB';
-import { userOne, insertUsers } from '../fixtures/user.fixture';
+import { userOne, insertUsers, userTwo } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour, insertMemberActivities } from '../fixtures/memberActivity.fixture';
 import { guildOne, insertGuilds } from '../fixtures/guilds.fixture';
 import { databaseService } from '@togethercrew.dev/db';
 import config from '../../src/config';
+import * as Neo4j from '../../src/neo4j';
+
 
 
 setupTestDB();
@@ -318,15 +320,35 @@ describe('member-activity routes', () => {
             await connection.dropDatabase();
         });
 
-        test('should return 200 and member interaction graph data if req data is ok', async () => {
+        test.only('should return 200 and member interaction graph data if req data is ok', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
+            await Neo4j.write("match (n) detach delete (n);")
+            await Neo4j.write(`MERGE (a:DiscordAccount {userId: "${userOne._id}"}) -[r:INTERACTED] -> (b:DiscordAccount {userId: "${userTwo._id}"})
+                                SET r.weights = [3444.0]
+                                SET r.dates = [1687434970.296297]
+                                SET r.createdAt = 1687434960.296297
+                                MERGE (a) <-[r2:INTERACTED]-(b)
+                                SET r2.weights = [1.0]
+                                SET r2.dates = [1687434970.296297]
+                                SET r.createdAt = 1687434960.296297
+                                WITH a, b
+                                CREATE (g:Guild {guildId: "${guildOne.guildId}"})
+                                MERGE (a) -[:IS_MEMBER]->(g)
+                                MERGE (b) -[:IS_MEMBER] ->(g)`)
+                                
+
             const res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/members-interactions-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
+
+            expect(Array.isArray(res.body)).toBe(true);
+            expect(res.body).toHaveLength(2)
+            expect(res.body).toEqual(expect.arrayContaining([expect.objectContaining({width: 1})]))
+            expect(res.body).toEqual(expect.arrayContaining([expect.objectContaining({width: 3444})]))
+
 
         })
         test('should return 401 if access token is missing', async () => {
