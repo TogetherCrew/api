@@ -3,7 +3,11 @@ import config from './config';
 import { Query } from 'neo4j-driver-core/types/types';
 
 
-const driver = neo4j.driver(config.neo4j.url, neo4j.auth.basic(config.neo4j.user, config.neo4j.password))
+const driver = neo4j.driver(config.neo4j.url,
+                            neo4j.auth.basic(config.neo4j.user, config.neo4j.password),
+                            // https://github.com/neo4j/neo4j-javascript-driver#enabling-native-numbers
+                            { disableLosslessIntegers: true }
+                            )
 
 export async function read(cypher: Query, params = {}, database = config.neo4j.database){
     const session = driver.session({
