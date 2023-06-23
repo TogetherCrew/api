@@ -320,7 +320,7 @@ describe('member-activity routes', () => {
             await connection.dropDatabase();
         });
 
-        test.only('should return 200 and member interaction graph data if req data is ok', async () => {
+        test('should return 200 and member interaction graph data if req data is ok', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
 
