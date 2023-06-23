@@ -226,29 +226,55 @@ paths:
           description: NotFound
           $ref: "#/components/responses/NotFound"
   /api/v1/member-activity/{guildId}/members-interactions-network-graph:
-    tags:
-      - [Member-Activity]
-    summary: Get data for active members interactions graph 
-    security:
-      - bearerAuth: []
     get:
       tags:
-        - [Member-Activity]
-      summary: Get data for member interactions graph 
-    parameters:
+        - Member-Activity
+      summary: Get data for active members interactions graph
+      security:
+        - bearerAuth: []
+      parameters:
         - in: path
           name: guildId
           required: true
           schema:
             type: string
-          description: Guild Id
-    responses:
-      "401":
-        description: Unauthorized
-        $ref: "#/components/responses/Unauthorized"
-      "404":
-        description: NotFound
-        $ref: "#/components/responses/NotFound"
+          description: Guild ID
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    from:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        radius:
+                          type: integer
+                        username:
+                          type: string
+                    to:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        radius:
+                          type: integer
+                        username:
+                          type: string
+                    width:
+                      type: integer
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
 
   /api/v1/member-activity/{guildId}/active-members-onboarding-line-graph:
     post:
