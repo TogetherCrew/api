@@ -318,7 +318,7 @@ describe('member-activity routes', () => {
         })
     })
 
-    describe('POST /api/v1/member-activity/:guildId/members-interactions-graph', () => {
+    describe('POST /api/v1/member-activity/:guildId/members-interactions-network-graph', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
         });
@@ -343,7 +343,7 @@ describe('member-activity routes', () => {
                                 
 
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/members-interactions-graph`)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/members-interactions-network-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
 
@@ -356,7 +356,7 @@ describe('member-activity routes', () => {
         })
         test('should return 401 if access token is missing', async () => {
             await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/members-interactions-graph`)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/members-interactions-network-graph`)
                 .send({ startDate: new Date(), endDate: new Date() })
                 .expect(httpStatus.UNAUTHORIZED);
         })
@@ -364,7 +364,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await request(app)
 
-                .get(`/api/v1/member-activity/${guildOne.guildId}/members-interactions-graph`)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/members-interactions-network-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.NOT_FOUND);
         })

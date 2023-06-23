@@ -225,7 +225,7 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
-  /api/v1/member-activity/{guildId}/members-interactions-graph:
+  /api/v1/member-activity/{guildId}/members-interactions-network-graph:
     tags:
       - [Member-Activity]
     summary: Get data for active members interactions graph 
