@@ -1,11 +1,13 @@
 import { Response } from 'express';
-import { guildService, memberActivityService } from '../services';
+import { guildService, memberActivityService, guildMemberService } from '../services';
 import { IAuthRequest } from '../interfaces/request.interface';
 import { catchAsync, ApiError, charts } from "../utils";
 import { databaseService } from '@togethercrew.dev/db'
 import httpStatus from 'http-status';
 import config from '../config';
 import * as Neo4j from '../neo4j';
+import { pick } from '../utils';
+
 
 
 const activeMembersCompositionLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
@@ -141,12 +143,27 @@ const memberInteractionsGraph = catchAsync(async function (req: IAuthRequest, re
     res.send(makedUpRecords)
 })
 
+const activeMembersCompositionTable = catchAsync(async function (req: IAuthRequest, res: Response) {
+    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    }
+    const filter = pick(req.query, ['activityComposition', 'roles', 'username']);
+    const options = pick(req.query, ['sortBy', 'limit', 'page']);
+    const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
+    const memberActivity = await memberActivityService.getLastDocumentForActiveMembersCompositionTable(connection, filter.activityComposition);
+    const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options, memberActivity);
+    const roles = await guildService.getGuildRolesFromDiscordAPI(req.params.guildId);
+    if (guildMembers) {
+        guildMemberService.addNeededDataForTable(guildMembers.results, roles, memberActivity);
+    }
+    res.send(guildMembers);
+});
 
 export default {
     activeMembersCompositionLineGraph,
     activeMembersOnboardingLineGraph,
     disengagedMembersCompositionLineGraph,
     inactiveMembersLineGraph,
-    memberInteractionsGraph
+    memberInteractionsGraph,
+    activeMembersCompositionTable
 }
-
