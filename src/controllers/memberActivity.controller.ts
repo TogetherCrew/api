@@ -51,6 +51,18 @@ const inactiveMembersLineGraph = catchAsync(async function (req: IAuthRequest, r
     res.send(inactiveMembersLineGraph);
 });
 
+const membersInteractionsNetworkGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
+    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    }
+    const guildId = req.params.guildId 
+    const connection = databaseService.connectionFactory(guildId, config.mongoose.botURL);
+
+    const networkGraphData = await memberActivityService.getMembersInteractionsNetworkGraph(guildId, connection)
+    
+    res.send(networkGraphData)
+})
+
 const activeMembersCompositionTable = catchAsync(async function (req: IAuthRequest, res: Response) {
     if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
@@ -72,6 +84,6 @@ export default {
     activeMembersOnboardingLineGraph,
     disengagedMembersCompositionLineGraph,
     inactiveMembersLineGraph,
+    membersInteractionsNetworkGraph,
     activeMembersCompositionTable
 }
-
