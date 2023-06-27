@@ -1,16 +1,15 @@
-FROM node:16 as builder
+FROM node:18-alpine AS base
+WORKDIR /project
+COPY . .
+RUN npm ci
 
-WORKDIR /user/app
-COPY package.json ./
-RUN npm install 
-COPY ./ ./
+FROM base AS test
+CMD [ "npx", "jest", "--coverage" ]
+
+FROM base AS build
 RUN npm run build
 
-FROM node:16
-
-WORKDIR /user/app
-COPY package.json ./
-RUN npm install --only=production
-COPY --from=builder /user/app/lib/ ./lib
-
-CMD ["bash", "-c", "npm run start"]
+FROM build AS prod
+RUN npm ci --omit=dev
+CMD ["npm", "run", "start"]
+EXPOSE 3000
