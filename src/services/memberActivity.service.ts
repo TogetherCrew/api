@@ -813,29 +813,32 @@ async function getLastDocumentForActiveMembersCompositionTable(connection: Conne
 function getActivityComposition(guildMember: IGuildMember, memberActivity: any) {
     const activityCompositions = [];
     if (memberActivity.all_new_active && memberActivity.all_new_active.includes(guildMember.discordId)) {
-        activityCompositions.push("newlyActive");
+        activityCompositions.push("Newly active");
     }
 
     if (memberActivity.all_new_disengaged && memberActivity.all_new_disengaged.includes(guildMember.discordId)) {
-        activityCompositions.push("becameDisengaged");
+        activityCompositions.push("Became disengaged");
     }
 
     if (memberActivity.all_active && memberActivity.all_active.includes(guildMember.discordId)) {
-        activityCompositions.push("totActiveMembers");
+        activityCompositions.push("All active");
     }
 
     if (memberActivity.all_consistent && memberActivity.all_consistent.includes(guildMember.discordId)) {
-        activityCompositions.push("consistentlyActive");
+        activityCompositions.push("Consistently active");
     }
 
     if (memberActivity.all_vital && memberActivity.all_vital.includes(guildMember.discordId)) {
-        activityCompositions.push("vitalMembers");
+        activityCompositions.push("Vital member");
     }
 
+    if (activityCompositions.length === 0) {
+        activityCompositions.push("Others");
+    }
     return activityCompositions;
 }
 
-async function getMembersInteractionsNetworkGraph(guildId: string, guildConnection: Connection){
+async function getMembersInteractionsNetworkGraph(guildId: string, guildConnection: Connection) {
     // TODO: refactor function
 
     const oneWeekMilliseconds = 7 * 24 * 60 * 60 * 1000; // Number of milliseconds in a week
@@ -867,14 +870,14 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
 
     const { records } = neo4jData;
     const userIds: string[] = [] // Our Graph DB does not have the names of users, so we load them all and push them to an array we want to send to front-end 
-    let makedUpRecords = records.reduce( (preRecords: any[], record) => {
+    let makedUpRecords = records.reduce((preRecords: any[], record) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         const { _fieldLookup, _fields } = record
         const a = _fields[_fieldLookup['a']]
         const r = _fields[_fieldLookup['r']]
         const b = _fields[_fieldLookup['b']]
-        
+
         const aWeeklyInteraction = a?.properties?.weekly_interaction
         const aUserId = a?.properties?.userId
 
@@ -884,9 +887,9 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
         const bUserId = b?.properties?.userId
 
 
-        if( aWeeklyInteraction && rWeeklyInteraction && bWeeklyInteraction){
+        if (aWeeklyInteraction && rWeeklyInteraction && bWeeklyInteraction) {
             const interaction = {
-                from: { id: aUserId, radius: aWeeklyInteraction},
+                from: { id: aUserId, radius: aWeeklyInteraction },
                 to: { id: bUserId, radius: bWeeklyInteraction },
                 width: rWeeklyInteraction
             }
@@ -906,12 +909,12 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
     makedUpRecords = makedUpRecords.map(record => {
         const fromId = record.from.id
         const toId = record.to.id
-        
+
         const fromUser = usersInfo.find(user => user.discordId === fromId)
         const fromUsername = fromUser?.username
         const fromDiscriminator = fromUser?.discriminator
         const fromFullUsername = fromDiscriminator === "0" ? fromUsername : fromUsername + "#" + fromDiscriminator
-        
+
         const toUser = usersInfo.find(user => user.discordId === toId)
         const toUsername = toUser?.username
         const toDiscriminator = toUser?.discriminator
