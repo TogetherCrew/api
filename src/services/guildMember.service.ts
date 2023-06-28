@@ -32,12 +32,12 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
 
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const matchStage: any = {
+    let matchStage: any = {
         discordId: { $in: memberActivity.all },
     };
 
     if (activityComposition && activityComposition.includes('others')) {
-        matchStage.discordId = { $nin: memberActivity.all };
+        matchStage = {};
     }
 
     if (username) {

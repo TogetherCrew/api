@@ -341,7 +341,7 @@ describe('member-activity routes', () => {
                                 CREATE (g:Guild {guildId: "${guildOne.guildId}"})
                                 MERGE (a) -[:IS_MEMBER]->(g)
                                 MERGE (b) -[:IS_MEMBER] ->(g)`)
-                                
+
 
             const res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/members-interactions-network-graph`)
@@ -354,13 +354,13 @@ describe('member-activity routes', () => {
                 from: { id: '123456789', radius: 3444, username: 'Behzad' },
                 to: { id: '987654321', radius: 1, username: 'Bi#1234' },
                 width: 3444
-              })
+            })
             ]))
             expect(res.body).toEqual(expect.arrayContaining([({
                 from: { id: '987654321', radius: 1, username: 'Bi#1234' },
                 to: { id: '123456789', radius: 3444, username: 'Behzad' },
                 width: 1
-              })
+            })
             ]))
 
         })
@@ -415,7 +415,7 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberThree.joinedAt.toISOString(),
                 discriminator: guildMemberThree.discriminator,
-                activityComposition: ['newlyActive']
+                activityComposition: ['Newly active']
             });
 
             expect(res.body.results[1]).toEqual({
@@ -429,7 +429,7 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberOne.joinedAt.toISOString(),
                 discriminator: guildMemberOne.discriminator,
-                activityComposition: ['newlyActive', 'becameDisengaged', 'totActiveMembers']
+                activityComposition: ['Newly active', 'Became disengaged', 'All active']
             });
 
             expect(res.body.results[2]).toEqual({
@@ -442,7 +442,7 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberTwo.joinedAt.toISOString(),
                 discriminator: guildMemberTwo.discriminator,
-                activityComposition: ['newlyActive']
+                activityComposition: ['Newly active']
             });
         })
 
@@ -500,11 +500,15 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 1,
+                totalResults: 4,
             });
 
-            expect(res.body.results).toHaveLength(1);
-            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results).toHaveLength(4);
+            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[3].discordId).toBe(guildMemberFour.discordId);
+
         })
 
         test('should correctly apply filter on roles field', async () => {
