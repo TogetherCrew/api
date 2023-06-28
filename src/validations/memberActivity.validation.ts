@@ -40,9 +40,31 @@ const inactiveMembersLineGraph = {
     }),
 };
 
+const memberInteractionsGraph = {
+    params: Joi.object().required().keys({
+        guildId: Joi.string().required()
+    }),
+}
+const activeMembersCompositionTable = {
+    params: Joi.object().required().keys({
+        guildId: Joi.string().required()
+    }),
+    query: Joi.object().required().keys({
+        activityComposition: Joi.array().items(Joi.string().valid('all_active', 'all_new_active', 'all_consistent', 'all_vital', 'all_new_disengaged', 'others')).single(),
+        roles: Joi.array().items(Joi.string()).single(),
+        username: Joi.string(),
+        sortBy: Joi.string(),
+        limit: Joi.number().integer(),
+        page: Joi.number().integer(),
+    }),
+};
+
 export default {
     activeMembersCompositionLineGraph,
     activeMembersOnboardingLineGraph,
     disengagedMembersCompositionLineGraph,
-    inactiveMembersLineGraph
+    inactiveMembersLineGraph,
+    memberInteractionsGraph,
+    activeMembersCompositionTable
 }
+

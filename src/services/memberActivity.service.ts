@@ -1,5 +1,8 @@
 import { Connection } from 'mongoose';
 import { date, math } from '../utils';
+import { IGuildMember } from '@togethercrew.dev/db';
+import * as Neo4j from '../neo4j';
+
 
 /**
  * active members composition line graph 
@@ -763,10 +766,175 @@ async function inactiveMembersLineGraph(connection: Connection, startDate: Date,
     }
 }
 
+/**
+ * Constructs a projection stage object for MongoDB aggregation pipeline based on the provided activity composition fields.
+ * 
+ * @param {Array<string>} fields - The activity composition fields to include in the projection. Each field corresponds to a property in the database documents.
+ * @returns {Stage} The projection stage object. It includes a '_id' field set to '0', an 'all' field with an empty '$setUnion', and additional fields based on the 'fields' parameter. Each additional field is prefixed with a '$'.
+ */
+function buildProjectStageBasedOnActivityComposition(fields: Array<string>) {
+    const initialStage: {
+        _id: string;
+        all: { $setUnion: Array<string> };
+        [key: string]: string | { $setUnion: Array<string> }
+    } = {
+        _id: "0",
+        all: { $setUnion: [] }
+    };
+
+    const finalStage = fields.reduce((stage, field) => {
+        stage[field] = `$${field}`;
+        stage.all.$setUnion.push(`$${field}`);
+        return stage;
+    }, initialStage);
+
+    return finalStage;
+}
+
+/**
+ * get last member activity document for usage of active member compostion table 
+ * @param {Connection} connection
+ * @param {Any} activityComposition
+ * @returns {Object}
+ */
+async function getLastDocumentForActiveMembersCompositionTable(connection: Connection, activityComposition: Array<string>) {
+    const fields = (activityComposition === undefined || activityComposition.length === 0 || activityComposition.includes('others')) ? ["all_active", "all_new_active", "all_consistent", "all_vital", "all_new_disengaged"] : activityComposition;
+    const projectStage = buildProjectStageBasedOnActivityComposition(fields);
+    const lastDocument = await connection.models.MemberActivity.aggregate([
+        { $sort: { date: -1 } },
+        { $limit: 1 },
+        { $project: projectStage }
+    ]);
+    return lastDocument[0]
+
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getActivityComposition(guildMember: IGuildMember, memberActivity: any) {
+    const activityCompositions = [];
+    if (memberActivity.all_new_active && memberActivity.all_new_active.includes(guildMember.discordId)) {
+        activityCompositions.push("newlyActive");
+    }
+
+    if (memberActivity.all_new_disengaged && memberActivity.all_new_disengaged.includes(guildMember.discordId)) {
+        activityCompositions.push("becameDisengaged");
+    }
+
+    if (memberActivity.all_active && memberActivity.all_active.includes(guildMember.discordId)) {
+        activityCompositions.push("totActiveMembers");
+    }
+
+    if (memberActivity.all_consistent && memberActivity.all_consistent.includes(guildMember.discordId)) {
+        activityCompositions.push("consistentlyActive");
+    }
+
+    if (memberActivity.all_vital && memberActivity.all_vital.includes(guildMember.discordId)) {
+        activityCompositions.push("vitalMembers");
+    }
+
+    return activityCompositions;
+}
+
+async function getMembersInteractionsNetworkGraph(guildId: string, guildConnection: Connection){
+    // TODO: refactor function
+
+    const oneWeekMilliseconds = 7 * 24 * 60 * 60 * 1000; // Number of milliseconds in a week
+    const currentDate = new Date();
+    const oneWeekAgo = new Date(currentDate.getTime() - oneWeekMilliseconds);
+    const oneWeekAgoEpoch = Math.floor(oneWeekAgo.getTime() / 1000); // Convert to seconds
+
+    const memberInteractionQueryOne = `
+        MATCH (a:DiscordAccount) -[r:INTERACTED]-(:DiscordAccount)
+        WITH r, apoc.coll.zip(r.dates, r.weights) as date_weights
+        SET r.weekly_weight = REDUCE(total=0, w in date_weights 
+        | CASE WHEN w[0] >= ${oneWeekAgoEpoch} THEN total + w[1] ELSE total END);
+        `
+    const memberInteractionQueryTwo = `
+        MATCH (a:DiscordAccount) -[r:INTERACTED]-> ()
+        WITH a, SUM(r.weekly_weight) as interaction_count
+        SET a.weekly_interaction = interaction_count;
+    `
+    const memberInteractionQueryThree = `
+        MATCH (a:DiscordAccount) -[r:INTERACTED]->(b:DiscordAccount)
+        WITH a,r,b
+        WHERE (a)-[:IS_MEMBER]->(:Guild {guildId:"${guildId}"}) 
+        AND  (b)-[:IS_MEMBER]->(:Guild {guildId:"${guildId}"})
+        RETURN a,r,b
+    `
+    await Neo4j.write(memberInteractionQueryOne)
+    await Neo4j.write(memberInteractionQueryTwo)
+    const neo4jData = await Neo4j.read(memberInteractionQueryThree)
+
+    const { records } = neo4jData;
+    const userIds: string[] = [] // Our Graph DB does not have the names of users, so we load them all and push them to an array we want to send to front-end 
+    let makedUpRecords = records.reduce( (preRecords: any[], record) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const { _fieldLookup, _fields } = record
+        const a = _fields[_fieldLookup['a']]
+        const r = _fields[_fieldLookup['r']]
+        const b = _fields[_fieldLookup['b']]
+        
+        const aWeeklyInteraction = a?.properties?.weekly_interaction
+        const aUserId = a?.properties?.userId
+
+        const rWeeklyInteraction = r?.properties?.weekly_weight
+
+        const bWeeklyInteraction = b?.properties?.weekly_interaction
+        const bUserId = b?.properties?.userId
+
+
+        if( aWeeklyInteraction && rWeeklyInteraction && bWeeklyInteraction){
+            const interaction = {
+                from: { id: aUserId, radius: aWeeklyInteraction},
+                to: { id: bUserId, radius: bWeeklyInteraction },
+                width: rWeeklyInteraction
+            }
+            userIds.push(aUserId)
+            userIds.push(bUserId)
+
+            preRecords.push(interaction)
+        }
+
+        return preRecords
+    }, [])
+
+    const userProjection = { discordId: 1, username: 1, discriminator: 1 }
+    const usersInfo = await guildConnection.models.GuildMember.find({}, { _id: 0, ...userProjection })
+
+    // insert username of user to the response object
+    makedUpRecords = makedUpRecords.map(record => {
+        const fromId = record.from.id
+        const toId = record.to.id
+        
+        const fromUser = usersInfo.find(user => user.discordId === fromId)
+        const fromUsername = fromUser?.username
+        const fromDiscriminator = fromUser?.discriminator
+        const fromFullUsername = fromDiscriminator === "0" ? fromUsername : fromUsername + "#" + fromDiscriminator
+        
+        const toUser = usersInfo.find(user => user.discordId === toId)
+        const toUsername = toUser?.username
+        const toDiscriminator = toUser?.discriminator
+        const toFullUsername = toDiscriminator === "0" ? toUsername : toUsername + "#" + toDiscriminator
+
+
+        record.from.username = fromFullUsername
+        record.to.username = toFullUsername
+
+        return record
+    })
+
+    return makedUpRecords
+}
+
+
 export default {
     activeMembersCompositionLineGraph,
     disengagedMembersCompositionLineGraph,
     inactiveMembersLineGraph,
-    activeMembersOnboardingLineGraph
+    activeMembersOnboardingLineGraph,
+    getLastDocumentForActiveMembersCompositionTable,
+    getActivityComposition,
+    getMembersInteractionsNetworkGraph
 }
 
