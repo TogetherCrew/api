@@ -5,9 +5,8 @@ import { catchAsync, ApiError, pick, sort } from "../utils";
 import httpStatus from 'http-status';
 import config from '../config';
 import { scopes, permissions } from '../config/dicord';
-import { IDiscordUser, IDiscordOathBotCallback, databaseService } from '@togethercrew.dev/db';
+import { IDiscordUser, IDiscordOathBotCallback, databaseService, IChannel } from '@togethercrew.dev/db';
 import querystring from 'querystring';
-import { ICustomChannel } from '../interfaces/guild.interface';
 import { closeConnection } from '../database/connection';
 
 const getGuilds = catchAsync(async function (req: IAuthRequest, res: Response) {
@@ -70,14 +69,14 @@ const getSelectedChannels = catchAsync(async function (req: IAuthRequest, res: R
         let sortedChannels = await sort.sortChannels(channels);
         sortedChannels = sortedChannels
             .filter(category => {
-                const selectedSubChannels = category.subChannels.filter((channel: any) => guild.selectedChannels?.some(selected => selected.channelId === channel.channelId));
+                const selectedSubChannels = category.subChannels.filter((channel: IChannel) => guild.selectedChannels?.some(selected => selected.channelId === channel.channelId));
                 return selectedSubChannels.length > 0;
             })
             .map(category => {
                 return {
                     channelId: category.channelId,
                     title: category.title,
-                    subChannels: category.subChannels.filter((channel: any) => guild.selectedChannels?.some(selected => selected.channelId === channel.channelId))
+                    subChannels: category.subChannels.filter((channel: IChannel) => guild.selectedChannels?.some(selected => selected.channelId === channel.channelId))
                 }
             });
         await closeConnection(connection)

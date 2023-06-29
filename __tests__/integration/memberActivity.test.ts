@@ -2,14 +2,13 @@ import request from 'supertest';
 import httpStatus from 'http-status';
 import app from '../../src/app';
 import setupTestDB from '../utils/setupTestDB';
-import { userOne, insertUsers, userTwo } from '../fixtures/user.fixture';
+import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour, insertMemberActivities } from '../fixtures/memberActivity.fixture';
 import { guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour, insertGuildMembers } from '../fixtures/guildMember.fixture';
 import { guildOne, insertGuilds } from '../fixtures/guilds.fixture';
 import { databaseService } from '@togethercrew.dev/db';
-import { discordRoleOne, discordRoleTwo, discordRoleThree } from '../fixtures/discord.roles.fixture';
-import { guildService } from '../../src/services';
+import { role1, role2, role3, insertRoles } from '../fixtures/discord.roles.fixture';
 import config from '../../src/config';
 import * as Neo4j from '../../src/neo4j';
 
@@ -19,7 +18,7 @@ setupTestDB();
 
 describe('member-activity routes', () => {
     const connection = databaseService.connectionFactory(guildOne.guildId, config.mongoose.botURL);
-    describe('POST /api/v1/member-activity/:guildId/active-members-composition-line-graph', () => {
+    describe('GET /api/v1/member-activity/:guildId/active-members-composition-line-graph', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
         });
@@ -103,7 +102,7 @@ describe('member-activity routes', () => {
         })
     })
 
-    describe('POST /api/v1/member-activity/:guildId/disengaged-members-composition-line-graph', () => {
+    describe('GET /api/v1/member-activity/:guildId/disengaged-members-composition-line-graph', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
         });
@@ -182,7 +181,7 @@ describe('member-activity routes', () => {
         })
     })
 
-    describe('POST /api/v1/member-activity/:guildId/active-members-onboarding-line-graph', () => {
+    describe('GET /api/v1/member-activity/:guildId/active-members-onboarding-line-graph', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
         });
@@ -259,13 +258,14 @@ describe('member-activity routes', () => {
         })
     })
 
-    describe('POST /api/v1/member-activity/:guildId/inactive-members-line-graph', () => {
+    describe('GET /api/v1/member-activity/:guildId/inactive-members-line-graph', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
         });
         test('should return 200 and inactive members line graph data if req data is ok', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
+            await insertRoles([role1, role2, role3], connection);
 
             await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
             const res = await request(app)
@@ -318,7 +318,7 @@ describe('member-activity routes', () => {
         })
     })
 
-    describe('POST /api/v1/member-activity/:guildId/members-interactions-network-graph', () => {
+    describe('GET /api/v1/member-activity/:guildId/members-interactions-network-graph', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
         });
@@ -380,17 +380,16 @@ describe('member-activity routes', () => {
         })
     })
 
-    describe('POST /api/v1/member-activity/:guildId/active-members-composition-table', () => {
+    describe('GET /api/v1/member-activity/:guildId/active-members-composition-table', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
-            guildService.getGuildRolesFromDiscordAPI = jest.fn().mockReturnValue([discordRoleOne, discordRoleTwo, discordRoleThree]);
         });
         test('should return 200 and apply the default query options', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
             await insertMemberActivities([memberActivityOne, memberActivityTwo], connection);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-
+            await insertRoles([role1, role2, role3], connection);
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -411,7 +410,7 @@ describe('member-activity routes', () => {
                 username: guildMemberThree.username,
                 avatar: guildMemberThree.avatar,
                 roles: [
-                    { id: discordRoleTwo.id, name: discordRoleTwo.name, color: discordRoleTwo.color }
+                    { roleId: role2.roleId, name: role2.name, color: role2.color }
                 ],
                 joinedAt: guildMemberThree.joinedAt.toISOString(),
                 discriminator: guildMemberThree.discriminator,
@@ -423,8 +422,8 @@ describe('member-activity routes', () => {
                 username: guildMemberOne.username,
                 avatar: guildMemberOne.avatar,
                 roles: [
-                    { id: discordRoleTwo.id, name: discordRoleTwo.name, color: discordRoleTwo.color },
-                    { id: discordRoleThree.id, name: discordRoleThree.name, color: discordRoleThree.color }
+                    { roleId: role2.roleId, name: role2.name, color: role2.color },
+                    { roleId: role3.roleId, name: role3.name, color: role3.color }
 
                 ],
                 joinedAt: guildMemberOne.joinedAt.toISOString(),
@@ -437,8 +436,8 @@ describe('member-activity routes', () => {
                 username: guildMemberTwo.username + "#" + guildMemberTwo.discriminator,
                 avatar: guildMemberTwo.avatar,
                 roles: [
-                    { id: discordRoleOne.id, name: discordRoleOne.name, color: discordRoleOne.color },
-                    { id: discordRoleThree.id, name: discordRoleThree.name, color: discordRoleThree.color }
+                    { roleId: role1.roleId, name: role1.name, color: role1.color },
+                    { roleId: role3.roleId, name: role3.name, color: role3.color }
                 ],
                 joinedAt: guildMemberTwo.joinedAt.toISOString(),
                 discriminator: guildMemberTwo.discriminator,
@@ -467,6 +466,7 @@ describe('member-activity routes', () => {
             await insertGuilds([guildOne]);
             await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertRoles([role1, role2, role3], connection);
 
             let res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
@@ -516,6 +516,7 @@ describe('member-activity routes', () => {
             await insertGuilds([guildOne]);
             await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertRoles([role1, role2, role3], connection);
 
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
@@ -541,6 +542,7 @@ describe('member-activity routes', () => {
             await insertGuilds([guildOne]);
             await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertRoles([role1, role2, role3], connection);
 
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
@@ -566,6 +568,7 @@ describe('member-activity routes', () => {
             await insertGuilds([guildOne]);
             await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertRoles([role1, role2, role3], connection);
 
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
@@ -592,6 +595,7 @@ describe('member-activity routes', () => {
             await insertGuilds([guildOne]);
             await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertRoles([role1, role2, role3], connection);
 
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
@@ -618,6 +622,7 @@ describe('member-activity routes', () => {
             await insertGuilds([guildOne]);
             await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertRoles([role1, role2, role3], connection);
 
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
@@ -654,6 +659,7 @@ describe('member-activity routes', () => {
             await insertGuilds([guildOne]);
             await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertRoles([role1, role2, role3], connection);
 
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
@@ -680,6 +686,7 @@ describe('member-activity routes', () => {
             await insertGuilds([guildOne]);
             await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertRoles([role1, role2, role3], connection);
 
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
@@ -701,4 +708,5 @@ describe('member-activity routes', () => {
         })
 
     })
+
 });

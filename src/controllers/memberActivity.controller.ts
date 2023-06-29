@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { guildService, memberActivityService, guildMemberService } from '../services';
+import { guildService, memberActivityService, guildMemberService, roleService } from '../services';
 import { IAuthRequest } from '../interfaces/request.interface';
 import { catchAsync, ApiError, charts } from "../utils";
 import { databaseService } from '@togethercrew.dev/db'
@@ -77,7 +77,7 @@ const activeMembersCompositionTable = catchAsync(async function (req: IAuthReque
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     const memberActivity = await memberActivityService.getLastDocumentForActiveMembersCompositionTable(connection, filter.activityComposition);
     const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options, memberActivity);
-    const roles = await guildService.getGuildRolesFromDiscordAPI(req.params.guildId);
+    const roles = await roleService.getRoles(connection, {});
     if (guildMembers) {
         guildMemberService.addNeededDataForTable(guildMembers.results, roles, memberActivity);
     }
