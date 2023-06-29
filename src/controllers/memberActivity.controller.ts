@@ -1,10 +1,12 @@
 import { Response } from 'express';
-import { guildService, memberActivityService } from '../services';
+import { guildService, memberActivityService, guildMemberService } from '../services';
 import { IAuthRequest } from '../interfaces/request.interface';
 import { catchAsync, ApiError, charts } from "../utils";
 import { databaseService } from '@togethercrew.dev/db'
 import httpStatus from 'http-status';
 import config from '../config';
+import { pick } from '../utils';
+import { closeConnection } from '../database/connection';
 
 
 
@@ -13,30 +15,21 @@ const activeMembersCompositionLineGraph = catchAsync(async function (req: IAuthR
         throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
     }
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
-    let activeMembersLineGraph = await memberActivityService.activeMembersCompositionLineGraph(connection, req.body.startDate, req.body.endDate);
-    activeMembersLineGraph = charts.fillActiveMembersCompositionLineGraph(activeMembersLineGraph, req.body.startDate, req.body.endDate);
-    res.send(activeMembersLineGraph);
+    let activeMembersCompositionLineGraph = await memberActivityService.activeMembersCompositionLineGraph(connection, req.body.startDate, req.body.endDate);
+    activeMembersCompositionLineGraph = charts.fillActiveMembersCompositionLineGraph(activeMembersCompositionLineGraph, req.body.startDate, req.body.endDate);
+    await closeConnection(connection)
+    res.send(activeMembersCompositionLineGraph);
 });
 
 const activeMembersOnboardingLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
-    const mockData = {
-        categories: ['21 Jan', '22 Jan', '23 Jan', '24 Jan', '25 Jan', '26 Jan', '27 Jan'],
-        series: [
-            { name: 'joined', data: [2, 4, 6, 8, 10, 2, 4] },
-            { name: 'newlyActive', data: [2, 4, 6, 8, 10, 2, 4] },
-            { name: 'stillActive', data: [2, 4, 6, 8, 10, 2, 4] },
-            { name: 'dropped', data: [2, 4, 6, 8, 10, 2, 4] }
-        ],
-        joined: 36,
-        newlyActive: 36,
-        stillActive: 36,
-        dropped: 36,
-        joinedPercentageChange: 100,
-        newlyActivePercentageChange: 100,
-        stillActivePercentageChange: 100,
-        droppedPercentageChange: 100,
+    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
     }
-    res.send(mockData);
+    const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
+    let activeMembersOnboardingLineGraph = await memberActivityService.activeMembersOnboardingLineGraph(connection, req.body.startDate, req.body.endDate);
+    activeMembersOnboardingLineGraph = charts.fillActiveMembersOnboardingLineGraph(activeMembersOnboardingLineGraph, req.body.startDate, req.body.endDate);
+    await closeConnection(connection)
+    res.send(activeMembersOnboardingLineGraph);
 });
 
 
@@ -47,6 +40,7 @@ const disengagedMembersCompositionLineGraph = catchAsync(async function (req: IA
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     let disengagedMembersLineGraph = await memberActivityService.disengagedMembersCompositionLineGraph(connection, req.body.startDate, req.body.endDate);
     disengagedMembersLineGraph = charts.fillDisengagedMembersCompositionLineGraph(disengagedMembersLineGraph, req.body.startDate, req.body.endDate);
+    await closeConnection(connection)
     res.send(disengagedMembersLineGraph);
 });
 
@@ -58,14 +52,44 @@ const inactiveMembersLineGraph = catchAsync(async function (req: IAuthRequest, r
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     let inactiveMembersLineGraph = await memberActivityService.inactiveMembersLineGraph(connection, req.body.startDate, req.body.endDate);
     inactiveMembersLineGraph = charts.fillInactiveMembersLineGraph(inactiveMembersLineGraph, req.body.startDate, req.body.endDate);
+    await closeConnection(connection)
     res.send(inactiveMembersLineGraph);
 });
 
+const membersInteractionsNetworkGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
+    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    }
+    const guildId = req.params.guildId
+    const connection = databaseService.connectionFactory(guildId, config.mongoose.botURL);
+
+    const networkGraphData = await memberActivityService.getMembersInteractionsNetworkGraph(guildId, connection)
+    await closeConnection(connection)
+    res.send(networkGraphData)
+})
+
+const activeMembersCompositionTable = catchAsync(async function (req: IAuthRequest, res: Response) {
+    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    }
+    const filter = pick(req.query, ['activityComposition', 'roles', 'username']);
+    const options = pick(req.query, ['sortBy', 'limit', 'page']);
+    const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
+    const memberActivity = await memberActivityService.getLastDocumentForActiveMembersCompositionTable(connection, filter.activityComposition);
+    const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options, memberActivity);
+    const roles = await guildService.getGuildRolesFromDiscordAPI(req.params.guildId);
+    if (guildMembers) {
+        guildMemberService.addNeededDataForTable(guildMembers.results, roles, memberActivity);
+    }
+    await closeConnection(connection)
+    res.send(guildMembers);
+});
 
 export default {
     activeMembersCompositionLineGraph,
     activeMembersOnboardingLineGraph,
     disengagedMembersCompositionLineGraph,
-    inactiveMembersLineGraph
+    inactiveMembersLineGraph,
+    membersInteractionsNetworkGraph,
+    activeMembersCompositionTable
 }
-

@@ -320,8 +320,8 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
         if (adjustedHeatmap.length === 0) {
             return {
                 ...heatmaps[0],
-                msgPercentageChange: 0,
-                emojiPercentageChange: 0
+                msgPercentageChange: "N/A",
+                emojiPercentageChange: "N/A"
             }
         }
 
