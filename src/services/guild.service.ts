@@ -23,7 +23,7 @@ async function createGuild(data: IDiscordGuild, discordId: Snowflake) {
         icon: data.icon
     });
 
-    await sagaService.createAndStartGuildSaga(guild.guildId, true)
+    await sagaService.createAndStartFetchMemberSaga(guild.guildId)
     return guild
 }
 
