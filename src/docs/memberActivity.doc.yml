@@ -1,6 +1,6 @@
 paths:
   /api/v1/member-activity/{guildId}/active-members-composition-line-graph:
-    post:
+    get:
       tags:
         - [Member-Activity]
       summary: Get data for active members composition line graph 
@@ -83,7 +83,7 @@ paths:
           description: NotFound
           $ref: "#/components/responses/NotFound"
   /api/v1/member-activity/{guildId}/disengaged-members-composition-line-graph:
-    post:
+    get:
       tags:
         - [Member-Activity]
       summary: Get data for disengaged memebres composition line graph 
@@ -161,7 +161,7 @@ paths:
           description: NotFound
           $ref: "#/components/responses/NotFound"
   /api/v1/member-activity/{guildId}/inactive-members-line-graph:
-    post:
+    get:
       tags:
         - [Member-Activity]
       summary: Get data for inactive members line graph 
@@ -228,7 +228,7 @@ paths:
   /api/v1/member-activity/{guildId}/members-interactions-network-graph:
     get:
       tags:
-        - Member-Activity
+        - [Member-Activity]
       summary: Get data for active members interactions graph
       security:
         - bearerAuth: []
@@ -277,7 +277,7 @@ paths:
           $ref: "#/components/responses/NotFound"
 
   /api/v1/member-activity/{guildId}/active-members-onboarding-line-graph:
-    post:
+    get:
       tags:
         - [Member-Activity]
       summary: Get data for active members onboarding line graph 
@@ -356,10 +356,10 @@ paths:
           description: NotFound
           $ref: "#/components/responses/NotFound"
   /api/v1/member-activity/{guildId}/active-members-composition-table:
-    post:
+    get:
       tags:
         - [Member-Activity]
-      summary: Get data for active members compostion table
+      summary: Get data for active members comgetion table
       security:
         - bearerAuth: []
       description: for now sortBy just can apply for username and joinedAt(DaoMemberSince in UI)
