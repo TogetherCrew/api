@@ -7,6 +7,7 @@ import memberActivityService from './memberActivity.service';
 import channelService from './channel.service';
 import sagaService from './saga.service';
 import guildMemberService from './guildMember.service';
+import roleService from './role.service';
 export {
     userService,
     authService,
@@ -16,5 +17,6 @@ export {
     memberActivityService,
     channelService,
     sagaService,
-    guildMemberService
+    guildMemberService,
+    roleService
 }

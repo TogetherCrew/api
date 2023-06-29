@@ -1,13 +1,14 @@
 import { Response, Request } from 'express';
-import { guildService, userService, authService } from '../services';
+import { guildService, userService, authService, roleService, channelService } from '../services';
 import { IAuthRequest } from '../interfaces/request.interface';
 import { catchAsync, ApiError, pick, sort } from "../utils";
 import httpStatus from 'http-status';
 import config from '../config';
 import { scopes, permissions } from '../config/dicord';
-import { IDiscordUser, IDiscordOathBotCallback } from '@togethercrew.dev/db';
+import { IDiscordUser, IDiscordOathBotCallback, databaseService } from '@togethercrew.dev/db';
 import querystring from 'querystring';
 import { ICustomChannel } from '../interfaces/guild.interface';
+import { closeConnection } from '../database/connection';
 
 const getGuilds = catchAsync(async function (req: IAuthRequest, res: Response) {
     const filter = pick(req.query, ['isDisconnected', 'isInProgress']);
@@ -38,21 +39,22 @@ const getGuildFromDiscordAPI = catchAsync(async function (req: IAuthRequest, res
     res.send(guild)
 });
 
-const getGuildRolesFromDiscordAPI = catchAsync(async function (req: IAuthRequest, res: Response) {
+const getRoles = catchAsync(async function (req: IAuthRequest, res: Response) {
     if (! await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
         throw new ApiError(440, 'Oops, something went wrong! Could you please try logging in');
     }
-    const roles = await guildService.getGuildRolesFromDiscordAPI(req.params.guildId);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    res.send(roles.map((role: any) => { return { name: role.name, id: role.id, color: role.color } }))
+    const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
+    const roles = await roleService.getRoles(connection, {});
+    await closeConnection(connection)
+    res.send(roles)
 });
 
-const getChannels = catchAsync(async function (req: IAuthRequest, res: Response) {
+const getChannelsFromDiscordAPI = catchAsync(async function (req: IAuthRequest, res: Response) {
     if (! await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
         throw new ApiError(440, 'Oops, something went wrong! Could you please try logging in');
     }
     const channels = await guildService.getChannelsFromDiscordJS(req.params.guildId);
-    const sortedChannels = await sort.sortChannels(channels);
+    const sortedChannels = await sort.sortChannelsForDiscordAPI(channels);
     res.send(sortedChannels)
 });
 
@@ -63,20 +65,22 @@ const getSelectedChannels = catchAsync(async function (req: IAuthRequest, res: R
         throw new ApiError(440, 'Oops, something went wrong! Could you please try logging in');
     }
     if (guild.selectedChannels && guild.selectedChannels.length > 0) {
-        const channels = await guildService.getChannelsFromDiscordJS(req.params.guildId);
+        const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
+        const channels = await channelService.getChannels(connection, {});
         let sortedChannels = await sort.sortChannels(channels);
         sortedChannels = sortedChannels
             .filter(category => {
-                const selectedSubChannels = category.subChannels.filter((channel: ICustomChannel) => guild.selectedChannels?.some(selected => selected.channelId === channel.id));
+                const selectedSubChannels = category.subChannels.filter((channel: any) => guild.selectedChannels?.some(selected => selected.channelId === channel.channelId));
                 return selectedSubChannels.length > 0;
             })
             .map(category => {
                 return {
-                    id: category.id,
+                    channelId: category.channelId,
                     title: category.title,
-                    subChannels: category.subChannels.filter((channel: ICustomChannel) => guild.selectedChannels?.some(selected => selected.channelId === channel.id))
+                    subChannels: category.subChannels.filter((channel: any) => guild.selectedChannels?.some(selected => selected.channelId === channel.channelId))
                 }
             });
+        await closeConnection(connection)
         res.send(sortedChannels)
     } else {
         res.send([]);
@@ -138,12 +142,12 @@ const disconnectGuild = catchAsync(async function (req: IAuthRequest, res: Respo
 });
 
 export default {
-    getChannels,
+    getChannelsFromDiscordAPI,
     getSelectedChannels,
     getGuild,
     updateGuild,
     getGuildFromDiscordAPI,
-    getGuildRolesFromDiscordAPI,
+    getRoles,
     getGuilds,
     disconnectGuild,
     connectGuild,
