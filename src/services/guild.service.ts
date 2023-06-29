@@ -60,7 +60,12 @@ async function updateGuild(filter: object, updateBody: IGuildUpdateBody) {
 
     // fire an event for bot only if `period` or `selectedChannels` is changed
     if (updateBody.period || updateBody.selectedChannels) {
-        await sagaService.createAndStartGuildSaga(guild.guildId, false)
+        await sagaService.createAndStartGuildSaga(guild.guildId, { 
+            created: false, 
+            discordId: guild.user,
+            message: "Your data import into TogetherCrew is complete! See your insights on your dashboard https://app.togethercrew.com/",
+            useFallback: true
+        })
     }
     return guild;
 }
