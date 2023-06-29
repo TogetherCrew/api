@@ -16,7 +16,7 @@ async function createAndStartFetchMemberSaga(guildId: Snowflake) {
     const saga = await MBConnection.models.Saga.create({
         status: Status.NOT_STARTED,
         data: { guildId },
-        choreography: ChoreographyDict //! waiting for package update
+        choreography: ChoreographyDict.DISCORD_FETCH_MEMBERS
     })
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
