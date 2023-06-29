@@ -6,6 +6,7 @@ import { databaseService } from '@togethercrew.dev/db'
 import httpStatus from 'http-status';
 import config from '../config';
 import { pick } from '../utils';
+import { closeConnection } from '../database/connection';
 
 
 
@@ -16,6 +17,7 @@ const activeMembersCompositionLineGraph = catchAsync(async function (req: IAuthR
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     let activeMembersCompositionLineGraph = await memberActivityService.activeMembersCompositionLineGraph(connection, req.body.startDate, req.body.endDate);
     activeMembersCompositionLineGraph = charts.fillActiveMembersCompositionLineGraph(activeMembersCompositionLineGraph, req.body.startDate, req.body.endDate);
+    await closeConnection(connection)
     res.send(activeMembersCompositionLineGraph);
 });
 
@@ -26,6 +28,7 @@ const activeMembersOnboardingLineGraph = catchAsync(async function (req: IAuthRe
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     let activeMembersOnboardingLineGraph = await memberActivityService.activeMembersOnboardingLineGraph(connection, req.body.startDate, req.body.endDate);
     activeMembersOnboardingLineGraph = charts.fillActiveMembersOnboardingLineGraph(activeMembersOnboardingLineGraph, req.body.startDate, req.body.endDate);
+    await closeConnection(connection)
     res.send(activeMembersOnboardingLineGraph);
 });
 
@@ -37,6 +40,7 @@ const disengagedMembersCompositionLineGraph = catchAsync(async function (req: IA
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     let disengagedMembersLineGraph = await memberActivityService.disengagedMembersCompositionLineGraph(connection, req.body.startDate, req.body.endDate);
     disengagedMembersLineGraph = charts.fillDisengagedMembersCompositionLineGraph(disengagedMembersLineGraph, req.body.startDate, req.body.endDate);
+    await closeConnection(connection)
     res.send(disengagedMembersLineGraph);
 });
 
@@ -48,8 +52,21 @@ const inactiveMembersLineGraph = catchAsync(async function (req: IAuthRequest, r
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     let inactiveMembersLineGraph = await memberActivityService.inactiveMembersLineGraph(connection, req.body.startDate, req.body.endDate);
     inactiveMembersLineGraph = charts.fillInactiveMembersLineGraph(inactiveMembersLineGraph, req.body.startDate, req.body.endDate);
+    await closeConnection(connection)
     res.send(inactiveMembersLineGraph);
 });
+
+const membersInteractionsNetworkGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
+    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    }
+    const guildId = req.params.guildId
+    const connection = databaseService.connectionFactory(guildId, config.mongoose.botURL);
+
+    const networkGraphData = await memberActivityService.getMembersInteractionsNetworkGraph(guildId, connection)
+    await closeConnection(connection)
+    res.send(networkGraphData)
+})
 
 const activeMembersCompositionTable = catchAsync(async function (req: IAuthRequest, res: Response) {
     if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
@@ -64,6 +81,7 @@ const activeMembersCompositionTable = catchAsync(async function (req: IAuthReque
     if (guildMembers) {
         guildMemberService.addNeededDataForTable(guildMembers.results, roles, memberActivity);
     }
+    await closeConnection(connection)
     res.send(guildMembers);
 });
 
@@ -72,6 +90,6 @@ export default {
     activeMembersOnboardingLineGraph,
     disengagedMembersCompositionLineGraph,
     inactiveMembersLineGraph,
+    membersInteractionsNetworkGraph,
     activeMembersCompositionTable
 }
-

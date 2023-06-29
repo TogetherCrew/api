@@ -2,7 +2,7 @@ import request from 'supertest';
 import httpStatus from 'http-status';
 import app from '../../src/app';
 import setupTestDB from '../utils/setupTestDB';
-import { userOne, insertUsers } from '../fixtures/user.fixture';
+import { userOne, insertUsers, userTwo } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour, insertMemberActivities } from '../fixtures/memberActivity.fixture';
 import { guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour, insertGuildMembers } from '../fixtures/guildMember.fixture';
@@ -11,6 +11,8 @@ import { databaseService } from '@togethercrew.dev/db';
 import { discordRoleOne, discordRoleTwo, discordRoleThree } from '../fixtures/discord.roles.fixture';
 import { guildService } from '../../src/services';
 import config from '../../src/config';
+import * as Neo4j from '../../src/neo4j';
+
 
 
 setupTestDB();
@@ -316,6 +318,67 @@ describe('member-activity routes', () => {
         })
     })
 
+    describe('POST /api/v1/member-activity/:guildId/members-interactions-network-graph', () => {
+        beforeEach(async () => {
+            await connection.dropDatabase();
+        });
+
+        test('should return 200 and member interaction graph data if req data is ok', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+
+            await Neo4j.write("match (n) detach delete (n);")
+            await Neo4j.write(`MERGE (a:DiscordAccount {userId: "${guildMemberOne.discordId}"}) -[r:INTERACTED] -> (b:DiscordAccount {userId: "${guildMemberTwo.discordId}"})
+                                SET r.weights = [3444.0]
+                                SET r.dates = [1687434970.296297]
+                                SET r.createdAt = 1687434960.296297
+                                MERGE (a) <-[r2:INTERACTED]-(b)
+                                SET r2.weights = [1.0]
+                                SET r2.dates = [1687434970.296297]
+                                SET r.createdAt = 1687434960.296297
+                                WITH a, b
+                                CREATE (g:Guild {guildId: "${guildOne.guildId}"})
+                                MERGE (a) -[:IS_MEMBER]->(g)
+                                MERGE (b) -[:IS_MEMBER] ->(g)`)
+
+
+            const res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/members-interactions-network-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .expect(httpStatus.OK);
+
+            expect(Array.isArray(res.body)).toBe(true);
+            expect(res.body).toHaveLength(2)
+            expect(res.body).toEqual(expect.arrayContaining([({
+                from: { id: '123456789', radius: 3444, username: 'Behzad' },
+                to: { id: '987654321', radius: 1, username: 'Bi#1234' },
+                width: 3444
+            })
+            ]))
+            expect(res.body).toEqual(expect.arrayContaining([({
+                from: { id: '987654321', radius: 1, username: 'Bi#1234' },
+                to: { id: '123456789', radius: 3444, username: 'Behzad' },
+                width: 1
+            })
+            ]))
+
+        })
+        test('should return 401 if access token is missing', async () => {
+            await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/members-interactions-network-graph`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.UNAUTHORIZED);
+        })
+        test('should return 404 if guild not found', async () => {
+            await insertUsers([userOne]);
+            await request(app)
+
+                .get(`/api/v1/member-activity/${guildOne.guildId}/members-interactions-network-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .expect(httpStatus.NOT_FOUND);
+        })
+    })
 
     describe('POST /api/v1/member-activity/:guildId/active-members-composition-table', () => {
         beforeEach(async () => {
@@ -352,7 +415,7 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberThree.joinedAt.toISOString(),
                 discriminator: guildMemberThree.discriminator,
-                activityComposition: ['newlyActive']
+                activityComposition: ['Newly active']
             });
 
             expect(res.body.results[1]).toEqual({
@@ -366,7 +429,7 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberOne.joinedAt.toISOString(),
                 discriminator: guildMemberOne.discriminator,
-                activityComposition: ['newlyActive', 'becameDisengaged', 'totActiveMembers']
+                activityComposition: ['Newly active', 'Became disengaged', 'All active']
             });
 
             expect(res.body.results[2]).toEqual({
@@ -379,7 +442,7 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberTwo.joinedAt.toISOString(),
                 discriminator: guildMemberTwo.discriminator,
-                activityComposition: ['newlyActive']
+                activityComposition: ['Newly active']
             });
         })
 
@@ -437,11 +500,15 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 1,
+                totalResults: 4,
             });
 
-            expect(res.body.results).toHaveLength(1);
-            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results).toHaveLength(4);
+            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[3].discordId).toBe(guildMemberFour.discordId);
+
         })
 
         test('should correctly apply filter on roles field', async () => {

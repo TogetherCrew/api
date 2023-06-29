@@ -40,6 +40,11 @@ const inactiveMembersLineGraph = {
     }),
 };
 
+const memberInteractionsGraph = {
+    params: Joi.object().required().keys({
+        guildId: Joi.string().required()
+    }),
+}
 const activeMembersCompositionTable = {
     params: Joi.object().required().keys({
         guildId: Joi.string().required()
@@ -59,6 +64,7 @@ export default {
     activeMembersOnboardingLineGraph,
     disengagedMembersCompositionLineGraph,
     inactiveMembersLineGraph,
+    memberInteractionsGraph,
     activeMembersCompositionTable
 }
 
