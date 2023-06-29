@@ -1023,7 +1023,336 @@ describe('member-activity routes', () => {
             await insertRoles([role1, role2, role3], connection);
 
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ page: 2, limit: 2 })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 2,
+                limit: 2,
+                totalPages: 2,
+                totalResults: 3,
+            });
+
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].discordId).toBe(guildMemberTwo.discordId);
+        })
+    })
+
+    describe('GET /api/v1/member-activity/:guildId/disengaged-members-composition-table', () => {
+        beforeEach(async () => {
+            await connection.dropDatabase();
+        });
+        test('should return 200 and apply the default query options', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+            await insertMemberActivities([memberActivityOne, memberActivityTwo], connection);
+            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertRoles([role1, role2, role3], connection);
+            const res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 3,
+            });
+
+            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results[0]).toEqual({
+                discordId: guildMemberThree.discordId,
+                username: guildMemberThree.username,
+                avatar: guildMemberThree.avatar,
+                roles: [
+                    { roleId: role2.roleId, name: role2.name, color: role2.color }
+                ],
+                joinedAt: guildMemberThree.joinedAt.toISOString(),
+                discriminator: guildMemberThree.discriminator,
+                activityComposition: ['Were newly active']
+            });
+
+            expect(res.body.results[1]).toEqual({
+                discordId: guildMemberOne.discordId,
+                username: guildMemberOne.username,
+                avatar: guildMemberOne.avatar,
+                roles: [
+                    { roleId: role2.roleId, name: role2.name, color: role2.color },
+                    { roleId: role3.roleId, name: role3.name, color: role3.color }
+
+                ],
+                joinedAt: guildMemberOne.joinedAt.toISOString(),
+                discriminator: guildMemberOne.discriminator,
+                activityComposition: ['Became disengaged', 'Were newly active', 'Were consistenly active', 'Were vital members']
+            });
+
+            expect(res.body.results[2]).toEqual({
+                discordId: guildMemberTwo.discordId,
+                username: guildMemberTwo.username + "#" + guildMemberTwo.discriminator,
+                avatar: guildMemberTwo.avatar,
+                roles: [
+                    { roleId: role1.roleId, name: role1.name, color: role1.color },
+                    { roleId: role3.roleId, name: role3.name, color: role3.color }
+                ],
+                joinedAt: guildMemberTwo.joinedAt.toISOString(),
+                discriminator: guildMemberTwo.discriminator,
+                activityComposition: ['Were newly active']
+            });
+        })
+
+        test('should return 401 if access token is missing', async () => {
+            await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .send()
+                .expect(httpStatus.UNAUTHORIZED);
+        })
+
+        test('should return 404 if guild not found', async () => {
+            await insertUsers([userOne]);
+            await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send()
+                .expect(httpStatus.NOT_FOUND);
+        })
+
+        test('should correctly apply filter on activityComposition field', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
+            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertRoles([role1, role2, role3], connection);
+
+            let res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ activityComposition: ["all_disengaged_were_vital"] })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 1,
+            });
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].discordId).toBe(guildMemberOne.discordId);
+
+            res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ activityComposition: ["others", "all_disengaged_were_vital"] })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 4,
+            });
+
+            expect(res.body.results).toHaveLength(4);
+            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results[0].activityComposition).toEqual(['Others']);
+            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[1].activityComposition).toEqual(['Were vital members']);
+            expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[2].activityComposition).toEqual(['Others']);
+            expect(res.body.results[3].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[3].activityComposition).toEqual(['Others']);
+
+        })
+
+        test('should correctly apply filter on roles field', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
+            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertRoles([role1, role2, role3], connection);
+
+            const res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ roles: ["987654321123456789"] })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 2,
+            });
+            expect(res.body.results).toHaveLength(2);
+            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
+        })
+
+        test('should correctly apply filter on username field', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
+            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertRoles([role1, role2, role3], connection);
+
+            const res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ username: "B" })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 2,
+            });
+            expect(res.body.results).toHaveLength(2);
+            expect(res.body.results[0].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[1].discordId).toBe(guildMemberTwo.discordId);
+
+        })
+        test('should correctly sort the returned array if descending sort param is specified', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
+            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertRoles([role1, role2, role3], connection);
+
+            const res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ sortBy: 'joinedAt:desc' })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 3,
+            });
+            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results[0].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[2].discordId).toBe(guildMemberThree.discordId);
+        })
+
+        test('should correctly sort the returned array if ascending  sort param is specified', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
+            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertRoles([role1, role2, role3], connection);
+
+            const res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ sortBy: 'joinedAt:asc' })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 3,
+            });
+            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
+        })
+
+        test('should correctly sort the returned array if multiple sorting criteria are specified', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
+            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertRoles([role1, role2, role3], connection);
+
+            const res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ sortBy: 'joinedAt:desc,username:asc' })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 3,
+            });
+
+            const expectedOrder = [guildMemberOne, guildMemberTwo, guildMemberThree,].sort((a, b) => {
+                if (a.joinedAt < b.joinedAt) {
+                    return 1;
+                }
+                if (a.joinedAt > b.joinedAt) {
+                    return -1;
+                }
+                return a.username < b.username ? -1 : 1;
+            });
+
+            expectedOrder.forEach((user, index) => {
+                expect(res.body.results[index].discordId).toBe(user.discordId);
+            });
+        })
+
+        test('should limit returned array if limit param is specified', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
+            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertRoles([role1, role2, role3], connection);
+
+            const res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ limit: 2 })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 2,
+                totalPages: 2,
+                totalResults: 3,
+            });
+
+            expect(res.body.results).toHaveLength(2);
+            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
+        })
+
+        test('should correctly sort the returned array if page and limit are specified', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
+            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertRoles([role1, role2, role3], connection);
+
+            const res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ page: 2, limit: 2 })
                 .send()
