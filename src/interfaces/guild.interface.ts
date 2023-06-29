@@ -27,5 +27,5 @@ export interface ICustomChannel {
     name: string;
     parent_id: string;
     guild_id: string;
-    canReadMessageHistoryAndViewChannel: boolean;
+    canReadMessageHistoryAndViewChannel?: boolean;
 }

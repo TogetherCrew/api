@@ -6,23 +6,26 @@ import setupTestDB from '../utils/setupTestDB';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { discordResponseGuildOne, guildOne, guildTwo, guildThree, guildFour, guildFive, insertGuilds } from '../fixtures/guilds.fixture';
-import { discordResponseChannels1, discordResponseChannels2, discordResponseChannelOne } from '../fixtures/channels.fixture';
-import { discordRoleOne, discordRoleTwo, discordRoleThree } from '../fixtures/discord.roles.fixture';
+import { discordResponseChannels1, discordResponseChannels2, discordResponseChannelOne, channel1, channel2, channel3, channel4, insertChannels } from '../fixtures/channels.fixture';
+import { role1, role2, role3, insertRoles } from '../fixtures/discord.roles.fixture';
 import { IGuildUpdateBody } from '../../src/interfaces/guild.interface';
 import { guildService, authService, userService, sagaService } from '../../src/services';
-import { Guild } from '@togethercrew.dev/db';
+import { Guild, databaseService } from '@togethercrew.dev/db';
+import config from '../../src/config';
+
 setupTestDB();
 
 describe('Guild routes', () => {
 
+    const connection = databaseService.connectionFactory(guildFive.guildId, config.mongoose.botURL);
 
-    describe('GET /api/v1/guilds/:guildId/channels', () => {
+    describe('GET /api/v1/guilds/discord-api/:guildId/channels', () => {
         test('should return 200 and array of channels of the guild', async () => {
             guildService.getChannelsFromDiscordJS = jest.fn().mockReturnValue(discordResponseChannels1);
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
             let res = await request(app)
-                .get(`/api/v1/guilds/${discordResponseGuildOne.id}/channels`)
+                .get(`/api/v1/guilds/discord-api/${discordResponseGuildOne.id}/channels`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(httpStatus.OK);
@@ -111,7 +114,7 @@ describe('Guild routes', () => {
 
             guildService.getChannelsFromDiscordJS = jest.fn().mockReturnValue(discordResponseChannels2);
             res = await request(app)
-                .get(`/api/v1/guilds/${discordResponseGuildOne.id}/channels`)
+                .get(`/api/v1/guilds/discord-api/${discordResponseGuildOne.id}/channels`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(httpStatus.OK);
@@ -120,7 +123,7 @@ describe('Guild routes', () => {
         test('should return 440 if did not find guild with guildId and relative user', async () => {
             await insertUsers([userOne]);
             await request(app)
-                .get(`/api/v1/guilds/${discordResponseGuildOne.id}/channels`)
+                .get(`/api/v1/guilds/discord-api/${discordResponseGuildOne.id}/channels`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(440);
@@ -129,17 +132,20 @@ describe('Guild routes', () => {
         test('should return 401 if access token is missing', async () => {
             await insertUsers([userOne]);
             await request(app)
-                .get(`/api/v1/guilds/${discordResponseGuildOne.id}/channels`)
+                .get(`/api/v1/guilds/discord-api/${discordResponseGuildOne.id}/channels`)
                 .send()
                 .expect(httpStatus.UNAUTHORIZED);
         })
     })
 
     describe('GET /api/v1/guilds/:guildId/selected-channels', () => {
+        beforeEach(async () => {
+            await connection.dropDatabase();
+        });
         test('should return 200 and array of selected channels of the guild', async () => {
-            guildService.getChannelsFromDiscordJS = jest.fn().mockReturnValue(discordResponseChannels1);
             await insertUsers([userOne]);
             await insertGuilds([guildFive]);
+            await insertChannels([channel1, channel2, channel3, channel4], connection);
             const res = await request(app)
                 .get(`/api/v1/guilds/${guildFive.guildId}/selected-channels`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -147,37 +153,26 @@ describe('Guild routes', () => {
                 .expect(httpStatus.OK);
 
             expect(res.body).toHaveLength(2);
-            expect(res.body[0].subChannels).toHaveLength(2);
+            expect(res.body[0].subChannels).toHaveLength(1);
             expect(res.body[1].subChannels).toHaveLength(1);
 
 
-            expect(res.body[0]).toEqual({
-                id: "915914985140531241",
-                title: "┏━┫COMMUNITY┣━━━━┓",
+            expect(res.body[0]).toMatchObject({
+                channelId: "987654321098765432",
+                title: "Channel 1",
                 subChannels: [{
-                    id: "915944557605163008",
-                    name: "💬・general-chat",
-                    parent_id: "915914985140531241",
-                    guild_id: "915914985140531240",
-                    canReadMessageHistoryAndViewChannel: true
-                },
-                {
-                    id: "920707473369878589",
-                    name: "📖・learning-together",
-                    parent_id: "915914985140531241",
-                    guild_id: "915914985140531240",
-                    canReadMessageHistoryAndViewChannel: true
-                },]
+                    channelId: "234567890123456789",
+                    name: "Channel 2",
+                    parentId: "987654321098765432",
+                }]
             });
-            expect(res.body[1]).toEqual({
-                id: "928623723190292520",
-                title: "┏━┫WELCOME┣━━━━┓",
+            expect(res.body[1]).toMatchObject({
+                channelId: "0",
+                title: "unCategorized",
                 subChannels: [{
-                    id: "915917066496774165",
-                    name: "👋・introductions",
-                    parent_id: "928623723190292520",
-                    guild_id: "915914985140531240",
-                    canReadMessageHistoryAndViewChannel: true
+                    channelId: "345678901234567000",
+                    name: "Channel 4",
+                    parentId: "345678901234567000",
                 }]
             });
         })
@@ -703,39 +698,43 @@ describe('Guild routes', () => {
         });
     });
 
-    describe('GET /api/v1/guilds/discord-api/:guildId/roles', () => {
+    describe('GET /api/v1/guilds/:guildId/roles', () => {
+        beforeEach(async () => {
+            await connection.dropDatabase();
+        });
         test('should return 200 and array of roles of the guild if data is ok', async () => {
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            guildService.getGuildRolesFromDiscordAPI = jest.fn().mockReturnValue([discordRoleOne, discordRoleTwo, discordRoleThree]);
+            await insertGuilds([guildFive]);
+            await insertRoles([role1, role2, role3], connection);
+
             const res = await request(app)
-                .get(`/api/v1/guilds/discord-api/${guildOne.guildId}/roles`)
+                .get(`/api/v1/guilds/${guildFive.guildId}/roles`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
 
             expect(res.body).toHaveLength(3);
-            expect(res.body[0].id).toBe(discordRoleOne.id);
-            expect(res.body[1].id).toBe(discordRoleTwo.id);
-            expect(res.body[2].id).toBe(discordRoleThree.id);
+            expect(res.body[0].roleId).toBe(role1.roleId);
+            expect(res.body[1].roleId).toBe(role2.roleId);
+            expect(res.body[2].roleId).toBe(role3.roleId);
         })
 
         test('should return 401 if access token is missing', async () => {
             await insertUsers([userOne]);
             await request(app)
-                .get(`/api/v1/guilds/discord-api/${guildOne.guildId}/roles`)
+                .get(`/api/v1/guilds/${guildFive.guildId}/roles`)
                 .expect(httpStatus.UNAUTHORIZED);
         })
         test('should return 400 if guild id is not valid', async () => {
             await insertUsers([userOne]);
             await request(app)
-                .get(`/api/v1/guilds/discord-api/1234/roles`)
+                .get(`/api/v1/guilds/1234/roles`)
                 .expect(httpStatus.UNAUTHORIZED);
         })
 
         test('should return 440 if did not find guild with guildId and relative user', async () => {
             await insertUsers([userOne]);
             await request(app)
-                .get(`/api/v1/guilds/discord-api/${guildOne.guildId}/roles`)
+                .get(`/api/v1/guilds/${guildFive.guildId}/roles`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(440);
