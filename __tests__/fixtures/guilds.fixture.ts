@@ -90,16 +90,16 @@ export const guildFive = {
     icon: 'IconFive',
     selectedChannels: [
         {
-            channelId: '915944557605163008',
-            channelName: 'one'
+            channelId: '987654321098765432',
+            channelName: 'Channel 1'
         },
         {
-            channelId: '920707473369878589',
-            channelName: 'two'
+            channelId: '234567890123456789',
+            channelName: 'Channel 2'
         },
         {
-            channelId: '915917066496774165',
-            channelName: 'three'
+            channelId: '345678901234567000',
+            channelName: 'Channel 4'
         },
     ]
 }
