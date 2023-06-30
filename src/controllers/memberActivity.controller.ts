@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { guildService, memberActivityService, guildMemberService } from '../services';
+import { guildService, memberActivityService, guildMemberService, roleService } from '../services';
 import { IAuthRequest } from '../interfaces/request.interface';
 import { catchAsync, ApiError, charts } from "../utils";
 import { databaseService } from '@togethercrew.dev/db'
@@ -75,9 +75,46 @@ const activeMembersCompositionTable = catchAsync(async function (req: IAuthReque
     const filter = pick(req.query, ['activityComposition', 'roles', 'username']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
-    const memberActivity = await memberActivityService.getLastDocumentForActiveMembersCompositionTable(connection, filter.activityComposition);
+    const activityCompostionFields = memberActivityService.getActivityCompositionOfActiveMembersComposition(filter.activityComposition)
+    const memberActivity = await memberActivityService.getLastDocumentForTablesUsage(connection, activityCompostionFields);
     const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options, memberActivity);
-    const roles = await guildService.getGuildRolesFromDiscordAPI(req.params.guildId);
+    const roles = await roleService.getRoles(connection, {});
+    if (guildMembers) {
+        guildMemberService.addNeededDataForTable(guildMembers.results, roles, memberActivity);
+    }
+    await closeConnection(connection)
+    res.send(guildMembers);
+});
+
+const activeMembersOnboardingTable = catchAsync(async function (req: IAuthRequest, res: Response) {
+    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    }
+    const filter = pick(req.query, ['activityComposition', 'roles', 'username']);
+    const options = pick(req.query, ['sortBy', 'limit', 'page']);
+    const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
+    const activityCompostionFields = memberActivityService.getActivityCompositionOfActiveMembersOnboarding(filter.activityComposition);
+    const memberActivity = await memberActivityService.getLastDocumentForTablesUsage(connection, activityCompostionFields);
+    const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options, memberActivity);
+    const roles = await roleService.getRoles(connection, {});
+    if (guildMembers) {
+        guildMemberService.addNeededDataForTable(guildMembers.results, roles, memberActivity);
+    }
+    await closeConnection(connection)
+    res.send(guildMembers);
+});
+
+const disengagedMembersCompositionTable = catchAsync(async function (req: IAuthRequest, res: Response) {
+    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    }
+    const filter = pick(req.query, ['activityComposition', 'roles', 'username']);
+    const options = pick(req.query, ['sortBy', 'limit', 'page']);
+    const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
+    const activityCompostionFields = memberActivityService.getActivityCompositionOfDisengagedComposition(filter.activityComposition);
+    const memberActivity = await memberActivityService.getLastDocumentForTablesUsage(connection, activityCompostionFields);
+    const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options, memberActivity);
+    const roles = await roleService.getRoles(connection, {});
     if (guildMembers) {
         guildMemberService.addNeededDataForTable(guildMembers.results, roles, memberActivity);
     }
@@ -91,5 +128,7 @@ export default {
     disengagedMembersCompositionLineGraph,
     inactiveMembersLineGraph,
     membersInteractionsNetworkGraph,
-    activeMembersCompositionTable
+    activeMembersCompositionTable,
+    activeMembersOnboardingTable,
+    disengagedMembersCompositionTable
 }

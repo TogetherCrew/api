@@ -2,6 +2,7 @@ import { Connection } from 'mongoose';
 import { sort } from '../utils';
 import { Role } from 'discord.js'
 import memberActivityService from './memberActivity.service';
+import { IRole } from '@togethercrew.dev/db';
 
 type Filter = {
     activityComposition?: Array<string>;
@@ -108,12 +109,12 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
  * 
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function addNeededDataForTable(guildMembers: Array<any>, roles: Array<Role>, memberActivity: any) {
+async function addNeededDataForTable(guildMembers: Array<any>, roles: Array<IRole>, memberActivity: any) {
     guildMembers.forEach((guildMember) => {
         guildMember.roles = guildMember.roles.map((roleId: string) => {
-            const role = roles.find((role: Role) => role.id === roleId);
+            const role = roles.find((role: IRole) => role.roleId === roleId);
             if (role) {
-                return { id: role.id, color: role.color, name: role.name };
+                return { roleId: role.roleId, color: role.color, name: role.name };
             }
         });
         guildMember.username = guildMember.discriminator === "0" ? guildMember.username : guildMember.username + "#" + guildMember.discriminator;

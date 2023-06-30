@@ -792,22 +792,49 @@ function buildProjectStageBasedOnActivityComposition(fields: Array<string>) {
 }
 
 /**
- * get last member activity document for usage of active member compostion table 
+ * get activity composition fileds of active member onboarding table
+ * @param {Any} activityComposition
+ * @returns {Object}
+ */
+function getActivityCompositionOfActiveMembersComposition(activityComposition: Array<string>) {
+    return (activityComposition === undefined || activityComposition.length === 0) ? ["all_active", "all_new_active", "all_consistent", "all_vital", "all_new_disengaged"] : activityComposition;
+}
+
+/**
+ * get activity composition fileds of active member compostion table
+ * @param {Any} activityComposition
+ * @returns {Object}
+ */
+function getActivityCompositionOfActiveMembersOnboarding(activityComposition: Array<string>) {
+    return (activityComposition === undefined || activityComposition.length === 0) ? ["all_joined", "all_new_active", "all_still_active", "all_dropped"] : activityComposition;
+}
+
+/**
+ * get activity composition fileds of disengaged member compostion table
+ * @param {Any} activityComposition
+ * @returns {Object}
+ */
+function getActivityCompositionOfDisengagedComposition(activityComposition: Array<string>) {
+    return (activityComposition === undefined || activityComposition.length === 0) ? ["all_new_disengaged", "all_disengaged_were_newly_active", "all_disengaged_were_consistenly_active", "all_disengaged_were_vital"] : activityComposition;
+}
+
+
+/**
+ * get last member activity document for usage of member activity table
  * @param {Connection} connection
  * @param {Any} activityComposition
  * @returns {Object}
  */
-async function getLastDocumentForActiveMembersCompositionTable(connection: Connection, activityComposition: Array<string>) {
-    const fields = (activityComposition === undefined || activityComposition.length === 0 || activityComposition.includes('others')) ? ["all_active", "all_new_active", "all_consistent", "all_vital", "all_new_disengaged"] : activityComposition;
-    const projectStage = buildProjectStageBasedOnActivityComposition(fields);
+async function getLastDocumentForTablesUsage(connection: Connection, activityComposition: Array<string>) {
+    const projectStage = buildProjectStageBasedOnActivityComposition(activityComposition);
     const lastDocument = await connection.models.MemberActivity.aggregate([
         { $sort: { date: -1 } },
         { $limit: 1 },
         { $project: projectStage }
     ]);
     return lastDocument[0]
-
 }
+
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getActivityComposition(guildMember: IGuildMember, memberActivity: any) {
@@ -830,6 +857,30 @@ function getActivityComposition(guildMember: IGuildMember, memberActivity: any) 
 
     if (memberActivity.all_vital && memberActivity.all_vital.includes(guildMember.discordId)) {
         activityCompositions.push("Vital member");
+    }
+
+    if (memberActivity.all_joined && memberActivity.all_joined.includes(guildMember.discordId)) {
+        activityCompositions.push("Joined");
+    }
+
+    if (memberActivity.all_dropped && memberActivity.all_dropped.includes(guildMember.discordId)) {
+        activityCompositions.push("Dropped");
+    }
+
+    if (memberActivity.all_still_active && memberActivity.all_still_active.includes(guildMember.discordId)) {
+        activityCompositions.push("Still active");
+    }
+
+    if (memberActivity.all_disengaged_were_newly_active && memberActivity.all_disengaged_were_newly_active.includes(guildMember.discordId)) {
+        activityCompositions.push("Were newly active");
+    }
+
+    if (memberActivity.all_disengaged_were_consistenly_active && memberActivity.all_disengaged_were_consistenly_active.includes(guildMember.discordId)) {
+        activityCompositions.push("Were consistenly active");
+    }
+
+    if (memberActivity.all_disengaged_were_vital && memberActivity.all_disengaged_were_vital.includes(guildMember.discordId)) {
+        activityCompositions.push("Were vital members");
     }
 
     if (activityCompositions.length === 0) {
@@ -936,8 +987,11 @@ export default {
     disengagedMembersCompositionLineGraph,
     inactiveMembersLineGraph,
     activeMembersOnboardingLineGraph,
-    getLastDocumentForActiveMembersCompositionTable,
+    getLastDocumentForTablesUsage,
     getActivityComposition,
-    getMembersInteractionsNetworkGraph
+    getMembersInteractionsNetworkGraph,
+    getActivityCompositionOfActiveMembersComposition,
+    getActivityCompositionOfActiveMembersOnboarding,
+    getActivityCompositionOfDisengagedComposition
 }
 
