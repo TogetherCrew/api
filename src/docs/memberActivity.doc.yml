@@ -1,6 +1,6 @@
 paths:
   /api/v1/member-activity/{guildId}/active-members-composition-line-graph:
-    get:
+    post:
       tags:
         - [Member-Activity]
       summary: Get data for active members composition line graph 
@@ -83,7 +83,7 @@ paths:
           description: NotFound
           $ref: "#/components/responses/NotFound"
   /api/v1/member-activity/{guildId}/disengaged-members-composition-line-graph:
-    get:
+    post:
       tags:
         - [Member-Activity]
       summary: Get data for disengaged memebres composition line graph 
@@ -161,7 +161,7 @@ paths:
           description: NotFound
           $ref: "#/components/responses/NotFound"
   /api/v1/member-activity/{guildId}/inactive-members-line-graph:
-    get:
+    post:
       tags:
         - [Member-Activity]
       summary: Get data for inactive members line graph 
@@ -226,7 +226,7 @@ paths:
           description: NotFound
           $ref: "#/components/responses/NotFound"
   /api/v1/member-activity/{guildId}/members-interactions-network-graph:
-    get:
+    post:
       tags:
         - [Member-Activity]
       summary: Get data for active members interactions graph
@@ -277,7 +277,7 @@ paths:
           $ref: "#/components/responses/NotFound"
 
   /api/v1/member-activity/{guildId}/active-members-onboarding-line-graph:
-    get:
+    post:
       tags:
         - [Member-Activity]
       summary: Get data for active members onboarding line graph 
