@@ -428,7 +428,7 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberOne.joinedAt.toISOString(),
                 discriminator: guildMemberOne.discriminator,
-                activityComposition: ['Newly active', 'Became disengaged', 'All active']
+                activityComposition: ['Newly active', 'Became disengaged', 'Active members']
             });
 
             expect(res.body.results[2]).toEqual({
