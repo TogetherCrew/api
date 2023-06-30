@@ -1,10 +1,4 @@
-
-import { ICustomChannel } from '../interfaces/guild.interface';
-interface SortedChannel {
-    channelId: string;
-    title: string;
-    subChannels: ICustomChannel[];
-}
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 function sortChannels(channels: any[]) {
     const sortedChannels: any[] = [];
@@ -24,7 +18,7 @@ function sortChannels(channels: any[]) {
                     subChannels,
                 });
             } else {
-                unCategorized.subChannels.push({ ...channel, channelId: channel.channelId, parentId: channel.channelId, name: channel.name });
+                unCategorized.subChannels.push({ canReadMessageHistoryAndViewChannel: channel.canReadMessageHistoryAndViewChannel, channelId: channel.channelId, parentId: channel.channelId, name: channel.name });
             }
         }
     }

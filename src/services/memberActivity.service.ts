@@ -921,6 +921,7 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
 
     const { records } = neo4jData;
     const userIds: string[] = [] // Our Graph DB does not have the names of users, so we load them all and push them to an array we want to send to front-end 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let makedUpRecords = records.reduce((preRecords: any[], record) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
