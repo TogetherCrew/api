@@ -79,7 +79,7 @@ const disengagedMembersCompositionTable = {
         guildId: Joi.string().required()
     }),
     query: Joi.object().required().keys({
-        activityComposition: Joi.array().items(Joi.string().valid('all_new_disengaged', 'all_disengaged_were_newly_active', 'all_disengaged_were_consistenly_active', 'all_disengaged_were_vital', 'others')).single(),
+        activityComposition: Joi.array().items(Joi.string().valid('all_new_disengaged', 'all_disengaged_were_newly_active', 'all_disengaged_were_consistently_active', 'all_disengaged_were_vital', 'others')).single(),
         roles: Joi.array().items(Joi.string()).single(),
         username: Joi.string(),
         sortBy: Joi.string(),

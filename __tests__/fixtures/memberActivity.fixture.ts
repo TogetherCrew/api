@@ -14,7 +14,7 @@ export const memberActivityOne = {
     all_dropped: ["123456789", "987654321", "555555555"],
     all_joined: ["123456789"],
     all_disengaged_were_newly_active: ["123456789", "987654321", "555555555"],
-    all_disengaged_were_consistenly_active: ["123456789"],
+    all_disengaged_were_consistently_active: ["123456789"],
     all_disengaged_were_vital: ["123456789"],
 }
 
@@ -32,7 +32,7 @@ export const memberActivityTwo = {
     all_dropped: [],
     all_joined: ["123456789", "987654321"],
     all_disengaged_were_newly_active: ["123456789"],
-    all_disengaged_were_consistenly_active: [],
+    all_disengaged_were_consistently_active: [],
     all_disengaged_were_vital: ["123456789", "987654321", "555555555", "444444444"],
 }
 
@@ -51,7 +51,7 @@ export const memberActivityThree = {
     all_dropped: [],
     all_joined: [],
     all_disengaged_were_newly_active: ["123456789"],
-    all_disengaged_were_consistenly_active: [],
+    all_disengaged_were_consistently_active: [],
     all_disengaged_were_vital: ["123456789", "987654321", "555555555", "444444444"],
 }
 
@@ -69,7 +69,7 @@ export const memberActivityFour = {
     all_dropped: [],
     all_joined: ["123456789",],
     all_disengaged_were_newly_active: ["123456789"],
-    all_disengaged_were_consistenly_active: [],
+    all_disengaged_were_consistently_active: [],
     all_disengaged_were_vital: ["123456789"],
 }
 
