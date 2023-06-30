@@ -848,7 +848,7 @@ function getActivityComposition(guildMember: IGuildMember, memberActivity: any) 
     }
 
     if (memberActivity.all_active && memberActivity.all_active.includes(guildMember.discordId)) {
-        activityCompositions.push("All active");
+        activityCompositions.push("Active members");
     }
 
     if (memberActivity.all_consistent && memberActivity.all_consistent.includes(guildMember.discordId)) {
