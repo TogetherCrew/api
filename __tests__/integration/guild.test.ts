@@ -37,77 +37,69 @@ describe('Guild routes', () => {
             expect(res.body[3].subChannels).toHaveLength(2);
 
             expect(res.body[0]).toEqual({
-                id: "915914985140531241",
+                channelId: "915914985140531241",
                 title: "┏━┫COMMUNITY┣━━━━┓",
                 subChannels: [{
-                    id: "915944557605163008",
+                    channelId: "915944557605163008",
                     name: "💬・general-chat",
-                    parent_id: "915914985140531241",
-                    guild_id: "915914985140531240",
+                    parentId: "915914985140531241",
                     canReadMessageHistoryAndViewChannel: true
                 },
                 {
-                    id: "920707473369878589",
+                    channelId: "920707473369878589",
                     name: "📖・learning-together",
-                    parent_id: "915914985140531241",
-                    guild_id: "915914985140531240",
+                    parentId: "915914985140531241",
                     canReadMessageHistoryAndViewChannel: true
                 }]
             });
 
 
             expect(res.body[1]).toEqual({
-                id: "928623723190292520",
+                channelId: "928623723190292520",
                 title: "┏━┫WELCOME┣━━━━┓",
                 subChannels: [{
-                    id: "915917066496774165",
+                    channelId: "915917066496774165",
                     name: "👋・introductions",
-                    parent_id: "928623723190292520",
-                    guild_id: "915914985140531240",
+                    parentId: "928623723190292520",
                     canReadMessageHistoryAndViewChannel: true
                 },
                 {
-                    id: "921468460062605334",
+                    channelId: "921468460062605334",
                     name: "☝・start-here",
-                    parent_id: "928623723190292520",
-                    guild_id: "915914985140531240",
+                    parentId: "928623723190292520",
                     canReadMessageHistoryAndViewChannel: true
                 }]
             });
             expect(res.body[2]).toEqual({
-                id: "928627624585072640",
+                channelId: "928627624585072640",
                 title: "┏━┫CONTRIBUTE┣━━━┓",
                 subChannels: [{
-                    id: "930049272693530674",
+                    channelId: "930049272693530674",
                     name: "😎・meeting room",
-                    parent_id: "928627624585072640",
-                    guild_id: "915914985140531240",
+                    parentId: "928627624585072640",
                     canReadMessageHistoryAndViewChannel: true
                 },
                 {
-                    id: "930488542168248390",
+                    channelId: "930488542168248390",
                     name: "🗺・official-links",
-                    parent_id: "928627624585072640",
-                    guild_id: "915914985140531240",
+                    parentId: "928627624585072640",
                     canReadMessageHistoryAndViewChannel: true
                 }]
             });
 
             expect(res.body[3]).toEqual({
-                id: "0",
+                channelId: "0",
                 title: "unCategorized",
                 subChannels: [{
-                    id: "9304885421682485901",
+                    channelId: "9304885421682485901",
                     name: "🗺・DAOX",
-                    parent_id: "9304885421682485901",
-                    guild_id: "915914985140531240",
+                    parentId: "9304885421682485901",
                     canReadMessageHistoryAndViewChannel: true
                 },
                 {
-                    id: "930488542168248590",
+                    channelId: "930488542168248590",
                     name: "🗺・DAO",
-                    parent_id: "930488542168248590",
-                    guild_id: "915914985140531240",
+                    parentId: "930488542168248590",
                     canReadMessageHistoryAndViewChannel: true
                 }]
             });
