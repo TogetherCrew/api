@@ -287,7 +287,7 @@ paths:
                 items: 
                   type: object
                   properties: 
-                    id: 
+                    channelId: 
                       type: string
                       format: Snowflake
                     title: 
@@ -297,21 +297,21 @@ paths:
                       items:
                         type: object
                         properties:
-                          id: 
+                          channelId: 
                             type: Snowflake
                           name: 
                             type: string
                           canReadMessageHistoryAndViewChannel: 
                             type: boolean
-                          parent_id: 
+                          parentId: 
                             type: Snowflake
                 example:
-                    id: "80351110224678914"
+                    channelId: "80351110224678914"
                     title: "channel B"
                     subChannels: [{
-                        id: "80351110224678912",
+                        channelId: "80351110224678912",
                         name: "channel C",
-                        parent_id: "80351110224678914",
+                        parentId: "80351110224678914",
                         canReadMessageHistoryAndViewChannel: true,
                       }]
         "400":

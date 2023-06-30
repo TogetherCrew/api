@@ -23,9 +23,8 @@ export interface IPermissionOverwrite {
 
 
 export interface ICustomChannel {
-    id: string;
+    channelId: string;
     name: string;
-    parent_id: string;
-    guild_id: string;
+    parentId: string;
     canReadMessageHistoryAndViewChannel?: boolean;
 }

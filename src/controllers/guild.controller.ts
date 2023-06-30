@@ -53,7 +53,7 @@ const getChannelsFromDiscordAPI = catchAsync(async function (req: IAuthRequest, 
         throw new ApiError(440, 'Oops, something went wrong! Could you please try logging in');
     }
     const channels = await guildService.getChannelsFromDiscordJS(req.params.guildId);
-    const sortedChannels = await sort.sortChannelsForDiscordAPI(channels);
+    const sortedChannels = await sort.sortChannels(channels);
     res.send(sortedChannels)
 });
 
