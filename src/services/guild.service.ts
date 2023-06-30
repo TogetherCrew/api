@@ -23,12 +23,7 @@ async function createGuild(data: IDiscordGuild, discordId: Snowflake) {
         icon: data.icon
     });
 
-    await sagaService.createAndStartGuildSaga(guild.guildId, {
-        created: true,
-        discordId: discordId,
-        message: "Your data import into TogetherCrew is complete! See your insights on your dashboard https://app.togethercrew.com/",
-        useFallback: true
-    })
+    await sagaService.createAndStartFetchMemberSaga(guild.guildId)
     return guild
 }
 
