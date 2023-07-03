@@ -981,6 +981,22 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
     return makedUpRecords
 }
 
+async function getFragmentationScore(guildId: string) {
+
+    const fragmentationScoreQuery = `
+        MATCH (g:Guild {guildId: "1234"})
+        RETURN 
+        g.avgClusteringCoeff[-1] as fragmentation_score,
+        g.resultDates[-1] as fragmentation_score_date
+    `
+    const neo4jData = await Neo4j.read(fragmentationScoreQuery)
+
+    // TODO: make up data
+    // TODO: prepare Swagger 
+    // TODO: write tests
+    return neo4jData
+
+}
 
 export default {
     activeMembersCompositionLineGraph,
@@ -990,6 +1006,7 @@ export default {
     getLastDocumentForTablesUsage,
     getActivityComposition,
     getMembersInteractionsNetworkGraph,
+    getFragmentationScore,
     getActivityCompositionOfActiveMembersComposition,
     getActivityCompositionOfActiveMembersOnboarding,
     getActivityCompositionOfDisengagedComposition

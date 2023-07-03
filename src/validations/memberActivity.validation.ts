@@ -46,6 +46,12 @@ const memberInteractionsGraph = {
     }),
 }
 
+const fragmentationScore = {
+    params: Joi.object().required().keys({
+        guildId: Joi.string().required()
+    }),
+}
+
 const activeMembersCompositionTable = {
     params: Joi.object().required().keys({
         guildId: Joi.string().required()
@@ -93,6 +99,7 @@ export default {
     disengagedMembersCompositionLineGraph,
     inactiveMembersLineGraph,
     memberInteractionsGraph,
+    fragmentationScore,
     activeMembersCompositionTable,
     activeMembersOnboardingTable,
     disengagedMembersCompositionTable
