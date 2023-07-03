@@ -68,6 +68,16 @@ const membersInteractionsNetworkGraph = catchAsync(async function (req: IAuthReq
     res.send(networkGraphData)
 })
 
+const decentralisationScore = catchAsync(async function (req: IAuthRequest, res: Response) {
+    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    }
+    const guildId = req.params.guildId
+
+    const decentralizationScoreData = await memberActivityService.getDecentralisationScore(guildId)
+    res.send(decentralizationScoreData)
+})
+
 const activeMembersCompositionTable = catchAsync(async function (req: IAuthRequest, res: Response) {
     if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');

@@ -983,6 +983,22 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
 }
 
 
+async function getDecentralisationScore(guildId: string){
+    const decentralisationScoreQuery = `
+        MATCH (g:Guild {guildId: "${guildId}"})
+        RETURN 
+            g.decentralityScores[-1] as decentralization_score,
+            g.resultDates[-1] as decentralization_score_date
+    `
+    const neo4jData = await Neo4j.read(decentralisationScoreQuery)
+
+    // TODO: make up data and return it
+    // TODO: write tests 
+    // TODO: add swagger
+
+    return neo4jData;
+}
+
 export default {
     activeMembersCompositionLineGraph,
     disengagedMembersCompositionLineGraph,
