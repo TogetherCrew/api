@@ -432,7 +432,7 @@ async function disengagedMembersCompositionLineGraph(connection: Connection, sta
                     date: { $convert: { input: "$date", to: "date" } },
                     all_new_disengaged: 1,
                     all_disengaged_were_newly_active: 1,
-                    all_disengaged_were_consistenly_active: 1,
+                    all_disengaged_were_consistently_active: 1,
                     all_disengaged_were_vital: 1,
                 }
             },
@@ -472,7 +472,7 @@ async function disengagedMembersCompositionLineGraph(connection: Connection, sta
                     },
                     became_disengaged: { $size: "$all_new_disengaged" },
                     were_newly_active: { $size: "$all_disengaged_were_newly_active" },
-                    were_consistently_active: { $size: "$all_disengaged_were_consistenly_active" },
+                    were_consistently_active: { $size: "$all_disengaged_were_consistently_active" },
                     were_vital_members: { $size: "$all_disengaged_were_vital" },
                 }
             },
@@ -545,7 +545,7 @@ async function disengagedMembersCompositionLineGraph(connection: Connection, sta
                     date: { $convert: { input: "$date", to: "date" } },
                     all_new_disengaged: 1,
                     all_disengaged_were_newly_active: 1,
-                    all_disengaged_were_consistenly_active: 1,
+                    all_disengaged_were_consistently_active: 1,
                     all_disengaged_were_vital: 1,
                 }
             },
@@ -566,7 +566,7 @@ async function disengagedMembersCompositionLineGraph(connection: Connection, sta
                 $project: {
                     becameDisengaged: { $size: "$all_new_disengaged" },
                     wereNewlyActive: { $size: "$all_disengaged_were_newly_active" },
-                    wereConsistentlyActive: { $size: "$all_disengaged_were_consistenly_active" },
+                    wereConsistentlyActive: { $size: "$all_disengaged_were_consistently_active" },
                     wereVitalMembers: { $size: "$all_disengaged_were_vital" },
                 }
             },
@@ -815,7 +815,7 @@ function getActivityCompositionOfActiveMembersOnboarding(activityComposition: Ar
  * @returns {Object}
  */
 function getActivityCompositionOfDisengagedComposition(activityComposition: Array<string>) {
-    return (activityComposition === undefined || activityComposition.length === 0) ? ["all_new_disengaged", "all_disengaged_were_newly_active", "all_disengaged_were_consistenly_active", "all_disengaged_were_vital"] : activityComposition;
+    return (activityComposition === undefined || activityComposition.length === 0) ? ["all_new_disengaged", "all_disengaged_were_newly_active", "all_disengaged_were_consistently_active", "all_disengaged_were_vital"] : activityComposition;
 }
 
 
@@ -848,7 +848,7 @@ function getActivityComposition(guildMember: IGuildMember, memberActivity: any) 
     }
 
     if (memberActivity.all_active && memberActivity.all_active.includes(guildMember.discordId)) {
-        activityCompositions.push("All active");
+        activityCompositions.push("Active members");
     }
 
     if (memberActivity.all_consistent && memberActivity.all_consistent.includes(guildMember.discordId)) {
@@ -875,7 +875,7 @@ function getActivityComposition(guildMember: IGuildMember, memberActivity: any) 
         activityCompositions.push("Were newly active");
     }
 
-    if (memberActivity.all_disengaged_were_consistenly_active && memberActivity.all_disengaged_were_consistenly_active.includes(guildMember.discordId)) {
+    if (memberActivity.all_disengaged_were_consistently_active && memberActivity.all_disengaged_were_consistently_active.includes(guildMember.discordId)) {
         activityCompositions.push("Were consistenly active");
     }
 
@@ -921,6 +921,7 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
 
     const { records } = neo4jData;
     const userIds: string[] = [] // Our Graph DB does not have the names of users, so we load them all and push them to an array we want to send to front-end 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let makedUpRecords = records.reduce((preRecords: any[], record) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore

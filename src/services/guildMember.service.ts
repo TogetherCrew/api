@@ -1,6 +1,5 @@
 import { Connection } from 'mongoose';
 import { sort } from '../utils';
-import { Role } from 'discord.js'
 import memberActivityService from './memberActivity.service';
 import { IRole } from '@togethercrew.dev/db';
 
