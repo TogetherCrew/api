@@ -1004,6 +1004,28 @@ async function getFragmentationScore(guildId: string) {
 
 }
 
+async function getDecentralisationScore(guildId: string){
+
+    const decentralisationScoreQuery = `
+        MATCH (g:Guild {guildId: "${guildId}"})
+        RETURN 
+            g.decentralityScores[-1] as decentralization_score,
+            g.resultDates[-1] as decentralization_score_date
+    `
+    const neo4jData = await Neo4j.read(decentralisationScoreQuery)
+    
+    const { records } = neo4jData
+    if(records.length == 0) return { decentralisationScore: null, decentralisationScoreDate: null }
+
+    const decentralisationData = records[0]
+    const { _fieldLookup, _fields } = decentralisationData as unknown as { _fieldLookup: Record<string, number> , _fields: number[]}
+
+    const decentralisationScore = _fields[_fieldLookup['decentralization_score']]
+    const decentralisationScoreDate = _fields[_fieldLookup['decentralization_score_date']]
+
+    return { decentralisationScore, decentralisationScoreDate }
+}
+
 export default {
     activeMembersCompositionLineGraph,
     disengagedMembersCompositionLineGraph,
@@ -1013,6 +1035,7 @@ export default {
     getActivityComposition,
     getMembersInteractionsNetworkGraph,
     getFragmentationScore,
+    getDecentralisationScore,
     getActivityCompositionOfActiveMembersComposition,
     getActivityCompositionOfActiveMembersOnboarding,
     getActivityCompositionOfDisengagedComposition

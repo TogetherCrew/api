@@ -561,6 +561,189 @@ describe('member-activity routes', () => {
         })
     })
 
+    describe('GET /api/v1/member-activity/:guildId/decentralisation-score', () => {
+        beforeEach(async () => {
+            await connection.dropDatabase();
+        });
+
+        test('should return 200 and decentralisation score if req data is ok', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+
+            // TODO: write neo4j queries in other file
+            await Neo4j.write("match (n) detach delete (n);")
+            await Neo4j.write(`CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${guildOne.guildId}"})
+                CREATE (b:DiscordAccount) -[:IS_MEMBER]->(g)
+                CREATE (c:DiscordAccount) -[:IS_MEMBER]->(g)
+                CREATE (d:DiscordAccount) -[:IS_MEMBER]->(g)
+                CREATE (e:DiscordAccount) -[:IS_MEMBER]->(g)
+                SET a.userId = "1000"
+                SET b.userId = "1001"
+                SET c.userId = "1002"
+                SET d.userId = "1003"
+                SET e.userId = "1004"
+                MERGE (a) -[r:INTERACTED]->(b)
+                MERGE (a) -[r2:INTERACTED]->(d)
+                MERGE (c) -[r3:INTERACTED]->(b)
+                MERGE (c) -[r4:INTERACTED]->(d)
+                MERGE (d) -[r5:INTERACTED]->(b)
+                MERGE (c) -[r6:INTERACTED]->(a)
+                MERGE (d) -[r7:INTERACTED]->(c)
+                MERGE (b) -[r8:INTERACTED]->(d)
+                MERGE (d) -[r9:INTERACTED]->(c)
+                MERGE (e) -[r10:INTERACTED]->(b)
+                MERGE (a) -[r11:INTERACTED]->(c)
+                SET r.dates = [166, 167]
+                SET r2.dates = [166]
+                SET r3.dates = [166, 167]
+                SET r4.dates = [166]
+                SET r5.dates = [166]
+                SET r6.dates = [167]
+                SET r7.dates = [167]
+                SET r8.dates = [167]
+                SET r9.dates = [167]
+                SET r10.dates = [167]
+                SET r11.dates = [167]
+                SET r.weights = [1, 2]
+                SET r2.weights = [3]
+                SET r3.weights = [2, 1]
+                SET r4.weights = [2]
+                SET r5.weights = [1]
+                SET r6.weights = [2]
+                SET r7.weights = [1]
+                SET r8.weights = [2]
+                SET r9.weights = [1]
+                SET r10.weights = [3]
+                SET r11.weights = [2]`)
+            await Neo4j.write(`MATCH (a: DiscordAccount {userId: "1000"})
+                MATCH (b:DiscordAccount {userId: "1001"})
+                MATCH (c:DiscordAccount {userId: "1002"})
+                MATCH (d:DiscordAccount {userId: "1003"})
+                MATCH (e:DiscordAccount {userId: "1004"})
+                MATCH (g:Guild {guildId: "${guildOne.guildId}"})
+                
+                SET a.localClusteringCoeff = [1.0, 1.0]
+                SET b.localClusteringCoeff = [0.66666, 0.33333]
+                SET c.localClusteringCoeff = [1.0, 0.66666]
+                SET d.localClusteringCoeff = [0.66666, 1.0]
+                SET e.localClusteringCoeff = [0.0, 0.0]
+                SET a.localClusteringCoeffDates = [166, 167]
+                SET b.localClusteringCoeffDates = [166, 167]
+                SET c.localClusteringCoeffDates = [166, 167]
+                SET d.localClusteringCoeffDates = [166, 167]
+                SET e.localClusteringCoeffDates = [166, 167]
+                SET g.avgClusteringCoeff = [0.8, 0.733333]
+                SET g.decentralityScores = [133.333, 66.666]
+                SET g.resultDates = [166, 167]`)
+
+            const res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/decentralisation-score`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .expect(httpStatus.OK);
+            
+            expect(res.body.decentralisationScore).toBe(66.666);
+            expect(res.body.decentralisationScoreDate).toBe(167);
+        })
+
+        test('should return 200 with "null" decentralisation score if there is not interaction or data', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildOne]);
+            await insertGuilds([guildTwo]);
+            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+
+            // TODO: write neo4j queries in other file
+            await Neo4j.write("match (n) detach delete (n);")
+            await Neo4j.write(`CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${guildOne.guildId}"})
+                CREATE (b:DiscordAccount) -[:IS_MEMBER]->(g)
+                CREATE (c:DiscordAccount) -[:IS_MEMBER]->(g)
+                CREATE (d:DiscordAccount) -[:IS_MEMBER]->(g)
+                CREATE (e:DiscordAccount) -[:IS_MEMBER]->(g)
+                SET a.userId = "1000"
+                SET b.userId = "1001"
+                SET c.userId = "1002"
+                SET d.userId = "1003"
+                SET e.userId = "1004"
+                MERGE (a) -[r:INTERACTED]->(b)
+                MERGE (a) -[r2:INTERACTED]->(d)
+                MERGE (c) -[r3:INTERACTED]->(b)
+                MERGE (c) -[r4:INTERACTED]->(d)
+                MERGE (d) -[r5:INTERACTED]->(b)
+                MERGE (c) -[r6:INTERACTED]->(a)
+                MERGE (d) -[r7:INTERACTED]->(c)
+                MERGE (b) -[r8:INTERACTED]->(d)
+                MERGE (d) -[r9:INTERACTED]->(c)
+                MERGE (e) -[r10:INTERACTED]->(b)
+                MERGE (a) -[r11:INTERACTED]->(c)
+                SET r.dates = [166, 167]
+                SET r2.dates = [166]
+                SET r3.dates = [166, 167]
+                SET r4.dates = [166]
+                SET r5.dates = [166]
+                SET r6.dates = [167]
+                SET r7.dates = [167]
+                SET r8.dates = [167]
+                SET r9.dates = [167]
+                SET r10.dates = [167]
+                SET r11.dates = [167]
+                SET r.weights = [1, 2]
+                SET r2.weights = [3]
+                SET r3.weights = [2, 1]
+                SET r4.weights = [2]
+                SET r5.weights = [1]
+                SET r6.weights = [2]
+                SET r7.weights = [1]
+                SET r8.weights = [2]
+                SET r9.weights = [1]
+                SET r10.weights = [3]
+                SET r11.weights = [2]`)
+            await Neo4j.write(`MATCH (a: DiscordAccount {userId: "1000"})
+                MATCH (b:DiscordAccount {userId: "1001"})
+                MATCH (c:DiscordAccount {userId: "1002"})
+                MATCH (d:DiscordAccount {userId: "1003"})
+                MATCH (e:DiscordAccount {userId: "1004"})
+                MATCH (g:Guild {guildId: "${guildOne.guildId}"})
+                
+                SET a.localClusteringCoeff = [1.0, 1.0]
+                SET b.localClusteringCoeff = [0.66666, 0.33333]
+                SET c.localClusteringCoeff = [1.0, 0.66666]
+                SET d.localClusteringCoeff = [0.66666, 1.0]
+                SET e.localClusteringCoeff = [0.0, 0.0]
+                SET a.localClusteringCoeffDates = [166, 167]
+                SET b.localClusteringCoeffDates = [166, 167]
+                SET c.localClusteringCoeffDates = [166, 167]
+                SET d.localClusteringCoeffDates = [166, 167]
+                SET e.localClusteringCoeffDates = [166, 167]
+                SET g.avgClusteringCoeff = [0.8, 0.733333]
+                SET g.decentralityScores = [133.333, 66.666]
+                SET g.resultDates = [166, 167]`)
+
+            const res = await request(app)
+                .get(`/api/v1/member-activity/${guildTwo.guildId}/decentralisation-score`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .expect(httpStatus.OK);
+            
+            expect(res.body.decentralisationScore).toBe(null);
+            expect(res.body.decentralisationScoreDate).toBe(null);
+        })
+
+        test('should return 401 if access token is missing', async () => {
+            await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/decentralisation-score`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.UNAUTHORIZED);
+        })
+
+        test('should return 404 if guild not found', async () => {
+            await insertUsers([userOne]);
+            await request(app)
+
+                .get(`/api/v1/member-activity/${guildOne.guildId}/decentralisation-score`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .expect(httpStatus.NOT_FOUND);
+        })
+    })
+    
     describe('GET /api/v1/member-activity/:guildId/active-members-composition-table', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
