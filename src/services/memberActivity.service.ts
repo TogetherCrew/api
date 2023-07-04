@@ -985,17 +985,22 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
 async function getFragmentationScore(guildId: string) {
 
     const fragmentationScoreQuery = `
-        MATCH (g:Guild {guildId: "1234"})
+        MATCH (g:Guild {guildId: "${guildId}"})
         RETURN 
         g.avgClusteringCoeff[-1] as fragmentation_score,
         g.resultDates[-1] as fragmentation_score_date
     `
     const neo4jData = await Neo4j.read(fragmentationScoreQuery)
+    const { records } = neo4jData
+    if(records.length == 0) return { fragmentationScore: null, fragmentationScoreDate: null }
 
-    // TODO: make up data
-    // TODO: prepare Swagger 
-    // TODO: write tests
-    return neo4jData
+    const fragmentationData = records[0]
+    const { _fieldLookup, _fields } = fragmentationData as unknown as { _fieldLookup: Record<string, number> , _fields: number[]}
+
+    const fragmentationScore = _fields[_fieldLookup['fragmentation_score']]
+    const fragmentationScoreDate = _fields[_fieldLookup['fragmentation_score_date']]
+
+    return { fragmentationScore, fragmentationScoreDate }
 
 }
 
