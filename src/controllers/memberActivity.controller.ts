@@ -68,6 +68,16 @@ const membersInteractionsNetworkGraph = catchAsync(async function (req: IAuthReq
     res.send(networkGraphData)
 })
 
+const fragmentationScore = catchAsync(async function (req: IAuthRequest, res: Response) {
+    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    }
+    const guildId = req.params.guildId
+
+    const networkGraphData = await memberActivityService.getFragmentationScore(guildId)
+    res.send(networkGraphData)
+})
+
 const activeMembersCompositionTable = catchAsync(async function (req: IAuthRequest, res: Response) {
     if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
@@ -128,6 +138,7 @@ export default {
     disengagedMembersCompositionLineGraph,
     inactiveMembersLineGraph,
     membersInteractionsNetworkGraph,
+    fragmentationScore,
     activeMembersCompositionTable,
     activeMembersOnboardingTable,
     disengagedMembersCompositionTable
