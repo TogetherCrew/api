@@ -312,6 +312,44 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
+  /api/v1/member-activity/{guildId}/decentralisation-score:
+    get:
+      tags:
+        - [Member-Activity]
+      summary: Get data for decentralisation score
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: guildId
+          required: true
+          schema:
+            type: string
+          description: Guild Id
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  decentralisationScore:
+                    type: float
+                    example: 5.775
+                  decentralisationScoreDate:
+                    type: integer
+                    example: 1
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
+
 
   /api/v1/member-activity/{guildId}/active-members-onboarding-line-graph:
     post:
