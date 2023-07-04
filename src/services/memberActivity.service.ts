@@ -1005,6 +1005,7 @@ async function getFragmentationScore(guildId: string) {
 }
 
 async function getDecentralisationScore(guildId: string){
+
     const decentralisationScoreQuery = `
         MATCH (g:Guild {guildId: "${guildId}"})
         RETURN 
@@ -1012,12 +1013,17 @@ async function getDecentralisationScore(guildId: string){
             g.resultDates[-1] as decentralization_score_date
     `
     const neo4jData = await Neo4j.read(decentralisationScoreQuery)
+    
+    const { records } = neo4jData
+    if(records.length == 0) return { decentralisationScore: null, decentralisationScoreDate: null }
 
-    // TODO: make up data and return it
-    // TODO: write tests 
-    // TODO: add swagger
+    const decentralisationData = records[0]
+    const { _fieldLookup, _fields } = decentralisationData as unknown as { _fieldLookup: Record<string, number> , _fields: number[]}
 
-    return neo4jData;
+    const decentralisationScore = _fields[_fieldLookup['decentralization_score']]
+    const decentralisationScoreDate = _fields[_fieldLookup['decentralization_score_date']]
+
+    return { decentralisationScore, decentralisationScoreDate }
 }
 
 export default {
