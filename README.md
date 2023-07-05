@@ -33,6 +33,21 @@ Run tests:
 npm run test
 ```
 
+## Neo4j Server 
+
+Below is a command for starting a Neo4j container in Docker
+```
+docker run \
+        -d \
+        --publish=7474:7474 --publish=7687:7687 \
+        -e NEO4J_PLUGINS='["apoc", "graph-data-science"]' \
+        -e NEO4J_apoc_export_file_enabled=true \
+        -e NEO4J_apoc_import_file_enabled=true \
+        -e NEO4J_apoc_import_file_use__neo4j__config=true \
+        --name neo4j \
+        neo4j
+```
+
 ## License
 
 [MIT](LICENSE)

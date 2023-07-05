@@ -225,6 +225,131 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
+  /api/v1/member-activity/{guildId}/members-interactions-network-graph:
+    post:
+      tags:
+        - [Member-Activity]
+      summary: Get data for active members interactions graph
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: guildId
+          required: true
+          schema:
+            type: string
+          description: Guild ID
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    from:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        radius:
+                          type: integer
+                        username:
+                          type: string
+                    to:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        radius:
+                          type: integer
+                        username:
+                          type: string
+                    width:
+                      type: integer
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
+  /api/v1/member-activity/{guildId}/fragmentation-score:
+    get:
+      tags:
+        - [Member-Activity]
+      summary: Get data for fragmentation score
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: guildId
+          required: true
+          schema:
+            type: string
+          description: Guild Id
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  fragmentationScore:
+                    type: float
+                    example: 0.77755
+                  fragmentationScoreDate:
+                    type: integer
+                    example: 1
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
+  /api/v1/member-activity/{guildId}/decentralisation-score:
+    get:
+      tags:
+        - [Member-Activity]
+      summary: Get data for decentralisation score
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: guildId
+          required: true
+          schema:
+            type: string
+          description: Guild Id
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  decentralisationScore:
+                    type: float
+                    example: 5.775
+                  decentralisationScoreDate:
+                    type: integer
+                    example: 1
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
+
 
   /api/v1/member-activity/{guildId}/active-members-onboarding-line-graph:
     post:
@@ -240,6 +365,7 @@ paths:
           schema:
             type: string
           description: Guild Id
+          
       requestBody:
         required: true
         content:
@@ -304,4 +430,379 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
-        
+  /api/v1/member-activity/{guildId}/active-members-composition-table:
+    get:
+      tags:
+        - [Member-Activity]
+      summary: Get data for active members composition table
+      security:
+        - bearerAuth: []
+      description: for now sortBy just can apply for username and joinedAt(DaoMemberSince in UI)
+      parameters:
+        - in: path
+          name: guildId
+          required: true
+          schema:
+            type: string
+          description: Guild Id
+        - in: query
+          name: activityComposition
+          schema:
+            type: array
+            items:
+              type: string
+              enum: ['all_active', 'all_new_active', 'all_consistent', 'all_vital', 'all_new_disengaged', 'others']
+            example: ["all_active", "all_new_active"]
+        - in: query
+          name: roles
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+            example: ["123456789", "987654321"]
+          description: Discord IDs
+          style: form
+          explode: true
+        - in: query
+          name: username
+          required: false
+          schema:
+            type: string
+            example: "Nima"
+        - in: query
+          name: sortBy
+          required: false
+          schema:
+            type: string
+            example: "joinedAt:desc,username:asc"
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            format: int32
+            example: 10
+            default: 10
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            format: int32
+            example: 2
+            default: 1
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          example: "Behzad"
+                        avatar:
+                          type: string
+                          example: "b50adff099924dd5e6b72d13f77eb9d7"
+                        roles:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              roleId:
+                                type: string
+                                example: "discordRoleId1"
+                              name:
+                                type: string
+                                example: "role1"
+                              color:
+                                type: string
+                                example: "#000000"                            
+                        activityComposition:
+                          type: array
+                          items:
+                            type: string
+                          example: ["Newly active", "Vital"]
+                        joinedAt:
+                          type: string
+                          format: date-time
+                          example: "2022-05-30T15:46:52.924+00:00"
+                  limit:
+                    type: integer
+                    example: 10
+                  page:
+                    type: integer
+                    example: 1
+                  totalPages:
+                    type: integer
+                    example: 2
+                  totalResults:
+                    type: integer
+                    example: 20
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
+  /api/v1/member-activity/{guildId}/active-members-onboarding-table:
+    get:
+      tags:
+        - [Member-Activity]
+      summary: Get data for active members onboarding table
+      security:
+        - bearerAuth: []
+      description: for now sortBy just can apply for username and joinedAt(DaoMemberSince in UI)
+      parameters:
+        - in: path
+          name: guildId
+          required: true
+          schema:
+            type: string
+          description: Guild Id
+        - in: query
+          name: activityComposition
+          schema:
+            type: array
+            items:
+              type: string
+              enum: ['all_joined', 'all_new_active', 'all_still_active', 'all_dropped', 'others']
+            example: ["all_joined", "all_new_active"]
+        - in: query
+          name: roles
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+            example: ["123456789", "987654321"]
+          description: Discord IDs
+          style: form
+          explode: true
+        - in: query
+          name: username
+          required: false
+          schema:
+            type: string
+            example: "Nima"
+        - in: query
+          name: sortBy
+          required: false
+          schema:
+            type: string
+            example: "joinedAt:desc,username:asc"
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            format: int32
+            example: 10
+            default: 10
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            format: int32
+            example: 2
+            default: 1
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          example: "Behzad"
+                        avatar:
+                          type: string
+                          example: "b50adff099924dd5e6b72d13f77eb9d7"
+                        roles:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              roleId:
+                                type: string
+                                example: "discordRoleId1"
+                              name:
+                                type: string
+                                example: "role1"
+                              color:
+                                type: string
+                                example: "#000000"                            
+                        activityComposition:
+                          type: array
+                          items:
+                            type: string
+                          example: ["Newly active", "Dropped"]
+                        joinedAt:
+                          type: string
+                          format: date-time
+                          example: "2022-05-30T15:46:52.924+00:00"
+                  limit:
+                    type: integer
+                    example: 10
+                  page:
+                    type: integer
+                    example: 1
+                  totalPages:
+                    type: integer
+                    example: 2
+                  totalResults:
+                    type: integer
+                    example: 20
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
+  /api/v1/member-activity/{guildId}/disengaged-members-composition-table:
+    get:
+      tags:
+        - [Member-Activity]
+      summary: Get data for disengaged members composition table
+      security:
+        - bearerAuth: []
+      description: for now sortBy just can apply for username and joinedAt(DaoMemberSince in UI)
+      parameters:
+        - in: path
+          name: guildId
+          required: true
+          schema:
+            type: string
+          description: Guild Id
+        - in: query
+          name: activityComposition
+          schema:
+            type: array
+            items:
+              type: string
+              enum: ['all_new_disengaged', 'all_disengaged_were_newly_active', 'all_disengaged_were_consistenly_active', 'all_disengaged_were_vital', 'others']
+            example: ["all_new_disengaged", "all_disengaged_were_newly_active"]
+        - in: query
+          name: roles
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+            example: ["123456789", "987654321"]
+          description: Discord IDs
+          style: form
+          explode: true
+        - in: query
+          name: username
+          required: false
+          schema:
+            type: string
+            example: "Nima"
+        - in: query
+          name: sortBy
+          required: false
+          schema:
+            type: string
+            example: "joinedAt:desc,username:asc"
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            format: int32
+            example: 10
+            default: 10
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            format: int32
+            example: 2
+            default: 1
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          example: "Behzad"
+                        avatar:
+                          type: string
+                          example: "b50adff099924dd5e6b72d13f77eb9d7"
+                        roles:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              roleId:
+                                type: string
+                                example: "discordRoleId1"
+                              name:
+                                type: string
+                                example: "role1"
+                              color:
+                                type: string
+                                example: "#000000"                            
+                        activityComposition:
+                          type: array
+                          items:
+                            type: string
+                          example: ["Were vital members", "Were newly active"]
+                        joinedAt:
+                          type: string
+                          format: date-time
+                          example: "2022-05-30T15:46:52.924+00:00"
+                  limit:
+                    type: integer
+                    example: 10
+                  page:
+                    type: integer
+                    example: 1
+                  totalPages:
+                    type: integer
+                    example: 2
+                  totalResults:
+                    type: integer
+                    example: 20
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
+

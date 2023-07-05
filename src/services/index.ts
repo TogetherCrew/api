@@ -6,7 +6,8 @@ import heatmapService from './heatmap.service';
 import memberActivityService from './memberActivity.service';
 import channelService from './channel.service';
 import sagaService from './saga.service';
-
+import guildMemberService from './guildMember.service';
+import roleService from './role.service';
 export {
     userService,
     authService,
@@ -15,5 +16,7 @@ export {
     heatmapService,
     memberActivityService,
     channelService,
-    sagaService
+    sagaService,
+    guildMemberService,
+    roleService
 }

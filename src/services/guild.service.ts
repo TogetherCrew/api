@@ -23,7 +23,7 @@ async function createGuild(data: IDiscordGuild, discordId: Snowflake) {
         icon: data.icon
     });
 
-    await sagaService.createAndStartGuildSaga(guild.guildId, true)
+    await sagaService.createAndStartFetchMemberSaga(guild.guildId)
     return guild
 }
 
@@ -60,7 +60,12 @@ async function updateGuild(filter: object, updateBody: IGuildUpdateBody) {
 
     // fire an event for bot only if `period` or `selectedChannels` is changed
     if (updateBody.period || updateBody.selectedChannels) {
-        await sagaService.createAndStartGuildSaga(guild.guildId, false)
+        await sagaService.createAndStartGuildSaga(guild.guildId, {
+            created: false,
+            discordId: guild.user,
+            message: "Your data import into TogetherCrew is complete! See your insights on your dashboard https://app.togethercrew.com/",
+            useFallback: true
+        })
     }
     return guild;
 }
@@ -82,6 +87,28 @@ async function deleteGuild(filter: object) {
 async function getGuildFromDiscordAPI(guildId: Snowflake) {
     try {
         const response = await fetch(`https://discord.com/api/guilds/${guildId}`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bot ${config.discord.botToken}` }
+        });
+        if (response.ok) {
+            return await response.json();
+        }
+        else {
+            throw new Error();
+        }
+    } catch (err) {
+        throw new ApiError(590, 'Can not fetch from discord API');
+    }
+}
+
+/**
+ * Get guild roles from discord API
+ * @param {Snowflake} guildId
+ * @returns {Promise<IDiscordGuild>}
+ */
+async function getGuildRolesFromDiscordAPI(guildId: Snowflake) {
+    try {
+        const response = await fetch(`https://discord.com/api/guilds/${guildId}/roles`, {
             method: 'GET',
             headers: { 'Authorization': `Bot ${config.discord.botToken}` }
         });
@@ -139,9 +166,9 @@ async function getChannelsFromDiscordJS(guildId: Snowflake) {
                 const botPermissions = channel.permissionsFor(botMember);
                 const canReadMessageHistoryAndViewChannel = botPermissions.has([PermissionsBitField.Flags.ReadMessageHistory, PermissionsBitField.Flags.ViewChannel]);
                 return {
-                    id: channel.id,
+                    channelId: channel.id,
                     name: channel.name,
-                    parent_id: channel.parentId,
+                    parentId: channel.parentId,
                     canReadMessageHistoryAndViewChannel
                 };
             }
@@ -197,6 +224,7 @@ export default {
     queryGuilds,
     deleteGuild,
     getGuildMemberFromDiscordAPI,
+    getGuildRolesFromDiscordAPI,
     getChannelsFromDiscordJS
 }
 

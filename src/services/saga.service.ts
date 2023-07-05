@@ -1,10 +1,10 @@
 import { ChoreographyDict, MBConnection, Status } from "@togethercrew.dev/tc-messagebroker"
 import { Snowflake } from "discord.js"
 
-async function createAndStartGuildSaga(guildId: Snowflake, created: boolean) {
+async function createAndStartGuildSaga(guildId: Snowflake, other: { created: boolean, discordId: Snowflake, message: string, useFallback: boolean }) {
     const saga = await MBConnection.models.Saga.create({
         status: Status.NOT_STARTED,
-        data: { guildId, created },
+        data: { guildId, ...other },
         choreography: ChoreographyDict.DISCORD_UPDATE_CHANNELS
     })
 
@@ -12,6 +12,18 @@ async function createAndStartGuildSaga(guildId: Snowflake, created: boolean) {
     await saga.start(() => { })
 }
 
+async function createAndStartFetchMemberSaga(guildId: Snowflake) {
+    const saga = await MBConnection.models.Saga.create({
+        status: Status.NOT_STARTED,
+        data: { guildId },
+        choreography: ChoreographyDict.DISCORD_FETCH_MEMBERS
+    })
+
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    await saga.start(() => { })
+}
+
 export default {
-    createAndStartGuildSaga
+    createAndStartGuildSaga,
+    createAndStartFetchMemberSaga
 }

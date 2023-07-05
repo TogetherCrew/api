@@ -12,8 +12,8 @@ router.get('/', auth(), validate(guildValidation.getGuilds), guildController.get
 router.get('/connect', guildController.connectGuild);
 router.get('/connect/callback', guildController.connectGuildCallback);
 
-router.get('/:guildId/channels', auth(), validate(guildValidation.getChannels), guildController.getChannels);
 router.get('/:guildId/selected-channels', auth(), validate(guildValidation.getSelectedChannels), guildController.getSelectedChannels);
+router.get('/:guildId/roles', auth(), validate(guildValidation.getRoles), guildController.getRoles);
 
 router.post('/:guildId/disconnect', auth(), validate(guildValidation.disconnectGuild), guildController.disconnectGuild);
 
@@ -22,11 +22,7 @@ router.route('/:guildId')
     .patch(auth(), validate(guildValidation.updateGuild), guildController.updateGuild);
 
 router.get('/discord-api/:guildId', auth(), validate(guildValidation.getGuildFromDiscordAPI), guildController.getGuildFromDiscordAPI);
-
-// Events
-// RabbitMQ.onEvent(Event.SERVER_API.UPDATE_GUILD, (msg) => {
-//     console.log(`Received a message on event ${Event.SERVER_API.UPDATE_GUILD} : `, msg)
-// })
+router.get('/discord-api/:guildId/channels', auth(), validate(guildValidation.getChannelsFromDiscordAPI), guildController.getChannelsFromDiscordAPI);
 
 export default router;
 

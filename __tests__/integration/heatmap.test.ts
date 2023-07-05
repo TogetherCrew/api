@@ -55,7 +55,7 @@ describe('Heatmap routes', () => {
         test('should return 200 and filter heatmap chart base on date (positive timezone offset) if req data is ok', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
-            requestBody.timeZone = 'Asia/Tehran'; // +3:30 
+            requestBody.timeZone = 'Asia/Tehran'; // +3:30
             await insertHeatmaps([heatmapOne, heatmapTwo, heatmapFive], connection);
             const res = await request(app)
                 .post(`/api/v1/heatmaps/${guildOne.guildId}/heatmap-chart`)
@@ -75,7 +75,7 @@ describe('Heatmap routes', () => {
         test('should return 200 and filter heatmap chart base on date (negative timezone offset) if req data is ok', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
-            requestBody.timeZone = 'Brazil/East'; // -3:30 
+            requestBody.timeZone = 'Brazil/East'; // -3:30
             await insertHeatmaps([heatmapOne, heatmapTwo, heatmapFive], connection);
             const res = await request(app)
                 .post(`/api/v1/heatmaps/${guildOne.guildId}/heatmap-chart`)

@@ -6,6 +6,7 @@ import { databaseService } from '@togethercrew.dev/db'
 import httpStatus from 'http-status';
 import config from '../config';
 import moment from 'moment-timezone';
+import { closeConnection } from '../database/connection';
 
 const heatmapChart = catchAsync(async function (req: IAuthRequest, res: Response) {
     if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
@@ -22,6 +23,7 @@ const heatmapChart = catchAsync(async function (req: IAuthRequest, res: Response
         heatmaps = date.shiftHeatmapsHours(heatmaps, timeZoneOffset);
     }
     heatmaps = charts.fillHeatmapChart(heatmaps);
+    await closeConnection(connection)
     res.send(heatmaps);
 });
 
@@ -32,6 +34,7 @@ const lineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     let lineGraph = await heatmapService.lineGraph(connection, req.body.startDate, req.body.endDate);
     lineGraph = charts.fillHeatmapLineGraph(lineGraph, req.body.startDate, req.body.endDate);
+    await closeConnection(connection)
     res.send(lineGraph);
 });
 

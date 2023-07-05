@@ -28,6 +28,12 @@ const envVarsSchema = Joi.object()
         NOTION_DATABASE_ID: Joi.string().required().description('notion database id'),
         SENTRY_DSN: Joi.string().required().description('sentry dsn'),
         SENTRY_ENV: Joi.string().valid('production', 'development', 'test').required(),
+        NEO4J_PROTOCOL: Joi.string().valid('http', 'https', 'bolt').description('NEO4j port'),
+        NEO4J_HOST: Joi.string().required().description('NEO4J url'),
+        NEO4J_PORT: Joi.string().required().description('NEO4J port'),
+        NEO4J_USER: Joi.string().required().description('NEO4J username'),
+        NEO4J_PASSWORD: Joi.string().required().description('NEO4J password'),
+        NEO4J_DB: Joi.string().required().description('NEO4J DB name'),
     })
     .unknown();
 
@@ -43,14 +49,16 @@ export default {
     mongoose: {
         serverURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}/${envVars.DB_NAME}`,
         botURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}`,
-        dbURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}`,
-        // serverURL: `mongodb://127.0.0.1:27017/RnDAO-local`,
-        // botURL: "mongodb://127.0.0.1:27017",
-        // dbURL: "mongodb://127.0.0.1:27017"
-
+        dbURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}`
     },
     rabbitMQ: {
         url: `amqp://${envVars.RABBIT_USER}:${envVars.RABBIT_PASSWORD}@${envVars.RABBIT_HOST}:${envVars.RABBIT_PORT}`,
+    },
+    neo4j: {
+        url: `${envVars.NEO4J_PROTOCOL}://${envVars.NEO4J_HOST}:${envVars.NEO4J_PORT}`,
+        user: envVars.NEO4J_USER,
+        password: envVars.NEO4J_PASSWORD,
+        database: envVars.NEO4J_DB,
     },
     discord: {
         clientId: envVars.DISCROD_CLIENT_ID,
