@@ -898,26 +898,38 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
     const oneWeekAgoEpoch = Math.floor(oneWeekAgo.getTime() / 1000); // Convert to seconds
 
     const memberInteractionQueryOne = `
-        MATCH (a:DiscordAccount) -[r:INTERACTED]-(:DiscordAccount)
+        MATCH (a:DiscordAccount) -[r:INTERACTED]-(b:DiscordAccount)
+        MATCH (a)-[:IS_MEMBER]->(g:Guild {guildId: "${guildId}"})
+        MATCH (b)-[:IS_MEMBER]->(g:Guild {guildId: "${guildId}"})
         WITH r, apoc.coll.zip(r.dates, r.weights) as date_weights
         SET r.weekly_weight = REDUCE(total=0, w in date_weights 
-        | CASE WHEN w[0] >= ${oneWeekAgoEpoch} THEN total + w[1] ELSE total END);
-        `
+        | CASE WHEN w[0] - ${oneWeekAgoEpoch} > 0 THEN total + w[1] ELSE total END);
+    `
     const memberInteractionQueryTwo = `
-        MATCH (a:DiscordAccount) -[r:INTERACTED]-> ()
+        MATCH (a:DiscordAccount) -[r:INTERACTED]-> (b:DiscordAccount)
+        MATCH (a)-[:IS_MEMBER]->(g:Guild {guildId: "${guildId}"})
+        MATCH (b)-[:IS_MEMBER]->(g:Guild {guildId: "${guildId}"})
         WITH a, SUM(r.weekly_weight) as interaction_count
         SET a.weekly_interaction = interaction_count;
     `
+
+    // query 3 -> in case of no INTERACTED
     const memberInteractionQueryThree = `
+        MATCH (a:DiscordAccount)
+        SET a.weekly_interaction = CASE WHEN a.weekly_interaction IS NULL THEN 0 ELSE a.weekly_interaction END;
+    `
+    const memberInteractionQueryFour = `
         MATCH (a:DiscordAccount) -[r:INTERACTED]->(b:DiscordAccount)
         WITH a,r,b
         WHERE (a)-[:IS_MEMBER]->(:Guild {guildId:"${guildId}"}) 
         AND  (b)-[:IS_MEMBER]->(:Guild {guildId:"${guildId}"})
-        RETURN a,r,b
+        RETURN a, r, b
     `
+
     await Neo4j.write(memberInteractionQueryOne)
     await Neo4j.write(memberInteractionQueryTwo)
-    const neo4jData = await Neo4j.read(memberInteractionQueryThree)
+    await Neo4j.write(memberInteractionQueryThree)
+    const neo4jData = await Neo4j.read(memberInteractionQueryFour)
 
     const { records } = neo4jData;
     const userIds: string[] = [] // Our Graph DB does not have the names of users, so we load them all and push them to an array we want to send to front-end 
