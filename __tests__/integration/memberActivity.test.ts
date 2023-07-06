@@ -328,15 +328,20 @@ describe('member-activity routes', () => {
             await insertGuilds([guildOne]);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
 
+            const twoDaysMilliseconds = 2 * 24 * 60 * 60 * 1000; // Number of milliseconds in a week
+            const currentDate = new Date();
+            const twoDaysAgo = new Date(currentDate.getTime() - twoDaysMilliseconds);
+            const twoDaysAgoEpoch = Math.floor(twoDaysAgo.getTime() / 1000); // Convert to seconds
+
             await Neo4j.write("match (n) detach delete (n);")
             await Neo4j.write(`MERGE (a:DiscordAccount {userId: "${guildMemberOne.discordId}"}) -[r:INTERACTED] -> (b:DiscordAccount {userId: "${guildMemberTwo.discordId}"})
                                 SET r.weights = [3444.0]
-                                SET r.dates = [1687434970.296297]
-                                SET r.createdAt = 1687434960.296297
+                                SET r.dates = [${twoDaysAgoEpoch}]
+                                SET r.createdAt = ${twoDaysAgoEpoch}
                                 MERGE (a) <-[r2:INTERACTED]-(b)
                                 SET r2.weights = [1.0]
-                                SET r2.dates = [1687434970.296297]
-                                SET r.createdAt = 1687434960.296297
+                                SET r2.dates = [${twoDaysAgoEpoch}]
+                                SET r.createdAt = ${twoDaysAgoEpoch}
                                 WITH a, b
                                 CREATE (g:Guild {guildId: "${guildOne.guildId}"})
                                 MERGE (a) -[:IS_MEMBER]->(g)
