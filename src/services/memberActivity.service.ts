@@ -1,5 +1,6 @@
 import { Connection } from 'mongoose';
 import { date, math } from '../utils';
+import ScoreStatus from '../utils/enums/scoreStatus.enum';
 import { IGuildMember } from '@togethercrew.dev/db';
 import * as Neo4j from '../neo4j';
 
@@ -996,6 +997,7 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
 
 async function getFragmentationScore(guildId: string) {
 
+    const fragmentationScoreRange = { minimumFragmentationScore: 0, maximumFragmentationScore: 200 }
     const fragmentationScoreQuery = `
         MATCH (g:Guild {guildId: "${guildId}"})
         RETURN 
@@ -1011,13 +1013,32 @@ async function getFragmentationScore(guildId: string) {
 
     const fragmentationScore = _fields[_fieldLookup['fragmentation_score']]
     const fragmentationScoreDate = _fields[_fieldLookup['fragmentation_score_date']]
+    const scoreStatus = findFragmentationScoreStatus(fragmentationScore);
 
-    return { fragmentationScore, fragmentationScoreDate }
+    return { fragmentationScore, fragmentationScoreRange, scoreStatus, fragmentationScoreDate }
 
+}
+/**
+ * this function was written based on what Amin and Ene suggested. (https://discord.com/channels/915914985140531240/1126528102311399464/1126771392512266250)
+ * if fragmentationScore is null or -1, it returns null that means there is not enough data to calculate the score
+ * ! if fragmentationScoreRange is changed, it we may should rewrite this function
+ * @param fragmentationScore number
+ * @returns ScoreStatus | null
+ */
+function findFragmentationScoreStatus(fragmentationScore?: number){
+    if(!fragmentationScore) return null
+    else if (fragmentationScore == -1) return null
+    else if (fragmentationScore >= 0 && fragmentationScore < 40) return ScoreStatus.DANGEROUSLY_LOW
+    else if (fragmentationScore >= 40 && fragmentationScore < 80) return ScoreStatus.SOMEWHAT_LOW
+    else if (fragmentationScore >= 80 && fragmentationScore < 120) return ScoreStatus.GOOD
+    else if (fragmentationScore >= 120 && fragmentationScore < 160) return ScoreStatus.SOMEWHAT_HIGH
+    else if (fragmentationScore >= 160 && fragmentationScore <= 200) return ScoreStatus.DANGEROUSLY_HIGH
+    else return null
 }
 
 async function getDecentralisationScore(guildId: string){
 
+    const decentralisationScoreRange = { minimumDecentralisationScore: 0, maximumDecentralisationScore: 200 }
     const decentralisationScoreQuery = `
         MATCH (g:Guild {guildId: "${guildId}"})
         RETURN 
@@ -1034,8 +1055,26 @@ async function getDecentralisationScore(guildId: string){
 
     const decentralisationScore = _fields[_fieldLookup['decentralization_score']]
     const decentralisationScoreDate = _fields[_fieldLookup['decentralization_score_date']]
+    const scoreStatus = findDecentralisationScoreStatus(decentralisationScore);
 
-    return { decentralisationScore, decentralisationScoreDate }
+    return { decentralisationScore, decentralisationScoreRange, scoreStatus, decentralisationScoreDate }
+}
+/**
+ * this function was written based on what Amin and Ene suggested. (https://discord.com/channels/915914985140531240/1126528102311399464/1126771392512266250)
+ * if fragmentationScore is null or -1, it returns null that means there is not enough data to calculate the score
+ * ! if decentralisationScoreRange is changed, it we may should rewrite this function
+ * @param fragmentationScore number
+ * @returns ScoreStatus | null
+ */
+function findDecentralisationScoreStatus(decentralisationScore?: number){
+    if(!decentralisationScore) return null
+    else if (decentralisationScore == -1) return null
+    else if (decentralisationScore >= 0 && decentralisationScore < 40) return ScoreStatus.DANGEROUSLY_LOW
+    else if (decentralisationScore >= 40 && decentralisationScore < 80) return ScoreStatus.SOMEWHAT_LOW
+    else if (decentralisationScore >= 80 && decentralisationScore < 120) return ScoreStatus.GOOD
+    else if (decentralisationScore >= 120 && decentralisationScore < 160) return ScoreStatus.SOMEWHAT_HIGH
+    else if (decentralisationScore >= 160 && decentralisationScore <= 200) return ScoreStatus.DANGEROUSLY_HIGH
+    else return null
 }
 
 export default {
