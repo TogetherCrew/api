@@ -303,6 +303,18 @@ paths:
                   fragmentationScoreDate:
                     type: integer
                     example: 1
+                  scoreStatus: 
+                    type: integer
+                    example: -1
+                  fragmentationScoreRange:
+                    type: object
+                    properties: 
+                      minimumFragmentationScore:
+                        type: integer
+                        example: 0
+                      maximumFragmentationScore:
+                        type: integer
+                        example: 200
         "400":
           description: Bad Request
           $ref: "#/components/responses/BadRequest"
@@ -340,6 +352,18 @@ paths:
                   decentralisationScoreDate:
                     type: integer
                     example: 1
+                  scoreStatus: 
+                    type: integer
+                    example: -1
+                  fragmentationScoreRange:
+                    type: object
+                    properties: 
+                      minimumFragmentationScore:
+                        type: integer
+                        example: 0
+                      maximumFragmentationScore:
+                        type: integer
+                        example: 200
         "400":
           description: Bad Request
           $ref: "#/components/responses/BadRequest"
