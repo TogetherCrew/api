@@ -218,7 +218,7 @@ describe('Guild routes', () => {
                 isDisconnected: guildOne.isDisconnected,
                 connectedAt: expect.anything(),
                 icon: guildOne.icon,
-                action: [1, 1, 1, 4, 3, 5, 5, 4, 3, 3, 2, 2, 1],
+                action: [1, 1, 1, 4, 3, 5, 5, 4, 3, 2, 2, 2, 1],
                 window: [7, 1]
             });
         })
@@ -517,7 +517,7 @@ describe('Guild routes', () => {
                 isDisconnected: guildOne.isDisconnected,
                 connectedAt: expect.anything(),
                 icon: guildOne.icon,
-                action: [1, 1, 1, 4, 3, 5, 5, 4, 3, 3, 2, 2, 1],
+                action: [1, 1, 1, 4, 3, 5, 5, 4, 3, 2, 2, 2, 1],
                 window: [7, 1]
             });
         });
