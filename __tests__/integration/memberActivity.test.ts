@@ -467,6 +467,9 @@ describe('member-activity routes', () => {
             
             expect(res.body.fragmentationScore).toBe(0.733333);
             expect(res.body.fragmentationScoreDate).toBe(167);
+            expect(res.body.scoreStatus).toBe(-2);
+            expect(res.body.decentralisationScoreRange).toHaveProperty("minimumFragmentationScore", 0);
+            expect(res.body.decentralisationScoreRange).toHaveProperty("maximumFragmentationScore", 200);
         })
 
         test('should return 200 with "null" fragmentation score if there is not interaction or data', async () => {
@@ -649,6 +652,10 @@ describe('member-activity routes', () => {
             
             expect(res.body.decentralisationScore).toBe(66.666);
             expect(res.body.decentralisationScoreDate).toBe(167);
+            expect(res.body.scoreStatus).toBe(-1);
+            expect(res.body.decentralisationScoreRange).toHaveProperty("minimumDecentralisationScore", 0);
+            expect(res.body.decentralisationScoreRange).toHaveProperty("maximumDecentralisationScore", 200);
+
         })
 
         test('should return 200 with "null" decentralisation score if there is not interaction or data', async () => {
