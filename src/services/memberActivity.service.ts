@@ -996,6 +996,7 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
 
 async function getFragmentationScore(guildId: string) {
 
+    const fragmentationScoreRange = { minimumFragmentationScore: 0, maximumFragmentationScore: 200 }
     const fragmentationScoreQuery = `
         MATCH (g:Guild {guildId: "${guildId}"})
         RETURN 
@@ -1012,12 +1013,13 @@ async function getFragmentationScore(guildId: string) {
     const fragmentationScore = _fields[_fieldLookup['fragmentation_score']]
     const fragmentationScoreDate = _fields[_fieldLookup['fragmentation_score_date']]
 
-    return { fragmentationScore, fragmentationScoreDate }
+    return { fragmentationScore, fragmentationScoreRange, fragmentationScoreDate }
 
 }
 
 async function getDecentralisationScore(guildId: string){
 
+    const decentralisationScoreRange = { minimumDecentralisationScore: 0, maximumDecentralisationScore: 200 }
     const decentralisationScoreQuery = `
         MATCH (g:Guild {guildId: "${guildId}"})
         RETURN 
@@ -1035,7 +1037,7 @@ async function getDecentralisationScore(guildId: string){
     const decentralisationScore = _fields[_fieldLookup['decentralization_score']]
     const decentralisationScoreDate = _fields[_fieldLookup['decentralization_score_date']]
 
-    return { decentralisationScore, decentralisationScoreDate }
+    return { decentralisationScore, decentralisationScoreRange, decentralisationScoreDate }
 }
 
 export default {
