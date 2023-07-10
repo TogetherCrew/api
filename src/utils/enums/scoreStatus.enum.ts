@@ -5,3 +5,5 @@ enum ScoreStatus {
     SOMEWHAT_HIGH = 1,
     DANGEROUSLY_HIGH = 2,
 }
+
+export default ScoreStatus

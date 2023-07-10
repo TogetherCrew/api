@@ -1,5 +1,6 @@
 import { Connection } from 'mongoose';
 import { date, math } from '../utils';
+import ScoreStatus from '../utils/enums/scoreStatus.enum';
 import { IGuildMember } from '@togethercrew.dev/db';
 import * as Neo4j from '../neo4j';
 
