@@ -1,6 +1,7 @@
 import { Connection } from 'mongoose';
 import { date, math } from '../utils';
 import ScoreStatus from '../utils/enums/scoreStatus.enum';
+import NodeStats from '../utils/enums/nodeStats.enum';
 import { IGuildMember } from '@togethercrew.dev/db';
 import * as Neo4j from '../neo4j';
 
@@ -945,17 +946,24 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
 
         const aWeeklyInteraction = a?.properties?.weekly_interaction
         const aUserId = a?.properties?.userId
+        // finding `aStats`
+        const aStases = a?.properties.stats
+        const aLastStats = aStases[aStases.length - 1]
+        const aStats = aLastStats == "B" ? NodeStats.BALANCED : aLastStats == "R" ? NodeStats.RECEIVER : aLastStats == "S" ? NodeStats.SENDER : null 
 
         const rWeeklyInteraction = r?.properties?.weekly_weight
 
         const bWeeklyInteraction = b?.properties?.weekly_interaction
         const bUserId = b?.properties?.userId
-
+        // finding `bStats`
+        const bStases = b?.properties.stats
+        const bLastStats = bStases[bStases.length - 1]
+        const bStats = bLastStats == "B" ? NodeStats.BALANCED : bLastStats == "R" ? NodeStats.RECEIVER : bLastStats == "S" ? NodeStats.SENDER : null 
 
         if (aWeeklyInteraction && rWeeklyInteraction && bWeeklyInteraction) {
             const interaction = {
-                from: { id: aUserId, radius: aWeeklyInteraction },
-                to: { id: bUserId, radius: bWeeklyInteraction },
+                from: { id: aUserId, radius: aWeeklyInteraction, stats: aStats },
+                to: { id: bUserId, radius: bWeeklyInteraction, stats: bStats },
                 width: rWeeklyInteraction
             }
             userIds.push(aUserId)

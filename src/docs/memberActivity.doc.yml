@@ -258,6 +258,8 @@ paths:
                           type: integer
                         username:
                           type: string
+                        stats: 
+                          type: string
                     to:
                       type: object
                       properties:
@@ -266,6 +268,8 @@ paths:
                         radius:
                           type: integer
                         username:
+                          type: string
+                        stats:
                           type: string
                     width:
                       type: integer

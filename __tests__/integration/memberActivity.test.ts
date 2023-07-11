@@ -336,10 +336,12 @@ describe('member-activity routes', () => {
             await Neo4j.write("match (n) detach delete (n);")
             await Neo4j.write(`MERGE (a:DiscordAccount {userId: "${guildMemberOne.discordId}"}) -[r:INTERACTED] -> (b:DiscordAccount {userId: "${guildMemberTwo.discordId}"})
                                 SET r.weights = [3444.0]
+                                SET a.stats = ["R", "R"]
                                 SET r.dates = [${twoDaysAgoEpoch}]
                                 SET r.createdAt = ${twoDaysAgoEpoch}
                                 MERGE (a) <-[r2:INTERACTED]-(b)
                                 SET r2.weights = [1.0]
+                                SET b.stats = ["B", "S"]
                                 SET r2.dates = [${twoDaysAgoEpoch}]
                                 SET r.createdAt = ${twoDaysAgoEpoch}
                                 WITH a, b
@@ -356,14 +358,14 @@ describe('member-activity routes', () => {
             expect(Array.isArray(res.body)).toBe(true);
             expect(res.body).toHaveLength(2)
             expect(res.body).toEqual(expect.arrayContaining([({
-                from: { id: '123456789', radius: 3444, username: 'Behzad' },
-                to: { id: '987654321', radius: 1, username: 'Bi#1234' },
+                from: { id: '123456789', radius: 3444, username: 'Behzad', stats: "RECEIVER" },
+                to: { id: '987654321', radius: 1, username: 'Bi#1234', stats: "SENDER" },
                 width: 3444
             })
             ]))
             expect(res.body).toEqual(expect.arrayContaining([({
-                from: { id: '987654321', radius: 1, username: 'Bi#1234' },
-                to: { id: '123456789', radius: 3444, username: 'Behzad' },
+                from: { id: '987654321', radius: 1, username: 'Bi#1234', stats: "SENDER" },
+                to: { id: '123456789', radius: 3444, username: 'Behzad', stats: "RECEIVER" },
                 width: 1
             })
             ]))
