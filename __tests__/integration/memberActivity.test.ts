@@ -353,7 +353,7 @@ describe('member-activity routes', () => {
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/members-interactions-network-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                // .expect(httpStatus.OK);
+                .expect(httpStatus.OK);
 
             expect(Array.isArray(res.body)).toBe(true);
             expect(res.body).toHaveLength(2)
