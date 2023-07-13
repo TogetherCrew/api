@@ -23,7 +23,7 @@ type Options = {
  * @returns {Promise<QueryResult>} - An object with the query results and other information like 'limit', 'page', 'totalPages', 'totalResults'.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function queryGuildMembers(connection: Connection, filter: Filter, options: Options, memberActivity: any) {
+async function queryGuildMembers(connection: Connection, filter: Filter, options: Options, memberActivity: any, activityCompostionsTypes: Array<string>) {
     try {
         const { roles, username, activityComposition } = filter;
         const { sortBy } = options;
@@ -31,14 +31,37 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
         const page = options.page && parseInt(options.page, 10) > 0 ? parseInt(options.page, 10) : 1;
         const sortParams: Record<string, 1 | -1> = sortBy ? sort.sortByHandler(sortBy) : { username: 1 };
 
+        // We need to track discord IDs that are to be included and excluded
+        const includeIds: string[] = [];
+        let excludeIds: string[] = [];
 
+        if (activityComposition && activityComposition.length > 0) {
+            // Gather IDs from the specified activities
+            activityComposition.filter(activity => activity !== 'others').forEach(activity => {
+                includeIds.push(...memberActivity[activity]);
+            });
+
+            // Gather IDs to be excluded when 'others' is mentioned
+            if (activityComposition.includes('others')) {
+                activityCompostionsTypes.forEach((activity) => {
+                    if (!activityComposition.includes(activity)) {
+                        excludeIds.push(...memberActivity[activity]);
+                    }
+                });
+            }
+        }
+
+        // Filter out included IDs from the excludeIds array
+        excludeIds = excludeIds.filter(id => !includeIds.includes(id));
+
+        // Construct the match stage
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let matchStage: any = {
-            discordId: { $in: memberActivity.all },
-        };
-
-        if (activityComposition && activityComposition.includes('others')) {
-            matchStage = {};
+        const matchStage: any = {};
+        if (includeIds.length > 0) {
+            matchStage.discordId = { $in: includeIds };
+        }
+        if (excludeIds.length > 0) {
+            matchStage.discordId = { $nin: excludeIds };
         }
 
         if (username) {
@@ -51,6 +74,7 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
 
         const totalResults = await connection.models.GuildMember.countDocuments(matchStage);
 
+        console.log(matchStage)
         const results = await connection.models.GuildMember.aggregate([
             {
                 $match: matchStage
@@ -96,19 +120,17 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
             totalResults: 0,
         }
     }
-
-
 }
-
 /**
  *  handel guild member roles and username
  * @param {Array} guildMembers - guild members array.
  * @param {Array} roles - roles array.
  * @param {Any} memberActivity - The document containing the last member activity.
+ * @param {Any} activityComposition
  * 
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function addNeededDataForTable(guildMembers: Array<any>, roles: Array<IRole>, memberActivity: any) {
+async function addNeededDataForTable(guildMembers: Array<any>, roles: Array<IRole>, memberActivity: any, activityComposition: Array<string>) {
     guildMembers.forEach((guildMember) => {
         guildMember.roles = guildMember.roles.map((roleId: string) => {
             const role = roles.find((role: IRole) => role.roleId === roleId);
@@ -117,7 +139,7 @@ async function addNeededDataForTable(guildMembers: Array<any>, roles: Array<IRol
             }
         });
         guildMember.username = guildMember.discriminator === "0" ? guildMember.username : guildMember.username + "#" + guildMember.discriminator;
-        guildMember.activityComposition = memberActivityService.getActivityComposition(guildMember, memberActivity)
+        guildMember.activityComposition = memberActivityService.getActivityComposition(guildMember, memberActivity, activityComposition)
     });
 }
 

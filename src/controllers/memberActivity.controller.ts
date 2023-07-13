@@ -7,7 +7,7 @@ import httpStatus from 'http-status';
 import config from '../config';
 import { pick } from '../utils';
 import { closeConnection } from '../database/connection';
-
+import { activityCompostionsTypes } from '../config/memberBreakDownTables';
 
 
 const activeMembersCompositionLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
@@ -95,12 +95,12 @@ const activeMembersCompositionTable = catchAsync(async function (req: IAuthReque
     const filter = pick(req.query, ['activityComposition', 'roles', 'username']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
-    const activityCompostionFields = memberActivityService.getActivityCompositionOfActiveMembersComposition(filter.activityComposition)
+    const activityCompostionFields = memberActivityService.getActivityCompositionOfActiveMembersComposition()
     const memberActivity = await memberActivityService.getLastDocumentForTablesUsage(connection, activityCompostionFields);
-    const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options, memberActivity);
+    const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options, memberActivity, activityCompostionsTypes.activeMembersComposition);
     const roles = await roleService.getRoles(connection, {});
     if (guildMembers) {
-        guildMemberService.addNeededDataForTable(guildMembers.results, roles, memberActivity);
+        guildMemberService.addNeededDataForTable(guildMembers.results, roles, memberActivity, filter.activityComposition);
     }
     await closeConnection(connection)
     res.send(guildMembers);
@@ -113,12 +113,17 @@ const activeMembersOnboardingTable = catchAsync(async function (req: IAuthReques
     const filter = pick(req.query, ['activityComposition', 'roles', 'username']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
-    const activityCompostionFields = memberActivityService.getActivityCompositionOfActiveMembersOnboarding(filter.activityComposition);
-    const memberActivity = await memberActivityService.getLastDocumentForTablesUsage(connection, activityCompostionFields);
-    const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options, memberActivity);
+    const activityCompostionFields = memberActivityService.getActivityCompositionOfActiveMembersOnboarding();
+    let memberActivity = await memberActivityService.getLastDocumentForTablesUsage(connection, activityCompostionFields);
+    if (activityCompostionFields.includes('all_joined')) {
+        const lastJoinedValues = await memberActivityService.getLastNDocumentsForField(connection, 'all_joined', 7);
+        memberActivity = { ...memberActivity, all_joined: lastJoinedValues };
+
+    }
+    const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options, memberActivity, activityCompostionsTypes.activeMembersOnboarding);
     const roles = await roleService.getRoles(connection, {});
     if (guildMembers) {
-        guildMemberService.addNeededDataForTable(guildMembers.results, roles, memberActivity);
+        guildMemberService.addNeededDataForTable(guildMembers.results, roles, memberActivity, filter.activityComposition);
     }
     await closeConnection(connection)
     res.send(guildMembers);
@@ -131,12 +136,12 @@ const disengagedMembersCompositionTable = catchAsync(async function (req: IAuthR
     const filter = pick(req.query, ['activityComposition', 'roles', 'username']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
-    const activityCompostionFields = memberActivityService.getActivityCompositionOfDisengagedComposition(filter.activityComposition);
+    const activityCompostionFields = memberActivityService.getActivityCompositionOfDisengagedComposition();
     const memberActivity = await memberActivityService.getLastDocumentForTablesUsage(connection, activityCompostionFields);
-    const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options, memberActivity);
+    const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options, memberActivity, activityCompostionsTypes.disengagedMembersCompostion);
     const roles = await roleService.getRoles(connection, {});
     if (guildMembers) {
-        guildMemberService.addNeededDataForTable(guildMembers.results, roles, memberActivity);
+        guildMemberService.addNeededDataForTable(guildMembers.results, roles, memberActivity, filter.activityComposition);
     }
     await closeConnection(connection)
     res.send(guildMembers);
