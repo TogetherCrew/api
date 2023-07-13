@@ -795,29 +795,26 @@ function buildProjectStageBasedOnActivityComposition(fields: Array<string>) {
 
 /**
  * get activity composition fileds of active member onboarding table
- * @param {Any} activityComposition
  * @returns {Object}
  */
-function getActivityCompositionOfActiveMembersComposition(activityComposition: Array<string>) {
-    return (activityComposition === undefined || activityComposition.length === 0) ? ["all_active", "all_new_active", "all_consistent", "all_vital", "all_new_disengaged"] : activityComposition;
+function getActivityCompositionOfActiveMembersComposition() {
+    return ["all_active", "all_new_active", "all_consistent", "all_vital", "all_new_disengaged"];
 }
 
 /**
  * get activity composition fileds of active member compostion table
- * @param {Any} activityComposition
  * @returns {Object}
  */
-function getActivityCompositionOfActiveMembersOnboarding(activityComposition: Array<string>) {
-    return (activityComposition === undefined || activityComposition.length === 0) ? ["all_joined", "all_new_active", "all_still_active", "all_dropped"] : activityComposition;
+function getActivityCompositionOfActiveMembersOnboarding() {
+    return ["all_joined", "all_new_active", "all_still_active", "all_dropped"];
 }
 
 /**
  * get activity composition fileds of disengaged member compostion table
- * @param {Any} activityComposition
  * @returns {Object}
  */
-function getActivityCompositionOfDisengagedComposition(activityComposition: Array<string>) {
-    return (activityComposition === undefined || activityComposition.length === 0) ? ["all_new_disengaged", "all_disengaged_were_newly_active", "all_disengaged_were_consistently_active", "all_disengaged_were_vital"] : activityComposition;
+function getActivityCompositionOfDisengagedComposition() {
+    return ["all_new_disengaged", "all_disengaged_were_newly_active", "all_disengaged_were_consistently_active", "all_disengaged_were_vital"];
 }
 
 
@@ -837,60 +834,55 @@ async function getLastDocumentForTablesUsage(connection: Connection, activityCom
     return lastDocument[0]
 }
 
+async function getLastNDocumentsForField(connection: Connection, fieldName: string, n: number) {
+    const documents = await connection.models.MemberActivity.aggregate([
+        { $sort: { date: -1 } },
+        { $limit: n },
+        { $project: { [fieldName]: 1 } }
+    ]);
+
+    // Flatten array of arrays into a single array
+    const flattenedArray = documents.flatMap(document => document[fieldName]);
+
+    // Remove duplicates
+    const uniqueArray = [...new Set(flattenedArray)];
+
+    return uniqueArray;
+}
+
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getActivityComposition(guildMember: IGuildMember, memberActivity: any) {
+function getActivityComposition(guildMember: IGuildMember, memberActivity: any, activityComposition: Array<string>) {
+    const activityTypes = [
+        { key: 'all_new_active', message: 'Newly active' },
+        { key: 'all_new_disengaged', message: 'Became disengaged' },
+        { key: 'all_active', message: 'Active members' },
+        { key: 'all_consistent', message: 'Consistently active' },
+        { key: 'all_vital', message: 'Vital member' },
+        { key: 'all_joined', message: 'Joined' },
+        { key: 'all_dropped', message: 'Dropped' },
+        { key: 'all_still_active', message: 'Still active' },
+        { key: 'all_disengaged_were_newly_active', message: 'Were newly active' },
+        { key: 'all_disengaged_were_consistently_active', message: 'Were consistenly active' },
+        { key: 'all_disengaged_were_vital', message: 'Were vital members' }
+    ];
+
     const activityCompositions = [];
-    if (memberActivity.all_new_active && memberActivity.all_new_active.includes(guildMember.discordId)) {
-        activityCompositions.push("Newly active");
-    }
 
-    if (memberActivity.all_new_disengaged && memberActivity.all_new_disengaged.includes(guildMember.discordId)) {
-        activityCompositions.push("Became disengaged");
-    }
-
-    if (memberActivity.all_active && memberActivity.all_active.includes(guildMember.discordId)) {
-        activityCompositions.push("Active members");
-    }
-
-    if (memberActivity.all_consistent && memberActivity.all_consistent.includes(guildMember.discordId)) {
-        activityCompositions.push("Consistently active");
-    }
-
-    if (memberActivity.all_vital && memberActivity.all_vital.includes(guildMember.discordId)) {
-        activityCompositions.push("Vital member");
-    }
-
-    if (memberActivity.all_joined && memberActivity.all_joined.includes(guildMember.discordId)) {
-        activityCompositions.push("Joined");
-    }
-
-    if (memberActivity.all_dropped && memberActivity.all_dropped.includes(guildMember.discordId)) {
-        activityCompositions.push("Dropped");
-    }
-
-    if (memberActivity.all_still_active && memberActivity.all_still_active.includes(guildMember.discordId)) {
-        activityCompositions.push("Still active");
-    }
-
-    if (memberActivity.all_disengaged_were_newly_active && memberActivity.all_disengaged_were_newly_active.includes(guildMember.discordId)) {
-        activityCompositions.push("Were newly active");
-    }
-
-    if (memberActivity.all_disengaged_were_consistently_active && memberActivity.all_disengaged_were_consistently_active.includes(guildMember.discordId)) {
-        activityCompositions.push("Were consistenly active");
-    }
-
-    if (memberActivity.all_disengaged_were_vital && memberActivity.all_disengaged_were_vital.includes(guildMember.discordId)) {
-        activityCompositions.push("Were vital members");
-    }
+    activityTypes.forEach((activityType) => {
+        if (memberActivity[activityType.key]
+            && memberActivity[activityType.key].includes(guildMember.discordId)
+            && (!activityComposition || activityComposition.length === 0 || activityComposition.includes(activityType.key))) {
+            activityCompositions.push(activityType.message);
+        }
+    });
 
     if (activityCompositions.length === 0) {
         activityCompositions.push("Others");
     }
+
     return activityCompositions;
 }
-
 async function getMembersInteractionsNetworkGraph(guildId: string, guildConnection: Connection) {
     // TODO: refactor function
 
@@ -949,7 +941,7 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
         // finding `aStats`
         const aStases = a?.properties.stats
         const aLastStats = aStases[aStases.length - 1]
-        const aStats = aLastStats == "B" ? NodeStats.BALANCED : aLastStats == "R" ? NodeStats.RECEIVER : aLastStats == "S" ? NodeStats.SENDER : null 
+        const aStats = aLastStats == "B" ? NodeStats.BALANCED : aLastStats == "R" ? NodeStats.RECEIVER : aLastStats == "S" ? NodeStats.SENDER : null
 
         const rWeeklyInteraction = r?.properties?.weekly_weight
 
@@ -958,7 +950,7 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
         // finding `bStats`
         const bStases = b?.properties.stats
         const bLastStats = bStases[bStases.length - 1]
-        const bStats = bLastStats == "B" ? NodeStats.BALANCED : bLastStats == "R" ? NodeStats.RECEIVER : bLastStats == "S" ? NodeStats.SENDER : null 
+        const bStats = bLastStats == "B" ? NodeStats.BALANCED : bLastStats == "R" ? NodeStats.RECEIVER : bLastStats == "S" ? NodeStats.SENDER : null
 
         if (aWeeklyInteraction && rWeeklyInteraction && bWeeklyInteraction) {
             const interaction = {
@@ -1014,10 +1006,10 @@ async function getFragmentationScore(guildId: string) {
     `
     const neo4jData = await Neo4j.read(fragmentationScoreQuery)
     const { records } = neo4jData
-    if(records.length == 0) return { fragmentationScore: null, fragmentationScoreDate: null }
+    if (records.length == 0) return { fragmentationScore: null, fragmentationScoreDate: null }
 
     const fragmentationData = records[0]
-    const { _fieldLookup, _fields } = fragmentationData as unknown as { _fieldLookup: Record<string, number> , _fields: number[]}
+    const { _fieldLookup, _fields } = fragmentationData as unknown as { _fieldLookup: Record<string, number>, _fields: number[] }
 
     const fragmentationScore = _fields[_fieldLookup['fragmentation_score']]
     const fragmentationScoreDate = _fields[_fieldLookup['fragmentation_score_date']]
@@ -1033,8 +1025,8 @@ async function getFragmentationScore(guildId: string) {
  * @param fragmentationScore number
  * @returns ScoreStatus | null
  */
-function findFragmentationScoreStatus(fragmentationScore?: number){
-    if(!fragmentationScore) return null
+function findFragmentationScoreStatus(fragmentationScore?: number) {
+    if (!fragmentationScore) return null
     else if (fragmentationScore == -1) return null
     else if (fragmentationScore >= 0 && fragmentationScore < 40) return ScoreStatus.DANGEROUSLY_LOW
     else if (fragmentationScore >= 40 && fragmentationScore < 80) return ScoreStatus.SOMEWHAT_LOW
@@ -1044,7 +1036,7 @@ function findFragmentationScoreStatus(fragmentationScore?: number){
     else return null
 }
 
-async function getDecentralisationScore(guildId: string){
+async function getDecentralisationScore(guildId: string) {
 
     const decentralisationScoreRange = { minimumDecentralisationScore: 0, maximumDecentralisationScore: 200 }
     const decentralisationScoreQuery = `
@@ -1054,12 +1046,12 @@ async function getDecentralisationScore(guildId: string){
             g.resultDates[-1] as decentralization_score_date
     `
     const neo4jData = await Neo4j.read(decentralisationScoreQuery)
-    
+
     const { records } = neo4jData
-    if(records.length == 0) return { decentralisationScore: null, decentralisationScoreDate: null }
+    if (records.length == 0) return { decentralisationScore: null, decentralisationScoreDate: null }
 
     const decentralisationData = records[0]
-    const { _fieldLookup, _fields } = decentralisationData as unknown as { _fieldLookup: Record<string, number> , _fields: number[]}
+    const { _fieldLookup, _fields } = decentralisationData as unknown as { _fieldLookup: Record<string, number>, _fields: number[] }
 
     const decentralisationScore = _fields[_fieldLookup['decentralization_score']]
     const decentralisationScoreDate = _fields[_fieldLookup['decentralization_score_date']]
@@ -1074,8 +1066,8 @@ async function getDecentralisationScore(guildId: string){
  * @param fragmentationScore number
  * @returns ScoreStatus | null
  */
-function findDecentralisationScoreStatus(decentralisationScore?: number){
-    if(!decentralisationScore) return null
+function findDecentralisationScoreStatus(decentralisationScore?: number) {
+    if (!decentralisationScore) return null
     else if (decentralisationScore == -1) return null
     else if (decentralisationScore >= 0 && decentralisationScore < 40) return ScoreStatus.DANGEROUSLY_LOW
     else if (decentralisationScore >= 40 && decentralisationScore < 80) return ScoreStatus.SOMEWHAT_LOW
@@ -1091,6 +1083,7 @@ export default {
     inactiveMembersLineGraph,
     activeMembersOnboardingLineGraph,
     getLastDocumentForTablesUsage,
+    getLastNDocumentsForField,
     getActivityComposition,
     getMembersInteractionsNetworkGraph,
     getFragmentationScore,

@@ -2,7 +2,7 @@ import request from 'supertest';
 import httpStatus from 'http-status';
 import app from '../../src/app';
 import setupTestDB from '../utils/setupTestDB';
-import { userOne, insertUsers, userTwo } from '../fixtures/user.fixture';
+import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour, insertMemberActivities } from '../fixtures/memberActivity.fixture';
 import { guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour, insertGuildMembers } from '../fixtures/guildMember.fixture';
@@ -447,7 +447,7 @@ describe('member-activity routes', () => {
                 MATCH (d:DiscordAccount {userId: "1003"})
                 MATCH (e:DiscordAccount {userId: "1004"})
                 MATCH (g:Guild {guildId: "${guildOne.guildId}"})
-                
+
                 SET a.localClusteringCoeff = [1.0, 1.0]
                 SET b.localClusteringCoeff = [0.66666, 0.33333]
                 SET c.localClusteringCoeff = [1.0, 0.66666]
@@ -466,7 +466,7 @@ describe('member-activity routes', () => {
                 .get(`/api/v1/member-activity/${guildOne.guildId}/fragmentation-score`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
-            
+
             expect(res.body.fragmentationScore).toBe(0.733333);
             expect(res.body.fragmentationScoreDate).toBe(167);
             expect(res.body.scoreStatus).toBe(-2);
@@ -530,7 +530,7 @@ describe('member-activity routes', () => {
                 MATCH (d:DiscordAccount {userId: "1003"})
                 MATCH (e:DiscordAccount {userId: "1004"})
                 MATCH (g:Guild {guildId: "${guildOne.guildId}"})
-                
+
                 SET a.localClusteringCoeff = [1.0, 1.0]
                 SET b.localClusteringCoeff = [0.66666, 0.33333]
                 SET c.localClusteringCoeff = [1.0, 0.66666]
@@ -549,7 +549,7 @@ describe('member-activity routes', () => {
                 .get(`/api/v1/member-activity/${guildTwo.guildId}/fragmentation-score`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
-            
+
             expect(res.body.fragmentationScore).toBe(null);
             expect(res.body.fragmentationScoreDate).toBe(null);
         })
@@ -632,7 +632,7 @@ describe('member-activity routes', () => {
                 MATCH (d:DiscordAccount {userId: "1003"})
                 MATCH (e:DiscordAccount {userId: "1004"})
                 MATCH (g:Guild {guildId: "${guildOne.guildId}"})
-                
+
                 SET a.localClusteringCoeff = [1.0, 1.0]
                 SET b.localClusteringCoeff = [0.66666, 0.33333]
                 SET c.localClusteringCoeff = [1.0, 0.66666]
@@ -651,7 +651,7 @@ describe('member-activity routes', () => {
                 .get(`/api/v1/member-activity/${guildOne.guildId}/decentralisation-score`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
-            
+
             expect(res.body.decentralisationScore).toBe(66.666);
             expect(res.body.decentralisationScoreDate).toBe(167);
             expect(res.body.scoreStatus).toBe(-1);
@@ -717,7 +717,7 @@ describe('member-activity routes', () => {
                 MATCH (d:DiscordAccount {userId: "1003"})
                 MATCH (e:DiscordAccount {userId: "1004"})
                 MATCH (g:Guild {guildId: "${guildOne.guildId}"})
-                
+
                 SET a.localClusteringCoeff = [1.0, 1.0]
                 SET b.localClusteringCoeff = [0.66666, 0.33333]
                 SET c.localClusteringCoeff = [1.0, 0.66666]
@@ -736,7 +736,7 @@ describe('member-activity routes', () => {
                 .get(`/api/v1/member-activity/${guildTwo.guildId}/decentralisation-score`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
-            
+
             expect(res.body.decentralisationScore).toBe(null);
             expect(res.body.decentralisationScoreDate).toBe(null);
         })
@@ -757,7 +757,7 @@ describe('member-activity routes', () => {
                 .expect(httpStatus.NOT_FOUND);
         })
     })
-    
+
     describe('GET /api/v1/member-activity/:guildId/active-members-composition-table', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
@@ -779,10 +779,10 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 4,
             });
 
-            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results).toHaveLength(4);
             expect(res.body.results[0]).toEqual({
                 discordId: guildMemberThree.discordId,
                 username: guildMemberThree.username,
@@ -820,6 +820,17 @@ describe('member-activity routes', () => {
                 joinedAt: guildMemberTwo.joinedAt.toISOString(),
                 discriminator: guildMemberTwo.discriminator,
                 activityComposition: ['Newly active']
+            });
+
+            expect(res.body.results[3]).toEqual({
+                discordId: guildMemberFour.discordId,
+                username: guildMemberFour.username + "#" + guildMemberFour.discriminator,
+                avatar: guildMemberFour.avatar,
+                roles: [
+                    { roleId: role1.roleId, name: role1.name, color: role1.color }],
+                joinedAt: guildMemberFour.joinedAt.toISOString(),
+                discriminator: guildMemberFour.discriminator,
+                activityComposition: ['Others']
             });
         })
 
@@ -878,18 +889,14 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 4,
+                totalResults: 2,
             });
 
-            expect(res.body.results).toHaveLength(4);
-            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
-            expect(res.body.results[0].activityComposition).toEqual(['Others']);
-            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[1].activityComposition).toEqual(['Became disengaged']);
-            expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
-            expect(res.body.results[2].activityComposition).toEqual(['Others']);
-            expect(res.body.results[3].discordId).toBe(guildMemberFour.discordId);
-            expect(res.body.results[3].activityComposition).toEqual(['Others']);
+            expect(res.body.results).toHaveLength(2);
+            expect(res.body.results[0].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[0].activityComposition).toEqual(['Became disengaged']);
+            expect(res.body.results[1].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[1].activityComposition).toEqual(['Others']);
 
 
         })
@@ -965,12 +972,13 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 4,
             });
-            expect(res.body.results).toHaveLength(3);
-            expect(res.body.results[0].discordId).toBe(guildMemberTwo.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[2].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results).toHaveLength(4);
+            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[1].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[2].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[3].discordId).toBe(guildMemberThree.discordId);
         })
 
         test('should correctly sort the returned array if ascending  sort param is specified', async () => {
@@ -992,12 +1000,13 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 4,
             });
-            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results).toHaveLength(4);
             expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
             expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
             expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[3].discordId).toBe(guildMemberFour.discordId);
         })
 
         test('should correctly sort the returned array if multiple sorting criteria are specified', async () => {
@@ -1019,10 +1028,10 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 4,
             });
 
-            const expectedOrder = [guildMemberOne, guildMemberTwo, guildMemberThree,].sort((a, b) => {
+            const expectedOrder = [guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour].sort((a, b) => {
                 if (a.joinedAt < b.joinedAt) {
                     return 1;
                 }
@@ -1056,7 +1065,7 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 2,
                 totalPages: 2,
-                totalResults: 3,
+                totalResults: 4,
             });
 
             expect(res.body.results).toHaveLength(2);
@@ -1083,11 +1092,12 @@ describe('member-activity routes', () => {
                 page: 2,
                 limit: 2,
                 totalPages: 2,
-                totalResults: 3,
+                totalResults: 4,
             });
 
-            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results).toHaveLength(2);
             expect(res.body.results[0].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[1].discordId).toBe(guildMemberFour.discordId);
         })
     })
 
@@ -1112,10 +1122,10 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 4,
             });
 
-            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results).toHaveLength(4);
             expect(res.body.results[0]).toEqual({
                 discordId: guildMemberThree.discordId,
                 username: guildMemberThree.username,
@@ -1152,7 +1162,19 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberTwo.joinedAt.toISOString(),
                 discriminator: guildMemberTwo.discriminator,
-                activityComposition: ['Newly active', 'Dropped']
+                activityComposition: ['Newly active', 'Joined', 'Dropped']
+            });
+
+            expect(res.body.results[3]).toEqual({
+                discordId: guildMemberFour.discordId,
+                username: guildMemberFour.username + "#" + guildMemberFour.discriminator,
+                avatar: guildMemberFour.avatar,
+                roles: [
+                    { roleId: role1.roleId, name: role1.name, color: role1.color },
+                ],
+                joinedAt: guildMemberFour.joinedAt.toISOString(),
+                discriminator: guildMemberFour.discriminator,
+                activityComposition: ['Others']
             });
         })
 
@@ -1191,10 +1213,13 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 1,
+                totalResults: 2,
             });
-            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results).toHaveLength(2);
             expect(res.body.results[0].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[0].activityComposition).toEqual(['Joined']);
+            expect(res.body.results[1].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[0].activityComposition).toEqual(['Joined']);
 
             res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
@@ -1208,18 +1233,16 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 4,
+                totalResults: 3,
             });
 
-            expect(res.body.results).toHaveLength(4);
-            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
-            expect(res.body.results[0].activityComposition).toEqual(['Others']);
-            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results[0].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[0].activityComposition).toEqual(['Joined']);
+            expect(res.body.results[1].discordId).toBe(guildMemberTwo.discordId);
             expect(res.body.results[1].activityComposition).toEqual(['Joined']);
-            expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[2].discordId).toBe(guildMemberFour.discordId);
             expect(res.body.results[2].activityComposition).toEqual(['Others']);
-            expect(res.body.results[3].discordId).toBe(guildMemberFour.discordId);
-            expect(res.body.results[3].activityComposition).toEqual(['Others']);
 
         })
 
@@ -1294,12 +1317,13 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 4,
             });
-            expect(res.body.results).toHaveLength(3);
-            expect(res.body.results[0].discordId).toBe(guildMemberTwo.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[2].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results).toHaveLength(4);
+            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[1].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[2].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[3].discordId).toBe(guildMemberThree.discordId);
         })
 
         test('should correctly sort the returned array if ascending  sort param is specified', async () => {
@@ -1321,12 +1345,13 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 4,
             });
-            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results).toHaveLength(4);
             expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
             expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
             expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[3].discordId).toBe(guildMemberFour.discordId);
         })
 
         test('should correctly sort the returned array if multiple sorting criteria are specified', async () => {
@@ -1348,10 +1373,10 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 4,
             });
 
-            const expectedOrder = [guildMemberOne, guildMemberTwo, guildMemberThree,].sort((a, b) => {
+            const expectedOrder = [guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour].sort((a, b) => {
                 if (a.joinedAt < b.joinedAt) {
                     return 1;
                 }
@@ -1385,7 +1410,7 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 2,
                 totalPages: 2,
-                totalResults: 3,
+                totalResults: 4,
             });
 
             expect(res.body.results).toHaveLength(2);
@@ -1412,11 +1437,12 @@ describe('member-activity routes', () => {
                 page: 2,
                 limit: 2,
                 totalPages: 2,
-                totalResults: 3,
+                totalResults: 4,
             });
 
-            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results).toHaveLength(2);
             expect(res.body.results[0].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[1].discordId).toBe(guildMemberFour.discordId);
         })
     })
 
@@ -1441,10 +1467,10 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 4,
             });
 
-            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results).toHaveLength(4);
             expect(res.body.results[0]).toEqual({
                 discordId: guildMemberThree.discordId,
                 username: guildMemberThree.username,
@@ -1482,6 +1508,18 @@ describe('member-activity routes', () => {
                 joinedAt: guildMemberTwo.joinedAt.toISOString(),
                 discriminator: guildMemberTwo.discriminator,
                 activityComposition: ['Were newly active']
+            });
+
+            expect(res.body.results[3]).toEqual({
+                discordId: guildMemberFour.discordId,
+                username: guildMemberFour.username + "#" + guildMemberFour.discriminator,
+                avatar: guildMemberFour.avatar,
+                roles: [
+                    { roleId: role1.roleId, name: role1.name, color: role1.color },
+                ],
+                joinedAt: guildMemberFour.joinedAt.toISOString(),
+                discriminator: guildMemberFour.discriminator,
+                activityComposition: ['Others']
             });
         })
 
@@ -1537,18 +1575,14 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 4,
+                totalResults: 2,
             });
 
-            expect(res.body.results).toHaveLength(4);
-            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
-            expect(res.body.results[0].activityComposition).toEqual(['Others']);
-            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[1].activityComposition).toEqual(['Were vital members']);
-            expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
-            expect(res.body.results[2].activityComposition).toEqual(['Others']);
-            expect(res.body.results[3].discordId).toBe(guildMemberFour.discordId);
-            expect(res.body.results[3].activityComposition).toEqual(['Others']);
+            expect(res.body.results).toHaveLength(2);
+            expect(res.body.results[0].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[0].activityComposition).toEqual(['Were vital members']);
+            expect(res.body.results[1].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[1].activityComposition).toEqual(['Others']);
 
         })
 
@@ -1623,12 +1657,13 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 4,
             });
-            expect(res.body.results).toHaveLength(3);
-            expect(res.body.results[0].discordId).toBe(guildMemberTwo.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[2].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results).toHaveLength(4);
+            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[1].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[2].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[3].discordId).toBe(guildMemberThree.discordId);
         })
 
         test('should correctly sort the returned array if ascending  sort param is specified', async () => {
@@ -1650,12 +1685,13 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 4,
             });
-            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results).toHaveLength(4);
             expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
             expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
             expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[3].discordId).toBe(guildMemberFour.discordId);
         })
 
         test('should correctly sort the returned array if multiple sorting criteria are specified', async () => {
@@ -1677,10 +1713,10 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 4,
             });
 
-            const expectedOrder = [guildMemberOne, guildMemberTwo, guildMemberThree,].sort((a, b) => {
+            const expectedOrder = [guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour].sort((a, b) => {
                 if (a.joinedAt < b.joinedAt) {
                     return 1;
                 }
@@ -1714,7 +1750,7 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 2,
                 totalPages: 2,
-                totalResults: 3,
+                totalResults: 4,
             });
 
             expect(res.body.results).toHaveLength(2);
@@ -1741,11 +1777,12 @@ describe('member-activity routes', () => {
                 page: 2,
                 limit: 2,
                 totalPages: 2,
-                totalResults: 3,
+                totalResults: 4,
             });
 
-            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results).toHaveLength(2);
             expect(res.body.results[0].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[1].discordId).toBe(guildMemberFour.discordId);
         })
     })
 
