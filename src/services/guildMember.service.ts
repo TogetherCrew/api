@@ -19,10 +19,10 @@ type Options = {
  * @param {Connection} connection - The MongoDB connection.
  * @param {Filter} filter - The filter object with fields like 'roles' and 'username'.
  * @param {Options} options - The options object with fields like 'sortBy', 'limit' and 'page'.
- * @param {Any} memberActivity - The document containing the last member activity.
+ * @param {any} memberActivity - The document containing the last member activity.
+ * @param {Array<string>} activityCompostionsTypes - An array containing types of activity compositions.
  * @returns {Promise<QueryResult>} - An object with the query results and other information like 'limit', 'page', 'totalPages', 'totalResults'.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function queryGuildMembers(connection: Connection, filter: Filter, options: Options, memberActivity: any, activityCompostionsTypes: Array<string>) {
     try {
         const { roles, username, activityComposition } = filter;
@@ -31,39 +31,32 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
         const page = options.page && parseInt(options.page, 10) > 0 ? parseInt(options.page, 10) : 1;
         const sortParams: Record<string, 1 | -1> = sortBy ? sort.sortByHandler(sortBy) : { username: 1 };
 
-        // We need to track discord IDs that are to be included and excluded
-        const includeIds: string[] = [];
-        let excludeIds: string[] = [];
+        let matchStage: any = {};
+        let allActivityIds: string[] = [];
 
         if (activityComposition && activityComposition.length > 0) {
-            // Gather IDs from the specified activities
-            activityComposition.filter(activity => activity !== 'others').forEach(activity => {
-                includeIds.push(...memberActivity[activity]);
-            });
-
-            // Gather IDs to be excluded when 'others' is mentioned
+            // If 'others' is in activityComposition, we exclude all IDs that are part of other activities
             if (activityComposition.includes('others')) {
-                activityCompostionsTypes.forEach((activity) => {
-                    if (!activityComposition.includes(activity)) {
-                        excludeIds.push(...memberActivity[activity]);
-                    }
-                });
+                allActivityIds = activityCompostionsTypes
+                    .filter(activity => activity !== 'others')
+                    .flatMap(activity => memberActivity[activity]);
+
+                matchStage.discordId = { $nin: allActivityIds };
+            }
+
+            // If specific activity compositions are mentioned along with 'others', we add them separately
+            if (activityComposition.some(activity => activity !== 'others')) {
+                const specificActivityIds = activityComposition
+                    .filter(activity => activity !== 'others')
+                    .flatMap(activity => memberActivity[activity]);
+
+                if (matchStage.discordId) {
+                    matchStage = { $or: [{ discordId: { $in: specificActivityIds } }, matchStage] };
+                } else {
+                    matchStage.discordId = { $in: specificActivityIds };
+                }
             }
         }
-
-        // Filter out included IDs from the excludeIds array
-        excludeIds = excludeIds.filter(id => !includeIds.includes(id));
-
-        // Construct the match stage
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const matchStage: any = {};
-        if (includeIds.length > 0) {
-            matchStage.discordId = { $in: includeIds };
-        }
-        if (excludeIds.length > 0) {
-            matchStage.discordId = { $nin: excludeIds };
-        }
-
         if (username) {
             matchStage.username = { $regex: username, $options: 'i' };
         }
@@ -74,7 +67,6 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
 
         const totalResults = await connection.models.GuildMember.countDocuments(matchStage);
 
-        console.log(matchStage)
         const results = await connection.models.GuildMember.aggregate([
             {
                 $match: matchStage
