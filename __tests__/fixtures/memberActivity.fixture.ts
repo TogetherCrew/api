@@ -2,7 +2,7 @@ import { Connection } from 'mongoose';
 
 export const memberActivityOne = {
     date: new Date("2023-04-07"),
-    all_active: ["123456789",],
+    all_active: [],
     all_new_active: ["123456789", "987654321", "555555555"],
     all_consistent: [],
     all_vital: [],
@@ -10,12 +10,12 @@ export const memberActivityOne = {
     all_disengaged: [],
     all_unpaused: [],
     all_returned: ["123456789"],
-    all_still_active: ["123456789"],
+    all_still_active: [],
     all_dropped: ["123456789", "987654321", "555555555"],
     all_joined: ["123456789"],
     all_disengaged_were_newly_active: ["123456789", "987654321", "555555555"],
     all_disengaged_were_consistently_active: ["123456789"],
-    all_disengaged_were_vital: ["123456789"],
+    all_disengaged_were_vital: [],
 }
 
 export const memberActivityTwo = {
