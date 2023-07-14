@@ -34,7 +34,7 @@ describe('member-activity routes', () => {
                 .expect(httpStatus.OK);
 
             expect(res.body).toMatchObject({
-                totActiveMembers: 1,
+                totActiveMembers: 0,
                 newlyActive: 3,
                 consistentlyActive: 0,
                 vitalMembers: 0,
@@ -53,7 +53,7 @@ describe('member-activity routes', () => {
             expect(res.body.series[3].name).toBe('vitalMembers');
             expect(res.body.series[4].name).toBe('becameDisengaged');
 
-            expect(res.body.series[0].data).toEqual([0, 0, 0, 0, 0, 0, 1]);
+            expect(res.body.series[0].data).toEqual([0, 0, 0, 0, 0, 0, 0]);
             expect(res.body.series[1].data).toEqual([1, 0, 0, 0, 0, 0, 3]);
             expect(res.body.series[2].data).toEqual([0, 0, 0, 0, 0, 0, 0]);
             expect(res.body.series[3].data).toEqual([1, 0, 0, 0, 0, 0, 0]);
@@ -122,11 +122,11 @@ describe('member-activity routes', () => {
                 becameDisengaged: 1,
                 wereNewlyActive: 3,
                 wereConsistentlyActive: 1,
-                wereVitalMembers: 1,
+                wereVitalMembers: 0,
                 becameDisengagedPercentageChange: 0,
                 wereNewlyActivePercentageChange: 200,
                 wereConsistentlyActivePercentageChange: "N/A",
-                wereVitalMembersPercentageChange: -75,
+                wereVitalMembersPercentageChange: -100,
             });
 
 
@@ -139,7 +139,7 @@ describe('member-activity routes', () => {
             expect(res.body.series[0].data).toEqual([1, 0, 0, 0, 0, 0, 1]);
             expect(res.body.series[1].data).toEqual([1, 0, 0, 0, 0, 0, 3]);
             expect(res.body.series[2].data).toEqual([0, 0, 0, 0, 0, 0, 1]);
-            expect(res.body.series[3].data).toEqual([1, 0, 0, 0, 0, 0, 1]);
+            expect(res.body.series[3].data).toEqual([1, 0, 0, 0, 0, 0, 0]);
         })
 
         test('should return 200 and disengaged members composition line graph data (testing for empty data) if req data is ok', async () => {
@@ -198,11 +198,11 @@ describe('member-activity routes', () => {
 
             expect(res.body).toMatchObject({
                 newlyActive: 3,
-                stillActive: 1,
+                stillActive: 0,
                 dropped: 3,
                 joined: 1,
                 newlyActivePercentageChange: 200,
-                stillActivePercentageChange: 0,
+                stillActivePercentageChange: -100,
                 droppedPercentageChange: "N/A",
                 joinedPercentageChange: -50,
             });
@@ -215,7 +215,7 @@ describe('member-activity routes', () => {
             expect(res.body.series[3].name).toBe('dropped');
             expect(res.body.series[0].data).toEqual([1, 0, 0, 0, 0, 0, 1]);
             expect(res.body.series[1].data).toEqual([1, 0, 0, 0, 0, 0, 3]);
-            expect(res.body.series[2].data).toEqual([1, 0, 0, 0, 0, 0, 1]);
+            expect(res.body.series[2].data).toEqual([1, 0, 0, 0, 0, 0, 0]);
             expect(res.body.series[3].data).toEqual([0, 0, 0, 0, 0, 0, 3]);
         })
 
@@ -806,7 +806,7 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberOne.joinedAt.toISOString(),
                 discriminator: guildMemberOne.discriminator,
-                activityComposition: ['Newly active', 'Became disengaged', 'Active members']
+                activityComposition: ['Newly active', 'Became disengaged']
             });
 
             expect(res.body.results[2]).toEqual({
@@ -860,7 +860,23 @@ describe('member-activity routes', () => {
             let res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .query({ activityComposition: ["all_new_disengaged"] })
+                .query({ activityComposition: ["all_active"] })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 0,
+                totalResults: 0,
+            });
+            expect(res.body.results).toHaveLength(0);
+
+            res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ activityComposition: ["all_active", "others"] })
                 .send()
                 .expect(httpStatus.OK);
 
@@ -872,15 +888,13 @@ describe('member-activity routes', () => {
                 totalResults: 1,
             });
             expect(res.body.results).toHaveLength(1);
-            expect(res.body.results[0].discordId).toBe(guildMemberOne.discordId);
-
-
-
+            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[0].activityComposition).toEqual(['Others']);
 
             res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .query({ activityComposition: ["others", "all_new_disengaged"] })
+                .query({ activityComposition: ["others"] })
                 .send()
                 .expect(httpStatus.OK);
 
@@ -889,14 +903,36 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 2,
+                totalResults: 1,
             });
 
-            expect(res.body.results).toHaveLength(2);
-            expect(res.body.results[0].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[0].activityComposition).toEqual(['Became disengaged']);
-            expect(res.body.results[1].discordId).toBe(guildMemberFour.discordId);
-            expect(res.body.results[1].activityComposition).toEqual(['Others']);
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[0].activityComposition).toEqual(['Others']);
+
+            res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ activityComposition: ["all_new_active", "all_new_disengaged"] })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 3,
+            });
+
+            expect(res.body.results).toHaveLength(3);
+
+            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results[0].activityComposition).toEqual(['Newly active']);
+            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[1].activityComposition).toEqual(['Newly active', 'Became disengaged']);
+            expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[2].activityComposition).toEqual(['Newly active']);
 
 
         })
@@ -1149,7 +1185,7 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberOne.joinedAt.toISOString(),
                 discriminator: guildMemberOne.discriminator,
-                activityComposition: ['Newly active', 'Joined', 'Dropped', 'Still active']
+                activityComposition: ['Newly active', 'Joined', 'Dropped']
             });
 
             expect(res.body.results[2]).toEqual({
@@ -1204,7 +1240,23 @@ describe('member-activity routes', () => {
             let res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .query({ activityComposition: ["all_joined"] })
+                .query({ activityComposition: ["all_still_active"] })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 0,
+                totalResults: 0,
+            });
+            expect(res.body.results).toHaveLength(0);
+
+            res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ activityComposition: ["others", "all_still_active"] })
                 .send()
                 .expect(httpStatus.OK);
 
@@ -1213,18 +1265,37 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 2,
+                totalResults: 1,
             });
-            expect(res.body.results).toHaveLength(2);
-            expect(res.body.results[0].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[0].activityComposition).toEqual(['Joined']);
-            expect(res.body.results[1].discordId).toBe(guildMemberTwo.discordId);
-            expect(res.body.results[0].activityComposition).toEqual(['Joined']);
+
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[0].activityComposition).toEqual(['Others']);
 
             res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .query({ activityComposition: ["others", "all_joined"] })
+                .query({ activityComposition: ["others"] })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 1,
+            });
+
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[0].activityComposition).toEqual(['Others']);
+
+
+            res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ activityComposition: ["all_dropped", "all_joined"] })
                 .send()
                 .expect(httpStatus.OK);
 
@@ -1236,14 +1307,14 @@ describe('member-activity routes', () => {
                 totalResults: 3,
             });
 
-            expect(res.body.results).toHaveLength(3);
-            expect(res.body.results[0].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[0].activityComposition).toEqual(['Joined']);
-            expect(res.body.results[1].discordId).toBe(guildMemberTwo.discordId);
-            expect(res.body.results[1].activityComposition).toEqual(['Joined']);
-            expect(res.body.results[2].discordId).toBe(guildMemberFour.discordId);
-            expect(res.body.results[2].activityComposition).toEqual(['Others']);
 
+            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results[0].activityComposition).toEqual(['Dropped']);
+            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[1].activityComposition).toEqual(['Joined', 'Dropped']);
+            expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[2].activityComposition).toEqual(['Joined', 'Dropped']);
         })
 
         test('should correctly apply filter on roles field', async () => {
@@ -1494,7 +1565,7 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberOne.joinedAt.toISOString(),
                 discriminator: guildMemberOne.discriminator,
-                activityComposition: ['Became disengaged', 'Were newly active', 'Were consistenly active', 'Were vital members']
+                activityComposition: ['Became disengaged', 'Were newly active', 'Were consistenly active']
             });
 
             expect(res.body.results[2]).toEqual({
@@ -1557,11 +1628,10 @@ describe('member-activity routes', () => {
                 results: expect.any(Array),
                 page: 1,
                 limit: 10,
-                totalPages: 1,
-                totalResults: 1,
+                totalPages: 0,
+                totalResults: 0,
             });
-            expect(res.body.results).toHaveLength(1);
-            expect(res.body.results[0].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results).toHaveLength(0);
 
             res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
@@ -1575,15 +1645,54 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 2,
+                totalResults: 1,
             });
 
-            expect(res.body.results).toHaveLength(2);
-            expect(res.body.results[0].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[0].activityComposition).toEqual(['Were vital members']);
-            expect(res.body.results[1].discordId).toBe(guildMemberFour.discordId);
-            expect(res.body.results[1].activityComposition).toEqual(['Others']);
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[0].activityComposition).toEqual(['Others']);
 
+            res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ activityComposition: ["others"] })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 1,
+            });
+
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[0].activityComposition).toEqual(['Others']);
+
+            res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ activityComposition: ["all_disengaged_were_newly_active", "all_disengaged_were_consistently_active"] })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 3,
+            });
+
+            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results[0].activityComposition).toEqual(['Were newly active']);
+            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[1].activityComposition).toEqual(['Were newly active', 'Were consistenly active']);
+            expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[2].activityComposition).toEqual(['Were newly active']);
         })
 
         test('should correctly apply filter on roles field', async () => {
