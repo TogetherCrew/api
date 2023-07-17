@@ -237,7 +237,7 @@ async function activeMembersOnboardingLineGraph(connection: Connection, startDat
                 $project: {
                     _id: 0,
                     date: { $convert: { input: "$date", to: "date" } },
-                    all_joined: 1,
+                    all_joined_day: 1,
                     all_new_active: 1,
                     all_still_active: 1,
                     all_dropped: 1,
@@ -277,7 +277,7 @@ async function activeMembersOnboardingLineGraph(connection: Connection, startDat
                             }
                         ]
                     },
-                    joined: { $size: "$all_joined" },
+                    joined: { $size: "$all_joined_day" },
                     newly_active: { $size: "$all_new_active" },
                     still_active: { $size: "$all_still_active" },
                     dropped: { $size: "$all_dropped" },
@@ -348,7 +348,7 @@ async function activeMembersOnboardingLineGraph(connection: Connection, startDat
                 $project: {
                     _id: 0,
                     date: { $convert: { input: "$date", to: "date" } },
-                    all_joined: 1,
+                    all_joined_day: 1,
                     all_new_active: 1,
                     all_still_active: 1,
                     all_dropped: 1,
@@ -369,7 +369,7 @@ async function activeMembersOnboardingLineGraph(connection: Connection, startDat
             // Stage 3: Calculate statistics and concatenate day - month field
             {
                 $project: {
-                    joined: { $size: "$all_joined" },
+                    joined: { $size: "$all_joined_day" },
                     newlyActive: { $size: "$all_new_active" },
                     stillActive: { $size: "$all_still_active" },
                     dropped: { $size: "$all_dropped" },
@@ -834,23 +834,6 @@ async function getLastDocumentForTablesUsage(connection: Connection, activityCom
     return lastDocument[0]
 }
 
-async function getLastNDocumentsForField(connection: Connection, fieldName: string, n: number) {
-    const documents = await connection.models.MemberActivity.aggregate([
-        { $sort: { date: -1 } },
-        { $limit: n },
-        { $project: { [fieldName]: 1 } }
-    ]);
-
-    // Flatten array of arrays into a single array
-    const flattenedArray = documents.flatMap(document => document[fieldName]);
-
-    // Remove duplicates
-    const uniqueArray = [...new Set(flattenedArray)];
-
-    return uniqueArray;
-}
-
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getActivityComposition(guildMember: IGuildMember, memberActivity: any, activityComposition: Array<string>) {
     const activityTypes = [
@@ -1083,7 +1066,6 @@ export default {
     inactiveMembersLineGraph,
     activeMembersOnboardingLineGraph,
     getLastDocumentForTablesUsage,
-    getLastNDocumentsForField,
     getActivityComposition,
     getMembersInteractionsNetworkGraph,
     getFragmentationScore,
