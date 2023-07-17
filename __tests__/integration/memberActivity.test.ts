@@ -1198,7 +1198,7 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberTwo.joinedAt.toISOString(),
                 discriminator: guildMemberTwo.discriminator,
-                activityComposition: ['Newly active', 'Joined', 'Dropped']
+                activityComposition: ['Newly active', 'Dropped']
             });
 
             expect(res.body.results[3]).toEqual({
@@ -1314,7 +1314,7 @@ describe('member-activity routes', () => {
             expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
             expect(res.body.results[1].activityComposition).toEqual(['Joined', 'Dropped']);
             expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
-            expect(res.body.results[2].activityComposition).toEqual(['Joined', 'Dropped']);
+            expect(res.body.results[2].activityComposition).toEqual(['Dropped']);
         })
 
         test('should correctly apply filter on roles field', async () => {

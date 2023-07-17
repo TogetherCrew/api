@@ -114,12 +114,7 @@ const activeMembersOnboardingTable = catchAsync(async function (req: IAuthReques
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     const activityCompostionFields = memberActivityService.getActivityCompositionOfActiveMembersOnboarding();
-    let memberActivity = await memberActivityService.getLastDocumentForTablesUsage(connection, activityCompostionFields);
-    if (activityCompostionFields.includes('all_joined')) {
-        const lastJoinedValues = await memberActivityService.getLastNDocumentsForField(connection, 'all_joined', 7);
-        memberActivity = { ...memberActivity, all_joined: lastJoinedValues };
-
-    }
+    const memberActivity = await memberActivityService.getLastDocumentForTablesUsage(connection, activityCompostionFields);
     const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options, memberActivity, activityCompostionsTypes.activeMembersOnboarding);
     const roles = await roleService.getRoles(connection, {});
     if (guildMembers) {
