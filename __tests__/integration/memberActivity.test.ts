@@ -196,11 +196,6 @@ describe('member-activity routes', () => {
                 .send({ startDate: new Date("2023-04-01"), endDate: new Date("2023-04-07") })
                 .expect(httpStatus.OK);
 
-
-            console.log(res.body)
-            console.log(res.body.categories)
-            console.log(res.body.series)
-
             expect(res.body).toMatchObject({
                 newlyActive: 3,
                 stillActive: 0,
