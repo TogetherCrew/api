@@ -241,6 +241,7 @@ async function activeMembersOnboardingLineGraph(connection: Connection, startDat
                     all_new_active: 1,
                     all_still_active: 1,
                     all_dropped: 1,
+                    all_joined: 1
                 }
             },
 
@@ -277,10 +278,12 @@ async function activeMembersOnboardingLineGraph(connection: Connection, startDat
                             }
                         ]
                     },
-                    joined: { $size: "$all_joined_day" },
+                    joinedDay: { $size: "$all_joined_day" },
+                    joined: { $size: "$all_joined" },
                     newly_active: { $size: "$all_new_active" },
                     still_active: { $size: "$all_still_active" },
                     dropped: { $size: "$all_dropped" },
+
                 }
             },
 
@@ -294,7 +297,7 @@ async function activeMembersOnboardingLineGraph(connection: Connection, startDat
                 $group: {
                     _id: null,
                     day_month: { $push: "$day_month" },
-                    joined: { $push: "$joined" },
+                    joinedDay: { $push: "$joinedDay" },
                     newlyActive: { $push: "$newly_active" },
                     stillActive: { $push: "$still_active" },
                     dropped: { $push: "$dropped" },
@@ -313,7 +316,7 @@ async function activeMembersOnboardingLineGraph(connection: Connection, startDat
                     _id: 0,
                     categories: "$day_month",
                     series: [
-                        { name: "joined", data: "$joined" },
+                        { name: "joinedDay", data: "$joinedDay" },
                         { name: "newlyActive", data: "$newlyActive" },
                         { name: "stillActive", data: "$stillActive" },
                         { name: "dropped", data: "$dropped" },
@@ -348,10 +351,11 @@ async function activeMembersOnboardingLineGraph(connection: Connection, startDat
                 $project: {
                     _id: 0,
                     date: { $convert: { input: "$date", to: "date" } },
-                    all_joined_day: 1,
                     all_new_active: 1,
                     all_still_active: 1,
                     all_dropped: 1,
+                    all_joined: 1
+
                 }
             },
 
@@ -369,7 +373,7 @@ async function activeMembersOnboardingLineGraph(connection: Connection, startDat
             // Stage 3: Calculate statistics and concatenate day - month field
             {
                 $project: {
-                    joined: { $size: "$all_joined_day" },
+                    joined: { $size: "$all_joined" },
                     newlyActive: { $size: "$all_new_active" },
                     stillActive: { $size: "$all_still_active" },
                     dropped: { $size: "$all_dropped" },
