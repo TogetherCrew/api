@@ -1,7 +1,7 @@
 import { Connection } from 'mongoose';
 import { sort } from '../utils';
 import memberActivityService from './memberActivity.service';
-import { IRole } from '@togethercrew.dev/db';
+import { IRole, IGuildMember } from '@togethercrew.dev/db';
 
 type Filter = {
     activityComposition?: Array<string>;
@@ -135,10 +135,25 @@ async function addNeededDataForTable(guildMembers: Array<any>, roles: Array<IRol
     });
 }
 
+/**
+ * Get a guild member from the database based on the filter criteria.
+ * @param {Connection} connection - Mongoose connection object for the database.
+ * @param {object} filter - An object specifying the filter criteria to match the desired guild member entry.
+ * @returns {Promise<IGuildMember | null>} - A promise that resolves to the matching guild member object or null if not found.
+ */
+async function getGuildMember(connection: Connection, filter: object): Promise<IGuildMember | null> {
+    try {
+        return await connection.models.GuildMember.findOne(filter);
+    } catch (error) {
+        console.log('Failed to retrieve  guild member', error);
+        return null;
+    }
+}
 
 
 export default {
     queryGuildMembers,
-    addNeededDataForTable
+    addNeededDataForTable,
+    getGuildMember
 }
 
