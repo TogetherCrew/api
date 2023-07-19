@@ -6,7 +6,7 @@ import setupTestDB from '../utils/setupTestDB';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { discordResponseGuildOne, guildOne, guildTwo, guildThree, guildFour, guildFive, insertGuilds } from '../fixtures/guilds.fixture';
-import { discordResponseChannels1, discordResponseChannels2, discordResponseChannelOne, channel1, channel2, channel3, channel4, insertChannels } from '../fixtures/channels.fixture';
+import { channel1, channel2, channel3, channel4, insertChannels } from '../fixtures/channels.fixture';
 import { role1, role2, role3, insertRoles } from '../fixtures/discord.roles.fixture';
 import { IGuildUpdateBody } from '../../src/interfaces/guild.interface';
 import { guildService, authService, userService, sagaService } from '../../src/services';
@@ -19,103 +19,59 @@ describe('Guild routes', () => {
 
     const connection = databaseService.connectionFactory(guildFive.guildId, config.mongoose.botURL);
 
-    describe('GET /api/v1/guilds/discord-api/:guildId/channels', () => {
+    describe('GET /api/v1/guilds/:guildId/channels', () => {
+        beforeEach(async () => {
+            await connection.dropDatabase();
+        });
         test('should return 200 and array of channels of the guild', async () => {
-            guildService.getChannelsFromDiscordJS = jest.fn().mockReturnValue(discordResponseChannels1);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            let res = await request(app)
-                .get(`/api/v1/guilds/discord-api/${discordResponseGuildOne.id}/channels`)
+            await insertGuilds([guildFive]);
+            await insertChannels([channel1, channel2, channel3, channel4], connection);
+            const res = await request(app)
+                .get(`/api/v1/guilds/${guildFive.guildId}/channels`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(httpStatus.OK);
 
-            expect(res.body).toHaveLength(4);
+            expect(res.body).toHaveLength(2);
             expect(res.body[0].subChannels).toHaveLength(2);
-            expect(res.body[1].subChannels).toHaveLength(2);
-            expect(res.body[2].subChannels).toHaveLength(2);
-            expect(res.body[3].subChannels).toHaveLength(2);
+            expect(res.body[1].subChannels).toHaveLength(1);
 
-            expect(res.body[0]).toEqual({
-                channelId: "915914985140531241",
-                title: "┏━┫COMMUNITY┣━━━━┓",
+            console.log(res.body)
+            console.log(res.body[0].subChannels)
+            console.log(res.body[1].subChannels)
+
+            expect(res.body[0]).toMatchObject({
+                channelId: "987654321098765432",
+                title: "Channel 1",
                 subChannels: [{
-                    channelId: "915944557605163008",
-                    name: "💬・general-chat",
-                    parentId: "915914985140531241",
-                    canReadMessageHistoryAndViewChannel: true
+                    channelId: "234567890123456789",
+                    name: "Channel 2",
+                    parentId: "987654321098765432",
+                    canReadMessageHistoryAndViewChannel: false
                 },
                 {
-                    channelId: "920707473369878589",
-                    name: "📖・learning-together",
-                    parentId: "915914985140531241",
+                    channelId: "345678901234567890",
+                    name: "Channel 3",
+                    parentId: "987654321098765432",
                     canReadMessageHistoryAndViewChannel: true
                 }]
             });
-
-
-            expect(res.body[1]).toEqual({
-                channelId: "928623723190292520",
-                title: "┏━┫WELCOME┣━━━━┓",
-                subChannels: [{
-                    channelId: "915917066496774165",
-                    name: "👋・introductions",
-                    parentId: "928623723190292520",
-                    canReadMessageHistoryAndViewChannel: true
-                },
-                {
-                    channelId: "921468460062605334",
-                    name: "☝・start-here",
-                    parentId: "928623723190292520",
-                    canReadMessageHistoryAndViewChannel: true
-                }]
-            });
-            expect(res.body[2]).toEqual({
-                channelId: "928627624585072640",
-                title: "┏━┫CONTRIBUTE┣━━━┓",
-                subChannels: [{
-                    channelId: "930049272693530674",
-                    name: "😎・meeting room",
-                    parentId: "928627624585072640",
-                    canReadMessageHistoryAndViewChannel: true
-                },
-                {
-                    channelId: "930488542168248390",
-                    name: "🗺・official-links",
-                    parentId: "928627624585072640",
-                    canReadMessageHistoryAndViewChannel: true
-                }]
-            });
-
-            expect(res.body[3]).toEqual({
+            expect(res.body[1]).toMatchObject({
                 channelId: "0",
                 title: "unCategorized",
                 subChannels: [{
-                    channelId: "9304885421682485901",
-                    name: "🗺・DAOX",
-                    parentId: "9304885421682485901",
-                    canReadMessageHistoryAndViewChannel: true
-                },
-                {
-                    channelId: "930488542168248590",
-                    name: "🗺・DAO",
-                    parentId: "930488542168248590",
+                    channelId: "345678901234567000",
+                    name: "Channel 4",
+                    parentId: "345678901234567000",
                     canReadMessageHistoryAndViewChannel: true
                 }]
             });
-
-            guildService.getChannelsFromDiscordJS = jest.fn().mockReturnValue(discordResponseChannels2);
-            res = await request(app)
-                .get(`/api/v1/guilds/discord-api/${discordResponseGuildOne.id}/channels`)
-                .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send()
-                .expect(httpStatus.OK);
-            expect(res.body).toHaveLength(3);
         })
         test('should return 440 if did not find guild with guildId and relative user', async () => {
             await insertUsers([userOne]);
             await request(app)
-                .get(`/api/v1/guilds/discord-api/${discordResponseGuildOne.id}/channels`)
+                .get(`/api/v1/guilds/${guildFive.guildId}/channels`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(440);
@@ -124,7 +80,7 @@ describe('Guild routes', () => {
         test('should return 401 if access token is missing', async () => {
             await insertUsers([userOne]);
             await request(app)
-                .get(`/api/v1/guilds/discord-api/${discordResponseGuildOne.id}/channels`)
+                .get(`/api/v1/guilds/${guildFive.guildId}/channels`)
                 .send()
                 .expect(httpStatus.UNAUTHORIZED);
         })
@@ -376,8 +332,8 @@ describe('Guild routes', () => {
                 period: moment("2022-02-01 08:30:26.127Z").toDate(),
                 selectedChannels: [
                     {
-                        channelId: discordResponseChannelOne.id,
-                        channelName: discordResponseChannelOne.name
+                        channelId: channel1.channelId,
+                        channelName: 'Name'
                     }
                 ],
                 isDisconnected: false
