@@ -5,8 +5,6 @@ import config from '../config';
 import { Guild, IDiscordGuild, IDiscordGuildMember } from '@togethercrew.dev/db';
 import { IGuildUpdateBody } from '../interfaces/guild.interface'
 import { ApiError } from '../utils';
-import { getDiscordClient } from '../config/dicord';
-import { PermissionsBitField } from 'discord.js'
 import sagaService from './saga.service';
 
 /**
@@ -148,39 +146,6 @@ async function getChannels(guildId: Snowflake) {
 }
 
 /**
- * Get guild channels
- * @param {Snowflake} guildId
- * @returns {Promise<Array<IDiscordChannel>>}
- */
-async function getChannelsFromDiscordJS(guildId: Snowflake) {
-    try {
-        const client = await getDiscordClient();
-        const guild = await client.guilds.fetch(guildId);
-        if (!client.user) {
-            throw new Error();
-        }
-        const botMember = await guild.members.fetch(client.user.id);
-        const channels = await guild.channels.fetch();
-        const channelData = channels.map((channel) => {
-            if (channel) {
-                const botPermissions = channel.permissionsFor(botMember);
-                const canReadMessageHistoryAndViewChannel = botPermissions.has([PermissionsBitField.Flags.ReadMessageHistory, PermissionsBitField.Flags.ViewChannel]);
-                return {
-                    channelId: channel.id,
-                    name: channel.name,
-                    parentId: channel.parentId,
-                    canReadMessageHistoryAndViewChannel
-                };
-            }
-
-        });
-        return channelData;
-    } catch (err) {
-        throw new ApiError(590, 'Can not fetch from discord API');
-    }
-}
-
-/**
  * query guilds
  * @param {Object} filter 
  * @param {Object} options 
@@ -225,6 +190,5 @@ export default {
     deleteGuild,
     getGuildMemberFromDiscordAPI,
     getGuildRolesFromDiscordAPI,
-    getChannelsFromDiscordJS
 }
 

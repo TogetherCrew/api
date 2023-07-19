@@ -8,7 +8,7 @@ import { scopes, permissions } from '../config/dicord';
 import { IDiscordUser, IDiscordOathBotCallback, databaseService, IChannel } from '@togethercrew.dev/db';
 import querystring from 'querystring';
 import { closeConnection } from '../database/connection';
-
+import { IChannelWithViewAndReadPermissions } from '../interfaces/channel.interface'
 const getGuilds = catchAsync(async function (req: IAuthRequest, res: Response) {
     const filter = pick(req.query, ['isDisconnected', 'isInProgress']);
     filter.user = req.user.discordId;
@@ -48,12 +48,24 @@ const getRoles = catchAsync(async function (req: IAuthRequest, res: Response) {
     res.send(roles)
 });
 
-const getChannelsFromDiscordAPI = catchAsync(async function (req: IAuthRequest, res: Response) {
+const getChannels = catchAsync(async function (req: IAuthRequest, res: Response) {
     if (! await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
         throw new ApiError(440, 'Oops, something went wrong! Could you please try logging in');
     }
-    const channels = await guildService.getChannelsFromDiscordJS(req.params.guildId);
-    const sortedChannels = await sort.sortChannels(channels);
+    const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
+    const channels = await channelService.getChannels(connection, {});
+    const channelsWithPermissions: Array<IChannelWithViewAndReadPermissions> = [];
+    for (let i = 0; i < channels.length; i++) {
+        const canReadMessageHistoryAndViewChannel = await channelService.checkReadMessageHistoryAndViewChannelpPermissions(connection, channels[i]);
+        channelsWithPermissions.push({
+            channelId: channels[i].channelId,
+            name: channels[i].name,
+            parentId: channels[i].parentId,
+            canReadMessageHistoryAndViewChannel
+        })
+    }
+    const sortedChannels = await sort.sortChannels(channelsWithPermissions);
+    await closeConnection(connection)
     res.send(sortedChannels)
 });
 
@@ -141,7 +153,7 @@ const disconnectGuild = catchAsync(async function (req: IAuthRequest, res: Respo
 });
 
 export default {
-    getChannelsFromDiscordAPI,
+    getChannels,
     getSelectedChannels,
     getGuild,
     updateGuild,

@@ -1,6 +1,8 @@
 import { Connection } from 'mongoose';
 import { IChannel } from '@togethercrew.dev/db';
-
+import config from '../config';
+import { permissions } from '../config//dicord';
+import guildMemberService from './guildMember.service';
 /**
  *  check if a bot has the "Read Message History" permissio 
  * @param {number} botPermissions
@@ -42,10 +44,37 @@ async function getChannels(connection: Connection, filter: object): Promise<ICha
 }
 
 
+/**
+ * Get channels from the database based on the filter criteria.
+ * @param {Connection} connection - Mongoose connection object for the database.
+ * @param {IChannel} channel - channel filed.
+ * @returns {Promise<boolean>} - A promise that resolves to an boolean.
+ */
+async function checkReadMessageHistoryAndViewChannelpPermissions(connection: Connection, channel: IChannel): Promise<boolean> {
+    try {
+        let canReadMessageHistoryAndViewChannel = true;
+        const botMember = await guildMemberService.getGuildMember(connection, { discordId: config.discord.clientId });
+        if (botMember && botMember.permissions) {
+            canReadMessageHistoryAndViewChannel = ((BigInt(botMember?.permissions) & BigInt(permissions.readMessageHistory)) !== BigInt(0)) && ((BigInt(botMember?.permissions) & BigInt(permissions.ViewChannels)) !== BigInt(0))
+        }
+        channel.permissionOverwrites?.forEach(overwrite => {
+            if (overwrite.id === config.discord.clientId && overwrite.type === 1) {
+                const allowed = BigInt(overwrite.allow);
+                const denied = BigInt(overwrite.deny);
+                canReadMessageHistoryAndViewChannel = ((allowed & BigInt(permissions.readMessageHistory)) !== BigInt(0) && (denied & BigInt(permissions.readMessageHistory)) === BigInt(0)) && ((allowed & BigInt(permissions.ViewChannels)) !== BigInt(0) && (denied & BigInt(permissions.ViewChannels)) === BigInt(0))
+            }
+        })
+        return canReadMessageHistoryAndViewChannel;
 
+    } catch (error) {
+        console.log('Failed to retrieve channels', error);
+        return false;
+    }
+}
 
 export default {
     hasReadMessageHistory,
     getChannel,
-    getChannels
+    getChannels,
+    checkReadMessageHistoryAndViewChannelpPermissions
 }
