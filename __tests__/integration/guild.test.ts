@@ -37,9 +37,6 @@ describe('Guild routes', () => {
             expect(res.body[0].subChannels).toHaveLength(2);
             expect(res.body[1].subChannels).toHaveLength(1);
 
-            console.log(res.body)
-            console.log(res.body[0].subChannels)
-            console.log(res.body[1].subChannels)
 
             expect(res.body[0]).toMatchObject({
                 channelId: "987654321098765432",
