@@ -571,7 +571,7 @@ describe('member-activity routes', () => {
         })
     })
 
-    describe.only('GET /api/v1/member-activity/:guildId/decentralisation-score', () => {
+    describe('GET /api/v1/member-activity/:guildId/decentralisation-score', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
         });
