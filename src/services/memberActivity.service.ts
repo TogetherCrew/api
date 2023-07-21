@@ -984,13 +984,18 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
 
 async function getFragmentationScore(guildId: string) {
 
-    const fragmentationScoreRange = { minimumFragmentationScore: 0, maximumFragmentationScore: 200 }
+    const date = new Date();
+    date.setDate(date.getDate() - 1);
+    const yesterdayTimestamp = date.setHours(0,0,0,0);
+    
+    const fragmentationScale = 200
+    const fragmentationScoreRange = { minimumFragmentationScore: 0, maximumFragmentationScore: fragmentationScale }
     const fragmentationScoreQuery = `
-        MATCH (g:Guild {guildId: "${guildId}"})
-        RETURN 
-        g.avgClusteringCoeff[-1] as fragmentation_score,
-        g.resultDates[-1] as fragmentation_score_date
+        MATCH ()-[r:INTERACTED_IN]->(g:Guild {guildId: "${guildId}" })
+        WHERE r.date = ${yesterdayTimestamp}
+        RETURN avg(r.localClusteringCoefficient) * ${fragmentationScale} AS fragmentation_score 
     `
+
     const neo4jData = await Neo4j.read(fragmentationScoreQuery)
     const { records } = neo4jData
     if (records.length == 0) return { fragmentationScore: null, fragmentationScoreDate: null }
@@ -999,10 +1004,9 @@ async function getFragmentationScore(guildId: string) {
     const { _fieldLookup, _fields } = fragmentationData as unknown as { _fieldLookup: Record<string, number>, _fields: number[] }
 
     const fragmentationScore = _fields[_fieldLookup['fragmentation_score']]
-    const fragmentationScoreDate = _fields[_fieldLookup['fragmentation_score_date']]
     const scoreStatus = findFragmentationScoreStatus(fragmentationScore);
 
-    return { fragmentationScore, fragmentationScoreRange, scoreStatus, fragmentationScoreDate }
+    return { fragmentationScore, fragmentationScoreRange, scoreStatus }
 
 }
 /**
