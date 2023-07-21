@@ -567,9 +567,18 @@ describe('member-activity routes', () => {
             await insertGuilds([guildOne]);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
 
+            const date = new Date();
+            date.setDate(date.getDate() - 1);
+            const yesterdayTimestamp = date.setHours(0,0,0,0);
+
+            const date2 = new Date();
+            date2.setDate(date.getDate() - 1);
+            const twodaysAgoTimestamp = date2.setHours(0,0,0,0);
+
             // TODO: write neo4j queries in other file
             await Neo4j.write("match (n) detach delete (n);")
-            await Neo4j.write(`CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${guildOne.guildId}"})
+            await Neo4j.write(`
+                CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${guildOne.guildId}"})
                 CREATE (b:DiscordAccount) -[:IS_MEMBER]->(g)
                 CREATE (c:DiscordAccount) -[:IS_MEMBER]->(g)
                 CREATE (d:DiscordAccount) -[:IS_MEMBER]->(g)
@@ -579,67 +588,51 @@ describe('member-activity routes', () => {
                 SET c.userId = "1002"
                 SET d.userId = "1003"
                 SET e.userId = "1004"
-                MERGE (a) -[r:INTERACTED]->(b)
-                MERGE (a) -[r2:INTERACTED]->(d)
-                MERGE (c) -[r3:INTERACTED]->(b)
-                MERGE (c) -[r4:INTERACTED]->(d)
-                MERGE (d) -[r5:INTERACTED]->(b)
-                MERGE (c) -[r6:INTERACTED]->(a)
-                MERGE (d) -[r7:INTERACTED]->(c)
-                MERGE (b) -[r8:INTERACTED]->(d)
-                MERGE (d) -[r9:INTERACTED]->(c)
-                MERGE (e) -[r10:INTERACTED]->(b)
-                MERGE (a) -[r11:INTERACTED]->(c)
-                SET r.dates = [166, 167]
-                SET r2.dates = [166]
-                SET r3.dates = [166, 167]
-                SET r4.dates = [166]
-                SET r5.dates = [166]
-                SET r6.dates = [167]
-                SET r7.dates = [167]
-                SET r8.dates = [167]
-                SET r9.dates = [167]
-                SET r10.dates = [167]
-                SET r11.dates = [167]
-                SET r.weights = [1, 2]
-                SET r2.weights = [3]
-                SET r3.weights = [2, 1]
-                SET r4.weights = [2]
-                SET r5.weights = [1]
-                SET r6.weights = [2]
-                SET r7.weights = [1]
-                SET r8.weights = [2]
-                SET r9.weights = [1]
-                SET r10.weights = [3]
-                SET r11.weights = [2]`)
-            await Neo4j.write(`MATCH (a: DiscordAccount {userId: "1000"})
-                MATCH (b:DiscordAccount {userId: "1001"})
-                MATCH (c:DiscordAccount {userId: "1002"})
-                MATCH (d:DiscordAccount {userId: "1003"})
-                MATCH (e:DiscordAccount {userId: "1004"})
-                MATCH (g:Guild {guildId: "${guildOne.guildId}"})
+                MERGE (a) -[r:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 1}]->(b)
+                MERGE (a) -[r2:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(b)
+                MERGE (a) -[r3:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 3}]->(d)
+                MERGE (c) -[r4:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 2}]->(b)
+                MERGE (c) -[r5:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(b)
+                MERGE (c) -[r6:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 2}]->(d)
+                MERGE (d) -[r7:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 1}]->(b)
+                MERGE (c) -[r8:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(a)
+                MERGE (d) -[r9:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(c)
+                MERGE (b) -[r10:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(d)
+                MERGE (d) -[r11:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(c)
+                MERGE (e) -[r12:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 3}]->(b)
 
-                SET a.localClusteringCoeff = [1.0, 1.0]
-                SET b.localClusteringCoeff = [0.66666, 0.33333]
-                SET c.localClusteringCoeff = [1.0, 0.66666]
-                SET d.localClusteringCoeff = [0.66666, 1.0]
-                SET e.localClusteringCoeff = [0.0, 0.0]
-                SET a.localClusteringCoeffDates = [166, 167]
-                SET b.localClusteringCoeffDates = [166, 167]
-                SET c.localClusteringCoeffDates = [166, 167]
-                SET d.localClusteringCoeffDates = [166, 167]
-                SET e.localClusteringCoeffDates = [166, 167]
-                SET g.avgClusteringCoeff = [0.8, 0.733333]
-                SET g.decentralityScores = [133.333, 66.666]
-                SET g.resultDates = [166, 167]`)
+                MERGE (a) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 1.0, status: 2}]-> (g)
+                MERGE (a) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 1.0, status: 0}] -> (g)
+                MERGE (b) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 0.6666666666666666, status: 1}] -> (g)
+                MERGE (b) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.3333333333333333, status: 1}] -> (g)
+                MERGE (c) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 1.0}]->(g)
+                MERGE (c) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.6666666666666666, status: 0}]->(g)
+                MERGE (c) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 1.0, status: 0, status: 2}]->(g)
+                MERGE (c) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.6666666666666666, status: 1}]->(g)
+                MERGE (e) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 0.0, status: 0}]->(g)
+                MERGE (e) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.0 }]->(g)
+                MERGE (g) -[:HAVE_METRICS {date: ${twodaysAgoTimestamp}, decentralizationScore: 133.33333333333334 }]->(g)
+                MERGE (g) -[:HAVE_METRICS {date: ${yesterdayTimestamp}, decentralizationScore: 66.66666666666669 }]->(g)
+
+                SET r.guildId = "${guildOne.guildId}"
+                SET r2.guildId = "${guildOne.guildId}"
+                SET r3.guildId = "${guildOne.guildId}"
+                SET r4.guildId = "${guildOne.guildId}"
+                SET r5.guildId = "${guildOne.guildId}"
+                SET r6.guildId = "${guildOne.guildId}"
+                SET r7.guildId = "${guildOne.guildId}"
+                SET r8.guildId = "${guildOne.guildId}"
+                SET r9.guildId = "${guildOne.guildId}"
+                SET r10.guildId = "${guildOne.guildId}"
+                SET r11.guildId = "${guildOne.guildId}"
+                SET r12.guildId = "${guildOne.guildId}"`)
 
             const res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/decentralisation-score`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
 
-            expect(res.body.decentralisationScore).toBe(66.666);
-            expect(res.body.decentralisationScoreDate).toBe(167);
+            expect(res.body.decentralisationScore).toBe(66.66666666666669);
             expect(res.body.scoreStatus).toBe(-1);
             expect(res.body.decentralisationScoreRange).toHaveProperty("minimumDecentralisationScore", 0);
             expect(res.body.decentralisationScoreRange).toHaveProperty("maximumDecentralisationScore", 200);
@@ -651,10 +644,19 @@ describe('member-activity routes', () => {
             await insertGuilds([guildOne]);
             await insertGuilds([guildTwo]);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            
+            const date = new Date();
+            date.setDate(date.getDate() - 1);
+            const yesterdayTimestamp = date.setHours(0,0,0,0);
+
+            const date2 = new Date();
+            date2.setDate(date.getDate() - 1);
+            const twodaysAgoTimestamp = date2.setHours(0,0,0,0);
 
             // TODO: write neo4j queries in other file
             await Neo4j.write("match (n) detach delete (n);")
-            await Neo4j.write(`CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${guildOne.guildId}"})
+            await Neo4j.write(`
+                CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${guildOne.guildId}"})
                 CREATE (b:DiscordAccount) -[:IS_MEMBER]->(g)
                 CREATE (c:DiscordAccount) -[:IS_MEMBER]->(g)
                 CREATE (d:DiscordAccount) -[:IS_MEMBER]->(g)
@@ -664,59 +666,44 @@ describe('member-activity routes', () => {
                 SET c.userId = "1002"
                 SET d.userId = "1003"
                 SET e.userId = "1004"
-                MERGE (a) -[r:INTERACTED]->(b)
-                MERGE (a) -[r2:INTERACTED]->(d)
-                MERGE (c) -[r3:INTERACTED]->(b)
-                MERGE (c) -[r4:INTERACTED]->(d)
-                MERGE (d) -[r5:INTERACTED]->(b)
-                MERGE (c) -[r6:INTERACTED]->(a)
-                MERGE (d) -[r7:INTERACTED]->(c)
-                MERGE (b) -[r8:INTERACTED]->(d)
-                MERGE (d) -[r9:INTERACTED]->(c)
-                MERGE (e) -[r10:INTERACTED]->(b)
-                MERGE (a) -[r11:INTERACTED]->(c)
-                SET r.dates = [166, 167]
-                SET r2.dates = [166]
-                SET r3.dates = [166, 167]
-                SET r4.dates = [166]
-                SET r5.dates = [166]
-                SET r6.dates = [167]
-                SET r7.dates = [167]
-                SET r8.dates = [167]
-                SET r9.dates = [167]
-                SET r10.dates = [167]
-                SET r11.dates = [167]
-                SET r.weights = [1, 2]
-                SET r2.weights = [3]
-                SET r3.weights = [2, 1]
-                SET r4.weights = [2]
-                SET r5.weights = [1]
-                SET r6.weights = [2]
-                SET r7.weights = [1]
-                SET r8.weights = [2]
-                SET r9.weights = [1]
-                SET r10.weights = [3]
-                SET r11.weights = [2]`)
-            await Neo4j.write(`MATCH (a: DiscordAccount {userId: "1000"})
-                MATCH (b:DiscordAccount {userId: "1001"})
-                MATCH (c:DiscordAccount {userId: "1002"})
-                MATCH (d:DiscordAccount {userId: "1003"})
-                MATCH (e:DiscordAccount {userId: "1004"})
-                MATCH (g:Guild {guildId: "${guildOne.guildId}"})
+                MERGE (a) -[r:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 1}]->(b)
+                MERGE (a) -[r2:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(b)
+                MERGE (a) -[r3:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 3}]->(d)
+                MERGE (c) -[r4:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 2}]->(b)
+                MERGE (c) -[r5:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(b)
+                MERGE (c) -[r6:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 2}]->(d)
+                MERGE (d) -[r7:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 1}]->(b)
+                MERGE (c) -[r8:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(a)
+                MERGE (d) -[r9:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(c)
+                MERGE (b) -[r10:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(d)
+                MERGE (d) -[r11:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(c)
+                MERGE (e) -[r12:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 3}]->(b)
 
-                SET a.localClusteringCoeff = [1.0, 1.0]
-                SET b.localClusteringCoeff = [0.66666, 0.33333]
-                SET c.localClusteringCoeff = [1.0, 0.66666]
-                SET d.localClusteringCoeff = [0.66666, 1.0]
-                SET e.localClusteringCoeff = [0.0, 0.0]
-                SET a.localClusteringCoeffDates = [166, 167]
-                SET b.localClusteringCoeffDates = [166, 167]
-                SET c.localClusteringCoeffDates = [166, 167]
-                SET d.localClusteringCoeffDates = [166, 167]
-                SET e.localClusteringCoeffDates = [166, 167]
-                SET g.avgClusteringCoeff = [0.8, 0.733333]
-                SET g.decentralityScores = [133.333, 66.666]
-                SET g.resultDates = [166, 167]`)
+                MERGE (a) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 1.0, status: 2}]-> (g)
+                MERGE (a) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 1.0, status: 0}] -> (g)
+                MERGE (b) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 0.6666666666666666, status: 1}] -> (g)
+                MERGE (b) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.3333333333333333, status: 1}] -> (g)
+                MERGE (c) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 1.0}]->(g)
+                MERGE (c) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.6666666666666666, status: 0}]->(g)
+                MERGE (c) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 1.0, status: 0, status: 2}]->(g)
+                MERGE (c) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.6666666666666666, status: 1}]->(g)
+                MERGE (e) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 0.0, status: 0}]->(g)
+                MERGE (e) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.0 }]->(g)
+                MERGE (g) -[:HAVE_METRICS {date: ${twodaysAgoTimestamp}, decentralizationScore: 133.33333333333334 }]->(g)
+                MERGE (g) -[:HAVE_METRICS {date: ${yesterdayTimestamp}, decentralizationScore: 66.66666666666669 }]->(g)
+
+                SET r.guildId = "${guildOne.guildId}"
+                SET r2.guildId = "${guildOne.guildId}"
+                SET r3.guildId = "${guildOne.guildId}"
+                SET r4.guildId = "${guildOne.guildId}"
+                SET r5.guildId = "${guildOne.guildId}"
+                SET r6.guildId = "${guildOne.guildId}"
+                SET r7.guildId = "${guildOne.guildId}"
+                SET r8.guildId = "${guildOne.guildId}"
+                SET r9.guildId = "${guildOne.guildId}"
+                SET r10.guildId = "${guildOne.guildId}"
+                SET r11.guildId = "${guildOne.guildId}"
+                SET r12.guildId = "${guildOne.guildId}"`)
 
             const res = await request(app)
                 .get(`/api/v1/member-activity/${guildTwo.guildId}/decentralisation-score`)
@@ -724,7 +711,6 @@ describe('member-activity routes', () => {
                 .expect(httpStatus.OK);
 
             expect(res.body.decentralisationScore).toBe(null);
-            expect(res.body.decentralisationScoreDate).toBe(null);
         })
 
         test('should return 401 if access token is missing', async () => {

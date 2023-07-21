@@ -1029,15 +1029,17 @@ function findFragmentationScoreStatus(fragmentationScore?: number) {
 
 async function getDecentralisationScore(guildId: string) {
 
+    const date = new Date();
+    date.setDate(date.getDate() - 1);
+    const yesterdayTimestamp = date.setHours(0,0,0,0);
+
     const decentralisationScoreRange = { minimumDecentralisationScore: 0, maximumDecentralisationScore: 200 }
     const decentralisationScoreQuery = `
-        MATCH (g:Guild {guildId: "${guildId}"})
-        RETURN 
-            g.decentralityScores[-1] as decentralization_score,
-            g.resultDates[-1] as decentralization_score_date
+        MATCH (g:Guild {guildId: "${guildId}"})-[r:HAVE_METRICS]->(g)
+        WHERE r.date = ${yesterdayTimestamp}
+        RETURN r.decentralizationScore AS decentralization_score 
     `
     const neo4jData = await Neo4j.read(decentralisationScoreQuery)
-
     const { records } = neo4jData
     if (records.length == 0) return { decentralisationScore: null, decentralisationScoreDate: null }
 
@@ -1045,10 +1047,9 @@ async function getDecentralisationScore(guildId: string) {
     const { _fieldLookup, _fields } = decentralisationData as unknown as { _fieldLookup: Record<string, number>, _fields: number[] }
 
     const decentralisationScore = _fields[_fieldLookup['decentralization_score']]
-    const decentralisationScoreDate = _fields[_fieldLookup['decentralization_score_date']]
     const scoreStatus = findDecentralisationScoreStatus(decentralisationScore);
 
-    return { decentralisationScore, decentralisationScoreRange, scoreStatus, decentralisationScoreDate }
+    return { decentralisationScore, decentralisationScoreRange, scoreStatus }
 }
 /**
  * this function was written based on what Amin and Ene suggested. (https://discord.com/channels/915914985140531240/1126528102311399464/1126771392512266250)
