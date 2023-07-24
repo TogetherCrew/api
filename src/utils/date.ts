@@ -34,10 +34,29 @@ function calculateAdjustedDate(endDate: Date, dayMonth: string) {
     const dayMonthMoment = moment(dayMonth + ' ' + end.year(), 'DD MMM YYYY');
     return (moment(dayMonthMoment).subtract(7, 'days')).format('YYYY-MM-DD')
 }
+/**
+ * Returns the UTC timestamp of yesterday with hour, minute, second and millisecond equal to 0.
+ *
+ * @return {number} The UTC timestamp of yesterday.
+ */
+function getYesterdayUTCtimestamp(){
+    const today = new Date()
+    
+    const yesterday = new Date(today.getDate() - 1)
+    const year = yesterday.getUTCFullYear()
+    const month = yesterday.getUTCMonth()
+    const day = yesterday.getUTCDate()
+
+    const yesterdayUTC = new Date(Date.UTC(year, month, day))
+    const yesterdayUTCtimestamp = yesterdayUTC.getTime()
+
+    return yesterdayUTCtimestamp
+}
 
 export default {
     shiftHeatmapsHours,
-    calculateAdjustedDate
+    calculateAdjustedDate,
+    getYesterdayUTCtimestamp
 }
 
 

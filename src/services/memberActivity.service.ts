@@ -2,6 +2,7 @@ import { Connection } from 'mongoose';
 import { date, math } from '../utils';
 import ScoreStatus from '../utils/enums/scoreStatus.enum';
 import NodeStats from '../utils/enums/nodeStats.enum';
+import dateUtils from '../utils/date';
 import { IGuildMember } from '@togethercrew.dev/db';
 import * as Neo4j from '../neo4j';
 
@@ -984,9 +985,7 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
 
 async function getFragmentationScore(guildId: string) {
 
-    const date = new Date();
-    date.setDate(date.getDate() - 1);
-    const yesterdayTimestamp = date.setHours(0,0,0,0);
+    const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
     
     const fragmentationScale = 200
     const fragmentationScoreRange = { minimumFragmentationScore: 0, maximumFragmentationScore: fragmentationScale }
@@ -1029,9 +1028,7 @@ function findFragmentationScoreStatus(fragmentationScore?: number) {
 
 async function getDecentralisationScore(guildId: string) {
 
-    const date = new Date();
-    date.setDate(date.getDate() - 1);
-    const yesterdayTimestamp = date.setHours(0,0,0,0);
+    const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
 
     const decentralisationScoreRange = { minimumDecentralisationScore: 0, maximumDecentralisationScore: 200 }
     const decentralisationScoreQuery = `
