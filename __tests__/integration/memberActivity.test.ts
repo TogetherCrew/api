@@ -2,6 +2,7 @@ import request from 'supertest';
 import httpStatus from 'http-status';
 import app from '../../src/app';
 import setupTestDB from '../utils/setupTestDB';
+import dateUtils from '../../src/utils/date';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour, insertMemberActivities } from '../fixtures/memberActivity.fixture';
@@ -397,13 +398,11 @@ describe('member-activity routes', () => {
             await insertGuilds([guildOne]);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
 
-            const date = new Date();
-            date.setDate(date.getDate() - 1);
-            const yesterdayTimestamp = date.setHours(0,0,0,0);
+            const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
 
-            const date2 = new Date();
-            date2.setDate(date.getDate() - 1);
-            const twodaysAgoTimestamp = date2.setHours(0,0,0,0);
+            const date = new Date();
+            date.setDate(date.getDate() - 2);
+            const twodaysAgoTimestamp = date.setHours(0,0,0,0);
 
             await Neo4j.write("match (n) detach delete (n);")
             await Neo4j.write(`
@@ -473,13 +472,11 @@ describe('member-activity routes', () => {
             await insertGuilds([guildTwo]);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
 
-            const date = new Date();
-            date.setDate(date.getDate() - 1);
-            const yesterdayTimestamp = date.setHours(0,0,0,0);
+            const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
 
-            const date2 = new Date();
-            date2.setDate(date.getDate() - 1);
-            const twodaysAgoTimestamp = date2.setHours(0,0,0,0);
+            const date = new Date();
+            date.setDate(date.getDate() - 2);
+            const twodaysAgoTimestamp = date.setHours(0,0,0,0);
 
             await Neo4j.write("match (n) detach delete (n);")
             await Neo4j.write(`
@@ -567,13 +564,11 @@ describe('member-activity routes', () => {
             await insertGuilds([guildOne]);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
 
-            const date = new Date();
-            date.setDate(date.getDate() - 1);
-            const yesterdayTimestamp = date.setHours(0,0,0,0);
+            const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
 
-            const date2 = new Date();
-            date2.setDate(date.getDate() - 1);
-            const twodaysAgoTimestamp = date2.setHours(0,0,0,0);
+            const date = new Date();
+            date.setDate(date.getDate() - 2);
+            const twodaysAgoTimestamp = date.setHours(0,0,0,0);
 
             // TODO: write neo4j queries in other file
             await Neo4j.write("match (n) detach delete (n);")
@@ -645,13 +640,11 @@ describe('member-activity routes', () => {
             await insertGuilds([guildTwo]);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
             
-            const date = new Date();
-            date.setDate(date.getDate() - 1);
-            const yesterdayTimestamp = date.setHours(0,0,0,0);
+            const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
 
-            const date2 = new Date();
-            date2.setDate(date.getDate() - 1);
-            const twodaysAgoTimestamp = date2.setHours(0,0,0,0);
+            const date = new Date();
+            date.setDate(date.getDate() - 2);
+            const twodaysAgoTimestamp = date.setHours(0,0,0,0);
 
             // TODO: write neo4j queries in other file
             await Neo4j.write("match (n) detach delete (n);")
