@@ -983,7 +983,8 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
     return makedUpRecords
 }
 
-async function getFragmentationScore(guildId: string) {
+type fragmentationScoreResponseType = { fragmentationScore: number | null, fragmentationScoreRange: { minimumFragmentationScore: number, maximumFragmentationScore: number }, scoreStatus: ScoreStatus| null }
+async function getFragmentationScore(guildId: string): Promise<fragmentationScoreResponseType> {
 
     const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
     
@@ -997,7 +998,7 @@ async function getFragmentationScore(guildId: string) {
 
     const neo4jData = await Neo4j.read(fragmentationScoreQuery)
     const { records } = neo4jData
-    if (records.length == 0) return { fragmentationScore: null, fragmentationScoreDate: null }
+    if (records.length == 0) return { fragmentationScore: null, fragmentationScoreRange, scoreStatus: null }
 
     const fragmentationData = records[0]
     const { _fieldLookup, _fields } = fragmentationData as unknown as { _fieldLookup: Record<string, number>, _fields: number[] }
@@ -1026,7 +1027,8 @@ function findFragmentationScoreStatus(fragmentationScore?: number) {
     else return null
 }
 
-async function getDecentralisationScore(guildId: string) {
+type decentralisationScoreResponseType = { decentralisationScore: number | null, decentralisationScoreRange: { minimumDecentralisationScore: number, maximumDecentralisationScore: number }, scoreStatus: ScoreStatus| null }
+async function getDecentralisationScore(guildId: string): Promise<decentralisationScoreResponseType> {
 
     const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
 
@@ -1038,7 +1040,7 @@ async function getDecentralisationScore(guildId: string) {
     `
     const neo4jData = await Neo4j.read(decentralisationScoreQuery)
     const { records } = neo4jData
-    if (records.length == 0) return { decentralisationScore: null, decentralisationScoreDate: null }
+    if (records.length == 0) return { decentralisationScore: null, decentralisationScoreRange, scoreStatus: null }
 
     const decentralisationData = records[0]
     const { _fieldLookup, _fields } = decentralisationData as unknown as { _fieldLookup: Record<string, number>, _fields: number[] }
