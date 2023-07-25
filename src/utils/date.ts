@@ -40,9 +40,9 @@ function calculateAdjustedDate(endDate: Date, dayMonth: string) {
  * @return {number} The UTC timestamp of yesterday.
  */
 function getYesterdayUTCtimestamp(){
-    const today = new Date()
+    const yesterday = new Date()
+    yesterday.setDate(yesterday.getDate() - 1)
     
-    const yesterday = new Date(today.getDate() - 1)
     const year = yesterday.getUTCFullYear()
     const month = yesterday.getUTCMonth()
     const day = yesterday.getUTCDate()

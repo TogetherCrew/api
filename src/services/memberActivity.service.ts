@@ -201,7 +201,7 @@ async function activeMembersCompositionLineGraph(connection: Connection, startDa
         }
 
     } catch (err) {
-        console.log(err);
+
         return {
             categories: [],
             series: [],
@@ -871,119 +871,117 @@ function getActivityComposition(guildMember: IGuildMember, memberActivity: any, 
 
     return activityCompositions;
 }
-async function getMembersInteractionsNetworkGraph(guildId: string, guildConnection: Connection) {
-    // TODO: refactor function
 
-    const oneWeekMilliseconds = 7 * 24 * 60 * 60 * 1000; // Number of milliseconds in a week
-    const currentDate = new Date();
-    const oneWeekAgo = new Date(currentDate.getTime() - oneWeekMilliseconds);
-    const oneWeekAgoEpoch = Math.floor(oneWeekAgo.getTime() / 1000); // Convert to seconds
-
-    const memberInteractionQueryOne = `
-        MATCH (a:DiscordAccount) -[r:INTERACTED]-(b:DiscordAccount)
-        MATCH (a)-[:IS_MEMBER]->(g:Guild {guildId: "${guildId}"})
-        MATCH (b)-[:IS_MEMBER]->(g:Guild {guildId: "${guildId}"})
-        WITH r, apoc.coll.zip(r.dates, r.weights) as date_weights
-        SET r.weekly_weight = REDUCE(total=0, w in date_weights 
-        | CASE WHEN w[0] - ${oneWeekAgoEpoch} > 0 THEN total + w[1] ELSE total END);
-    `
-    const memberInteractionQueryTwo = `
-        MATCH (a:DiscordAccount) -[r:INTERACTED]-> (b:DiscordAccount)
-        MATCH (a)-[:IS_MEMBER]->(g:Guild {guildId: "${guildId}"})
-        MATCH (b)-[:IS_MEMBER]->(g:Guild {guildId: "${guildId}"})
-        WITH a, SUM(r.weekly_weight) as interaction_count
-        SET a.weekly_interaction = interaction_count;
-    `
-
-    // query 3 -> in case of no INTERACTED
-    const memberInteractionQueryThree = `
-        MATCH (a:DiscordAccount)
-        SET a.weekly_interaction = CASE WHEN a.weekly_interaction IS NULL THEN 0 ELSE a.weekly_interaction END;
-    `
-    const memberInteractionQueryFour = `
-        MATCH (a:DiscordAccount) -[r:INTERACTED]->(b:DiscordAccount)
-        WITH a,r,b
-        WHERE (a)-[:IS_MEMBER]->(:Guild {guildId:"${guildId}"}) 
-        AND  (b)-[:IS_MEMBER]->(:Guild {guildId:"${guildId}"})
-        RETURN a, r, b
-    `
-
-    await Neo4j.write(memberInteractionQueryOne)
-    await Neo4j.write(memberInteractionQueryTwo)
-    await Neo4j.write(memberInteractionQueryThree)
-    const neo4jData = await Neo4j.read(memberInteractionQueryFour)
-
-    const { records } = neo4jData;
-    const userIds: string[] = [] // Our Graph DB does not have the names of users, so we load them all and push them to an array we want to send to front-end 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let makedUpRecords = records.reduce((preRecords: any[], record) => {
+type memberInteractionType = { id: string, radius: number, stats: NodeStats, username: string }
+type memberInteractionsGraphResponseType = { width: number, from: memberInteractionType, to: memberInteractionType }[]
+async function getMembersInteractionsNetworkGraph(guildId: string, guildConnection: Connection): Promise<memberInteractionsGraphResponseType> {
+    // TODO: refactor function later
+    const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
+    // userInteraction
+    const usersInteractionsQuery = `
+    MATCH (a:DiscordAccount) -[r:INTERACTED_WITH {date: ${yesterdayTimestamp}, guildId: "${guildId}"}]->(b:DiscordAccount)
+    RETURN a, r, b`
+    const neo4jUsersInteractionsData = await Neo4j.read(usersInteractionsQuery)
+    const { records: neo4jUsersInteractions } = neo4jUsersInteractionsData
+    const usersInteractions = neo4jUsersInteractions.map((usersInteraction) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const { _fieldLookup, _fields } = record
+        const { _fieldLookup, _fields } = usersInteraction
         const a = _fields[_fieldLookup['a']]
         const r = _fields[_fieldLookup['r']]
         const b = _fields[_fieldLookup['b']]
 
-        const aWeeklyInteraction = a?.properties?.weekly_interaction
-        const aUserId = a?.properties?.userId
-        // finding `aStats`
-        const aStases = a?.properties.stats
-        const aLastStats = aStases[aStases.length - 1]
-        const aStats = aLastStats == "B" ? NodeStats.BALANCED : aLastStats == "R" ? NodeStats.RECEIVER : aLastStats == "S" ? NodeStats.SENDER : null
+        const aUserId = a?.properties?.userId as string
+        const rWeeklyInteraction = r?.properties?.weight as number 
+        const bUserId = b?.properties?.userId as string
 
-        const rWeeklyInteraction = r?.properties?.weekly_weight
-
-        const bWeeklyInteraction = b?.properties?.weekly_interaction
-        const bUserId = b?.properties?.userId
-        // finding `bStats`
-        const bStases = b?.properties.stats
-        const bLastStats = bStases[bStases.length - 1]
-        const bStats = bLastStats == "B" ? NodeStats.BALANCED : bLastStats == "R" ? NodeStats.RECEIVER : bLastStats == "S" ? NodeStats.SENDER : null
-
-        if (aWeeklyInteraction && rWeeklyInteraction && bWeeklyInteraction) {
-            const interaction = {
-                from: { id: aUserId, radius: aWeeklyInteraction, stats: aStats },
-                to: { id: bUserId, radius: bWeeklyInteraction, stats: bStats },
-                width: rWeeklyInteraction
-            }
-            userIds.push(aUserId)
-            userIds.push(bUserId)
-
-            preRecords.push(interaction)
+        const interaction = {
+            aUserId,
+            bUserId,
+            rWeeklyInteraction
         }
 
-        return preRecords
-    }, [])
+        return interaction
+    })
 
+    // userRadius
+    const userRadiusQuery = `
+    MATCH (a:DiscordAccount) -[r:INTERACTED_WITH {date: ${yesterdayTimestamp}, guildId: "${guildId}"}]-(:DiscordAccount)
+    WITH a, r 
+    RETURN a.userId as userId, SUM(r.weight) as radius`
+    const neo4jUserRadiusData = await Neo4j.read(userRadiusQuery)
+    const { records: neo4jUserRadius } = neo4jUserRadiusData
+    const userRadius = neo4jUserRadius.map((userRadius) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const { _fieldLookup, _fields } = userRadius
+        const userId = _fields[_fieldLookup['userId']] as string
+        const radius = _fields[_fieldLookup['radius']] as number
+
+        return { userId, radius}
+    })
+
+    // userStatus
+    const userStatusQuery = `
+    MATCH (a:DiscordAccount)-[r:INTERACTED_IN {date: ${yesterdayTimestamp}}]->(g:Guild {guildId: "${guildId}"})
+    RETURN a.userId as userId, r.status as status`
+    const neo4jUserStatusData = await Neo4j.read(userStatusQuery)
+    const { records: neo4jUserStatus } = neo4jUserStatusData
+    const userStatus = neo4jUserStatus.map((userStatus) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const { _fieldLookup, _fields } = userStatus
+        const userId = _fields[_fieldLookup['userId']] as string
+        const status = _fields[_fieldLookup['status']] as number
+        const stats = status == 0 ? NodeStats.SENDER : status == 1 ? NodeStats.RECEIVER : status == 2 ? NodeStats.BALANCED : null
+
+        return { userId, stats }
+    })
+
+    // usersInfo
     const userProjection = { discordId: 1, username: 1, discriminator: 1 }
     const usersInfo = await guildConnection.models.GuildMember.find({}, { _id: 0, ...userProjection })
 
-    // insert username of user to the response object
-    makedUpRecords = makedUpRecords.map(record => {
-        const fromId = record.from.id
-        const toId = record.to.id
+    // prepare data
+    const response = usersInteractions.flatMap((interaction) => {
+        const { aUserId, bUserId, rWeeklyInteraction } = interaction
+        // Radius
+        const aUserRadiusObj = userRadius.find((userRadius) => userRadius.userId == aUserId)
+        const aUserRadius = aUserRadiusObj?.radius as number
+        const bUserRadiusObj = userRadius.find((userRadius) => userRadius.userId == bUserId)
+        const bUserRadius = bUserRadiusObj?.radius as number
+        // Status
+        const aUserStatsObj = userStatus.find((userStatus) => userStatus.userId == aUserId)
+        const aUserStats = aUserStatsObj?.stats
+        const bUserStatsObj = userStatus.find((userStatus) => userStatus.userId == bUserId)
+        const bUserStats = bUserStatsObj?.stats
+        // userInfo
+        const aUser = usersInfo.find(user => user.discordId === aUserId)
+        const aUsername = aUser?.username
+        const aDiscriminator = aUser?.discriminator
+        const aFullUsername = aDiscriminator === "0" ? aUsername : aUsername + "#" + aDiscriminator
 
-        const fromUser = usersInfo.find(user => user.discordId === fromId)
-        const fromUsername = fromUser?.username
-        const fromDiscriminator = fromUser?.discriminator
-        const fromFullUsername = fromDiscriminator === "0" ? fromUsername : fromUsername + "#" + fromDiscriminator
+        const bUser = usersInfo.find(user => user.discordId === bUserId)
+        const bUsername = bUser?.username
+        const bDiscriminator = bUser?.discriminator
+        const bFullUsername = bDiscriminator === "0" ? bUsername : bUsername + "#" + bDiscriminator
 
-        const toUser = usersInfo.find(user => user.discordId === toId)
-        const toUsername = toUser?.username
-        const toDiscriminator = toUser?.discriminator
-        const toFullUsername = toDiscriminator === "0" ? toUsername : toUsername + "#" + toDiscriminator
+        if(!aUserStats || !bUserStats) {
+            return []
+        }
 
-
-        record.from.username = fromFullUsername
-        record.to.username = toFullUsername
-
-        return record
+        return {
+            from: { id: aUserId, radius: aUserRadius, stats: aUserStats, username: aFullUsername },
+            to: { id: bUserId, radius: bUserRadius, stats: bUserStats, username: bFullUsername },
+            width: rWeeklyInteraction
+        }
     })
 
-    return makedUpRecords
+    return response
 }
 
-async function getFragmentationScore(guildId: string) {
+type fragmentationScoreResponseType = { fragmentationScore: number | null, fragmentationScoreRange: { minimumFragmentationScore: number, maximumFragmentationScore: number }, scoreStatus: ScoreStatus| null }
+async function getFragmentationScore(guildId: string): Promise<fragmentationScoreResponseType> {
 
     const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
     
@@ -997,7 +995,7 @@ async function getFragmentationScore(guildId: string) {
 
     const neo4jData = await Neo4j.read(fragmentationScoreQuery)
     const { records } = neo4jData
-    if (records.length == 0) return { fragmentationScore: null, fragmentationScoreDate: null }
+    if (records.length == 0) return { fragmentationScore: null, fragmentationScoreRange, scoreStatus: null }
 
     const fragmentationData = records[0]
     const { _fieldLookup, _fields } = fragmentationData as unknown as { _fieldLookup: Record<string, number>, _fields: number[] }
@@ -1026,7 +1024,8 @@ function findFragmentationScoreStatus(fragmentationScore?: number) {
     else return null
 }
 
-async function getDecentralisationScore(guildId: string) {
+type decentralisationScoreResponseType = { decentralisationScore: number | null, decentralisationScoreRange: { minimumDecentralisationScore: number, maximumDecentralisationScore: number }, scoreStatus: ScoreStatus| null }
+async function getDecentralisationScore(guildId: string): Promise<decentralisationScoreResponseType> {
 
     const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
 
@@ -1038,7 +1037,7 @@ async function getDecentralisationScore(guildId: string) {
     `
     const neo4jData = await Neo4j.read(decentralisationScoreQuery)
     const { records } = neo4jData
-    if (records.length == 0) return { decentralisationScore: null, decentralisationScoreDate: null }
+    if (records.length == 0) return { decentralisationScore: null, decentralisationScoreRange, scoreStatus: null }
 
     const decentralisationData = records[0]
     const { _fieldLookup, _fields } = decentralisationData as unknown as { _fieldLookup: Record<string, number>, _fields: number[] }
