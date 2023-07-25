@@ -329,27 +329,33 @@ describe('member-activity routes', () => {
             await insertGuilds([guildOne]);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
 
-            const twoDaysMilliseconds = 2 * 24 * 60 * 60 * 1000; // Number of milliseconds in a week
-            const currentDate = new Date();
-            const twoDaysAgo = new Date(currentDate.getTime() - twoDaysMilliseconds);
-            const twoDaysAgoEpoch = Math.floor(twoDaysAgo.getTime() / 1000); // Convert to seconds
+            const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
+            
+            const date = new Date();
+            date.setDate(date.getDate() - 2);
+            const twodaysAgoTimestamp = date.setHours(10,0,0,0);
 
             await Neo4j.write("match (n) detach delete (n);")
-            await Neo4j.write(`MERGE (a:DiscordAccount {userId: "${guildMemberOne.discordId}"}) -[r:INTERACTED] -> (b:DiscordAccount {userId: "${guildMemberTwo.discordId}"})
-                                SET r.weights = [3444.0]
-                                SET a.stats = ["R", "R"]
-                                SET r.dates = [${twoDaysAgoEpoch}]
-                                SET r.createdAt = ${twoDaysAgoEpoch}
-                                MERGE (a) <-[r2:INTERACTED]-(b)
-                                SET r2.weights = [1.0]
-                                SET b.stats = ["B", "S"]
-                                SET r2.dates = [${twoDaysAgoEpoch}]
-                                SET r.createdAt = ${twoDaysAgoEpoch}
-                                WITH a, b
-                                CREATE (g:Guild {guildId: "${guildOne.guildId}"})
-                                MERGE (a) -[:IS_MEMBER]->(g)
-                                MERGE (b) -[:IS_MEMBER] ->(g)`)
-
+            await Neo4j.write(`CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${guildOne.guildId}"})
+                CREATE (b:DiscordAccount) -[:IS_MEMBER]->(g)
+                CREATE (c:DiscordAccount) -[:IS_MEMBER]->(g)
+                CREATE (d:DiscordAccount) -[:IS_MEMBER]->(g)
+                CREATE (e:DiscordAccount) -[:IS_MEMBER]->(g)
+                SET a.userId = '${guildMemberOne.discordId}'
+                SET b.userId = '${guildMemberTwo.discordId}'
+                MERGE (a) -[r:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(b)
+                MERGE (b) -[r2:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 2}]->(a)
+                MERGE (b) -[r3:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(a)
+                
+                SET r.guildId = "${guildOne.guildId}"
+                SET r2.guildId = "${guildOne.guildId}"
+                SET r3.guildId = "${guildOne.guildId}"
+                
+                MERGE (a) -[:INTERACTED_IN {localclusteringcoefficient: 1, date: ${yesterdayTimestamp}, status: 0}]->(g)
+                MERGE (a) -[:INTERACTED_IN {localclusteringcoefficient: 1, date: ${twodaysAgoTimestamp}, status: 2}]->(g)
+                MERGE (b) -[:INTERACTED_IN {localclusteringcoefficient: 1, date: ${yesterdayTimestamp}, status: 1}]->(g)
+                MERGE (b) -[:INTERACTED_IN {localclusteringcoefficient: 1, date: ${twodaysAgoTimestamp}, status: 1}]->(g)
+                `)
 
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/members-interactions-network-graph`)
@@ -359,15 +365,15 @@ describe('member-activity routes', () => {
             expect(Array.isArray(res.body)).toBe(true);
             expect(res.body).toHaveLength(2)
             expect(res.body).toEqual(expect.arrayContaining([({
-                from: { id: '123456789', radius: 3444, username: 'Behzad', stats: "RECEIVER" },
-                to: { id: '987654321', radius: 1, username: 'Bi#1234', stats: "SENDER" },
-                width: 3444
+                from: { id: '123456789', radius: 3, username: 'Behzad', stats: "SENDER" },
+                to: { id: '987654321', radius: 3, username: 'Bi#1234', stats: "RECEIVER" },
+                width: 1
             })
             ]))
             expect(res.body).toEqual(expect.arrayContaining([({
-                from: { id: '987654321', radius: 1, username: 'Bi#1234', stats: "SENDER" },
-                to: { id: '123456789', radius: 3444, username: 'Behzad', stats: "RECEIVER" },
-                width: 1
+                from: { id: '987654321', radius: 3, username: 'Bi#1234', stats: "RECEIVER" },
+                to: { id: '123456789', radius: 3, username: 'Behzad', stats: "SENDER" },
+                width: 2
             })
             ]))
 
