@@ -17,7 +17,7 @@
     "@discordjs/rest": "^1.7.0",
     "@notionhq/client": "^2.2.3",
     "@sentry/node": "^7.50.0",
-    "@togethercrew.dev/db": "^2.4.9",
+    "@togethercrew.dev/db": "^2.4.93",
     "@togethercrew.dev/tc-messagebroker": "^0.0.40",
     "babel-jest": "^29.3.1",
     "compression": "^1.7.4",
