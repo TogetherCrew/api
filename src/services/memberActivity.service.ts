@@ -1014,7 +1014,7 @@ async function getFragmentationScore(guildId: string): Promise<fragmentationScor
  * @returns ScoreStatus | null
  */
 function findFragmentationScoreStatus(fragmentationScore?: number) {
-    if (!fragmentationScore) return null
+    if (fragmentationScore == null) return null
     else if (fragmentationScore == -1) return null
     else if (fragmentationScore >= 0 && fragmentationScore < 40) return ScoreStatus.DANGEROUSLY_LOW
     else if (fragmentationScore >= 40 && fragmentationScore < 80) return ScoreStatus.SOMEWHAT_LOW
@@ -1055,7 +1055,7 @@ async function getDecentralisationScore(guildId: string): Promise<decentralisati
  * @returns ScoreStatus | null
  */
 function findDecentralisationScoreStatus(decentralisationScore?: number) {
-    if (!decentralisationScore) return null
+    if (decentralisationScore == null) return null
     else if (decentralisationScore == -1) return null
     else if (decentralisationScore >= 0 && decentralisationScore < 40) return ScoreStatus.DANGEROUSLY_LOW
     else if (decentralisationScore >= 40 && decentralisationScore < 80) return ScoreStatus.SOMEWHAT_LOW
