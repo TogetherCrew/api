@@ -176,7 +176,10 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
             // Stage 6: Group documents by day and compute summary statistics
             {
                 $group: {
-                    _id: "$day_month",
+                    _id: {
+                        date: "$date",
+                        day_month: "$day_month"
+                    },
                     emojis: { $sum: "$emojis" },
                     messages: { $sum: { $sum: ["$total_lone_messages", "$total_thr_messages", "$total_replier"] } }
                 }
@@ -185,14 +188,14 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
 
             // Stage 7: Sort documents by date
             {
-                $sort: { _id: 1 }
+                $sort: { "_id.date": 1 }
             },
 
             // Stage 8: Transform group data into final format for charting
             {
                 $group: {
                     _id: null,
-                    categories: { $push: "$_id" },
+                    categories: { $push: "$_id.day_month" },
                     emojis: { $push: "$emojis" },
                     messages: { $push: "$messages" },
                     // totalEmojis: { $sum: "$emojis" },
