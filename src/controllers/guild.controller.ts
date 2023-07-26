@@ -43,7 +43,7 @@ const getRoles = catchAsync(async function (req: IAuthRequest, res: Response) {
         throw new ApiError(440, 'Oops, something went wrong! Could you please try logging in');
     }
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
-    const roles = await roleService.getRoles(connection, {});
+    const roles = await roleService.getRoles(connection, { deletedAt: null });
     await closeConnection(connection)
     res.send(roles)
 });
@@ -53,7 +53,7 @@ const getChannels = catchAsync(async function (req: IAuthRequest, res: Response)
         throw new ApiError(440, 'Oops, something went wrong! Could you please try logging in');
     }
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
-    const channels = await channelService.getChannels(connection, {});
+    const channels = await channelService.getChannels(connection, { deletedAt: null });
     const channelsWithPermissions: Array<IChannelWithViewAndReadPermissions> = [];
     for (let i = 0; i < channels.length; i++) {
         const canReadMessageHistoryAndViewChannel = await channelService.checkReadMessageHistoryAndViewChannelpPermissions(connection, channels[i]);
@@ -77,7 +77,7 @@ const getSelectedChannels = catchAsync(async function (req: IAuthRequest, res: R
     }
     if (guild.selectedChannels && guild.selectedChannels.length > 0) {
         const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
-        const channels = await channelService.getChannels(connection, {});
+        const channels = await channelService.getChannels(connection, { deletedAt: null });
         let sortedChannels = await sort.sortChannels(channels);
         sortedChannels = sortedChannels
             .filter(category => {

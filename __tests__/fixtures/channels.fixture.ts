@@ -14,6 +14,7 @@ export const channel1: IChannel = {
             deny: '0',
         },
     ],
+    deletedAt: null
 };
 
 export const channel2: IChannel = {
@@ -34,6 +35,7 @@ export const channel2: IChannel = {
             deny: '0',
         },
     ],
+    deletedAt: null
 };
 
 export const channel3: IChannel = {
@@ -54,13 +56,23 @@ export const channel3: IChannel = {
             deny: '0',
         },
     ],
+    deletedAt: null
 };
 
 export const channel4: IChannel = {
     channelId: '345678901234567000',
     name: 'Channel 4',
     parentId: null,
+    deletedAt: null
 };
+
+export const channel5: IChannel = {
+    channelId: '345678901234567333',
+    name: 'Channel 5',
+    parentId: '987654321098765432',
+    deletedAt: new Date()
+};
+
 
 export const insertChannels = async function <Type>(channels: Array<Type>, connection: Connection) {
     await connection.models.Channel.insertMany(channels.map((channel) => (channel)));

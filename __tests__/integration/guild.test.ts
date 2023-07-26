@@ -6,8 +6,8 @@ import setupTestDB from '../utils/setupTestDB';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { discordResponseGuildOne, guildOne, guildTwo, guildThree, guildFour, guildFive, insertGuilds } from '../fixtures/guilds.fixture';
-import { channel1, channel2, channel3, channel4, insertChannels } from '../fixtures/channels.fixture';
-import { role1, role2, role3, insertRoles } from '../fixtures/discord.roles.fixture';
+import { channel1, channel2, channel3, channel4, channel5, insertChannels } from '../fixtures/channels.fixture';
+import { role1, role2, role3, role4, insertRoles } from '../fixtures/discord.roles.fixture';
 import { IGuildUpdateBody } from '../../src/interfaces/guild.interface';
 import { guildService, authService, userService, sagaService } from '../../src/services';
 import { Guild, databaseService } from '@togethercrew.dev/db';
@@ -26,7 +26,7 @@ describe('Guild routes', () => {
         test('should return 200 and array of channels of the guild', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildFive]);
-            await insertChannels([channel1, channel2, channel3, channel4], connection);
+            await insertChannels([channel1, channel2, channel3, channel4, channel5], connection);
             const res = await request(app)
                 .get(`/api/v1/guilds/${guildFive.guildId}/channels`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -90,7 +90,7 @@ describe('Guild routes', () => {
         test('should return 200 and array of selected channels of the guild', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildFive]);
-            await insertChannels([channel1, channel2, channel3, channel4], connection);
+            await insertChannels([channel1, channel2, channel3, channel4, channel5], connection);
             const res = await request(app)
                 .get(`/api/v1/guilds/${guildFive.guildId}/selected-channels`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -650,7 +650,7 @@ describe('Guild routes', () => {
         test('should return 200 and array of roles of the guild if data is ok', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildFive]);
-            await insertRoles([role1, role2, role3], connection);
+            await insertRoles([role1, role2, role3, role4], connection);
 
             const res = await request(app)
                 .get(`/api/v1/guilds/${guildFive.guildId}/roles`)
