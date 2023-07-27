@@ -7,6 +7,7 @@ mongoose.set("strictQuery", false);
 
 // Connect to MongoDB
 MBConnection.connect(config.mongoose.dbURL)
+console.log(config.mongoose.serverURL)
 mongoose.connect(config.mongoose.serverURL)
     .then(() => {
         console.log('Connected to MongoDB!');

@@ -12,6 +12,7 @@ router.get('/', auth(), validate(guildValidation.getGuilds), guildController.get
 router.get('/connect', guildController.connectGuild);
 router.get('/connect/callback', guildController.connectGuildCallback);
 
+router.get('/:guildId/channels', auth(), validate(guildValidation.getChannels), guildController.getChannels);
 router.get('/:guildId/selected-channels', auth(), validate(guildValidation.getSelectedChannels), guildController.getSelectedChannels);
 router.get('/:guildId/roles', auth(), validate(guildValidation.getRoles), guildController.getRoles);
 
@@ -22,7 +23,6 @@ router.route('/:guildId')
     .patch(auth(), validate(guildValidation.updateGuild), guildController.updateGuild);
 
 router.get('/discord-api/:guildId', auth(), validate(guildValidation.getGuildFromDiscordAPI), guildController.getGuildFromDiscordAPI);
-router.get('/discord-api/:guildId/channels', auth(), validate(guildValidation.getChannelsFromDiscordAPI), guildController.getChannelsFromDiscordAPI);
 
 export default router;
 

@@ -1,5 +1,8 @@
 import { Connection } from 'mongoose';
 import { date, math } from '../utils';
+import ScoreStatus from '../utils/enums/scoreStatus.enum';
+import NodeStats from '../utils/enums/nodeStats.enum';
+import dateUtils from '../utils/date';
 import { IGuildMember } from '@togethercrew.dev/db';
 import * as Neo4j from '../neo4j';
 
@@ -198,7 +201,7 @@ async function activeMembersCompositionLineGraph(connection: Connection, startDa
         }
 
     } catch (err) {
-        console.log(err);
+
         return {
             categories: [],
             series: [],
@@ -235,10 +238,11 @@ async function activeMembersOnboardingLineGraph(connection: Connection, startDat
                 $project: {
                     _id: 0,
                     date: { $convert: { input: "$date", to: "date" } },
-                    all_joined: 1,
+                    all_joined_day: 1,
                     all_new_active: 1,
                     all_still_active: 1,
                     all_dropped: 1,
+                    all_joined: 1
                 }
             },
 
@@ -275,10 +279,12 @@ async function activeMembersOnboardingLineGraph(connection: Connection, startDat
                             }
                         ]
                     },
+                    joinedDay: { $size: "$all_joined_day" },
                     joined: { $size: "$all_joined" },
                     newly_active: { $size: "$all_new_active" },
                     still_active: { $size: "$all_still_active" },
                     dropped: { $size: "$all_dropped" },
+
                 }
             },
 
@@ -292,7 +298,7 @@ async function activeMembersOnboardingLineGraph(connection: Connection, startDat
                 $group: {
                     _id: null,
                     day_month: { $push: "$day_month" },
-                    joined: { $push: "$joined" },
+                    joinedDay: { $push: "$joinedDay" },
                     newlyActive: { $push: "$newly_active" },
                     stillActive: { $push: "$still_active" },
                     dropped: { $push: "$dropped" },
@@ -311,7 +317,7 @@ async function activeMembersOnboardingLineGraph(connection: Connection, startDat
                     _id: 0,
                     categories: "$day_month",
                     series: [
-                        { name: "joined", data: "$joined" },
+                        { name: "joinedDay", data: "$joinedDay" },
                         { name: "newlyActive", data: "$newlyActive" },
                         { name: "stillActive", data: "$stillActive" },
                         { name: "dropped", data: "$dropped" },
@@ -346,10 +352,11 @@ async function activeMembersOnboardingLineGraph(connection: Connection, startDat
                 $project: {
                     _id: 0,
                     date: { $convert: { input: "$date", to: "date" } },
-                    all_joined: 1,
                     all_new_active: 1,
                     all_still_active: 1,
                     all_dropped: 1,
+                    all_joined: 1
+
                 }
             },
 
@@ -793,29 +800,26 @@ function buildProjectStageBasedOnActivityComposition(fields: Array<string>) {
 
 /**
  * get activity composition fileds of active member onboarding table
- * @param {Any} activityComposition
  * @returns {Object}
  */
-function getActivityCompositionOfActiveMembersComposition(activityComposition: Array<string>) {
-    return (activityComposition === undefined || activityComposition.length === 0) ? ["all_active", "all_new_active", "all_consistent", "all_vital", "all_new_disengaged"] : activityComposition;
+function getActivityCompositionOfActiveMembersComposition() {
+    return ["all_active", "all_new_active", "all_consistent", "all_vital", "all_new_disengaged"];
 }
 
 /**
  * get activity composition fileds of active member compostion table
- * @param {Any} activityComposition
  * @returns {Object}
  */
-function getActivityCompositionOfActiveMembersOnboarding(activityComposition: Array<string>) {
-    return (activityComposition === undefined || activityComposition.length === 0) ? ["all_joined", "all_new_active", "all_still_active", "all_dropped"] : activityComposition;
+function getActivityCompositionOfActiveMembersOnboarding() {
+    return ["all_joined", "all_new_active", "all_still_active", "all_dropped"];
 }
 
 /**
  * get activity composition fileds of disengaged member compostion table
- * @param {Any} activityComposition
  * @returns {Object}
  */
-function getActivityCompositionOfDisengagedComposition(activityComposition: Array<string>) {
-    return (activityComposition === undefined || activityComposition.length === 0) ? ["all_new_disengaged", "all_disengaged_were_newly_active", "all_disengaged_were_consistently_active", "all_disengaged_were_vital"] : activityComposition;
+function getActivityCompositionOfDisengagedComposition() {
+    return ["all_new_disengaged", "all_disengaged_were_newly_active", "all_disengaged_were_consistently_active", "all_disengaged_were_vital"];
 }
 
 
@@ -835,195 +839,230 @@ async function getLastDocumentForTablesUsage(connection: Connection, activityCom
     return lastDocument[0]
 }
 
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getActivityComposition(guildMember: IGuildMember, memberActivity: any) {
+function getActivityComposition(guildMember: IGuildMember, memberActivity: any, activityComposition: Array<string>) {
+    const activityTypes = [
+        { key: 'all_new_active', message: 'Newly active' },
+        { key: 'all_new_disengaged', message: 'Became disengaged' },
+        { key: 'all_active', message: 'Active members' },
+        { key: 'all_consistent', message: 'Consistently active' },
+        { key: 'all_vital', message: 'Vital member' },
+        { key: 'all_joined', message: 'Joined' },
+        { key: 'all_dropped', message: 'Dropped' },
+        { key: 'all_still_active', message: 'Still active' },
+        { key: 'all_disengaged_were_newly_active', message: 'Were newly active' },
+        { key: 'all_disengaged_were_consistently_active', message: 'Were consistenly active' },
+        { key: 'all_disengaged_were_vital', message: 'Were vital members' }
+    ];
+
     const activityCompositions = [];
-    if (memberActivity.all_new_active && memberActivity.all_new_active.includes(guildMember.discordId)) {
-        activityCompositions.push("Newly active");
-    }
 
-    if (memberActivity.all_new_disengaged && memberActivity.all_new_disengaged.includes(guildMember.discordId)) {
-        activityCompositions.push("Became disengaged");
-    }
-
-    if (memberActivity.all_active && memberActivity.all_active.includes(guildMember.discordId)) {
-        activityCompositions.push("Active members");
-    }
-
-    if (memberActivity.all_consistent && memberActivity.all_consistent.includes(guildMember.discordId)) {
-        activityCompositions.push("Consistently active");
-    }
-
-    if (memberActivity.all_vital && memberActivity.all_vital.includes(guildMember.discordId)) {
-        activityCompositions.push("Vital member");
-    }
-
-    if (memberActivity.all_joined && memberActivity.all_joined.includes(guildMember.discordId)) {
-        activityCompositions.push("Joined");
-    }
-
-    if (memberActivity.all_dropped && memberActivity.all_dropped.includes(guildMember.discordId)) {
-        activityCompositions.push("Dropped");
-    }
-
-    if (memberActivity.all_still_active && memberActivity.all_still_active.includes(guildMember.discordId)) {
-        activityCompositions.push("Still active");
-    }
-
-    if (memberActivity.all_disengaged_were_newly_active && memberActivity.all_disengaged_were_newly_active.includes(guildMember.discordId)) {
-        activityCompositions.push("Were newly active");
-    }
-
-    if (memberActivity.all_disengaged_were_consistently_active && memberActivity.all_disengaged_were_consistently_active.includes(guildMember.discordId)) {
-        activityCompositions.push("Were consistenly active");
-    }
-
-    if (memberActivity.all_disengaged_were_vital && memberActivity.all_disengaged_were_vital.includes(guildMember.discordId)) {
-        activityCompositions.push("Were vital members");
-    }
+    activityTypes.forEach((activityType) => {
+        if (memberActivity[activityType.key]
+            && memberActivity[activityType.key].includes(guildMember.discordId)
+            && (!activityComposition || activityComposition.length === 0 || activityComposition.includes(activityType.key))) {
+            activityCompositions.push(activityType.message);
+        }
+    });
 
     if (activityCompositions.length === 0) {
         activityCompositions.push("Others");
     }
+
     return activityCompositions;
 }
 
-async function getMembersInteractionsNetworkGraph(guildId: string, guildConnection: Connection) {
-    // TODO: refactor function
-
-    const oneWeekMilliseconds = 7 * 24 * 60 * 60 * 1000; // Number of milliseconds in a week
-    const currentDate = new Date();
-    const oneWeekAgo = new Date(currentDate.getTime() - oneWeekMilliseconds);
-    const oneWeekAgoEpoch = Math.floor(oneWeekAgo.getTime() / 1000); // Convert to seconds
-
-    const memberInteractionQueryOne = `
-        MATCH (a:DiscordAccount) -[r:INTERACTED]-(:DiscordAccount)
-        WITH r, apoc.coll.zip(r.dates, r.weights) as date_weights
-        SET r.weekly_weight = REDUCE(total=0, w in date_weights 
-        | CASE WHEN w[0] >= ${oneWeekAgoEpoch} THEN total + w[1] ELSE total END);
-        `
-    const memberInteractionQueryTwo = `
-        MATCH (a:DiscordAccount) -[r:INTERACTED]-> ()
-        WITH a, SUM(r.weekly_weight) as interaction_count
-        SET a.weekly_interaction = interaction_count;
-    `
-    const memberInteractionQueryThree = `
-        MATCH (a:DiscordAccount) -[r:INTERACTED]->(b:DiscordAccount)
-        WITH a,r,b
-        WHERE (a)-[:IS_MEMBER]->(:Guild {guildId:"${guildId}"}) 
-        AND  (b)-[:IS_MEMBER]->(:Guild {guildId:"${guildId}"})
-        RETURN a,r,b
-    `
-    await Neo4j.write(memberInteractionQueryOne)
-    await Neo4j.write(memberInteractionQueryTwo)
-    const neo4jData = await Neo4j.read(memberInteractionQueryThree)
-
-    const { records } = neo4jData;
-    const userIds: string[] = [] // Our Graph DB does not have the names of users, so we load them all and push them to an array we want to send to front-end 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let makedUpRecords = records.reduce((preRecords: any[], record) => {
+type memberInteractionType = { id: string, radius: number, stats: NodeStats, username: string }
+type memberInteractionsGraphResponseType = { width: number, from: memberInteractionType, to: memberInteractionType }[]
+async function getMembersInteractionsNetworkGraph(guildId: string, guildConnection: Connection): Promise<memberInteractionsGraphResponseType> {
+    // TODO: refactor function later
+    const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
+    // userInteraction
+    const usersInteractionsQuery = `
+    MATCH (a:DiscordAccount) -[r:INTERACTED_WITH {date: ${yesterdayTimestamp}, guildId: "${guildId}"}]->(b:DiscordAccount)
+    RETURN a, r, b`
+    const neo4jUsersInteractionsData = await Neo4j.read(usersInteractionsQuery)
+    const { records: neo4jUsersInteractions } = neo4jUsersInteractionsData
+    const usersInteractions = neo4jUsersInteractions.map((usersInteraction) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const { _fieldLookup, _fields } = record
+        const { _fieldLookup, _fields } = usersInteraction
         const a = _fields[_fieldLookup['a']]
         const r = _fields[_fieldLookup['r']]
         const b = _fields[_fieldLookup['b']]
 
-        const aWeeklyInteraction = a?.properties?.weekly_interaction
-        const aUserId = a?.properties?.userId
+        const aUserId = a?.properties?.userId as string
+        const rWeeklyInteraction = r?.properties?.weight as number 
+        const bUserId = b?.properties?.userId as string
 
-        const rWeeklyInteraction = r?.properties?.weekly_weight
-
-        const bWeeklyInteraction = b?.properties?.weekly_interaction
-        const bUserId = b?.properties?.userId
-
-
-        if (aWeeklyInteraction && rWeeklyInteraction && bWeeklyInteraction) {
-            const interaction = {
-                from: { id: aUserId, radius: aWeeklyInteraction },
-                to: { id: bUserId, radius: bWeeklyInteraction },
-                width: rWeeklyInteraction
-            }
-            userIds.push(aUserId)
-            userIds.push(bUserId)
-
-            preRecords.push(interaction)
+        const interaction = {
+            aUserId,
+            bUserId,
+            rWeeklyInteraction
         }
 
-        return preRecords
-    }, [])
+        return interaction
+    })
 
+    // userRadius
+    const userRadiusQuery = `
+    MATCH (a:DiscordAccount) -[r:INTERACTED_WITH {date: ${yesterdayTimestamp}, guildId: "${guildId}"}]-(:DiscordAccount)
+    WITH a, r 
+    RETURN a.userId as userId, SUM(r.weight) as radius`
+    const neo4jUserRadiusData = await Neo4j.read(userRadiusQuery)
+    const { records: neo4jUserRadius } = neo4jUserRadiusData
+    const userRadius = neo4jUserRadius.map((userRadius) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const { _fieldLookup, _fields } = userRadius
+        const userId = _fields[_fieldLookup['userId']] as string
+        const radius = _fields[_fieldLookup['radius']] as number
+
+        return { userId, radius}
+    })
+
+    // userStatus
+    const userStatusQuery = `
+    MATCH (a:DiscordAccount)-[r:INTERACTED_IN {date: ${yesterdayTimestamp}}]->(g:Guild {guildId: "${guildId}"})
+    RETURN a.userId as userId, r.status as status`
+    const neo4jUserStatusData = await Neo4j.read(userStatusQuery)
+    const { records: neo4jUserStatus } = neo4jUserStatusData
+    const userStatus = neo4jUserStatus.map((userStatus) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const { _fieldLookup, _fields } = userStatus
+        const userId = _fields[_fieldLookup['userId']] as string
+        const status = _fields[_fieldLookup['status']] as number
+        const stats = status == 0 ? NodeStats.SENDER : status == 1 ? NodeStats.RECEIVER : status == 2 ? NodeStats.BALANCED : null
+
+        return { userId, stats }
+    })
+
+    // usersInfo
     const userProjection = { discordId: 1, username: 1, discriminator: 1 }
     const usersInfo = await guildConnection.models.GuildMember.find({}, { _id: 0, ...userProjection })
 
-    // insert username of user to the response object
-    makedUpRecords = makedUpRecords.map(record => {
-        const fromId = record.from.id
-        const toId = record.to.id
+    // prepare data
+    const response = usersInteractions.flatMap((interaction) => {
+        const { aUserId, bUserId, rWeeklyInteraction } = interaction
+        // Radius
+        const aUserRadiusObj = userRadius.find((userRadius) => userRadius.userId == aUserId)
+        const aUserRadius = aUserRadiusObj?.radius as number
+        const bUserRadiusObj = userRadius.find((userRadius) => userRadius.userId == bUserId)
+        const bUserRadius = bUserRadiusObj?.radius as number
+        // Status
+        const aUserStatsObj = userStatus.find((userStatus) => userStatus.userId == aUserId)
+        const aUserStats = aUserStatsObj?.stats
+        const bUserStatsObj = userStatus.find((userStatus) => userStatus.userId == bUserId)
+        const bUserStats = bUserStatsObj?.stats
+        // userInfo
+        const aUser = usersInfo.find(user => user.discordId === aUserId)
+        const aUsername = aUser?.username
+        const aDiscriminator = aUser?.discriminator
+        const aFullUsername = aDiscriminator === "0" ? aUsername : aUsername + "#" + aDiscriminator
 
-        const fromUser = usersInfo.find(user => user.discordId === fromId)
-        const fromUsername = fromUser?.username
-        const fromDiscriminator = fromUser?.discriminator
-        const fromFullUsername = fromDiscriminator === "0" ? fromUsername : fromUsername + "#" + fromDiscriminator
+        const bUser = usersInfo.find(user => user.discordId === bUserId)
+        const bUsername = bUser?.username
+        const bDiscriminator = bUser?.discriminator
+        const bFullUsername = bDiscriminator === "0" ? bUsername : bUsername + "#" + bDiscriminator
 
-        const toUser = usersInfo.find(user => user.discordId === toId)
-        const toUsername = toUser?.username
-        const toDiscriminator = toUser?.discriminator
-        const toFullUsername = toDiscriminator === "0" ? toUsername : toUsername + "#" + toDiscriminator
+        if(!aUserStats || !bUserStats) {
+            return []
+        }
 
-
-        record.from.username = fromFullUsername
-        record.to.username = toFullUsername
-
-        return record
+        return {
+            from: { id: aUserId, radius: aUserRadius, stats: aUserStats, username: aFullUsername },
+            to: { id: bUserId, radius: bUserRadius, stats: bUserStats, username: bFullUsername },
+            width: rWeeklyInteraction
+        }
     })
 
-    return makedUpRecords
+    return response
 }
 
-async function getFragmentationScore(guildId: string) {
+type fragmentationScoreResponseType = { fragmentationScore: number | null, fragmentationScoreRange: { minimumFragmentationScore: number, maximumFragmentationScore: number }, scoreStatus: ScoreStatus| null }
+async function getFragmentationScore(guildId: string): Promise<fragmentationScoreResponseType> {
 
+    const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
+    
+    const fragmentationScale = 200
+    const fragmentationScoreRange = { minimumFragmentationScore: 0, maximumFragmentationScore: fragmentationScale }
     const fragmentationScoreQuery = `
-        MATCH (g:Guild {guildId: "${guildId}"})
-        RETURN 
-        g.avgClusteringCoeff[-1] as fragmentation_score,
-        g.resultDates[-1] as fragmentation_score_date
+        MATCH ()-[r:INTERACTED_IN]->(g:Guild {guildId: "${guildId}" })
+        WHERE r.date = ${yesterdayTimestamp}
+        RETURN avg(r.localClusteringCoefficient) * ${fragmentationScale} AS fragmentation_score 
     `
+
     const neo4jData = await Neo4j.read(fragmentationScoreQuery)
     const { records } = neo4jData
-    if(records.length == 0) return { fragmentationScore: null, fragmentationScoreDate: null }
+    if (records.length == 0) return { fragmentationScore: null, fragmentationScoreRange, scoreStatus: null }
 
     const fragmentationData = records[0]
-    const { _fieldLookup, _fields } = fragmentationData as unknown as { _fieldLookup: Record<string, number> , _fields: number[]}
+    const { _fieldLookup, _fields } = fragmentationData as unknown as { _fieldLookup: Record<string, number>, _fields: number[] }
 
     const fragmentationScore = _fields[_fieldLookup['fragmentation_score']]
-    const fragmentationScoreDate = _fields[_fieldLookup['fragmentation_score_date']]
+    const scoreStatus = findFragmentationScoreStatus(fragmentationScore);
 
-    return { fragmentationScore, fragmentationScoreDate }
+    return { fragmentationScore, fragmentationScoreRange, scoreStatus }
 
 }
+/**
+ * this function was written based on what Amin and Ene suggested. (https://discord.com/channels/915914985140531240/1126528102311399464/1126771392512266250)
+ * if fragmentationScore is null or -1, it returns null that means there is not enough data to calculate the score
+ * ! if fragmentationScoreRange is changed, it we may should rewrite this function
+ * @param fragmentationScore number
+ * @returns ScoreStatus | null
+ */
+function findFragmentationScoreStatus(fragmentationScore?: number) {
+    if (fragmentationScore == null) return null
+    else if (fragmentationScore == -1) return null
+    else if (fragmentationScore >= 0 && fragmentationScore < 40) return ScoreStatus.DANGEROUSLY_LOW
+    else if (fragmentationScore >= 40 && fragmentationScore < 80) return ScoreStatus.SOMEWHAT_LOW
+    else if (fragmentationScore >= 80 && fragmentationScore < 120) return ScoreStatus.GOOD
+    else if (fragmentationScore >= 120 && fragmentationScore < 160) return ScoreStatus.SOMEWHAT_HIGH
+    else if (fragmentationScore >= 160 && fragmentationScore <= 200) return ScoreStatus.DANGEROUSLY_HIGH
+    else return null
+}
 
-async function getDecentralisationScore(guildId: string){
+type decentralisationScoreResponseType = { decentralisationScore: number | null, decentralisationScoreRange: { minimumDecentralisationScore: number, maximumDecentralisationScore: number }, scoreStatus: ScoreStatus| null }
+async function getDecentralisationScore(guildId: string): Promise<decentralisationScoreResponseType> {
 
+    const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
+
+    const decentralisationScoreRange = { minimumDecentralisationScore: 0, maximumDecentralisationScore: 200 }
     const decentralisationScoreQuery = `
-        MATCH (g:Guild {guildId: "${guildId}"})
-        RETURN 
-            g.decentralityScores[-1] as decentralization_score,
-            g.resultDates[-1] as decentralization_score_date
+        MATCH (g:Guild {guildId: "${guildId}"})-[r:HAVE_METRICS]->(g)
+        WHERE r.date = ${yesterdayTimestamp}
+        RETURN r.decentralizationScore AS decentralization_score 
     `
     const neo4jData = await Neo4j.read(decentralisationScoreQuery)
-    
     const { records } = neo4jData
-    if(records.length == 0) return { decentralisationScore: null, decentralisationScoreDate: null }
+    if (records.length == 0) return { decentralisationScore: null, decentralisationScoreRange, scoreStatus: null }
 
     const decentralisationData = records[0]
-    const { _fieldLookup, _fields } = decentralisationData as unknown as { _fieldLookup: Record<string, number> , _fields: number[]}
+    const { _fieldLookup, _fields } = decentralisationData as unknown as { _fieldLookup: Record<string, number>, _fields: number[] }
 
     const decentralisationScore = _fields[_fieldLookup['decentralization_score']]
-    const decentralisationScoreDate = _fields[_fieldLookup['decentralization_score_date']]
+    const scoreStatus = findDecentralisationScoreStatus(decentralisationScore);
 
-    return { decentralisationScore, decentralisationScoreDate }
+    return { decentralisationScore, decentralisationScoreRange, scoreStatus }
+}
+/**
+ * this function was written based on what Amin and Ene suggested. (https://discord.com/channels/915914985140531240/1126528102311399464/1126771392512266250)
+ * if fragmentationScore is null or -1, it returns null that means there is not enough data to calculate the score
+ * ! if decentralisationScoreRange is changed, it we may should rewrite this function
+ * @param fragmentationScore number
+ * @returns ScoreStatus | null
+ */
+function findDecentralisationScoreStatus(decentralisationScore?: number) {
+    if (decentralisationScore == null) return null
+    else if (decentralisationScore == -1) return null
+    else if (decentralisationScore >= 0 && decentralisationScore < 40) return ScoreStatus.DANGEROUSLY_LOW
+    else if (decentralisationScore >= 40 && decentralisationScore < 80) return ScoreStatus.SOMEWHAT_LOW
+    else if (decentralisationScore >= 80 && decentralisationScore < 120) return ScoreStatus.GOOD
+    else if (decentralisationScore >= 120 && decentralisationScore < 160) return ScoreStatus.SOMEWHAT_HIGH
+    else if (decentralisationScore >= 160 && decentralisationScore <= 200) return ScoreStatus.DANGEROUSLY_HIGH
+    else return null
 }
 
 export default {

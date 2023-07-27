@@ -2,7 +2,8 @@ import request from 'supertest';
 import httpStatus from 'http-status';
 import app from '../../src/app';
 import setupTestDB from '../utils/setupTestDB';
-import { userOne, insertUsers, userTwo } from '../fixtures/user.fixture';
+import dateUtils from '../../src/utils/date';
+import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour, insertMemberActivities } from '../fixtures/memberActivity.fixture';
 import { guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour, insertGuildMembers } from '../fixtures/guildMember.fixture';
@@ -34,7 +35,7 @@ describe('member-activity routes', () => {
                 .expect(httpStatus.OK);
 
             expect(res.body).toMatchObject({
-                totActiveMembers: 1,
+                totActiveMembers: 0,
                 newlyActive: 3,
                 consistentlyActive: 0,
                 vitalMembers: 0,
@@ -53,7 +54,7 @@ describe('member-activity routes', () => {
             expect(res.body.series[3].name).toBe('vitalMembers');
             expect(res.body.series[4].name).toBe('becameDisengaged');
 
-            expect(res.body.series[0].data).toEqual([0, 0, 0, 0, 0, 0, 1]);
+            expect(res.body.series[0].data).toEqual([0, 0, 0, 0, 0, 0, 0]);
             expect(res.body.series[1].data).toEqual([1, 0, 0, 0, 0, 0, 3]);
             expect(res.body.series[2].data).toEqual([0, 0, 0, 0, 0, 0, 0]);
             expect(res.body.series[3].data).toEqual([1, 0, 0, 0, 0, 0, 0]);
@@ -122,11 +123,11 @@ describe('member-activity routes', () => {
                 becameDisengaged: 1,
                 wereNewlyActive: 3,
                 wereConsistentlyActive: 1,
-                wereVitalMembers: 1,
+                wereVitalMembers: 0,
                 becameDisengagedPercentageChange: 0,
                 wereNewlyActivePercentageChange: 200,
                 wereConsistentlyActivePercentageChange: "N/A",
-                wereVitalMembersPercentageChange: -75,
+                wereVitalMembersPercentageChange: -100,
             });
 
 
@@ -139,7 +140,7 @@ describe('member-activity routes', () => {
             expect(res.body.series[0].data).toEqual([1, 0, 0, 0, 0, 0, 1]);
             expect(res.body.series[1].data).toEqual([1, 0, 0, 0, 0, 0, 3]);
             expect(res.body.series[2].data).toEqual([0, 0, 0, 0, 0, 0, 1]);
-            expect(res.body.series[3].data).toEqual([1, 0, 0, 0, 0, 0, 1]);
+            expect(res.body.series[3].data).toEqual([1, 0, 0, 0, 0, 0, 0]);
         })
 
         test('should return 200 and disengaged members composition line graph data (testing for empty data) if req data is ok', async () => {
@@ -198,11 +199,11 @@ describe('member-activity routes', () => {
 
             expect(res.body).toMatchObject({
                 newlyActive: 3,
-                stillActive: 1,
+                stillActive: 0,
                 dropped: 3,
                 joined: 1,
                 newlyActivePercentageChange: 200,
-                stillActivePercentageChange: 0,
+                stillActivePercentageChange: -100,
                 droppedPercentageChange: "N/A",
                 joinedPercentageChange: -50,
             });
@@ -215,7 +216,7 @@ describe('member-activity routes', () => {
             expect(res.body.series[3].name).toBe('dropped');
             expect(res.body.series[0].data).toEqual([1, 0, 0, 0, 0, 0, 1]);
             expect(res.body.series[1].data).toEqual([1, 0, 0, 0, 0, 0, 3]);
-            expect(res.body.series[2].data).toEqual([1, 0, 0, 0, 0, 0, 1]);
+            expect(res.body.series[2].data).toEqual([1, 0, 0, 0, 0, 0, 0]);
             expect(res.body.series[3].data).toEqual([0, 0, 0, 0, 0, 0, 3]);
         })
 
@@ -328,20 +329,33 @@ describe('member-activity routes', () => {
             await insertGuilds([guildOne]);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
 
-            await Neo4j.write("match (n) detach delete (n);")
-            await Neo4j.write(`MERGE (a:DiscordAccount {userId: "${guildMemberOne.discordId}"}) -[r:INTERACTED] -> (b:DiscordAccount {userId: "${guildMemberTwo.discordId}"})
-                                SET r.weights = [3444.0]
-                                SET r.dates = [1687434970.296297]
-                                SET r.createdAt = 1687434960.296297
-                                MERGE (a) <-[r2:INTERACTED]-(b)
-                                SET r2.weights = [1.0]
-                                SET r2.dates = [1687434970.296297]
-                                SET r.createdAt = 1687434960.296297
-                                WITH a, b
-                                CREATE (g:Guild {guildId: "${guildOne.guildId}"})
-                                MERGE (a) -[:IS_MEMBER]->(g)
-                                MERGE (b) -[:IS_MEMBER] ->(g)`)
+            const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
+            
+            const date = new Date();
+            date.setDate(date.getDate() - 2);
+            const twodaysAgoTimestamp = date.setHours(10,0,0,0);
 
+            await Neo4j.write("match (n) detach delete (n);")
+            await Neo4j.write(`CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${guildOne.guildId}"})
+                CREATE (b:DiscordAccount) -[:IS_MEMBER]->(g)
+                CREATE (c:DiscordAccount) -[:IS_MEMBER]->(g)
+                CREATE (d:DiscordAccount) -[:IS_MEMBER]->(g)
+                CREATE (e:DiscordAccount) -[:IS_MEMBER]->(g)
+                SET a.userId = '${guildMemberOne.discordId}'
+                SET b.userId = '${guildMemberTwo.discordId}'
+                MERGE (a) -[r:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(b)
+                MERGE (b) -[r2:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 2}]->(a)
+                MERGE (b) -[r3:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(a)
+                
+                SET r.guildId = "${guildOne.guildId}"
+                SET r2.guildId = "${guildOne.guildId}"
+                SET r3.guildId = "${guildOne.guildId}"
+                
+                MERGE (a) -[:INTERACTED_IN {localclusteringcoefficient: 1, date: ${yesterdayTimestamp}, status: 0}]->(g)
+                MERGE (a) -[:INTERACTED_IN {localclusteringcoefficient: 1, date: ${twodaysAgoTimestamp}, status: 2}]->(g)
+                MERGE (b) -[:INTERACTED_IN {localclusteringcoefficient: 1, date: ${yesterdayTimestamp}, status: 1}]->(g)
+                MERGE (b) -[:INTERACTED_IN {localclusteringcoefficient: 1, date: ${twodaysAgoTimestamp}, status: 1}]->(g)
+                `)
 
             const res = await request(app)
                 .post(`/api/v1/member-activity/${guildOne.guildId}/members-interactions-network-graph`)
@@ -351,15 +365,15 @@ describe('member-activity routes', () => {
             expect(Array.isArray(res.body)).toBe(true);
             expect(res.body).toHaveLength(2)
             expect(res.body).toEqual(expect.arrayContaining([({
-                from: { id: '123456789', radius: 3444, username: 'Behzad' },
-                to: { id: '987654321', radius: 1, username: 'Bi#1234' },
-                width: 3444
+                from: { id: '123456789', radius: 3, username: 'Behzad', stats: "SENDER" },
+                to: { id: '987654321', radius: 3, username: 'Bi#1234', stats: "RECEIVER" },
+                width: 1
             })
             ]))
             expect(res.body).toEqual(expect.arrayContaining([({
-                from: { id: '987654321', radius: 1, username: 'Bi#1234' },
-                to: { id: '123456789', radius: 3444, username: 'Behzad' },
-                width: 1
+                from: { id: '987654321', radius: 3, username: 'Bi#1234', stats: "RECEIVER" },
+                to: { id: '123456789', radius: 3, username: 'Behzad', stats: "SENDER" },
+                width: 2
             })
             ]))
 
@@ -390,8 +404,15 @@ describe('member-activity routes', () => {
             await insertGuilds([guildOne]);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
 
+            const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
+
+            const date = new Date();
+            date.setDate(date.getDate() - 2);
+            const twodaysAgoTimestamp = date.setHours(0,0,0,0);
+
             await Neo4j.write("match (n) detach delete (n);")
-            await Neo4j.write(`CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${guildOne.guildId}"})
+            await Neo4j.write(`
+                CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${guildOne.guildId}"})
                 CREATE (b:DiscordAccount) -[:IS_MEMBER]->(g)
                 CREATE (c:DiscordAccount) -[:IS_MEMBER]->(g)
                 CREATE (d:DiscordAccount) -[:IS_MEMBER]->(g)
@@ -401,67 +422,54 @@ describe('member-activity routes', () => {
                 SET c.userId = "1002"
                 SET d.userId = "1003"
                 SET e.userId = "1004"
-                MERGE (a) -[r:INTERACTED]->(b)
-                MERGE (a) -[r2:INTERACTED]->(d)
-                MERGE (c) -[r3:INTERACTED]->(b)
-                MERGE (c) -[r4:INTERACTED]->(d)
-                MERGE (d) -[r5:INTERACTED]->(b)
-                MERGE (c) -[r6:INTERACTED]->(a)
-                MERGE (d) -[r7:INTERACTED]->(c)
-                MERGE (b) -[r8:INTERACTED]->(d)
-                MERGE (d) -[r9:INTERACTED]->(c)
-                MERGE (e) -[r10:INTERACTED]->(b)
-                MERGE (a) -[r11:INTERACTED]->(c)
-                SET r.dates = [166, 167]
-                SET r2.dates = [166]
-                SET r3.dates = [166, 167]
-                SET r4.dates = [166]
-                SET r5.dates = [166]
-                SET r6.dates = [167]
-                SET r7.dates = [167]
-                SET r8.dates = [167]
-                SET r9.dates = [167]
-                SET r10.dates = [167]
-                SET r11.dates = [167]
-                SET r.weights = [1, 2]
-                SET r2.weights = [3]
-                SET r3.weights = [2, 1]
-                SET r4.weights = [2]
-                SET r5.weights = [1]
-                SET r6.weights = [2]
-                SET r7.weights = [1]
-                SET r8.weights = [2]
-                SET r9.weights = [1]
-                SET r10.weights = [3]
-                SET r11.weights = [2]`)
-            await Neo4j.write(`MATCH (a: DiscordAccount {userId: "1000"})
-                MATCH (b:DiscordAccount {userId: "1001"})
-                MATCH (c:DiscordAccount {userId: "1002"})
-                MATCH (d:DiscordAccount {userId: "1003"})
-                MATCH (e:DiscordAccount {userId: "1004"})
-                MATCH (g:Guild {guildId: "${guildOne.guildId}"})
-                
-                SET a.localClusteringCoeff = [1.0, 1.0]
-                SET b.localClusteringCoeff = [0.66666, 0.33333]
-                SET c.localClusteringCoeff = [1.0, 0.66666]
-                SET d.localClusteringCoeff = [0.66666, 1.0]
-                SET e.localClusteringCoeff = [0.0, 0.0]
-                SET a.localClusteringCoeffDates = [166, 167]
-                SET b.localClusteringCoeffDates = [166, 167]
-                SET c.localClusteringCoeffDates = [166, 167]
-                SET d.localClusteringCoeffDates = [166, 167]
-                SET e.localClusteringCoeffDates = [166, 167]
-                SET g.avgClusteringCoeff = [0.8, 0.733333]
-                SET g.decentralityScores = [133.333, 66.666]
-                SET g.resultDates = [166, 167]`)
+                MERGE (a) -[r:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 1}]->(b)
+                MERGE (a) -[r2:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(b)
+                MERGE (a) -[r3:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 3}]->(d)
+                MERGE (c) -[r4:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 2}]->(b)
+                MERGE (c) -[r5:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(b)
+                MERGE (c) -[r6:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 2}]->(d)
+                MERGE (d) -[r7:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 1}]->(b)
+                MERGE (c) -[r8:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(a)
+                MERGE (d) -[r9:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(c)
+                MERGE (b) -[r10:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(d)
+                MERGE (d) -[r11:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(c)
+                MERGE (e) -[r12:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 3}]->(b)
+
+                MERGE (a) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 1.0, status: 2}]-> (g)
+                MERGE (a) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 1.0, status: 0}] -> (g)
+                MERGE (b) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 0.6666666666666666, status: 1}] -> (g)
+                MERGE (b) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.3333333333333333, status: 1}] -> (g)
+                MERGE (c) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 1.0}]->(g)
+                MERGE (c) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.6666666666666666, status: 0}]->(g)
+                MERGE (c) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 1.0, status: 0, status: 2}]->(g)
+                MERGE (c) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.6666666666666666, status: 1}]->(g)
+                MERGE (e) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 0.0, status: 0}]->(g)
+                MERGE (e) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.0 }]->(g)
+                MERGE (g) -[:HAVE_METRICS {date: ${twodaysAgoTimestamp}, decentralizationScore: 133.33333333333334 }]->(g)
+                MERGE (g) -[:HAVE_METRICS {date: ${yesterdayTimestamp}, decentralizationScore: 66.66666666666669 }]->(g)
+
+                SET r.guildId = "${guildOne.guildId}"
+                SET r2.guildId = "${guildOne.guildId}"
+                SET r3.guildId = "${guildOne.guildId}"
+                SET r4.guildId = "${guildOne.guildId}"
+                SET r5.guildId = "${guildOne.guildId}"
+                SET r6.guildId = "${guildOne.guildId}"
+                SET r7.guildId = "${guildOne.guildId}"
+                SET r8.guildId = "${guildOne.guildId}"
+                SET r9.guildId = "${guildOne.guildId}"
+                SET r10.guildId = "${guildOne.guildId}"
+                SET r11.guildId = "${guildOne.guildId}"
+                SET r12.guildId = "${guildOne.guildId}"`)
 
             const res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/fragmentation-score`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
-            
-            expect(res.body.fragmentationScore).toBe(0.733333);
-            expect(res.body.fragmentationScoreDate).toBe(167);
+
+            expect(res.body.fragmentationScore).toBe(146.66666666666666);
+            expect(res.body.scoreStatus).toBe(1);
+            expect(res.body.fragmentationScoreRange).toHaveProperty("minimumFragmentationScore", 0);
+            expect(res.body.fragmentationScoreRange).toHaveProperty("maximumFragmentationScore", 200);
         })
 
         test('should return 200 with "null" fragmentation score if there is not interaction or data', async () => {
@@ -470,8 +478,15 @@ describe('member-activity routes', () => {
             await insertGuilds([guildTwo]);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
 
+            const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
+
+            const date = new Date();
+            date.setDate(date.getDate() - 2);
+            const twodaysAgoTimestamp = date.setHours(0,0,0,0);
+
             await Neo4j.write("match (n) detach delete (n);")
-            await Neo4j.write(`CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${guildOne.guildId}"})
+            await Neo4j.write(`
+                CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${guildOne.guildId}"})
                 CREATE (b:DiscordAccount) -[:IS_MEMBER]->(g)
                 CREATE (c:DiscordAccount) -[:IS_MEMBER]->(g)
                 CREATE (d:DiscordAccount) -[:IS_MEMBER]->(g)
@@ -481,67 +496,51 @@ describe('member-activity routes', () => {
                 SET c.userId = "1002"
                 SET d.userId = "1003"
                 SET e.userId = "1004"
-                MERGE (a) -[r:INTERACTED]->(b)
-                MERGE (a) -[r2:INTERACTED]->(d)
-                MERGE (c) -[r3:INTERACTED]->(b)
-                MERGE (c) -[r4:INTERACTED]->(d)
-                MERGE (d) -[r5:INTERACTED]->(b)
-                MERGE (c) -[r6:INTERACTED]->(a)
-                MERGE (d) -[r7:INTERACTED]->(c)
-                MERGE (b) -[r8:INTERACTED]->(d)
-                MERGE (d) -[r9:INTERACTED]->(c)
-                MERGE (e) -[r10:INTERACTED]->(b)
-                MERGE (a) -[r11:INTERACTED]->(c)
-                SET r.dates = [166, 167]
-                SET r2.dates = [166]
-                SET r3.dates = [166, 167]
-                SET r4.dates = [166]
-                SET r5.dates = [166]
-                SET r6.dates = [167]
-                SET r7.dates = [167]
-                SET r8.dates = [167]
-                SET r9.dates = [167]
-                SET r10.dates = [167]
-                SET r11.dates = [167]
-                SET r.weights = [1, 2]
-                SET r2.weights = [3]
-                SET r3.weights = [2, 1]
-                SET r4.weights = [2]
-                SET r5.weights = [1]
-                SET r6.weights = [2]
-                SET r7.weights = [1]
-                SET r8.weights = [2]
-                SET r9.weights = [1]
-                SET r10.weights = [3]
-                SET r11.weights = [2]`)
-            await Neo4j.write(`MATCH (a: DiscordAccount {userId: "1000"})
-                MATCH (b:DiscordAccount {userId: "1001"})
-                MATCH (c:DiscordAccount {userId: "1002"})
-                MATCH (d:DiscordAccount {userId: "1003"})
-                MATCH (e:DiscordAccount {userId: "1004"})
-                MATCH (g:Guild {guildId: "${guildOne.guildId}"})
-                
-                SET a.localClusteringCoeff = [1.0, 1.0]
-                SET b.localClusteringCoeff = [0.66666, 0.33333]
-                SET c.localClusteringCoeff = [1.0, 0.66666]
-                SET d.localClusteringCoeff = [0.66666, 1.0]
-                SET e.localClusteringCoeff = [0.0, 0.0]
-                SET a.localClusteringCoeffDates = [166, 167]
-                SET b.localClusteringCoeffDates = [166, 167]
-                SET c.localClusteringCoeffDates = [166, 167]
-                SET d.localClusteringCoeffDates = [166, 167]
-                SET e.localClusteringCoeffDates = [166, 167]
-                SET g.avgClusteringCoeff = [0.8, 0.733333]
-                SET g.decentralityScores = [133.333, 66.666]
-                SET g.resultDates = [166, 167]`)
+                MERGE (a) -[r:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 1}]->(b)
+                MERGE (a) -[r2:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(b)
+                MERGE (a) -[r3:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 3}]->(d)
+                MERGE (c) -[r4:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 2}]->(b)
+                MERGE (c) -[r5:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(b)
+                MERGE (c) -[r6:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 2}]->(d)
+                MERGE (d) -[r7:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 1}]->(b)
+                MERGE (c) -[r8:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(a)
+                MERGE (d) -[r9:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(c)
+                MERGE (b) -[r10:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(d)
+                MERGE (d) -[r11:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(c)
+                MERGE (e) -[r12:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 3}]->(b)
+
+                MERGE (a) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 1.0, status: 2}]-> (g)
+                MERGE (a) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 1.0, status: 0}] -> (g)
+                MERGE (b) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 0.6666666666666666, status: 1}] -> (g)
+                MERGE (b) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.3333333333333333, status: 1}] -> (g)
+                MERGE (c) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 1.0}]->(g)
+                MERGE (c) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.6666666666666666, status: 0}]->(g)
+                MERGE (c) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 1.0, status: 0, status: 2}]->(g)
+                MERGE (c) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.6666666666666666, status: 1}]->(g)
+                MERGE (e) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 0.0, status: 0}]->(g)
+                MERGE (e) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.0 }]->(g)
+                MERGE (g) -[:HAVE_METRICS {date: ${twodaysAgoTimestamp}, decentralizationScore: 133.33333333333334 }]->(g)
+                MERGE (g) -[:HAVE_METRICS {date: ${yesterdayTimestamp}, decentralizationScore: 66.66666666666669 }]->(g)
+
+                SET r.guildId = "${guildOne.guildId}"
+                SET r2.guildId = "${guildOne.guildId}"
+                SET r3.guildId = "${guildOne.guildId}"
+                SET r4.guildId = "${guildOne.guildId}"
+                SET r5.guildId = "${guildOne.guildId}"
+                SET r6.guildId = "${guildOne.guildId}"
+                SET r7.guildId = "${guildOne.guildId}"
+                SET r8.guildId = "${guildOne.guildId}"
+                SET r9.guildId = "${guildOne.guildId}"
+                SET r10.guildId = "${guildOne.guildId}"
+                SET r11.guildId = "${guildOne.guildId}"
+                SET r12.guildId = "${guildOne.guildId}"`)
 
             const res = await request(app)
                 .get(`/api/v1/member-activity/${guildTwo.guildId}/fragmentation-score`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
-            
+
             expect(res.body.fragmentationScore).toBe(null);
-            expect(res.body.fragmentationScoreDate).toBe(null);
         })
 
         test('should return 401 if access token is missing', async () => {
@@ -571,9 +570,16 @@ describe('member-activity routes', () => {
             await insertGuilds([guildOne]);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
 
+            const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
+
+            const date = new Date();
+            date.setDate(date.getDate() - 2);
+            const twodaysAgoTimestamp = date.setHours(0,0,0,0);
+
             // TODO: write neo4j queries in other file
             await Neo4j.write("match (n) detach delete (n);")
-            await Neo4j.write(`CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${guildOne.guildId}"})
+            await Neo4j.write(`
+                CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${guildOne.guildId}"})
                 CREATE (b:DiscordAccount) -[:IS_MEMBER]->(g)
                 CREATE (c:DiscordAccount) -[:IS_MEMBER]->(g)
                 CREATE (d:DiscordAccount) -[:IS_MEMBER]->(g)
@@ -583,67 +589,55 @@ describe('member-activity routes', () => {
                 SET c.userId = "1002"
                 SET d.userId = "1003"
                 SET e.userId = "1004"
-                MERGE (a) -[r:INTERACTED]->(b)
-                MERGE (a) -[r2:INTERACTED]->(d)
-                MERGE (c) -[r3:INTERACTED]->(b)
-                MERGE (c) -[r4:INTERACTED]->(d)
-                MERGE (d) -[r5:INTERACTED]->(b)
-                MERGE (c) -[r6:INTERACTED]->(a)
-                MERGE (d) -[r7:INTERACTED]->(c)
-                MERGE (b) -[r8:INTERACTED]->(d)
-                MERGE (d) -[r9:INTERACTED]->(c)
-                MERGE (e) -[r10:INTERACTED]->(b)
-                MERGE (a) -[r11:INTERACTED]->(c)
-                SET r.dates = [166, 167]
-                SET r2.dates = [166]
-                SET r3.dates = [166, 167]
-                SET r4.dates = [166]
-                SET r5.dates = [166]
-                SET r6.dates = [167]
-                SET r7.dates = [167]
-                SET r8.dates = [167]
-                SET r9.dates = [167]
-                SET r10.dates = [167]
-                SET r11.dates = [167]
-                SET r.weights = [1, 2]
-                SET r2.weights = [3]
-                SET r3.weights = [2, 1]
-                SET r4.weights = [2]
-                SET r5.weights = [1]
-                SET r6.weights = [2]
-                SET r7.weights = [1]
-                SET r8.weights = [2]
-                SET r9.weights = [1]
-                SET r10.weights = [3]
-                SET r11.weights = [2]`)
-            await Neo4j.write(`MATCH (a: DiscordAccount {userId: "1000"})
-                MATCH (b:DiscordAccount {userId: "1001"})
-                MATCH (c:DiscordAccount {userId: "1002"})
-                MATCH (d:DiscordAccount {userId: "1003"})
-                MATCH (e:DiscordAccount {userId: "1004"})
-                MATCH (g:Guild {guildId: "${guildOne.guildId}"})
-                
-                SET a.localClusteringCoeff = [1.0, 1.0]
-                SET b.localClusteringCoeff = [0.66666, 0.33333]
-                SET c.localClusteringCoeff = [1.0, 0.66666]
-                SET d.localClusteringCoeff = [0.66666, 1.0]
-                SET e.localClusteringCoeff = [0.0, 0.0]
-                SET a.localClusteringCoeffDates = [166, 167]
-                SET b.localClusteringCoeffDates = [166, 167]
-                SET c.localClusteringCoeffDates = [166, 167]
-                SET d.localClusteringCoeffDates = [166, 167]
-                SET e.localClusteringCoeffDates = [166, 167]
-                SET g.avgClusteringCoeff = [0.8, 0.733333]
-                SET g.decentralityScores = [133.333, 66.666]
-                SET g.resultDates = [166, 167]`)
+                MERGE (a) -[r:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 1}]->(b)
+                MERGE (a) -[r2:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(b)
+                MERGE (a) -[r3:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 3}]->(d)
+                MERGE (c) -[r4:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 2}]->(b)
+                MERGE (c) -[r5:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(b)
+                MERGE (c) -[r6:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 2}]->(d)
+                MERGE (d) -[r7:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 1}]->(b)
+                MERGE (c) -[r8:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(a)
+                MERGE (d) -[r9:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(c)
+                MERGE (b) -[r10:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(d)
+                MERGE (d) -[r11:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(c)
+                MERGE (e) -[r12:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 3}]->(b)
+
+                MERGE (a) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 1.0, status: 2}]-> (g)
+                MERGE (a) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 1.0, status: 0}] -> (g)
+                MERGE (b) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 0.6666666666666666, status: 1}] -> (g)
+                MERGE (b) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.3333333333333333, status: 1}] -> (g)
+                MERGE (c) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 1.0}]->(g)
+                MERGE (c) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.6666666666666666, status: 0}]->(g)
+                MERGE (c) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 1.0, status: 0, status: 2}]->(g)
+                MERGE (c) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.6666666666666666, status: 1}]->(g)
+                MERGE (e) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 0.0, status: 0}]->(g)
+                MERGE (e) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.0 }]->(g)
+                MERGE (g) -[:HAVE_METRICS {date: ${twodaysAgoTimestamp}, decentralizationScore: 133.33333333333334 }]->(g)
+                MERGE (g) -[:HAVE_METRICS {date: ${yesterdayTimestamp}, decentralizationScore: 66.66666666666669 }]->(g)
+
+                SET r.guildId = "${guildOne.guildId}"
+                SET r2.guildId = "${guildOne.guildId}"
+                SET r3.guildId = "${guildOne.guildId}"
+                SET r4.guildId = "${guildOne.guildId}"
+                SET r5.guildId = "${guildOne.guildId}"
+                SET r6.guildId = "${guildOne.guildId}"
+                SET r7.guildId = "${guildOne.guildId}"
+                SET r8.guildId = "${guildOne.guildId}"
+                SET r9.guildId = "${guildOne.guildId}"
+                SET r10.guildId = "${guildOne.guildId}"
+                SET r11.guildId = "${guildOne.guildId}"
+                SET r12.guildId = "${guildOne.guildId}"`)
 
             const res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/decentralisation-score`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
-            
-            expect(res.body.decentralisationScore).toBe(66.666);
-            expect(res.body.decentralisationScoreDate).toBe(167);
+
+            expect(res.body.decentralisationScore).toBe(66.66666666666669);
+            expect(res.body.scoreStatus).toBe(-1);
+            expect(res.body.decentralisationScoreRange).toHaveProperty("minimumDecentralisationScore", 0);
+            expect(res.body.decentralisationScoreRange).toHaveProperty("maximumDecentralisationScore", 200);
+
         })
 
         test('should return 200 with "null" decentralisation score if there is not interaction or data', async () => {
@@ -651,10 +645,17 @@ describe('member-activity routes', () => {
             await insertGuilds([guildOne]);
             await insertGuilds([guildTwo]);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            
+            const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
+
+            const date = new Date();
+            date.setDate(date.getDate() - 2);
+            const twodaysAgoTimestamp = date.setHours(0,0,0,0);
 
             // TODO: write neo4j queries in other file
             await Neo4j.write("match (n) detach delete (n);")
-            await Neo4j.write(`CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${guildOne.guildId}"})
+            await Neo4j.write(`
+                CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${guildOne.guildId}"})
                 CREATE (b:DiscordAccount) -[:IS_MEMBER]->(g)
                 CREATE (c:DiscordAccount) -[:IS_MEMBER]->(g)
                 CREATE (d:DiscordAccount) -[:IS_MEMBER]->(g)
@@ -664,67 +665,51 @@ describe('member-activity routes', () => {
                 SET c.userId = "1002"
                 SET d.userId = "1003"
                 SET e.userId = "1004"
-                MERGE (a) -[r:INTERACTED]->(b)
-                MERGE (a) -[r2:INTERACTED]->(d)
-                MERGE (c) -[r3:INTERACTED]->(b)
-                MERGE (c) -[r4:INTERACTED]->(d)
-                MERGE (d) -[r5:INTERACTED]->(b)
-                MERGE (c) -[r6:INTERACTED]->(a)
-                MERGE (d) -[r7:INTERACTED]->(c)
-                MERGE (b) -[r8:INTERACTED]->(d)
-                MERGE (d) -[r9:INTERACTED]->(c)
-                MERGE (e) -[r10:INTERACTED]->(b)
-                MERGE (a) -[r11:INTERACTED]->(c)
-                SET r.dates = [166, 167]
-                SET r2.dates = [166]
-                SET r3.dates = [166, 167]
-                SET r4.dates = [166]
-                SET r5.dates = [166]
-                SET r6.dates = [167]
-                SET r7.dates = [167]
-                SET r8.dates = [167]
-                SET r9.dates = [167]
-                SET r10.dates = [167]
-                SET r11.dates = [167]
-                SET r.weights = [1, 2]
-                SET r2.weights = [3]
-                SET r3.weights = [2, 1]
-                SET r4.weights = [2]
-                SET r5.weights = [1]
-                SET r6.weights = [2]
-                SET r7.weights = [1]
-                SET r8.weights = [2]
-                SET r9.weights = [1]
-                SET r10.weights = [3]
-                SET r11.weights = [2]`)
-            await Neo4j.write(`MATCH (a: DiscordAccount {userId: "1000"})
-                MATCH (b:DiscordAccount {userId: "1001"})
-                MATCH (c:DiscordAccount {userId: "1002"})
-                MATCH (d:DiscordAccount {userId: "1003"})
-                MATCH (e:DiscordAccount {userId: "1004"})
-                MATCH (g:Guild {guildId: "${guildOne.guildId}"})
-                
-                SET a.localClusteringCoeff = [1.0, 1.0]
-                SET b.localClusteringCoeff = [0.66666, 0.33333]
-                SET c.localClusteringCoeff = [1.0, 0.66666]
-                SET d.localClusteringCoeff = [0.66666, 1.0]
-                SET e.localClusteringCoeff = [0.0, 0.0]
-                SET a.localClusteringCoeffDates = [166, 167]
-                SET b.localClusteringCoeffDates = [166, 167]
-                SET c.localClusteringCoeffDates = [166, 167]
-                SET d.localClusteringCoeffDates = [166, 167]
-                SET e.localClusteringCoeffDates = [166, 167]
-                SET g.avgClusteringCoeff = [0.8, 0.733333]
-                SET g.decentralityScores = [133.333, 66.666]
-                SET g.resultDates = [166, 167]`)
+                MERGE (a) -[r:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 1}]->(b)
+                MERGE (a) -[r2:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(b)
+                MERGE (a) -[r3:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 3}]->(d)
+                MERGE (c) -[r4:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 2}]->(b)
+                MERGE (c) -[r5:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(b)
+                MERGE (c) -[r6:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 2}]->(d)
+                MERGE (d) -[r7:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 1}]->(b)
+                MERGE (c) -[r8:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(a)
+                MERGE (d) -[r9:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(c)
+                MERGE (b) -[r10:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(d)
+                MERGE (d) -[r11:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(c)
+                MERGE (e) -[r12:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 3}]->(b)
+
+                MERGE (a) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 1.0, status: 2}]-> (g)
+                MERGE (a) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 1.0, status: 0}] -> (g)
+                MERGE (b) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 0.6666666666666666, status: 1}] -> (g)
+                MERGE (b) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.3333333333333333, status: 1}] -> (g)
+                MERGE (c) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 1.0}]->(g)
+                MERGE (c) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.6666666666666666, status: 0}]->(g)
+                MERGE (c) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 1.0, status: 0, status: 2}]->(g)
+                MERGE (c) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.6666666666666666, status: 1}]->(g)
+                MERGE (e) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 0.0, status: 0}]->(g)
+                MERGE (e) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.0 }]->(g)
+                MERGE (g) -[:HAVE_METRICS {date: ${twodaysAgoTimestamp}, decentralizationScore: 133.33333333333334 }]->(g)
+                MERGE (g) -[:HAVE_METRICS {date: ${yesterdayTimestamp}, decentralizationScore: 66.66666666666669 }]->(g)
+
+                SET r.guildId = "${guildOne.guildId}"
+                SET r2.guildId = "${guildOne.guildId}"
+                SET r3.guildId = "${guildOne.guildId}"
+                SET r4.guildId = "${guildOne.guildId}"
+                SET r5.guildId = "${guildOne.guildId}"
+                SET r6.guildId = "${guildOne.guildId}"
+                SET r7.guildId = "${guildOne.guildId}"
+                SET r8.guildId = "${guildOne.guildId}"
+                SET r9.guildId = "${guildOne.guildId}"
+                SET r10.guildId = "${guildOne.guildId}"
+                SET r11.guildId = "${guildOne.guildId}"
+                SET r12.guildId = "${guildOne.guildId}"`)
 
             const res = await request(app)
                 .get(`/api/v1/member-activity/${guildTwo.guildId}/decentralisation-score`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
-            
+
             expect(res.body.decentralisationScore).toBe(null);
-            expect(res.body.decentralisationScoreDate).toBe(null);
         })
 
         test('should return 401 if access token is missing', async () => {
@@ -743,7 +728,7 @@ describe('member-activity routes', () => {
                 .expect(httpStatus.NOT_FOUND);
         })
     })
-    
+
     describe('GET /api/v1/member-activity/:guildId/active-members-composition-table', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
@@ -765,10 +750,10 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 4,
             });
 
-            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results).toHaveLength(4);
             expect(res.body.results[0]).toEqual({
                 discordId: guildMemberThree.discordId,
                 username: guildMemberThree.username,
@@ -792,7 +777,7 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberOne.joinedAt.toISOString(),
                 discriminator: guildMemberOne.discriminator,
-                activityComposition: ['Newly active', 'Became disengaged', 'Active members']
+                activityComposition: ['Newly active', 'Became disengaged']
             });
 
             expect(res.body.results[2]).toEqual({
@@ -806,6 +791,17 @@ describe('member-activity routes', () => {
                 joinedAt: guildMemberTwo.joinedAt.toISOString(),
                 discriminator: guildMemberTwo.discriminator,
                 activityComposition: ['Newly active']
+            });
+
+            expect(res.body.results[3]).toEqual({
+                discordId: guildMemberFour.discordId,
+                username: guildMemberFour.username + "#" + guildMemberFour.discriminator,
+                avatar: guildMemberFour.avatar,
+                roles: [
+                    { roleId: role1.roleId, name: role1.name, color: role1.color }],
+                joinedAt: guildMemberFour.joinedAt.toISOString(),
+                discriminator: guildMemberFour.discriminator,
+                activityComposition: ['Others']
             });
         })
 
@@ -835,7 +831,23 @@ describe('member-activity routes', () => {
             let res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .query({ activityComposition: ["all_new_disengaged"] })
+                .query({ activityComposition: ["all_active"] })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 0,
+                totalResults: 0,
+            });
+            expect(res.body.results).toHaveLength(0);
+
+            res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ activityComposition: ["all_active", "others"] })
                 .send()
                 .expect(httpStatus.OK);
 
@@ -847,15 +859,13 @@ describe('member-activity routes', () => {
                 totalResults: 1,
             });
             expect(res.body.results).toHaveLength(1);
-            expect(res.body.results[0].discordId).toBe(guildMemberOne.discordId);
-
-
-
+            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[0].activityComposition).toEqual(['Others']);
 
             res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .query({ activityComposition: ["others", "all_new_disengaged"] })
+                .query({ activityComposition: ["others"] })
                 .send()
                 .expect(httpStatus.OK);
 
@@ -864,18 +874,36 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 4,
+                totalResults: 1,
             });
 
-            expect(res.body.results).toHaveLength(4);
-            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
             expect(res.body.results[0].activityComposition).toEqual(['Others']);
+
+            res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ activityComposition: ["all_new_active", "all_new_disengaged"] })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 3,
+            });
+
+            expect(res.body.results).toHaveLength(3);
+
+            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results[0].activityComposition).toEqual(['Newly active']);
             expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[1].activityComposition).toEqual(['Became disengaged']);
+            expect(res.body.results[1].activityComposition).toEqual(['Newly active', 'Became disengaged']);
             expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
-            expect(res.body.results[2].activityComposition).toEqual(['Others']);
-            expect(res.body.results[3].discordId).toBe(guildMemberFour.discordId);
-            expect(res.body.results[3].activityComposition).toEqual(['Others']);
+            expect(res.body.results[2].activityComposition).toEqual(['Newly active']);
 
 
         })
@@ -951,12 +979,13 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 4,
             });
-            expect(res.body.results).toHaveLength(3);
-            expect(res.body.results[0].discordId).toBe(guildMemberTwo.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[2].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results).toHaveLength(4);
+            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[1].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[2].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[3].discordId).toBe(guildMemberThree.discordId);
         })
 
         test('should correctly sort the returned array if ascending  sort param is specified', async () => {
@@ -978,12 +1007,13 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 4,
             });
-            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results).toHaveLength(4);
             expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
             expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
             expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[3].discordId).toBe(guildMemberFour.discordId);
         })
 
         test('should correctly sort the returned array if multiple sorting criteria are specified', async () => {
@@ -1005,10 +1035,10 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 4,
             });
 
-            const expectedOrder = [guildMemberOne, guildMemberTwo, guildMemberThree,].sort((a, b) => {
+            const expectedOrder = [guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour].sort((a, b) => {
                 if (a.joinedAt < b.joinedAt) {
                     return 1;
                 }
@@ -1042,7 +1072,7 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 2,
                 totalPages: 2,
-                totalResults: 3,
+                totalResults: 4,
             });
 
             expect(res.body.results).toHaveLength(2);
@@ -1069,11 +1099,12 @@ describe('member-activity routes', () => {
                 page: 2,
                 limit: 2,
                 totalPages: 2,
-                totalResults: 3,
+                totalResults: 4,
             });
 
-            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results).toHaveLength(2);
             expect(res.body.results[0].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[1].discordId).toBe(guildMemberFour.discordId);
         })
     })
 
@@ -1098,10 +1129,10 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 4,
             });
 
-            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results).toHaveLength(4);
             expect(res.body.results[0]).toEqual({
                 discordId: guildMemberThree.discordId,
                 username: guildMemberThree.username,
@@ -1125,7 +1156,7 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberOne.joinedAt.toISOString(),
                 discriminator: guildMemberOne.discriminator,
-                activityComposition: ['Newly active', 'Joined', 'Dropped', 'Still active']
+                activityComposition: ['Newly active', 'Joined', 'Dropped']
             });
 
             expect(res.body.results[2]).toEqual({
@@ -1139,6 +1170,18 @@ describe('member-activity routes', () => {
                 joinedAt: guildMemberTwo.joinedAt.toISOString(),
                 discriminator: guildMemberTwo.discriminator,
                 activityComposition: ['Newly active', 'Dropped']
+            });
+
+            expect(res.body.results[3]).toEqual({
+                discordId: guildMemberFour.discordId,
+                username: guildMemberFour.username + "#" + guildMemberFour.discriminator,
+                avatar: guildMemberFour.avatar,
+                roles: [
+                    { roleId: role1.roleId, name: role1.name, color: role1.color },
+                ],
+                joinedAt: guildMemberFour.joinedAt.toISOString(),
+                discriminator: guildMemberFour.discriminator,
+                activityComposition: ['Others']
             });
         })
 
@@ -1168,7 +1211,23 @@ describe('member-activity routes', () => {
             let res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .query({ activityComposition: ["all_joined"] })
+                .query({ activityComposition: ["all_still_active"] })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 0,
+                totalResults: 0,
+            });
+            expect(res.body.results).toHaveLength(0);
+
+            res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ activityComposition: ["others", "all_still_active"] })
                 .send()
                 .expect(httpStatus.OK);
 
@@ -1179,13 +1238,15 @@ describe('member-activity routes', () => {
                 totalPages: 1,
                 totalResults: 1,
             });
+
             expect(res.body.results).toHaveLength(1);
-            expect(res.body.results[0].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[0].activityComposition).toEqual(['Others']);
 
             res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .query({ activityComposition: ["others", "all_joined"] })
+                .query({ activityComposition: ["others"] })
                 .send()
                 .expect(httpStatus.OK);
 
@@ -1194,19 +1255,37 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 4,
+                totalResults: 1,
             });
 
-            expect(res.body.results).toHaveLength(4);
-            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
             expect(res.body.results[0].activityComposition).toEqual(['Others']);
-            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[1].activityComposition).toEqual(['Joined']);
-            expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
-            expect(res.body.results[2].activityComposition).toEqual(['Others']);
-            expect(res.body.results[3].discordId).toBe(guildMemberFour.discordId);
-            expect(res.body.results[3].activityComposition).toEqual(['Others']);
 
+
+            res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ activityComposition: ["all_dropped", "all_joined"] })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 3,
+            });
+
+
+            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results[0].activityComposition).toEqual(['Dropped']);
+            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[1].activityComposition).toEqual(['Joined', 'Dropped']);
+            expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[2].activityComposition).toEqual(['Dropped']);
         })
 
         test('should correctly apply filter on roles field', async () => {
@@ -1280,12 +1359,13 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 4,
             });
-            expect(res.body.results).toHaveLength(3);
-            expect(res.body.results[0].discordId).toBe(guildMemberTwo.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[2].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results).toHaveLength(4);
+            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[1].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[2].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[3].discordId).toBe(guildMemberThree.discordId);
         })
 
         test('should correctly sort the returned array if ascending  sort param is specified', async () => {
@@ -1307,12 +1387,13 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 4,
             });
-            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results).toHaveLength(4);
             expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
             expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
             expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[3].discordId).toBe(guildMemberFour.discordId);
         })
 
         test('should correctly sort the returned array if multiple sorting criteria are specified', async () => {
@@ -1334,10 +1415,10 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 4,
             });
 
-            const expectedOrder = [guildMemberOne, guildMemberTwo, guildMemberThree,].sort((a, b) => {
+            const expectedOrder = [guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour].sort((a, b) => {
                 if (a.joinedAt < b.joinedAt) {
                     return 1;
                 }
@@ -1371,7 +1452,7 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 2,
                 totalPages: 2,
-                totalResults: 3,
+                totalResults: 4,
             });
 
             expect(res.body.results).toHaveLength(2);
@@ -1398,11 +1479,12 @@ describe('member-activity routes', () => {
                 page: 2,
                 limit: 2,
                 totalPages: 2,
-                totalResults: 3,
+                totalResults: 4,
             });
 
-            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results).toHaveLength(2);
             expect(res.body.results[0].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[1].discordId).toBe(guildMemberFour.discordId);
         })
     })
 
@@ -1427,10 +1509,10 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 4,
             });
 
-            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results).toHaveLength(4);
             expect(res.body.results[0]).toEqual({
                 discordId: guildMemberThree.discordId,
                 username: guildMemberThree.username,
@@ -1454,7 +1536,7 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberOne.joinedAt.toISOString(),
                 discriminator: guildMemberOne.discriminator,
-                activityComposition: ['Became disengaged', 'Were newly active', 'Were consistenly active', 'Were vital members']
+                activityComposition: ['Became disengaged', 'Were newly active', 'Were consistenly active']
             });
 
             expect(res.body.results[2]).toEqual({
@@ -1468,6 +1550,18 @@ describe('member-activity routes', () => {
                 joinedAt: guildMemberTwo.joinedAt.toISOString(),
                 discriminator: guildMemberTwo.discriminator,
                 activityComposition: ['Were newly active']
+            });
+
+            expect(res.body.results[3]).toEqual({
+                discordId: guildMemberFour.discordId,
+                username: guildMemberFour.username + "#" + guildMemberFour.discriminator,
+                avatar: guildMemberFour.avatar,
+                roles: [
+                    { roleId: role1.roleId, name: role1.name, color: role1.color },
+                ],
+                joinedAt: guildMemberFour.joinedAt.toISOString(),
+                discriminator: guildMemberFour.discriminator,
+                activityComposition: ['Others']
             });
         })
 
@@ -1505,11 +1599,10 @@ describe('member-activity routes', () => {
                 results: expect.any(Array),
                 page: 1,
                 limit: 10,
-                totalPages: 1,
-                totalResults: 1,
+                totalPages: 0,
+                totalResults: 0,
             });
-            expect(res.body.results).toHaveLength(1);
-            expect(res.body.results[0].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results).toHaveLength(0);
 
             res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
@@ -1523,19 +1616,54 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 4,
+                totalResults: 1,
             });
 
-            expect(res.body.results).toHaveLength(4);
-            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
             expect(res.body.results[0].activityComposition).toEqual(['Others']);
-            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[1].activityComposition).toEqual(['Were vital members']);
-            expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
-            expect(res.body.results[2].activityComposition).toEqual(['Others']);
-            expect(res.body.results[3].discordId).toBe(guildMemberFour.discordId);
-            expect(res.body.results[3].activityComposition).toEqual(['Others']);
 
+            res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ activityComposition: ["others"] })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 1,
+            });
+
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[0].activityComposition).toEqual(['Others']);
+
+            res = await request(app)
+                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ activityComposition: ["all_disengaged_were_newly_active", "all_disengaged_were_consistently_active"] })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 3,
+            });
+
+            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results[0].activityComposition).toEqual(['Were newly active']);
+            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[1].activityComposition).toEqual(['Were newly active', 'Were consistenly active']);
+            expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[2].activityComposition).toEqual(['Were newly active']);
         })
 
         test('should correctly apply filter on roles field', async () => {
@@ -1609,12 +1737,13 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 4,
             });
-            expect(res.body.results).toHaveLength(3);
-            expect(res.body.results[0].discordId).toBe(guildMemberTwo.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[2].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results).toHaveLength(4);
+            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[1].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[2].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[3].discordId).toBe(guildMemberThree.discordId);
         })
 
         test('should correctly sort the returned array if ascending  sort param is specified', async () => {
@@ -1636,12 +1765,13 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 4,
             });
-            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results).toHaveLength(4);
             expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
             expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
             expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[3].discordId).toBe(guildMemberFour.discordId);
         })
 
         test('should correctly sort the returned array if multiple sorting criteria are specified', async () => {
@@ -1663,10 +1793,10 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 4,
             });
 
-            const expectedOrder = [guildMemberOne, guildMemberTwo, guildMemberThree,].sort((a, b) => {
+            const expectedOrder = [guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour].sort((a, b) => {
                 if (a.joinedAt < b.joinedAt) {
                     return 1;
                 }
@@ -1700,7 +1830,7 @@ describe('member-activity routes', () => {
                 page: 1,
                 limit: 2,
                 totalPages: 2,
-                totalResults: 3,
+                totalResults: 4,
             });
 
             expect(res.body.results).toHaveLength(2);
@@ -1727,11 +1857,12 @@ describe('member-activity routes', () => {
                 page: 2,
                 limit: 2,
                 totalPages: 2,
-                totalResults: 3,
+                totalResults: 4,
             });
 
-            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results).toHaveLength(2);
             expect(res.body.results[0].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[1].discordId).toBe(guildMemberFour.discordId);
         })
     })
 

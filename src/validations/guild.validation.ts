@@ -53,7 +53,7 @@ const getRoles = {
 
 
 
-const getChannelsFromDiscordAPI = {
+const getChannels = {
     params: Joi.object().required().keys({
         guildId: Joi.string().required()
     })
@@ -67,7 +67,7 @@ const getSelectedChannels = {
 
 export default {
     getSelectedChannels,
-    getChannelsFromDiscordAPI,
+    getChannels,
     updateGuild,
     getGuild,
     getGuildFromDiscordAPI,
