@@ -876,10 +876,11 @@ type memberInteractionType = { id: string, radius: number, stats: NodeStats, use
 type memberInteractionsGraphResponseType = { width: number, from: memberInteractionType, to: memberInteractionType }[]
 async function getMembersInteractionsNetworkGraph(guildId: string, guildConnection: Connection): Promise<memberInteractionsGraphResponseType> {
     // TODO: refactor function later
-    const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
     // userInteraction
     const usersInteractionsQuery = `
-    MATCH (a:DiscordAccount) -[r:INTERACTED_WITH {date: ${yesterdayTimestamp}, guildId: "${guildId}"}]->(b:DiscordAccount)
+    MATCH () -[r:INTERACTED_WITH {guildId: "${guildId}"}]-()
+    WITH max(r.date) as latest_date
+    MATCH (a:DiscordAccount)-[r:INTERACTED_WITH {guildId: "${guildId}", date: latest_date}]->(b:DiscordAccount)
     RETURN a, r, b`
     const neo4jUsersInteractionsData = await Neo4j.read(usersInteractionsQuery)
     const { records: neo4jUsersInteractions } = neo4jUsersInteractionsData
@@ -906,7 +907,9 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
 
     // userRadius
     const userRadiusQuery = `
-    MATCH (a:DiscordAccount) -[r:INTERACTED_WITH {date: ${yesterdayTimestamp}, guildId: "${guildId}"}]-(:DiscordAccount)
+    MATCH () -[r:INTERACTED_WITH {guildId: "${guildId}"}]-()
+    WITH max(r.date) as latest_date
+    MATCH (a:DiscordAccount) -[r:INTERACTED_WITH {date: latest_date, guildId: "${guildId}"}]-(:DiscordAccount)
     WITH a, r 
     RETURN a.userId as userId, SUM(r.weight) as radius`
     const neo4jUserRadiusData = await Neo4j.read(userRadiusQuery)
@@ -923,7 +926,9 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
 
     // userStatus
     const userStatusQuery = `
-    MATCH (a:DiscordAccount)-[r:INTERACTED_IN {date: ${yesterdayTimestamp}}]->(g:Guild {guildId: "${guildId}"})
+    MATCH () -[r:INTERACTED_IN]-(g:Guild {guildId: "${guildId}"})
+    WITH max(r.date) as latest_date
+    MATCH (a:DiscordAccount)-[r:INTERACTED_IN {date: latest_date}]->(g:Guild {guildId: "${guildId}"})
     RETURN a.userId as userId, r.status as status`
     const neo4jUserStatusData = await Neo4j.read(userStatusQuery)
     const { records: neo4jUserStatus } = neo4jUserStatusData
