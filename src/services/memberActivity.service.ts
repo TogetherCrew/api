@@ -982,15 +982,13 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
 
 type fragmentationScoreResponseType = { fragmentationScore: number | null, fragmentationScoreRange: { minimumFragmentationScore: number, maximumFragmentationScore: number }, scoreStatus: ScoreStatus| null }
 async function getFragmentationScore(guildId: string): Promise<fragmentationScoreResponseType> {
-
-    const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
     
     const fragmentationScale = 200
     const fragmentationScoreRange = { minimumFragmentationScore: 0, maximumFragmentationScore: fragmentationScale }
     const fragmentationScoreQuery = `
         MATCH ()-[r:INTERACTED_IN]->(g:Guild {guildId: "${guildId}" })
-        WHERE r.date = ${yesterdayTimestamp}
-        RETURN avg(r.localClusteringCoefficient) * ${fragmentationScale} AS fragmentation_score 
+        WITH avg(r.localClusteringCoefficient) * ${fragmentationScale}  AS fragmentation_score, r.date as date
+        RETURN fragmentation_score ORDER BY date DESC LIMIT 1
     `
 
     const neo4jData = await Neo4j.read(fragmentationScoreQuery)
