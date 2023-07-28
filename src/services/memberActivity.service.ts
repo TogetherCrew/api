@@ -1025,13 +1025,10 @@ function findFragmentationScoreStatus(fragmentationScore?: number) {
 type decentralisationScoreResponseType = { decentralisationScore: number | null, decentralisationScoreRange: { minimumDecentralisationScore: number, maximumDecentralisationScore: number }, scoreStatus: ScoreStatus| null }
 async function getDecentralisationScore(guildId: string): Promise<decentralisationScoreResponseType> {
 
-    const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
-
     const decentralisationScoreRange = { minimumDecentralisationScore: 0, maximumDecentralisationScore: 200 }
     const decentralisationScoreQuery = `
         MATCH (g:Guild {guildId: "${guildId}"})-[r:HAVE_METRICS]->(g)
-        WHERE r.date = ${yesterdayTimestamp}
-        RETURN r.decentralizationScore AS decentralization_score 
+        RETURN r.decentralizationScore as decentralization_score ORDER BY r.date DESC LIMIT 1
     `
     const neo4jData = await Neo4j.read(decentralisationScoreQuery)
     const { records } = neo4jData
