@@ -34,6 +34,8 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
         let matchStage: any = {};
         let allActivityIds: string[] = [];
 
+        const memberActivityDate = await connection.models.MemberActivity.findOne().sort({ date: -1 }).select({ date: 1, _id: 0 });
+
         if (activityComposition && activityComposition.length > 0) {
             // If 'others' is in activityComposition, we exclude all IDs that are part of other activities
             if (activityComposition.includes('others')) {
@@ -63,6 +65,10 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
 
         if (roles && roles.length > 0) {
             matchStage.roles = { $in: roles };
+        }
+
+        if (memberActivityDate) {
+            matchStage.joinedAt = { $lte: memberActivityDate.date };
         }
 
         const totalResults = await connection.models.GuildMember.countDocuments(matchStage);
@@ -114,7 +120,7 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
     }
 }
 /**
- *  handel guild member roles and username
+ *  handel guild member roles, ngu, and username
  * @param {Array} guildMembers - guild members array.
  * @param {Array} roles - roles array.
  * @param {Any} memberActivity - The document containing the last member activity.
