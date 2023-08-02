@@ -6,7 +6,7 @@ import dateUtils from '../../src/utils/date';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour, insertMemberActivities } from '../fixtures/memberActivity.fixture';
-import { guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour, insertGuildMembers } from '../fixtures/guildMember.fixture';
+import { guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour, guildMemberFive, insertGuildMembers } from '../fixtures/guildMember.fixture';
 import { guildOne, guildTwo, insertGuilds } from '../fixtures/guilds.fixture';
 import { databaseService } from '@togethercrew.dev/db';
 import { role1, role2, role3, insertRoles } from '../fixtures/discord.roles.fixture';
@@ -330,10 +330,10 @@ describe('member-activity routes', () => {
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
 
             const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
-            
+
             const date = new Date();
             date.setDate(date.getDate() - 2);
-            const twodaysAgoTimestamp = date.setHours(10,0,0,0);
+            const twodaysAgoTimestamp = date.setHours(10, 0, 0, 0);
 
             await Neo4j.write("match (n) detach delete (n);")
             await Neo4j.write(`CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${guildOne.guildId}"})
@@ -408,7 +408,7 @@ describe('member-activity routes', () => {
 
             const date = new Date();
             date.setDate(date.getDate() - 2);
-            const twodaysAgoTimestamp = date.setHours(0,0,0,0);
+            const twodaysAgoTimestamp = date.setHours(0, 0, 0, 0);
 
             await Neo4j.write("match (n) detach delete (n);")
             await Neo4j.write(`
@@ -482,7 +482,7 @@ describe('member-activity routes', () => {
 
             const date = new Date();
             date.setDate(date.getDate() - 2);
-            const twodaysAgoTimestamp = date.setHours(0,0,0,0);
+            const twodaysAgoTimestamp = date.setHours(0, 0, 0, 0);
 
             await Neo4j.write("match (n) detach delete (n);")
             await Neo4j.write(`
@@ -574,7 +574,7 @@ describe('member-activity routes', () => {
 
             const date = new Date();
             date.setDate(date.getDate() - 2);
-            const twodaysAgoTimestamp = date.setHours(0,0,0,0);
+            const twodaysAgoTimestamp = date.setHours(0, 0, 0, 0);
 
             // TODO: write neo4j queries in other file
             await Neo4j.write("match (n) detach delete (n);")
@@ -645,12 +645,12 @@ describe('member-activity routes', () => {
             await insertGuilds([guildOne]);
             await insertGuilds([guildTwo]);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            
+
             const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
 
             const date = new Date();
             date.setDate(date.getDate() - 2);
-            const twodaysAgoTimestamp = date.setHours(0,0,0,0);
+            const twodaysAgoTimestamp = date.setHours(0, 0, 0, 0);
 
             // TODO: write neo4j queries in other file
             await Neo4j.write("match (n) detach delete (n);")
@@ -737,7 +737,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
             await insertMemberActivities([memberActivityOne, memberActivityTwo], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour, guildMemberFive], connection);
             await insertRoles([role1, role2, role3], connection);
             const res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
@@ -1116,7 +1116,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
             await insertMemberActivities([memberActivityOne, memberActivityTwo], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour, guildMemberFive], connection);
             await insertRoles([role1, role2, role3], connection);
             const res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
@@ -1496,7 +1496,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
             await insertMemberActivities([memberActivityOne, memberActivityTwo], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour, guildMemberFive], connection);
             await insertRoles([role1, role2, role3], connection);
             const res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
