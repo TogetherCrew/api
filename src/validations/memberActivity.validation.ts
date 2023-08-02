@@ -46,7 +46,7 @@ const memberInteractionsGraph = {
     }),
 }
 
-const decentralisationScore = { 
+const decentralisationScore = {
     params: Joi.object().required().keys({
         guildId: Joi.string().required()
     }),
@@ -65,7 +65,7 @@ const activeMembersCompositionTable = {
     query: Joi.object().required().keys({
         activityComposition: Joi.array().items(Joi.string().valid('all_active', 'all_new_active', 'all_consistent', 'all_vital', 'all_new_disengaged', 'others')).single(),
         roles: Joi.array().items(Joi.string()).single(),
-        username: Joi.string(),
+        ngu: Joi.string(),
         sortBy: Joi.string(),
         limit: Joi.number().integer(),
         page: Joi.number().integer(),
@@ -79,7 +79,7 @@ const activeMembersOnboardingTable = {
     query: Joi.object().required().keys({
         activityComposition: Joi.array().items(Joi.string().valid('all_joined', 'all_new_active', 'all_still_active', 'all_dropped', 'others')).single(),
         roles: Joi.array().items(Joi.string()).single(),
-        username: Joi.string(),
+        ngu: Joi.string(),
         sortBy: Joi.string(),
         limit: Joi.number().integer(),
         page: Joi.number().integer(),
@@ -93,7 +93,7 @@ const disengagedMembersCompositionTable = {
     query: Joi.object().required().keys({
         activityComposition: Joi.array().items(Joi.string().valid('all_new_disengaged', 'all_disengaged_were_newly_active', 'all_disengaged_were_consistently_active', 'all_disengaged_were_vital', 'others')).single(),
         roles: Joi.array().items(Joi.string()).single(),
-        username: Joi.string(),
+        ngu: Joi.string(),
         sortBy: Joi.string(),
         limit: Joi.number().integer(),
         page: Joi.number().integer(),
