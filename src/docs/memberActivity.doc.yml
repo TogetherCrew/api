@@ -377,8 +377,6 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
-
-
   /api/v1/member-activity/{guildId}/active-members-onboarding-line-graph:
     post:
       tags:
@@ -465,7 +463,7 @@ paths:
       summary: Get data for active members composition table
       security:
         - bearerAuth: []
-      description: for now sortBy just can apply for username and joinedAt(DaoMemberSince in UI)
+      description: for now sortBy just can apply for ngu and joinedAt(DaoMemberSince in UI)
       parameters:
         - in: path
           name: guildId
@@ -493,7 +491,7 @@ paths:
           style: form
           explode: true
         - in: query
-          name: username
+          name: ngu
           required: false
           schema:
             type: string
@@ -503,7 +501,7 @@ paths:
           required: false
           schema:
             type: string
-            example: "joinedAt:desc,username:asc"
+            example: "joinedAt:desc,ngu:asc"
         - in: query
           name: limit
           required: false
@@ -533,7 +531,10 @@ paths:
                     items:
                       type: object
                       properties:
-                        name:
+                        username:
+                          type: string
+                          example: "Behzad_Rabiei"
+                        ngu:
                           type: string
                           example: "Behzad"
                         avatar:
@@ -590,7 +591,7 @@ paths:
       summary: Get data for active members onboarding table
       security:
         - bearerAuth: []
-      description: for now sortBy just can apply for username and joinedAt(DaoMemberSince in UI)
+      description: for now sortBy just can apply for ngu and joinedAt(DaoMemberSince in UI)
       parameters:
         - in: path
           name: guildId
@@ -618,7 +619,7 @@ paths:
           style: form
           explode: true
         - in: query
-          name: username
+          name: ngu
           required: false
           schema:
             type: string
@@ -628,7 +629,7 @@ paths:
           required: false
           schema:
             type: string
-            example: "joinedAt:desc,username:asc"
+            example: "joinedAt:desc,ngu:asc"
         - in: query
           name: limit
           required: false
@@ -658,7 +659,10 @@ paths:
                     items:
                       type: object
                       properties:
-                        name:
+                        username:
+                          type: string
+                          example: "Behzad_Rabiei"
+                        ngu:
                           type: string
                           example: "Behzad"
                         avatar:
@@ -715,7 +719,7 @@ paths:
       summary: Get data for disengaged members composition table
       security:
         - bearerAuth: []
-      description: for now sortBy just can apply for username and joinedAt(DaoMemberSince in UI)
+      description: for now sortBy just can apply for ngu and joinedAt(DaoMemberSince in UI)
       parameters:
         - in: path
           name: guildId
@@ -743,7 +747,7 @@ paths:
           style: form
           explode: true
         - in: query
-          name: username
+          name: ngu
           required: false
           schema:
             type: string
@@ -753,7 +757,7 @@ paths:
           required: false
           schema:
             type: string
-            example: "joinedAt:desc,username:asc"
+            example: "joinedAt:desc,ngu:asc"
         - in: query
           name: limit
           required: false
@@ -783,7 +787,10 @@ paths:
                     items:
                       type: object
                       properties:
-                        name:
+                        username:
+                          type: string
+                          example: "Behzad_Rabiei"
+                        ngu:
                           type: string
                           example: "Behzad"
                         avatar:
