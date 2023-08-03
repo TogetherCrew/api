@@ -6,7 +6,7 @@ import dateUtils from '../../src/utils/date';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour, insertMemberActivities } from '../fixtures/memberActivity.fixture';
-import { guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour, insertGuildMembers } from '../fixtures/guildMember.fixture';
+import { guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour, guildMemberFive, insertGuildMembers } from '../fixtures/guildMember.fixture';
 import { guildOne, guildTwo, insertGuilds } from '../fixtures/guilds.fixture';
 import { databaseService } from '@togethercrew.dev/db';
 import { role1, role2, role3, insertRoles } from '../fixtures/discord.roles.fixture';
@@ -737,7 +737,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
             await insertMemberActivities([memberActivityOne, memberActivityTwo], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour, guildMemberFive], connection);
             await insertRoles([role1, role2, role3], connection);
             const res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
@@ -1120,7 +1120,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
             await insertMemberActivities([memberActivityOne, memberActivityTwo], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour, guildMemberFive], connection);
             await insertRoles([role1, role2, role3], connection);
             const res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
@@ -1504,7 +1504,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
             await insertMemberActivities([memberActivityOne, memberActivityTwo], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour, guildMemberFive], connection);
             await insertRoles([role1, role2, role3], connection);
             const res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
