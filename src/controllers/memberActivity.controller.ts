@@ -92,7 +92,7 @@ const activeMembersCompositionTable = catchAsync(async function (req: IAuthReque
     if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
     }
-    const filter = pick(req.query, ['activityComposition', 'roles', 'username']);
+    const filter = pick(req.query, ['activityComposition', 'roles', 'ngu']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     const activityCompostionFields = memberActivityService.getActivityCompositionOfActiveMembersComposition()
@@ -110,7 +110,7 @@ const activeMembersOnboardingTable = catchAsync(async function (req: IAuthReques
     if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
     }
-    const filter = pick(req.query, ['activityComposition', 'roles', 'username']);
+    const filter = pick(req.query, ['activityComposition', 'roles', 'ngu']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     const activityCompostionFields = memberActivityService.getActivityCompositionOfActiveMembersOnboarding();
@@ -128,7 +128,7 @@ const disengagedMembersCompositionTable = catchAsync(async function (req: IAuthR
     if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
     }
-    const filter = pick(req.query, ['activityComposition', 'roles', 'username']);
+    const filter = pick(req.query, ['activityComposition', 'roles', 'ngu']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     const activityCompostionFields = memberActivityService.getActivityCompositionOfDisengagedComposition();
