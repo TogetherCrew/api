@@ -6,7 +6,7 @@ import dateUtils from '../../src/utils/date';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour, insertMemberActivities } from '../fixtures/memberActivity.fixture';
-import { guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour, insertGuildMembers } from '../fixtures/guildMember.fixture';
+import { guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour, guildMemberFive, insertGuildMembers } from '../fixtures/guildMember.fixture';
 import { guildOne, guildTwo, insertGuilds } from '../fixtures/guilds.fixture';
 import { databaseService } from '@togethercrew.dev/db';
 import { role1, role2, role3, insertRoles } from '../fixtures/discord.roles.fixture';
@@ -330,10 +330,10 @@ describe('member-activity routes', () => {
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
 
             const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
-            
+
             const date = new Date();
             date.setDate(date.getDate() - 2);
-            const twodaysAgoTimestamp = date.setHours(10,0,0,0);
+            const twodaysAgoTimestamp = date.setHours(10, 0, 0, 0);
 
             await Neo4j.write("match (n) detach delete (n);")
             await Neo4j.write(`CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${guildOne.guildId}"})
@@ -365,14 +365,14 @@ describe('member-activity routes', () => {
             expect(Array.isArray(res.body)).toBe(true);
             expect(res.body).toHaveLength(2)
             expect(res.body).toEqual(expect.arrayContaining([({
-                from: { id: '123456789', radius: 3, username: 'Behzad', stats: "SENDER" },
-                to: { id: '987654321', radius: 3, username: 'Bi#1234', stats: "RECEIVER" },
+                from: { id: '123456789', radius: 3, username: 'behzad_rabiei', stats: "SENDER" },
+                to: { id: '987654321', radius: 3, username: 'mrjackalop', stats: "RECEIVER" },
                 width: 1
             })
             ]))
             expect(res.body).toEqual(expect.arrayContaining([({
-                from: { id: '987654321', radius: 3, username: 'Bi#1234', stats: "RECEIVER" },
-                to: { id: '123456789', radius: 3, username: 'Behzad', stats: "SENDER" },
+                from: { id: '987654321', radius: 3, username: 'mrjackalop', stats: "RECEIVER" },
+                to: { id: '123456789', radius: 3, username: 'behzad_rabiei', stats: "SENDER" },
                 width: 2
             })
             ]))
@@ -408,7 +408,7 @@ describe('member-activity routes', () => {
 
             const date = new Date();
             date.setDate(date.getDate() - 2);
-            const twodaysAgoTimestamp = date.setHours(0,0,0,0);
+            const twodaysAgoTimestamp = date.setHours(0, 0, 0, 0);
 
             await Neo4j.write("match (n) detach delete (n);")
             await Neo4j.write(`
@@ -482,7 +482,7 @@ describe('member-activity routes', () => {
 
             const date = new Date();
             date.setDate(date.getDate() - 2);
-            const twodaysAgoTimestamp = date.setHours(0,0,0,0);
+            const twodaysAgoTimestamp = date.setHours(0, 0, 0, 0);
 
             await Neo4j.write("match (n) detach delete (n);")
             await Neo4j.write(`
@@ -574,7 +574,7 @@ describe('member-activity routes', () => {
 
             const date = new Date();
             date.setDate(date.getDate() - 2);
-            const twodaysAgoTimestamp = date.setHours(0,0,0,0);
+            const twodaysAgoTimestamp = date.setHours(0, 0, 0, 0);
 
             // TODO: write neo4j queries in other file
             await Neo4j.write("match (n) detach delete (n);")
@@ -645,12 +645,12 @@ describe('member-activity routes', () => {
             await insertGuilds([guildOne]);
             await insertGuilds([guildTwo]);
             await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            
+
             const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
 
             const date = new Date();
             date.setDate(date.getDate() - 2);
-            const twodaysAgoTimestamp = date.setHours(0,0,0,0);
+            const twodaysAgoTimestamp = date.setHours(0, 0, 0, 0);
 
             // TODO: write neo4j queries in other file
             await Neo4j.write("match (n) detach delete (n);")
@@ -737,7 +737,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
             await insertMemberActivities([memberActivityOne, memberActivityTwo], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour, guildMemberFive], connection);
             await insertRoles([role1, role2, role3], connection);
             const res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
@@ -757,6 +757,7 @@ describe('member-activity routes', () => {
             expect(res.body.results[0]).toEqual({
                 discordId: guildMemberThree.discordId,
                 username: guildMemberThree.username,
+                ngu: guildMemberThree.username,
                 avatar: guildMemberThree.avatar,
                 roles: [
                     { roleId: role2.roleId, name: role2.name, color: role2.color }
@@ -769,6 +770,7 @@ describe('member-activity routes', () => {
             expect(res.body.results[1]).toEqual({
                 discordId: guildMemberOne.discordId,
                 username: guildMemberOne.username,
+                ngu: guildMemberOne.globalName,
                 avatar: guildMemberOne.avatar,
                 roles: [
                     { roleId: role2.roleId, name: role2.name, color: role2.color },
@@ -782,7 +784,8 @@ describe('member-activity routes', () => {
 
             expect(res.body.results[2]).toEqual({
                 discordId: guildMemberTwo.discordId,
-                username: guildMemberTwo.username + "#" + guildMemberTwo.discriminator,
+                username: guildMemberTwo.username,
+                ngu: guildMemberTwo.nickname,
                 avatar: guildMemberTwo.avatar,
                 roles: [
                     { roleId: role1.roleId, name: role1.name, color: role1.color },
@@ -796,6 +799,7 @@ describe('member-activity routes', () => {
             expect(res.body.results[3]).toEqual({
                 discordId: guildMemberFour.discordId,
                 username: guildMemberFour.username + "#" + guildMemberFour.discriminator,
+                ngu: guildMemberFour.username + "#" + guildMemberFour.discriminator,
                 avatar: guildMemberFour.avatar,
                 roles: [
                     { roleId: role1.roleId, name: role1.name, color: role1.color }],
@@ -944,7 +948,7 @@ describe('member-activity routes', () => {
             const res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .query({ username: "B" })
+                .query({ ngu: "behzad" })
                 .send()
                 .expect(httpStatus.OK);
 
@@ -957,7 +961,7 @@ describe('member-activity routes', () => {
             });
             expect(res.body.results).toHaveLength(2);
             expect(res.body.results[0].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[1].discordId).toBe(guildMemberFour.discordId);
 
         })
         test('should correctly sort the returned array if descending sort param is specified', async () => {
@@ -1116,7 +1120,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
             await insertMemberActivities([memberActivityOne, memberActivityTwo], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour, guildMemberFive], connection);
             await insertRoles([role1, role2, role3], connection);
             const res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
@@ -1136,6 +1140,7 @@ describe('member-activity routes', () => {
             expect(res.body.results[0]).toEqual({
                 discordId: guildMemberThree.discordId,
                 username: guildMemberThree.username,
+                ngu: guildMemberThree.username,
                 avatar: guildMemberThree.avatar,
                 roles: [
                     { roleId: role2.roleId, name: role2.name, color: role2.color }
@@ -1148,6 +1153,7 @@ describe('member-activity routes', () => {
             expect(res.body.results[1]).toEqual({
                 discordId: guildMemberOne.discordId,
                 username: guildMemberOne.username,
+                ngu: guildMemberOne.globalName,
                 avatar: guildMemberOne.avatar,
                 roles: [
                     { roleId: role2.roleId, name: role2.name, color: role2.color },
@@ -1161,7 +1167,8 @@ describe('member-activity routes', () => {
 
             expect(res.body.results[2]).toEqual({
                 discordId: guildMemberTwo.discordId,
-                username: guildMemberTwo.username + "#" + guildMemberTwo.discriminator,
+                username: guildMemberTwo.username,
+                ngu: guildMemberTwo.nickname,
                 avatar: guildMemberTwo.avatar,
                 roles: [
                     { roleId: role1.roleId, name: role1.name, color: role1.color },
@@ -1175,6 +1182,7 @@ describe('member-activity routes', () => {
             expect(res.body.results[3]).toEqual({
                 discordId: guildMemberFour.discordId,
                 username: guildMemberFour.username + "#" + guildMemberFour.discriminator,
+                ngu: guildMemberFour.username + "#" + guildMemberFour.discriminator,
                 avatar: guildMemberFour.avatar,
                 roles: [
                     { roleId: role1.roleId, name: role1.name, color: role1.color },
@@ -1324,7 +1332,7 @@ describe('member-activity routes', () => {
             const res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .query({ username: "B" })
+                .query({ ngu: "behzad" })
                 .send()
                 .expect(httpStatus.OK);
 
@@ -1337,7 +1345,7 @@ describe('member-activity routes', () => {
             });
             expect(res.body.results).toHaveLength(2);
             expect(res.body.results[0].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[1].discordId).toBe(guildMemberFour.discordId);
 
         })
         test('should correctly sort the returned array if descending sort param is specified', async () => {
@@ -1496,7 +1504,7 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertGuilds([guildOne]);
             await insertMemberActivities([memberActivityOne, memberActivityTwo], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour, guildMemberFive], connection);
             await insertRoles([role1, role2, role3], connection);
             const res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
@@ -1516,6 +1524,7 @@ describe('member-activity routes', () => {
             expect(res.body.results[0]).toEqual({
                 discordId: guildMemberThree.discordId,
                 username: guildMemberThree.username,
+                ngu: guildMemberThree.username,
                 avatar: guildMemberThree.avatar,
                 roles: [
                     { roleId: role2.roleId, name: role2.name, color: role2.color }
@@ -1528,6 +1537,7 @@ describe('member-activity routes', () => {
             expect(res.body.results[1]).toEqual({
                 discordId: guildMemberOne.discordId,
                 username: guildMemberOne.username,
+                ngu: guildMemberOne.globalName,
                 avatar: guildMemberOne.avatar,
                 roles: [
                     { roleId: role2.roleId, name: role2.name, color: role2.color },
@@ -1541,7 +1551,8 @@ describe('member-activity routes', () => {
 
             expect(res.body.results[2]).toEqual({
                 discordId: guildMemberTwo.discordId,
-                username: guildMemberTwo.username + "#" + guildMemberTwo.discriminator,
+                username: guildMemberTwo.username,
+                ngu: guildMemberTwo.nickname,
                 avatar: guildMemberTwo.avatar,
                 roles: [
                     { roleId: role1.roleId, name: role1.name, color: role1.color },
@@ -1555,6 +1566,7 @@ describe('member-activity routes', () => {
             expect(res.body.results[3]).toEqual({
                 discordId: guildMemberFour.discordId,
                 username: guildMemberFour.username + "#" + guildMemberFour.discriminator,
+                ngu: guildMemberFour.username + "#" + guildMemberFour.discriminator,
                 avatar: guildMemberFour.avatar,
                 roles: [
                     { roleId: role1.roleId, name: role1.name, color: role1.color },
@@ -1702,7 +1714,7 @@ describe('member-activity routes', () => {
             const res = await request(app)
                 .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .query({ username: "B" })
+                .query({ ngu: "behzad" })
                 .send()
                 .expect(httpStatus.OK);
 
@@ -1715,7 +1727,7 @@ describe('member-activity routes', () => {
             });
             expect(res.body.results).toHaveLength(2);
             expect(res.body.results[0].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[1].discordId).toBe(guildMemberFour.discordId);
 
         })
         test('should correctly sort the returned array if descending sort param is specified', async () => {

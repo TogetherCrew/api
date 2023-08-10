@@ -6,7 +6,7 @@ import { IRole, IGuildMember } from '@togethercrew.dev/db';
 type Filter = {
     activityComposition?: Array<string>;
     roles?: Array<string>;
-    username?: string;
+    ngu?: string;
 };
 
 type Options = {
@@ -25,7 +25,7 @@ type Options = {
  */
 async function queryGuildMembers(connection: Connection, filter: Filter, options: Options, memberActivity: any, activityCompostionsTypes: Array<string>) {
     try {
-        const { roles, username, activityComposition } = filter;
+        const { roles, ngu, activityComposition } = filter;
         const { sortBy } = options;
         const limit = options.limit && parseInt(options.limit, 10) > 0 ? parseInt(options.limit, 10) : 10;
         const page = options.page && parseInt(options.page, 10) > 0 ? parseInt(options.page, 10) : 1;
@@ -33,6 +33,8 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
 
         let matchStage: any = {};
         let allActivityIds: string[] = [];
+
+        const memberActivityDate = await connection.models.MemberActivity.findOne().sort({ date: -1 }).select({ date: 1, _id: 0 });
 
         if (activityComposition && activityComposition.length > 0) {
             // If 'others' is in activityComposition, we exclude all IDs that are part of other activities
@@ -57,12 +59,20 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
                 }
             }
         }
-        if (username) {
-            matchStage.username = { $regex: username, $options: 'i' };
+        if (ngu) {
+            matchStage.$or = [
+                { "username": { $regex: ngu, $options: 'i' } },
+                { "globalName": { $regex: ngu, $options: 'i' } },
+                { "nickname": { $regex: ngu, $options: 'i' } }
+            ];
         }
 
         if (roles && roles.length > 0) {
             matchStage.roles = { $in: roles };
+        }
+
+        if (memberActivityDate) {
+            matchStage.joinedAt = { $lte: memberActivityDate.date };
         }
 
         const totalResults = await connection.models.GuildMember.countDocuments(matchStage);
@@ -88,7 +98,9 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
                     roles: 1,
                     avatar: 1,
                     joinedAt: 1,
-                    _id: 0
+                    nickname: 1,
+                    globalName: 1,
+                    _id: 0,
                 }
             }
         ]);
@@ -114,7 +126,7 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
     }
 }
 /**
- *  handel guild member roles and username
+ *  handel guild member roles and displayName
  * @param {Array} guildMembers - guild members array.
  * @param {Array} roles - roles array.
  * @param {Any} memberActivity - The document containing the last member activity.
@@ -123,6 +135,7 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function addNeededDataForTable(guildMembers: Array<any>, roles: Array<IRole>, memberActivity: any, activityComposition: Array<string>) {
+
     guildMembers.forEach((guildMember) => {
         guildMember.roles = guildMember.roles.map((roleId: string) => {
             const role = roles.find((role: IRole) => role.roleId === roleId);
@@ -131,7 +144,18 @@ async function addNeededDataForTable(guildMembers: Array<any>, roles: Array<IRol
             }
         });
         guildMember.username = guildMember.discriminator === "0" ? guildMember.username : guildMember.username + "#" + guildMember.discriminator;
-        guildMember.activityComposition = memberActivityService.getActivityComposition(guildMember, memberActivity, activityComposition)
+        guildMember.activityComposition = memberActivityService.getActivityComposition(guildMember, memberActivity, activityComposition);
+        if (guildMember.nickname) {
+            guildMember.ngu = guildMember.nickname;
+        }
+        else if (guildMember.globalName) {
+            guildMember.ngu = guildMember.globalName;
+        }
+        else {
+            guildMember.ngu = guildMember.username;
+        }
+        delete guildMember.nickname;
+        delete guildMember.globalName;
     });
 }
 
