@@ -537,6 +537,12 @@ paths:
                         ngu:
                           type: string
                           example: "Behzad"
+                        nickname:
+                          type: string
+                          example: "Behzad"
+                        globalName:
+                          type: string
+                          example: "Behzad"                        
                         avatar:
                           type: string
                           example: "b50adff099924dd5e6b72d13f77eb9d7"
@@ -665,6 +671,12 @@ paths:
                         ngu:
                           type: string
                           example: "Behzad"
+                        nickname:
+                          type: string
+                          example: "Behzad"
+                        globalName:
+                          type: string
+                          example: "Behzad"  
                         avatar:
                           type: string
                           example: "b50adff099924dd5e6b72d13f77eb9d7"
@@ -793,6 +805,12 @@ paths:
                         ngu:
                           type: string
                           example: "Behzad"
+                        nickname:
+                          type: string
+                          example: "Behzad"
+                        globalName:
+                          type: string
+                          example: "Behzad"  
                         avatar:
                           type: string
                           example: "b50adff099924dd5e6b72d13f77eb9d7"
