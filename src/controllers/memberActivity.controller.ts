@@ -100,7 +100,12 @@ const activeMembersCompositionTable = catchAsync(async function (req: IAuthReque
     const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options, memberActivity, activityCompostionsTypes.activeMembersComposition);
     const roles = await roleService.getRoles(connection, {});
     if (guildMembers) {
-        guildMemberService.addNeededDataForTable(guildMembers.results, roles, memberActivity, filter.activityComposition);
+        guildMembers.results.forEach((guildMember) => {
+            guildMember.roles = roleService.getRolesForGuildMember(guildMember, roles);
+            guildMember.ngu = guildMemberService.getNgu(guildMember);
+            guildMember.activityComposition = memberActivityService.getActivityComposition(guildMember, memberActivity, filter.activityComposition);
+            guildMember.username = guildMember.discriminator === "0" ? guildMember.username : guildMember.username + "#" + guildMember.discriminator;
+        });
     }
     await closeConnection(connection)
     res.send(guildMembers);
@@ -118,7 +123,12 @@ const activeMembersOnboardingTable = catchAsync(async function (req: IAuthReques
     const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options, memberActivity, activityCompostionsTypes.activeMembersOnboarding);
     const roles = await roleService.getRoles(connection, {});
     if (guildMembers) {
-        guildMemberService.addNeededDataForTable(guildMembers.results, roles, memberActivity, filter.activityComposition);
+        guildMembers.results.forEach((guildMember) => {
+            guildMember.roles = roleService.getRolesForGuildMember(guildMember, roles);
+            guildMember.ngu = guildMemberService.getNgu(guildMember);
+            guildMember.activityComposition = memberActivityService.getActivityComposition(guildMember, memberActivity, filter.activityComposition);
+            guildMember.username = guildMember.discriminator === "0" ? guildMember.username : guildMember.username + "#" + guildMember.discriminator;
+        });
     }
     await closeConnection(connection)
     res.send(guildMembers);
@@ -136,7 +146,12 @@ const disengagedMembersCompositionTable = catchAsync(async function (req: IAuthR
     const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options, memberActivity, activityCompostionsTypes.disengagedMembersCompostion);
     const roles = await roleService.getRoles(connection, {});
     if (guildMembers) {
-        guildMemberService.addNeededDataForTable(guildMembers.results, roles, memberActivity, filter.activityComposition);
+        guildMembers.results.forEach((guildMember) => {
+            guildMember.roles = roleService.getRolesForGuildMember(guildMember, roles);
+            guildMember.ngu = guildMemberService.getNgu(guildMember);
+            guildMember.activityComposition = memberActivityService.getActivityComposition(guildMember, memberActivity, filter.activityComposition);
+            guildMember.username = guildMember.discriminator === "0" ? guildMember.username : guildMember.username + "#" + guildMember.discriminator;
+        });
     }
     await closeConnection(connection)
     res.send(guildMembers);
