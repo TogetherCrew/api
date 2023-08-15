@@ -32,6 +32,8 @@ export const guildMemberThree = {
     joinedAt: new Date("2022-06-01"),
     isBot: false,
     discriminator: "0",
+    nickname: null,
+    globalName: null
 };
 
 export const guildMemberFour = {
@@ -42,6 +44,8 @@ export const guildMemberFour = {
     joinedAt: new Date("2023-04-01"),
     isBot: false,
     discriminator: "4321",
+    nickname: null,
+    globalName: null
 };
 
 export const guildMemberFive = {
@@ -51,7 +55,9 @@ export const guildMemberFive = {
     roles: ["652345789987654321"],
     joinedAt: new Date("2023-04-08"),
     isBot: false,
-    discriminator: "4321"
+    discriminator: "4321",
+    nickname: null,
+    globalName: null
 };
 
 export const insertGuildMembers = async function <Type>(guildMembers: Array<Type>, connection: Connection) {
