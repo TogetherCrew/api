@@ -365,14 +365,14 @@ describe('member-activity routes', () => {
             expect(Array.isArray(res.body)).toBe(true);
             expect(res.body).toHaveLength(2)
             expect(res.body).toEqual(expect.arrayContaining([({
-                from: { id: '123456789', radius: 3, username: 'behzad_rabiei', stats: "SENDER" },
-                to: { id: '987654321', radius: 3, username: 'mrjackalop', stats: "RECEIVER" },
+                from: { avatar: null, id: "123456789", joinedAt: "2023-03-07T00:00:00.000Z", ngu: "Behzad", radius: 3, roles: [], stats: "SENDER", username: "behzad_rabiei" },
+                to: { avatar: "AvatarLink", id: "987654321", joinedAt: "2023-03-31T00:00:00.000Z", ngu: "Daniel", radius: 3, roles: [], stats: "RECEIVER", username: "mrjackalop"},
                 width: 1
             })
             ]))
             expect(res.body).toEqual(expect.arrayContaining([({
-                from: { id: '987654321', radius: 3, username: 'mrjackalop', stats: "RECEIVER" },
-                to: { id: '123456789', radius: 3, username: 'behzad_rabiei', stats: "SENDER" },
+                from: { avatar: "AvatarLink", id: "987654321", joinedAt: "2023-03-31T00:00:00.000Z", ngu: "Daniel", radius: 3, roles: [], stats: "RECEIVER", username: "mrjackalop"},
+                to: { avatar: null, id: "123456789", joinedAt: "2023-03-07T00:00:00.000Z", ngu: "Behzad", radius: 3, roles: [], stats: "SENDER", username: "behzad_rabiei"},
                 width: 2
             })
             ]))
