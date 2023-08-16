@@ -3,8 +3,10 @@ import { date, math } from '../utils';
 import ScoreStatus from '../utils/enums/scoreStatus.enum';
 import NodeStats from '../utils/enums/nodeStats.enum';
 import dateUtils from '../utils/date';
-import { IGuildMember } from '@togethercrew.dev/db';
+import { IGuildMember, IRole } from '@togethercrew.dev/db';
 import * as Neo4j from '../neo4j';
+import roleService from './role.service';
+import guildMemberService from './guildMember.service';
 
 
 /**
@@ -872,7 +874,27 @@ function getActivityComposition(guildMember: IGuildMember, memberActivity: any, 
     return activityCompositions;
 }
 
-type memberInteractionType = { id: string, radius: number, stats: NodeStats, username: string }
+type networkGraphUserInformationType = { username: string, avatar: string | null | undefined, joinedAt: Date | null, roles: any, ngu: string }
+function getUserInformationForNetworkGraph(user: IGuildMember, guildRoles: IRole[]): networkGraphUserInformationType{
+    const username = user?.username
+    const discriminator = user?.discriminator
+    const fullUsername = discriminator === "0" ? username : username + "#" + discriminator
+
+    const avatar = user?.avatar
+    const joinedAt = user?.joinedAt
+    const roles = roleService.getRolesForGuildMember(user, guildRoles);
+    const ngu = guildMemberService.getNgu(user);
+
+    return {
+        username: fullUsername,
+        avatar,
+        joinedAt,
+        roles,
+        ngu
+    }
+}
+
+type memberInteractionType = { id: string, radius: number, stats: NodeStats } & networkGraphUserInformationType
 type memberInteractionsGraphResponseType = { width: number, from: memberInteractionType, to: memberInteractionType }[]
 async function getMembersInteractionsNetworkGraph(guildId: string, guildConnection: Connection): Promise<memberInteractionsGraphResponseType> {
     // TODO: refactor function later
@@ -944,8 +966,8 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
     })
 
     // usersInfo
-    const userProjection = { discordId: 1, username: 1, discriminator: 1 }
-    const usersInfo = await guildConnection.models.GuildMember.find({}, { _id: 0, ...userProjection })
+    const usersInfo = await guildConnection.models.GuildMember.find()
+    const roles = await roleService.getRoles(guildConnection, {})
 
     // prepare data
     const response = usersInteractions.flatMap((interaction) => {
@@ -962,22 +984,19 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
         const bUserStats = bUserStatsObj?.stats
         // userInfo
         const aUser = usersInfo.find(user => user.discordId === aUserId)
-        const aUsername = aUser?.username
-        const aDiscriminator = aUser?.discriminator
-        const aFullUsername = aDiscriminator === "0" ? aUsername : aUsername + "#" + aDiscriminator
+        const aInfo = getUserInformationForNetworkGraph(aUser, roles)
 
         const bUser = usersInfo.find(user => user.discordId === bUserId)
-        const bUsername = bUser?.username
-        const bDiscriminator = bUser?.discriminator
-        const bFullUsername = bDiscriminator === "0" ? bUsername : bUsername + "#" + bDiscriminator
+        const bInfo = getUserInformationForNetworkGraph(bUser, roles)
+
 
         if(!aUserStats || !bUserStats) {
             return []
         }
 
         return {
-            from: { id: aUserId, radius: aUserRadius, stats: aUserStats, username: aFullUsername },
-            to: { id: bUserId, radius: bUserRadius, stats: bUserStats, username: bFullUsername },
+            from: { id: aUserId, radius: aUserRadius, stats: aUserStats, ...aInfo },
+            to: { id: bUserId, radius: bUserRadius, stats: bUserStats, ...bInfo },
             width: rWeeklyInteraction
         }
     })
