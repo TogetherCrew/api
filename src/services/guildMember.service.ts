@@ -143,6 +143,16 @@ function getNgu(guildMember: IGuildMember): string {
     }
 }
 
+/**
+ * Determines the username based on discriminator.
+ * @param {IGuildMember} guildMember - The guild member for which the ngu needs to be determined.
+ * @returns {string} - The determined username for guild member.
+ */
+function getUsername(guildMember: IGuildMember): string {
+    return guildMember.discriminator === "0" ? guildMember.username : guildMember.username + "#" + guildMember.discriminator;
+
+}
+
 
 /**
  * Get a guild member from the database based on the filter criteria.
@@ -163,6 +173,7 @@ async function getGuildMember(connection: Connection, filter: object): Promise<I
 export default {
     queryGuildMembers,
     getGuildMember,
-    getNgu
+    getNgu,
+    getUsername
 }
 

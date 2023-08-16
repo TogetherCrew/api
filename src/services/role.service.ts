@@ -1,6 +1,5 @@
 import { Connection } from 'mongoose';
-import { IRole } from '@togethercrew.dev/db';
-import { IGuildMember } from 'tc_dbcomm';
+import { IRole, IGuildMember } from '@togethercrew.dev/db';
 
 /**
  * Get a role from the database based on the filter criteria.

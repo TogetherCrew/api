@@ -104,7 +104,7 @@ const activeMembersCompositionTable = catchAsync(async function (req: IAuthReque
             guildMember.roles = roleService.getRolesForGuildMember(guildMember, roles);
             guildMember.ngu = guildMemberService.getNgu(guildMember);
             guildMember.activityComposition = memberActivityService.getActivityComposition(guildMember, memberActivity, filter.activityComposition);
-            guildMember.username = guildMember.discriminator === "0" ? guildMember.username : guildMember.username + "#" + guildMember.discriminator;
+            guildMember.username = guildMemberService.getUsername(guildMember);
         });
     }
     await closeConnection(connection)
@@ -127,7 +127,7 @@ const activeMembersOnboardingTable = catchAsync(async function (req: IAuthReques
             guildMember.roles = roleService.getRolesForGuildMember(guildMember, roles);
             guildMember.ngu = guildMemberService.getNgu(guildMember);
             guildMember.activityComposition = memberActivityService.getActivityComposition(guildMember, memberActivity, filter.activityComposition);
-            guildMember.username = guildMember.discriminator === "0" ? guildMember.username : guildMember.username + "#" + guildMember.discriminator;
+            guildMember.username = guildMemberService.getUsername(guildMember);
         });
     }
     await closeConnection(connection)
@@ -150,7 +150,7 @@ const disengagedMembersCompositionTable = catchAsync(async function (req: IAuthR
             guildMember.roles = roleService.getRolesForGuildMember(guildMember, roles);
             guildMember.ngu = guildMemberService.getNgu(guildMember);
             guildMember.activityComposition = memberActivityService.getActivityComposition(guildMember, memberActivity, filter.activityComposition);
-            guildMember.username = guildMember.discriminator === "0" ? guildMember.username : guildMember.username + "#" + guildMember.discriminator;
+            guildMember.username = guildMemberService.getUsername(guildMember);
         });
     }
     await closeConnection(connection)
