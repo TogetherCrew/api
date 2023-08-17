@@ -876,10 +876,7 @@ function getActivityComposition(guildMember: IGuildMember, memberActivity: any, 
 
 type networkGraphUserInformationType = { username: string, avatar: string | null | undefined, joinedAt: Date | null, roles: any, ngu: string }
 function getUserInformationForNetworkGraph(user: IGuildMember, guildRoles: IRole[]): networkGraphUserInformationType{
-    const username = user?.username
-    const discriminator = user?.discriminator
-    const fullUsername = discriminator === "0" ? username : username + "#" + discriminator
-
+    const fullUsername =  guildMemberService.getUsername(user)
     const avatar = user?.avatar
     const joinedAt = user?.joinedAt
     const roles = roleService.getRolesForGuildMember(user, guildRoles);
