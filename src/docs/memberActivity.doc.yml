@@ -260,6 +260,31 @@ paths:
                           type: string
                         stats: 
                           type: string
+                        avatar:
+                          type: string
+                          example: "b50adff099924dd5e6b72d13f77eb9d7"
+                        joinedAt:
+                          type: string
+                          format: date-time
+                          example: "2022-05-30T15:46:52.924+00:00"
+                        roles:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              roleId:
+                                type: string
+                                example: "discordRoleId1"
+                              name:
+                                type: string
+                                example: "role1"
+                              color:
+                                type: string
+                                example: "#000000" 
+                        ngu:
+                          type: string
+                          example: "HajBehzadTalast"
+                        
                     to:
                       type: object
                       properties:
@@ -269,8 +294,33 @@ paths:
                           type: integer
                         username:
                           type: string
-                        stats:
+                        stats: 
                           type: string
+                        avatar:
+                          type: string
+                          example: "b50adff099924dd5e6b72d13f77eb9d7"
+                        joinedAt:
+                          type: string
+                          format: date-time
+                          example: "2022-05-30T15:46:52.924+00:00"
+                        roles:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              roleId:
+                                type: string
+                                example: "discordRoleId1"
+                              name:
+                                type: string
+                                example: "role1"
+                              color:
+                                type: string
+                                example: "#000000" 
+                        ngu:
+                          type: string
+                          example: "HajBehzadTalast"
+                    
                     width:
                       type: integer
         "401":
@@ -537,6 +587,12 @@ paths:
                         ngu:
                           type: string
                           example: "Behzad"
+                        nickname:
+                          type: string
+                          example: "Behzad"
+                        globalName:
+                          type: string
+                          example: "Behzad"                        
                         avatar:
                           type: string
                           example: "b50adff099924dd5e6b72d13f77eb9d7"
@@ -665,6 +721,12 @@ paths:
                         ngu:
                           type: string
                           example: "Behzad"
+                        nickname:
+                          type: string
+                          example: "Behzad"
+                        globalName:
+                          type: string
+                          example: "Behzad"  
                         avatar:
                           type: string
                           example: "b50adff099924dd5e6b72d13f77eb9d7"
@@ -793,6 +855,12 @@ paths:
                         ngu:
                           type: string
                           example: "Behzad"
+                        nickname:
+                          type: string
+                          example: "Behzad"
+                        globalName:
+                          type: string
+                          example: "Behzad"  
                         avatar:
                           type: string
                           example: "b50adff099924dd5e6b72d13f77eb9d7"
