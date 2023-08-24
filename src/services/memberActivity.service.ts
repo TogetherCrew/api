@@ -7,6 +7,7 @@ import { IGuildMember, IRole } from '@togethercrew.dev/db';
 import * as Neo4j from '../neo4j';
 import roleService from './role.service';
 import guildMemberService from './guildMember.service';
+import { Snowflake } from 'discord.js';
 
 
 /**
@@ -874,8 +875,9 @@ function getActivityComposition(guildMember: IGuildMember, memberActivity: any, 
     return activityCompositions;
 }
 
-type networkGraphUserInformationType = { username: string, avatar: string | null | undefined, joinedAt: Date | null, roles: any, ngu: string }
+type networkGraphUserInformationType = { discordId: Snowflake, username: string, avatar: string | null | undefined, joinedAt: Date | null, roles: any, ngu: string }
 function getUserInformationForNetworkGraph(user: IGuildMember, guildRoles: IRole[]): networkGraphUserInformationType{
+    const discordId = user?.discordId
     const fullUsername =  guildMemberService.getUsername(user)
     const avatar = user?.avatar
     const joinedAt = user?.joinedAt
@@ -883,6 +885,7 @@ function getUserInformationForNetworkGraph(user: IGuildMember, guildRoles: IRole
     const ngu = guildMemberService.getNgu(user);
 
     return {
+        discordId, 
         username: fullUsername,
         avatar,
         joinedAt,

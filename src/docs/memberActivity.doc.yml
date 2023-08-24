@@ -254,6 +254,8 @@ paths:
                       properties:
                         id:
                           type: string
+                        discordId:
+                          type: string
                         radius:
                           type: integer
                         username:
@@ -289,6 +291,8 @@ paths:
                       type: object
                       properties:
                         id:
+                          type: string
+                        discordId:
                           type: string
                         radius:
                           type: integer
