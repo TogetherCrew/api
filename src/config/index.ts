@@ -34,6 +34,7 @@ const envVarsSchema = Joi.object()
         NEO4J_USER: Joi.string().required().description('NEO4J username'),
         NEO4J_PASSWORD: Joi.string().required().description('NEO4J password'),
         NEO4J_DB: Joi.string().required().description('NEO4J DB name'),
+        LOG_LEVEL: Joi.string().required().description('Min allowed log level'),
     })
     .unknown();
 
@@ -87,5 +88,8 @@ export default {
     sentry: {
         dsn: envVars.SENTRY_DSN,
         env: envVars.SENTRY_ENV
+    },
+    logger: {
+        level: envVars.LOG_LEVEL,
     },
 }
