@@ -8,12 +8,7 @@ import { IRole, IGuildMember } from '@togethercrew.dev/db';
  * @returns {Promise<IRole | null>} - A promise that resolves to the matching role object or null if not found.
  */
 async function getRole(connection: Connection, filter: object): Promise<IRole | null> {
-    try {
-        return await connection.models.Role.findOne(filter);
-    } catch (error) {
-        console.log('Failed to retrieve  role', error);
-        return null;
-    }
+    return await connection.models.Role.findOne(filter);
 }
 
 /**
@@ -23,12 +18,7 @@ async function getRole(connection: Connection, filter: object): Promise<IRole | 
  * @returns {Promise<IRole[] | []>} - A promise that resolves to an array of the matching role objects.
  */
 async function getRoles(connection: Connection, filter: object): Promise<IRole[] | []> {
-    try {
-        return await connection.models.Role.find(filter);
-    } catch (error) {
-        console.log('Failed to retrieve  roles', error);
-        return [];
-    }
+    return await connection.models.Role.find(filter);
 }
 
 /**

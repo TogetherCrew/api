@@ -3,6 +3,10 @@ import { IChannel } from '@togethercrew.dev/db';
 import config from '../config';
 import { permissions } from '../config//dicord';
 import guildMemberService from './guildMember.service';
+import parentLogger from '../config/logger';
+
+const logger = parentLogger.child({ module: 'ChannelService' });
+
 /**
  *  check if a bot has the "Read Message History" permissio 
  * @param {number} botPermissions
@@ -20,12 +24,7 @@ function hasReadMessageHistory(botPermissions: number): boolean {
  * @returns {Promise<IChannel | null>} - A promise that resolves to the matching channel object or null if not found.
  */
 async function getChannel(connection: Connection, filter: object): Promise<IChannel | null> {
-    try {
-        return await connection.models.Channel.findOne(filter);
-    } catch (error) {
-        console.log('Failed to retrieve channel', error);
-        return null;
-    }
+    return await connection.models.Channel.findOne(filter);
 }
 
 /**
@@ -35,12 +34,7 @@ async function getChannel(connection: Connection, filter: object): Promise<IChan
  * @returns {Promise<IChannel[] | []>} - A promise that resolves to an array of the matching channel objects.
  */
 async function getChannels(connection: Connection, filter: object): Promise<IChannel[] | []> {
-    try {
-        return await connection.models.Channel.find(filter);
-    } catch (error) {
-        console.log('Failed to retrieve channels', error);
-        return [];
-    }
+    return await connection.models.Channel.find(filter);
 }
 
 
@@ -67,7 +61,7 @@ async function checkReadMessageHistoryAndViewChannelpPermissions(connection: Con
         return canReadMessageHistoryAndViewChannel;
 
     } catch (error) {
-        console.log('Failed to retrieve channels', error);
+        logger.error({ database: connection.name, error }, 'Failed to checkReadMessageHistoryAndViewChannelpPermissions');
         return false;
     }
 }

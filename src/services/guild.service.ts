@@ -6,7 +6,9 @@ import { Guild, IDiscordGuild, IDiscordGuildMember } from '@togethercrew.dev/db'
 import { IGuildUpdateBody } from '../interfaces/guild.interface'
 import { ApiError } from '../utils';
 import sagaService from './saga.service';
+import parentLogger from '../config/logger';
 
+const logger = parentLogger.child({ module: 'GuildService' });
 /**
  * Create guild base on discord guild
  * @param {IGuild} data
@@ -94,7 +96,8 @@ async function getGuildFromDiscordAPI(guildId: Snowflake) {
         else {
             throw new Error();
         }
-    } catch (err) {
+    } catch (error) {
+        logger.error({ guild_id: guildId, bot_token: config.discord.botToken, error }, 'Failed to get guild from discord API');
         throw new ApiError(590, 'Can not fetch from discord API');
     }
 }
@@ -116,7 +119,8 @@ async function getGuildRolesFromDiscordAPI(guildId: Snowflake) {
         else {
             throw new Error();
         }
-    } catch (err) {
+    } catch (error) {
+        logger.error({ guild_id: guildId, bot_token: config.discord.botToken, error }, 'Failed to get roles from discrod API');
         throw new ApiError(590, 'Can not fetch from discord API');
     }
 }
@@ -132,15 +136,14 @@ async function getChannels(guildId: Snowflake) {
             method: 'GET',
             headers: { 'Authorization': `Bot ${config.discord.botToken}` }
         });
-        const channels = await response.json();
         if (response.ok) {
             return await response.json();
         }
         else {
             throw new Error();
         }
-        return channels;
-    } catch (err) {
+    } catch (error) {
+        logger.error({ guild_id: guildId, bot_token: config.discord.botToken, error }, 'Failed to get channels from discrod API');
         throw new ApiError(590, 'Can not fetch from discord API');
     }
 }
@@ -174,7 +177,8 @@ async function getGuildMemberFromDiscordAPI(guildId: Snowflake, discordId: Snowf
         else {
             throw new Error();
         }
-    } catch (err) {
+    } catch (error) {
+        logger.error({ guild_id: guildId, bot_token: config.discord.botToken, guild_member_id: discordId, error }, 'Failed to get guild member from discrod API');
         throw new ApiError(590, 'Can not fetch from discord API');
     }
 }

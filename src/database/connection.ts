@@ -1,4 +1,8 @@
 import { Connection } from 'mongoose';
+import parentLogger from '../config/logger';
+
+const logger = parentLogger.child({ module: 'Connection' });
+
 /**
  * Closes a given Mongoose connection.
  * @param {Connection} connection - The Mongoose connection object to be closed.
@@ -8,8 +12,8 @@ import { Connection } from 'mongoose';
 export async function closeConnection(connection: Connection) {
     try {
         await connection.close();
-        console.log('The connection to the database has been successfully closed.');
-    } catch (err) {
-        console.log('Error closing connection to the database:', err);
+        logger.info({ database: connection.name }, 'The connection to database has been successfully closed');
+    } catch (error) {
+        logger.fatal({ database: connection.name, error }, 'Failed to close the connection to the database');
     }
 }
