@@ -365,14 +365,14 @@ describe('member-activity routes', () => {
             expect(Array.isArray(res.body)).toBe(true);
             expect(res.body).toHaveLength(2)
             expect(res.body).toEqual(expect.arrayContaining([({
-                from: { id: '123456789', radius: 3, username: 'behzad_rabiei', stats: "SENDER" },
-                to: { id: '987654321', radius: 3, username: 'mrjackalop', stats: "RECEIVER" },
+                from: { avatar: null, id: "123456789", discordId: "123456789", joinedAt: "2023-03-07T00:00:00.000Z", ngu: "Behzad", radius: 3, roles: [], stats: "SENDER", username: "behzad_rabiei" },
+                to: { avatar: "AvatarLink", id: "987654321", discordId: '987654321', joinedAt: "2023-03-31T00:00:00.000Z", ngu: "Daniel", radius: 3, roles: [], stats: "RECEIVER", username: "mrjackalop"},
                 width: 1
             })
             ]))
             expect(res.body).toEqual(expect.arrayContaining([({
-                from: { id: '987654321', radius: 3, username: 'mrjackalop', stats: "RECEIVER" },
-                to: { id: '123456789', radius: 3, username: 'behzad_rabiei', stats: "SENDER" },
+                from: { avatar: "AvatarLink", id: "987654321", discordId: "987654321", joinedAt: "2023-03-31T00:00:00.000Z", ngu: "Daniel", radius: 3, roles: [], stats: "RECEIVER", username: "mrjackalop"},
+                to: { avatar: null, id: "123456789", discordId: '123456789', joinedAt: "2023-03-07T00:00:00.000Z", ngu: "Behzad", radius: 3, roles: [], stats: "SENDER", username: "behzad_rabiei"},
                 width: 2
             })
             ]))
@@ -764,7 +764,9 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberThree.joinedAt.toISOString(),
                 discriminator: guildMemberThree.discriminator,
-                activityComposition: ['Newly active']
+                activityComposition: ['Newly active'],
+                nickname: guildMemberThree.nickname,
+                globalName: guildMemberThree.globalName
             });
 
             expect(res.body.results[1]).toEqual({
@@ -779,7 +781,9 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberOne.joinedAt.toISOString(),
                 discriminator: guildMemberOne.discriminator,
-                activityComposition: ['Newly active', 'Became disengaged']
+                activityComposition: ['Newly active', 'Became disengaged'],
+                nickname: guildMemberOne.nickname,
+                globalName: guildMemberOne.globalName
             });
 
             expect(res.body.results[2]).toEqual({
@@ -793,7 +797,9 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberTwo.joinedAt.toISOString(),
                 discriminator: guildMemberTwo.discriminator,
-                activityComposition: ['Newly active']
+                activityComposition: ['Newly active'],
+                nickname: guildMemberTwo.nickname,
+                globalName: guildMemberTwo.globalName
             });
 
             expect(res.body.results[3]).toEqual({
@@ -805,7 +811,9 @@ describe('member-activity routes', () => {
                     { roleId: role1.roleId, name: role1.name, color: role1.color }],
                 joinedAt: guildMemberFour.joinedAt.toISOString(),
                 discriminator: guildMemberFour.discriminator,
-                activityComposition: ['Others']
+                activityComposition: ['Others'],
+                nickname: guildMemberFour.nickname,
+                globalName: guildMemberFour.globalName
             });
         })
 
@@ -1147,7 +1155,9 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberThree.joinedAt.toISOString(),
                 discriminator: guildMemberThree.discriminator,
-                activityComposition: ['Newly active', 'Dropped']
+                activityComposition: ['Newly active', 'Dropped'],
+                nickname: guildMemberThree.nickname,
+                globalName: guildMemberThree.globalName
             });
 
             expect(res.body.results[1]).toEqual({
@@ -1162,7 +1172,9 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberOne.joinedAt.toISOString(),
                 discriminator: guildMemberOne.discriminator,
-                activityComposition: ['Newly active', 'Joined', 'Dropped']
+                activityComposition: ['Newly active', 'Joined', 'Dropped'],
+                nickname: guildMemberOne.nickname,
+                globalName: guildMemberOne.globalName
             });
 
             expect(res.body.results[2]).toEqual({
@@ -1176,7 +1188,9 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberTwo.joinedAt.toISOString(),
                 discriminator: guildMemberTwo.discriminator,
-                activityComposition: ['Newly active', 'Dropped']
+                activityComposition: ['Newly active', 'Dropped'],
+                nickname: guildMemberTwo.nickname,
+                globalName: guildMemberTwo.globalName
             });
 
             expect(res.body.results[3]).toEqual({
@@ -1189,7 +1203,9 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberFour.joinedAt.toISOString(),
                 discriminator: guildMemberFour.discriminator,
-                activityComposition: ['Others']
+                activityComposition: ['Others'],
+                nickname: guildMemberFour.nickname,
+                globalName: guildMemberFour.globalName
             });
         })
 
@@ -1531,7 +1547,9 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberThree.joinedAt.toISOString(),
                 discriminator: guildMemberThree.discriminator,
-                activityComposition: ['Were newly active']
+                activityComposition: ['Were newly active'],
+                nickname: guildMemberThree.nickname,
+                globalName: guildMemberThree.globalName
             });
 
             expect(res.body.results[1]).toEqual({
@@ -1546,7 +1564,9 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberOne.joinedAt.toISOString(),
                 discriminator: guildMemberOne.discriminator,
-                activityComposition: ['Became disengaged', 'Were newly active', 'Were consistenly active']
+                activityComposition: ['Became disengaged', 'Were newly active', 'Were consistenly active'],
+                nickname: guildMemberOne.nickname,
+                globalName: guildMemberOne.globalName
             });
 
             expect(res.body.results[2]).toEqual({
@@ -1560,7 +1580,9 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberTwo.joinedAt.toISOString(),
                 discriminator: guildMemberTwo.discriminator,
-                activityComposition: ['Were newly active']
+                activityComposition: ['Were newly active'],
+                nickname: guildMemberTwo.nickname,
+                globalName: guildMemberTwo.globalName
             });
 
             expect(res.body.results[3]).toEqual({
@@ -1573,7 +1595,9 @@ describe('member-activity routes', () => {
                 ],
                 joinedAt: guildMemberFour.joinedAt.toISOString(),
                 discriminator: guildMemberFour.discriminator,
-                activityComposition: ['Others']
+                activityComposition: ['Others'],
+                nickname: guildMemberFour.nickname,
+                globalName: guildMemberFour.globalName
             });
         })
 

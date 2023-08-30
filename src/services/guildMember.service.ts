@@ -1,7 +1,6 @@
 import { Connection } from 'mongoose';
 import { sort } from '../utils';
-import memberActivityService from './memberActivity.service';
-import { IRole, IGuildMember } from '@togethercrew.dev/db';
+import { IGuildMember } from '@togethercrew.dev/db';
 
 type Filter = {
     activityComposition?: Array<string>;
@@ -23,6 +22,7 @@ type Options = {
  * @param {Array<string>} activityCompostionsTypes - An array containing types of activity compositions.
  * @returns {Promise<QueryResult>} - An object with the query results and other information like 'limit', 'page', 'totalPages', 'totalResults'.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function queryGuildMembers(connection: Connection, filter: Filter, options: Options, memberActivity: any, activityCompostionsTypes: Array<string>) {
     try {
         const { roles, ngu, activityComposition } = filter;
@@ -31,6 +31,7 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
         const page = options.page && parseInt(options.page, 10) > 0 ? parseInt(options.page, 10) : 1;
         const sortParams: Record<string, 1 | -1> = sortBy ? sort.sortByHandler(sortBy) : { username: 1 };
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let matchStage: any = {};
         let allActivityIds: string[] = [];
 
@@ -125,39 +126,33 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
         }
     }
 }
-/**
- *  handel guild member roles and displayName
- * @param {Array} guildMembers - guild members array.
- * @param {Array} roles - roles array.
- * @param {Any} memberActivity - The document containing the last member activity.
- * @param {Any} activityComposition
- * 
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function addNeededDataForTable(guildMembers: Array<any>, roles: Array<IRole>, memberActivity: any, activityComposition: Array<string>) {
 
-    guildMembers.forEach((guildMember) => {
-        guildMember.roles = guildMember.roles.map((roleId: string) => {
-            const role = roles.find((role: IRole) => role.roleId === roleId);
-            if (role) {
-                return { roleId: role.roleId, color: role.color, name: role.name };
-            }
-        });
-        guildMember.username = guildMember.discriminator === "0" ? guildMember.username : guildMember.username + "#" + guildMember.discriminator;
-        guildMember.activityComposition = memberActivityService.getActivityComposition(guildMember, memberActivity, activityComposition);
-        if (guildMember.nickname) {
-            guildMember.ngu = guildMember.nickname;
-        }
-        else if (guildMember.globalName) {
-            guildMember.ngu = guildMember.globalName;
-        }
-        else {
-            guildMember.ngu = guildMember.username;
-        }
-        delete guildMember.nickname;
-        delete guildMember.globalName;
-    });
+/**
+ * Determines the ngu (name to be displayed) for a given guild member.
+ * The name priority is as follows: nickname, globalName, username with discriminator.
+ * @param {IGuildMember} guildMember - The guild member for which the ngu needs to be determined.
+ * @returns {string} - The determined ngu for the guild member.
+ */
+function getNgu(guildMember: IGuildMember): string {
+    if (guildMember.nickname) {
+        return guildMember.nickname;
+    } else if (guildMember.globalName) {
+        return guildMember.globalName;
+    } else {
+        return guildMember.discriminator === "0" ? guildMember.username : guildMember.username + "#" + guildMember.discriminator;
+    }
 }
+
+/**
+ * Determines the username based on discriminator.
+ * @param {IGuildMember} guildMember - The guild member for which the ngu needs to be determined.
+ * @returns {string} - The determined username for guild member.
+ */
+function getUsername(guildMember: IGuildMember): string {
+    return guildMember.discriminator === "0" ? guildMember.username : guildMember.username + "#" + guildMember.discriminator;
+
+}
+
 
 /**
  * Get a guild member from the database based on the filter criteria.
@@ -177,7 +172,8 @@ async function getGuildMember(connection: Connection, filter: object): Promise<I
 
 export default {
     queryGuildMembers,
-    addNeededDataForTable,
-    getGuildMember
+    getGuildMember,
+    getNgu,
+    getUsername
 }
 

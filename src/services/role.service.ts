@@ -1,5 +1,5 @@
 import { Connection } from 'mongoose';
-import { IRole } from '@togethercrew.dev/db';
+import { IRole, IGuildMember } from '@togethercrew.dev/db';
 
 /**
  * Get a role from the database based on the filter criteria.
@@ -31,7 +31,25 @@ async function getRoles(connection: Connection, filter: object): Promise<IRole[]
     }
 }
 
+/**
+ * Retrieves an array of roles based on the role IDs present in the guild member's data.
+ * The roles are mapped from a provided roles array.
+ *
+ * @param {any} guildMember - The guild member for which roles need to be determined.
+ * @param {Array<IRole>} roles - An array of roles to match against the guild member's role IDs.
+ * @returns {Array<{ roleId: string; color: string; name: string }>} - An array of roles for the guild member.
+ */
+function getRolesForGuildMember(guildMember: IGuildMember, roles: Array<IRole>) {
+    return guildMember.roles.map((roleId: string) => {
+        const role = roles.find((role: IRole) => role.roleId === roleId);
+        if (role) {
+            return { roleId: role.roleId, color: role.color, name: role.name };
+        }
+    }).filter(role => role !== undefined);
+}
+
 export default {
     getRole,
     getRoles,
+    getRolesForGuildMember
 };
