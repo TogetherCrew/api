@@ -20,10 +20,13 @@ const connectToRabbitMQ = async () => {
 // Connect to Message Broker DB
 const connectToMB = async () => {
     try {
-        await MBConnection.connect(config.mongoose.dbURL);
+        const connection = await MBConnection.connect(config.mongoose.dbURL);
+        if (connection === undefined) {
+            throw new Error()
+        }
         logger.info({ url: config.mongoose.dbURL }, 'Connected to Message Broker!');
     } catch (error) {
-        logger.fatal({ url: config.mongoose.dbURL, error }, 'Failed to connect to MongoDB!');
+        logger.fatal({ url: config.mongoose.dbURL, error }, 'Failed to connect to Message Broker!!');
     }
 };
 
@@ -33,7 +36,7 @@ const connectToMongoDB = async () => {
         await mongoose.connect(config.mongoose.serverURL);
         logger.info({ url: config.mongoose.serverURL }, 'Connected to MongoDB!');
     } catch (error) {
-        logger.error({ url: config.mongoose.serverURL, error }, 'Failed to connect to MongoDB!')
+        logger.fatal({ url: config.mongoose.serverURL, error }, 'Failed to connect to MongoDB!')
     }
 };
 
