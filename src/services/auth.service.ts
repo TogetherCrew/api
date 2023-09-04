@@ -35,7 +35,6 @@ async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscor
             body: new URLSearchParams(data),
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         })
-        console.log(await response.json())
         if (response.ok) {
             return await response.json();
         }
@@ -43,7 +42,6 @@ async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscor
             throw new Error();
         }
     } catch (error) {
-        console.log(error)
         logger.error({ discordAuthFields, code, redirect_uri, error }, 'Failed to exchange discord code');
         throw new ApiError(590, 'Can not fetch from discord API');
     }
