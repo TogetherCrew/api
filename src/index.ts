@@ -20,10 +20,7 @@ const connectToRabbitMQ = async () => {
 // Connect to Message Broker DB
 const connectToMB = async () => {
     try {
-        const connection = await MBConnection.connect(config.mongoose.dbURL);
-        if (connection === undefined) {
-            throw new Error()
-        }
+        await MBConnection.connect(config.mongoose.dbURL);
         logger.info({ url: config.mongoose.dbURL }, 'Connected to Message Broker!');
     } catch (error) {
         logger.fatal({ url: config.mongoose.dbURL, error }, 'Failed to connect to Message Broker!!');
