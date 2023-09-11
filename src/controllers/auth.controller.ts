@@ -1,12 +1,16 @@
 import httpStatus from 'http-status';
 import { Request, Response } from 'express';
 import config from '../config';
-import { scopes, permissions } from '../config/dicord'
+import { scopes, permissions } from '../config/dicord';
+import { twitterScopes } from '../config/twitter';
 import { userService, authService, tokenService, guildService } from '../services';
 import { IDiscordUser, IDiscordOathBotCallback } from '@togethercrew.dev/db';
 import { catchAsync } from "../utils";
 import { authTokens } from '../interfaces/token.interface'
 import querystring from 'querystring';
+import { generateState, generateCodeChallenge, generateCodeVerifier, base64UrlEncode } from '../config/oauth2';
+import { ISessionRequest } from '../interfaces/request.interface';
+import logger from '../config/logger';
 
 const tryNow = catchAsync(async function (req: Request, res: Response) {
     res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.tryNow}&response_type=code&scope=${scopes.tryNow}&permissions=${permissions.ViewChannels | permissions.readMessageHistory}`);
@@ -103,6 +107,36 @@ const loginCallback = catchAsync(async function (req: Request, res: Response) {
     }
 });
 
+const twitterLogin = catchAsync(async function (req: ISessionRequest, res: Response) {
+    const codeVerifier = generateCodeVerifier();
+    const codeChallenge = generateCodeChallenge(codeVerifier);
+    const state = generateState();
+    req.session.codeVerifier = codeVerifier;
+    req.session.state = state;
+    res.redirect(`https://twitter.com/i/oauth2/authorize?response_type=code&client_id=${config.twitter.clientId}&redirect_uri=${config.twitter.callbackURI.login}&scope=${twitterScopes.login}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256`);
+});
+
+const twitterLoginCallback = catchAsync(async function (req: ISessionRequest, res: Response) {
+    const code = req.query.code as string;
+    const returnedState = req.query.state as string;
+    const storedState = req.session.state;
+    const storedCodeVerifier = req.session.codeVerifier;
+    logger.info({ code, returnedState, storedState, storedCodeVerifier }, 'session')
+    try {
+        if (!code || !returnedState || (returnedState !== storedState)) {
+            logger.error('fuck')
+            throw new Error();
+        }
+        const discordOathCallback: IDiscordOathBotCallback = await authService.exchangeTwitterCode(code, config.twitter.callbackURI.login, storedCodeVerifier);
+
+    } catch (error) {
+        const query = querystring.stringify({
+            "statusCode": 490
+        });
+        res.redirect(`${config.frontend.url}/callback?` + query);
+    }
+});
+
 const logout = catchAsync(async function (req: Request, res: Response) {
     const { refreshToken } = req.body;
     await authService.logout(refreshToken);
@@ -121,5 +155,7 @@ export default {
     login,
     loginCallback,
     refreshTokens,
-    logout
+    logout,
+    twitterLogin,
+    twitterLoginCallback
 }

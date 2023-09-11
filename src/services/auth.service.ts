@@ -15,7 +15,7 @@ const discordAuthFields = {
 };
 
 /**
- * exchange code with access token
+ * exchange discord code with access token
  * @param {string} code
    @param {string} redirect_uri
  * @returns {Promise<IDiscordOathBotCallback>}
@@ -43,6 +43,48 @@ async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscor
         }
     } catch (error) {
         logger.error({ discordAuthFields, code, redirect_uri, error }, 'Failed to exchange discord code');
+        throw new ApiError(590, 'Can not fetch from discord API');
+    }
+}
+
+
+/**
+ * exchange twitter code with access token
+ * @param {string} code
+   @param {string} redirect_uri
+ * @returns {Promise<IDiscordOathBotCallback>}
+ */
+async function exchangeTwitterCode(code: string, redirect_uri: string, code_verifier: string): Promise<IDiscordOathBotCallback> {
+    try {
+        const credentials = `${config.twitter.clientId}:${config.twitter.clientSecret}`;
+        const encodedCredentials = Buffer.from(credentials).toString('base64');
+
+        const data = {
+            code_verifier,
+            grant_type: 'authorization_code',
+            redirect_uri,
+            code
+        };
+
+        logger
+        const response = await fetch('https://api.twitter.com/2/oauth2/token', {
+            method: 'POST',
+            body: new URLSearchParams(data),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': `Basic ${encodedCredentials}`
+            }
+        })
+        logger.info({ response })
+        logger.info({ response: response.json() })
+        // if (response.ok) {
+        //     return await response.json();
+        // }
+        // else {
+        //     throw new Error();
+        // }
+    } catch (error) {
+        logger.error({ error }, 'Failed to exchange twitter code');
         throw new ApiError(590, 'Can not fetch from discord API');
     }
 }
@@ -116,6 +158,7 @@ async function refreshAuth(refreshToken: string) {
 export default {
     exchangeCode,
     refreshDiscordAuth,
+    exchangeTwitterCode,
     logout,
     refreshAuth
 }
