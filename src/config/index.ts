@@ -79,7 +79,7 @@ export default {
         clientSecret: envVars.TWITTER_CLIENT_SECRET,
         callbackURI: {
             login: envVars.TWITTER_LOGIN_CALLBACK_URI,
-        },
+        }
     },
     jwt: {
         secret: envVars.JWT_SECRET,
