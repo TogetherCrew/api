@@ -75,14 +75,12 @@ async function exchangeTwitterCode(code: string, redirect_uri: string, code_veri
                 'Authorization': `Basic ${encodedCredentials}`
             }
         })
-        logger.info({ response })
-        logger.info({ response: response.json() })
-        // if (response.ok) {
-        //     return await response.json();
-        // }
-        // else {
-        //     throw new Error();
-        // }
+        if (response.ok) {
+            return await response.json();
+        }
+        else {
+            throw new Error();
+        }
     } catch (error) {
         logger.error({ error }, 'Failed to exchange twitter code');
         throw new ApiError(590, 'Can not fetch from discord API');
