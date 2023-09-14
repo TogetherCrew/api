@@ -1,4 +1,4 @@
-export interface authTokens {
+export interface IAuthTokens {
     access: {
         token: string,
         expires: Date
@@ -9,7 +9,7 @@ export interface authTokens {
     }
 }
 
-export interface twitterAuthTokens {
+export interface ITwitterAuthTokens {
     access_token: string;
     token_type: string;
     expires_in: number;

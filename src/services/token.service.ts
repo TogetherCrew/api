@@ -7,8 +7,8 @@ import { tokenTypes } from '../config/tokens';
 import { ApiError } from '../utils';
 import authService from './auth.service';
 import { IDiscordOathBotCallback, IToken, Token } from '@togethercrew.dev/db';
-import { authTokens } from '../interfaces/token.interface';
-
+import { IAuthTokens } from '../interfaces/token.interface';
+import { ITwitterAuthTokens } from '../interfaces/token.interface';
 /**
  * Generate token
  * @param {Snowflake} discordId
@@ -66,9 +66,9 @@ async function verifyToken(token: string, type: string) {
 /**
  * Generate auth tokens
  * @param {Snowflake} discordId
- * @returns {Promise<Object>}
+ * @returns {Promise<IAuthTokens>}
  */
-async function generateAuthTokens(discordId: Snowflake): Promise<authTokens> {
+async function generateAuthTokens(discordId: Snowflake): Promise<IAuthTokens> {
     const accessTokenExpires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
     const accessToken = generateToken(discordId, accessTokenExpires, tokenTypes.ACCESS);
 
@@ -140,7 +140,60 @@ async function getDiscordAuth(discordId: Snowflake) {
             expires: DiscordRefreshTokenDoc.expires
         }
     };
+}
 
+/**
+ * save twitter auths (delete old ones)
+ * @param {Snowflake} discordId
+ * @param {IDiscordOathBotCallback} discordAuth
+ * @returns {Promise<Object>}
+ */
+async function saveTwitterAuth(discordId: Snowflake, twitterAuths: ITwitterAuthTokens) {
+    await Token.deleteMany({ user: discordId, type: { $in: [tokenTypes.TWITTER_ACCESS, tokenTypes.TWITTER_REFRESH] } });
+    const accessTokenExpires = moment().add(twitterAuths.expires_in, 'seconds');
+    const refreshTokenExpires = moment().add(config.jwt.discordRefreshExpirationDays, 'days');
+    const twitterAccessTokenDoc: IToken = await saveToken(twitterAuths.access_token, discordId, accessTokenExpires, tokenTypes.TWITTER_ACCESS);
+    const twitterRefreshTokenDoc: IToken = await saveToken(twitterAuths.refresh_token, discordId, refreshTokenExpires, tokenTypes.TWITTER_REFRESH);
+
+    return {
+        access: {
+            token: twitterAccessTokenDoc.token,
+            expires: twitterAccessTokenDoc.expires
+        },
+        refresh: {
+            token: twitterRefreshTokenDoc.token,
+            expires: twitterRefreshTokenDoc.expires
+        }
+    }
+}
+
+/**
+ * get discord Auths by user discordId 
+ * will request new discord auths if access token is expired
+ * @param {Snowflake} discordId
+ * @param {IDiscordOathBotCallback} discordAuth
+ * @returns {Promise<Object>}
+ */
+async function getTwitterAuth(discordId: Snowflake) {
+    const twitterAccessTokenDoc = await Token.findOne({ user: discordId, type: tokenTypes.TWITTER_ACCESS });
+    const twitterRefreshTokenDoc = await Token.findOne({ user: discordId, type: tokenTypes.TWITTER_REFRESH });
+
+    if (!twitterAccessTokenDoc || !twitterRefreshTokenDoc) { throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'twitter auth tokens missed'); }
+    if (new Date() > twitterAccessTokenDoc.expires) {
+        const twitterAuths: ITwitterAuthTokens = await authService.refreshTwitterAuth(twitterRefreshTokenDoc.token);
+        return saveTwitterAuth(discordId, twitterAuths);
+    }
+
+    return {
+        access: {
+            token: twitterAccessTokenDoc.token,
+            expires: twitterAccessTokenDoc.expires
+        },
+        refresh: {
+            token: twitterRefreshTokenDoc.token,
+            expires: twitterRefreshTokenDoc.expires
+        }
+    };
 }
 
 export default {
@@ -149,5 +202,7 @@ export default {
     generateAuthTokens,
     saveToken,
     saveDiscordAuth,
-    getDiscordAuth
+    getDiscordAuth,
+    saveTwitterAuth,
+    getTwitterAuth
 }

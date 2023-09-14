@@ -4,8 +4,8 @@ import config from '../config';
 import { IDiscordUser, IUser, User } from '@togethercrew.dev/db';
 import { ApiError } from '../utils';
 import httpStatus = require('http-status');
-import { IUserUpdateBody } from '../interfaces/user.interface';
 import parentLogger from '../config/logger';
+import { IUserUpdateBody } from '@togethercrew.dev/db';
 import { ITwitterUser } from 'src/interfaces/twitter.interface';
 
 const logger = parentLogger.child({ module: 'UserService' });
@@ -109,6 +109,7 @@ async function getCurrentUserGuilds(accessToken: string) {
  * @returns {Promise<IGuild>}
  */
 async function updateUserByDiscordId(discordId: Snowflake, updateBody: IUserUpdateBody) {
+    console.log(updateBody)
     const user = await User.findOne({ discordId });
     if (!user) {
         throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
@@ -116,8 +117,6 @@ async function updateUserByDiscordId(discordId: Snowflake, updateBody: IUserUpda
     if (updateBody.email && (await User.findOne({ email: updateBody.email, discordId: { $ne: discordId } }))) {
         throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
     }
-
-
     Object.assign(user, updateBody);
     await user.save();
     return user;
@@ -135,7 +134,7 @@ async function getUserFromTwitterAPI(accessToken: string): Promise<ITwitterUser>
             headers: { 'Authorization': `Bearer ${accessToken}` }
         });
         if (response.ok) {
-            return await response.json();
+            return (await response.json()).data;
         }
         else {
             throw new Error();

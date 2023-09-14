@@ -36,7 +36,7 @@ app.use(compression());
 app.use(cors());
 
 app.use(session({
-    secret: 'your-secret-key',
+    secret: config.session.secret,
     resave: false,
     saveUninitialized: true
 }));

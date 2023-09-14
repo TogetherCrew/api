@@ -6,10 +6,10 @@ import { twitterScopes } from '../config/twitter';
 import { userService, authService, tokenService, guildService } from '../services';
 import { IDiscordUser, IDiscordOathBotCallback } from '@togethercrew.dev/db';
 import { catchAsync } from "../utils";
-import { authTokens } from '../interfaces/token.interface'
+import { IAuthTokens } from '../interfaces/token.interface'
 import querystring from 'querystring';
 import { generateState, generateCodeChallenge, generateCodeVerifier } from '../config/oauth2';
-import { ISessionRequest } from '../interfaces/request.interface';
+import { ISessionRequest, IAuthAndSessionRequest } from '../interfaces/request.interface';
 import logger from '../config/logger';
 
 const tryNow = catchAsync(async function (req: Request, res: Response) {
@@ -52,7 +52,7 @@ const tryNowCallback = catchAsync(async function (req: Request, res: Response) {
             guildId = guild.guildId;
         }
         tokenService.saveDiscordAuth(user.discordId, discordOathCallback);
-        const tokens: authTokens = await tokenService.generateAuthTokens(user.discordId);
+        const tokens: IAuthTokens = await tokenService.generateAuthTokens(user.discordId);
         const query = querystring.stringify({
             "statusCode": statusCode, "guildId": guildId, "guildName": guildName,
             "accessToken": tokens.access.token, "accessExp": tokens.access.expires.toString(), "refreshToken": tokens.refresh.token, "refreshExp": tokens.refresh.expires.toString(),
@@ -91,7 +91,7 @@ const loginCallback = catchAsync(async function (req: Request, res: Response) {
                 statusCode = 603;
             }
             tokenService.saveDiscordAuth(user.discordId, discordOathCallback);
-            const tokens: authTokens = await tokenService.generateAuthTokens(user.discordId);
+            const tokens: IAuthTokens = await tokenService.generateAuthTokens(user.discordId);
             const query = querystring.stringify({
                 "statusCode": statusCode, "guildId": guild?.guildId, "guildName": guild?.name,
                 "accessToken": tokens.access.token, "accessExp": tokens.access.expires.toString(), "refreshToken": tokens.refresh.token, "refreshExp": tokens.refresh.expires.toString(),
@@ -107,14 +107,13 @@ const loginCallback = catchAsync(async function (req: Request, res: Response) {
     }
 });
 
-const twitterLogin = catchAsync(async function (req: ISessionRequest, res: Response) {
+const twitterLogin = catchAsync(async function (req: IAuthAndSessionRequest, res: Response) {
     const codeVerifier = generateCodeVerifier();
     const codeChallenge = generateCodeChallenge(codeVerifier);
     const state = generateState();
     req.session.codeVerifier = codeVerifier;
     req.session.state = state;
-
-    logger.info({ codeVerifier })
+    req.session.discordId = req.user.discordId
     res.redirect(`https://twitter.com/i/oauth2/authorize?response_type=code&client_id=${config.twitter.clientId}&redirect_uri=${config.twitter.callbackURI.login}&scope=${twitterScopes.login}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256`);
 });
 
@@ -123,19 +122,26 @@ const twitterLoginCallback = catchAsync(async function (req: ISessionRequest, re
     const returnedState = req.query.state as string;
     const storedState = req.session.state;
     const storedCodeVerifier = req.session.codeVerifier;
-    logger.info({ storedCodeVerifier }, 'session')
+    const discordId = req.session.discordId;
+    console.log(storedState, storedCodeVerifier, discordId)
+    logger.info({ storedState, storedCodeVerifier, discordId }, 'session')
     try {
         if (!code || !returnedState || (returnedState !== storedState)) {
             throw new Error();
         }
-        const discordOathCallback = await authService.exchangeTwitterCode(code, config.twitter.callbackURI.login, storedCodeVerifier);
-        console.log(discordOathCallback)
-        const user = await userService.getUserFromTwitterAPI(discordOathCallback.access_token);
+        const twitterOAuthCallback = await authService.exchangeTwitterCode(code, config.twitter.callbackURI.login, storedCodeVerifier);
+        console.log(twitterOAuthCallback)
+        const twitterUser = await userService.getUserFromTwitterAPI(twitterOAuthCallback.access_token);
+        console.log(twitterUser)
+        const user = await userService.updateUserByDiscordId(discordId, {
+            twitterId: twitterUser.id,
+            twitterUsername: twitterUser.username,
+            twitterProfileImageUrl: twitterUser.profile_image_url
+        })
         console.log(user)
 
-
-
     } catch (error) {
+        logger.error({ error })
         const query = querystring.stringify({
             "statusCode": 490
         });

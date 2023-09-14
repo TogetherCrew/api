@@ -93,8 +93,6 @@ async function exchangeTwitterCode(code: string, redirect_uri: string, code_veri
             redirect_uri,
             code
         };
-
-        logger
         const response = await fetch('https://api.twitter.com/2/oauth2/token', {
             method: 'POST',
             body: new URLSearchParams(data),

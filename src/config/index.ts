@@ -38,6 +38,8 @@ const envVarsSchema = Joi.object()
         NEO4J_PASSWORD: Joi.string().required().description('NEO4J password'),
         NEO4J_DB: Joi.string().required().description('NEO4J DB name'),
         LOG_LEVEL: Joi.string().required().description('Min allowed log level'),
+        SESSION_SECRET: Joi.string().required().description('Session secret'),
+
     })
     .unknown();
 
@@ -102,4 +104,7 @@ export default {
     logger: {
         level: envVars.LOG_LEVEL,
     },
+    session: {
+        secret: envVars.SESSION_SECRET
+    }
 }
