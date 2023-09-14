@@ -109,7 +109,6 @@ async function getCurrentUserGuilds(accessToken: string) {
  * @returns {Promise<IGuild>}
  */
 async function updateUserByDiscordId(discordId: Snowflake, updateBody: IUserUpdateBody) {
-    console.log(updateBody)
     const user = await User.findOne({ discordId });
     if (!user) {
         throw new ApiError(httpStatus.NOT_FOUND, 'User not found');

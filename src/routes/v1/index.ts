@@ -6,6 +6,7 @@ import usersRoute from './users.route'
 import heatmapsRoute from './heatmaps.route';
 import notionRoute from './notion.route';
 import memberActivityRoute from './memberActivity.route';
+import twitterRoute from './twitter.route';
 
 const router = express.Router();
 
@@ -37,9 +38,12 @@ const defaultRoutes = [
     {
         path: '/member-activity',
         route: memberActivityRoute
+    },
+    {
+        path: '/twitter',
+        route: twitterRoute
     }
 ];
-
 
 defaultRoutes.forEach((route) => {
     router.use(route.path, route.route);

@@ -8,7 +8,8 @@ import { scopes, permissions } from '../config/dicord';
 import { IDiscordUser, IDiscordOathBotCallback, databaseService, IChannel } from '@togethercrew.dev/db';
 import querystring from 'querystring';
 import { closeConnection } from '../database/connection';
-import { IChannelWithViewAndReadPermissions } from '../interfaces/channel.interface'
+import { IChannelWithViewAndReadPermissions } from '../interfaces/channel.interface';
+
 const getGuilds = catchAsync(async function (req: IAuthRequest, res: Response) {
     const filter = pick(req.query, ['isDisconnected', 'isInProgress']);
     filter.user = req.user.discordId;
