@@ -1,5 +1,5 @@
 export interface ITwitterUser {
-    twitterId?: string;
-    twitterUsername?: string;
-    twitterProfileImageUrl?: string;
+    profile_image_url: string;
+    username: string;
+    id: string;
 }
