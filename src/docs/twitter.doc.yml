@@ -1,0 +1,21 @@
+paths:  
+  /api/v1/twitter/disconnect:
+    post:
+      tags:
+        - [Twitter]
+      summary: Disconnect a twitter account
+      description:  set twitter fields to null + remove twitter auth tokens
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: No Content
+          $ref: "#/components/responses/NoContent"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+
+
+
+
+
