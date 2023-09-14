@@ -1,5 +1,5 @@
 const twitterScopes = {
-    login: "tweet.read offline.access"
+    login: "tweet.read offline.access users.read"
 };
 
 

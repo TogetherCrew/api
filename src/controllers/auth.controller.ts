@@ -130,6 +130,10 @@ const twitterLoginCallback = catchAsync(async function (req: ISessionRequest, re
         }
         const discordOathCallback = await authService.exchangeTwitterCode(code, config.twitter.callbackURI.login, storedCodeVerifier);
         console.log(discordOathCallback)
+        const user = await userService.getUserFromTwitterAPI(discordOathCallback.access_token);
+        console.log(user)
+
+
 
     } catch (error) {
         const query = querystring.stringify({

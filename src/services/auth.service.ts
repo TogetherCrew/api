@@ -147,38 +147,6 @@ async function refreshTwitterAuth(refreshToken: string): Promise<twitterAuthToke
 }
 
 /**
- * invalidate twitter token
- * @param {string} accessToken
- * @returns {Promise<twitterAuthTokens>}
- */
-async function invalidateTwitterToken(accessToken: string): Promise<twitterAuthTokens> {
-    try {
-        const data = {
-            client_id: config.twitter.clientId,
-            client_secret: config.twitter.clientSecret,
-            access_token: accessToken
-        };
-
-        const response = await fetch('https://api.twitter.com/oauth2/invalidate_token', {
-            method: 'POST',
-            body: new URLSearchParams(data),
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-        })
-        if (response.ok) {
-            return await response.json();
-        }
-        else {
-            throw new Error();
-        }
-    } catch (error) {
-        logger.error({ accessToken, error }, 'Failed to invalidate twitter token');
-        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Can not fetch from twitter API');
-    }
-}
-
-
-
-/**
  * Logout
  * @param {string} refreshToken
  * @returns {Promise}
@@ -218,7 +186,6 @@ export default {
     refreshDiscordAuth,
     exchangeTwitterCode,
     refreshTwitterAuth,
-    invalidateTwitterToken,
     logout,
     refreshAuth
 }

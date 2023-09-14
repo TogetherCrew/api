@@ -6,6 +6,7 @@ import { ApiError } from '../utils';
 import httpStatus = require('http-status');
 import { IUserUpdateBody } from '../interfaces/user.interface';
 import parentLogger from '../config/logger';
+import { ITwitterUser } from 'src/interfaces/twitter.interface';
 
 const logger = parentLogger.child({ module: 'UserService' });
 
@@ -43,7 +44,6 @@ async function getUserFromDiscordAPI(accessToken: string): Promise<IDiscordUser>
         throw new ApiError(590, 'Can not fetch from discord API');
     }
 }
-
 
 /**
  * get user data from discord api by access token
@@ -123,6 +123,28 @@ async function updateUserByDiscordId(discordId: Snowflake, updateBody: IUserUpda
     return user;
 }
 
+/**
+ * get user data from twitter api by access token
+ * @param {String} accessToken
+ * @returns {Promise<ITwitterUser>}
+ */
+async function getUserFromTwitterAPI(accessToken: string): Promise<ITwitterUser> {
+    try {
+        const response = await fetch('https://api.twitter.com/2/users/me?user.fields=profile_image_url,name,id', {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        if (response.ok) {
+            return await response.json();
+        }
+        else {
+            throw new Error();
+        }
+    } catch (error) {
+        logger.error({ accessToken, error }, 'Failed to get user from twitter API');
+        throw new ApiError(590, 'Can not fetch from twitter API');
+    }
+}
 
 export default {
     createUser,
@@ -130,5 +152,6 @@ export default {
     getBotFromDiscordAPI,
     getUserByDiscordId,
     getCurrentUserGuilds,
-    updateUserByDiscordId
+    updateUserByDiscordId,
+    getUserFromTwitterAPI
 }
