@@ -113,6 +113,8 @@ const twitterLogin = catchAsync(async function (req: ISessionRequest, res: Respo
     const state = generateState();
     req.session.codeVerifier = codeVerifier;
     req.session.state = state;
+
+    logger.info({ codeVerifier })
     res.redirect(`https://twitter.com/i/oauth2/authorize?response_type=code&client_id=${config.twitter.clientId}&redirect_uri=${config.twitter.callbackURI.login}&scope=${twitterScopes.login}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256`);
 });
 
@@ -121,13 +123,13 @@ const twitterLoginCallback = catchAsync(async function (req: ISessionRequest, re
     const returnedState = req.query.state as string;
     const storedState = req.session.state;
     const storedCodeVerifier = req.session.codeVerifier;
-    logger.info({ code, returnedState, storedState, storedCodeVerifier }, 'session')
+    logger.info({ storedCodeVerifier }, 'session')
     try {
         if (!code || !returnedState || (returnedState !== storedState)) {
-            logger.error('fuck')
             throw new Error();
         }
         const discordOathCallback: IDiscordOathBotCallback = await authService.exchangeTwitterCode(code, config.twitter.callbackURI.login, storedCodeVerifier);
+        console.log(discordOathCallback)
 
     } catch (error) {
         const query = querystring.stringify({

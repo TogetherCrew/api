@@ -6,6 +6,7 @@ import userService from './user.service';
 import { tokenTypes } from '../config/tokens';
 import { ApiError } from '../utils';
 import { Token, IDiscordOathBotCallback } from '@togethercrew.dev/db';
+import { twitterAuthTokens } from '../interfaces/token.interface';
 import parentLogger from '../config/logger';
 
 const logger = parentLogger.child({ module: 'AuthService' });
@@ -52,9 +53,9 @@ async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscor
  * exchange twitter code with access token
  * @param {string} code
    @param {string} redirect_uri
- * @returns {Promise<IDiscordOathBotCallback>}
+ * @returns {Promise<twitterAuthTokens>}
  */
-async function exchangeTwitterCode(code: string, redirect_uri: string, code_verifier: string): Promise<IDiscordOathBotCallback> {
+async function exchangeTwitterCode(code: string, redirect_uri: string, code_verifier: string): Promise<twitterAuthTokens> {
     try {
         const credentials = `${config.twitter.clientId}:${config.twitter.clientSecret}`;
         const encodedCredentials = Buffer.from(credentials).toString('base64');
@@ -86,6 +87,39 @@ async function exchangeTwitterCode(code: string, redirect_uri: string, code_veri
         throw new ApiError(590, 'Can not fetch from discord API');
     }
 }
+
+/**
+ * refresh token
+ * @param {string} refreshToken
+ * @returns {Promise<IDiscordOathBotCallback>}
+ */
+async function refreshTwitterAuth(refreshToken: string): Promise<IDiscordOathBotCallback> {
+    try {
+        const data = {
+            client_id: config.discord.clientId,
+            client_secret: config.discord.clientSecret,
+            grant_type: 'refresh_token',
+            refresh_token: refreshToken
+        };
+
+        const response = await fetch('https://discord.com/api/oauth2/token', {
+            method: 'POST',
+            body: new URLSearchParams(data),
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        })
+        if (response.ok) {
+            return await response.json();
+        }
+        else {
+            throw new Error();
+        }
+    } catch (error) {
+        logger.error({ discordAuthFields, refreshToken, error }, 'Failed to refresh discord auth');
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Can not fetch from discord API');
+    }
+}
+
+
 
 /**
  * refresh token
