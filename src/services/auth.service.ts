@@ -10,10 +10,6 @@ import { twitterAuthTokens } from '../interfaces/token.interface';
 import parentLogger from '../config/logger';
 
 const logger = parentLogger.child({ module: 'AuthService' });
-const discordAuthFields = {
-    client_id: config.discord.clientId,
-    client_secret: config.discord.clientSecret,
-};
 
 /**
  * exchange discord code with access token
@@ -43,8 +39,39 @@ async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscor
             throw new Error();
         }
     } catch (error) {
-        logger.error({ discordAuthFields, code, redirect_uri, error }, 'Failed to exchange discord code');
+        logger.error({ code, redirect_uri, error }, 'Failed to exchange discord code');
         throw new ApiError(590, 'Can not fetch from discord API');
+    }
+}
+
+/**
+ * refresh token
+ * @param {string} refreshToken
+ * @returns {Promise<IDiscordOathBotCallback>}
+ */
+async function refreshDiscordAuth(refreshToken: string): Promise<IDiscordOathBotCallback> {
+    try {
+        const data = {
+            client_id: config.discord.clientId,
+            client_secret: config.discord.clientSecret,
+            grant_type: 'refresh_token',
+            refresh_token: refreshToken
+        };
+
+        const response = await fetch('https://discord.com/api/oauth2/token', {
+            method: 'POST',
+            body: new URLSearchParams(data),
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        })
+        if (response.ok) {
+            return await response.json();
+        }
+        else {
+            throw new Error();
+        }
+    } catch (error) {
+        logger.error({ refreshToken, error }, 'Failed to refresh discord auth');
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Can not fetch from discord API');
     }
 }
 
@@ -89,20 +116,20 @@ async function exchangeTwitterCode(code: string, redirect_uri: string, code_veri
 }
 
 /**
- * refresh token
+ * refresh twitter token
  * @param {string} refreshToken
- * @returns {Promise<IDiscordOathBotCallback>}
+ * @returns {Promise<twitterAuthTokens>}
  */
-async function refreshTwitterAuth(refreshToken: string): Promise<IDiscordOathBotCallback> {
+async function refreshTwitterAuth(refreshToken: string): Promise<twitterAuthTokens> {
     try {
         const data = {
-            client_id: config.discord.clientId,
-            client_secret: config.discord.clientSecret,
+            client_id: config.twitter.clientId,
+            client_secret: config.twitter.clientSecret,
             grant_type: 'refresh_token',
             refresh_token: refreshToken
         };
 
-        const response = await fetch('https://discord.com/api/oauth2/token', {
+        const response = await fetch('https://api.twitter.com/2/oauth2/token', {
             method: 'POST',
             body: new URLSearchParams(data),
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
@@ -114,28 +141,25 @@ async function refreshTwitterAuth(refreshToken: string): Promise<IDiscordOathBot
             throw new Error();
         }
     } catch (error) {
-        logger.error({ discordAuthFields, refreshToken, error }, 'Failed to refresh discord auth');
-        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Can not fetch from discord API');
+        logger.error({ refreshToken, error }, 'Failed to refresh twitter auth');
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Can not fetch from twitter API');
     }
 }
-
-
 
 /**
- * refresh token
- * @param {string} refreshToken
- * @returns {Promise<IDiscordOathBotCallback>}
+ * invalidate twitter token
+ * @param {string} accessToken
+ * @returns {Promise<twitterAuthTokens>}
  */
-async function refreshDiscordAuth(refreshToken: string): Promise<IDiscordOathBotCallback> {
+async function invalidateTwitterToken(accessToken: string): Promise<twitterAuthTokens> {
     try {
         const data = {
-            client_id: config.discord.clientId,
-            client_secret: config.discord.clientSecret,
-            grant_type: 'refresh_token',
-            refresh_token: refreshToken
+            client_id: config.twitter.clientId,
+            client_secret: config.twitter.clientSecret,
+            access_token: accessToken
         };
 
-        const response = await fetch('https://discord.com/api/oauth2/token', {
+        const response = await fetch('https://api.twitter.com/oauth2/invalidate_token', {
             method: 'POST',
             body: new URLSearchParams(data),
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
@@ -147,10 +171,12 @@ async function refreshDiscordAuth(refreshToken: string): Promise<IDiscordOathBot
             throw new Error();
         }
     } catch (error) {
-        logger.error({ discordAuthFields, refreshToken, error }, 'Failed to refresh discord auth');
-        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Can not fetch from discord API');
+        logger.error({ accessToken, error }, 'Failed to invalidate twitter token');
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Can not fetch from twitter API');
     }
 }
+
+
 
 /**
  * Logout
@@ -191,6 +217,8 @@ export default {
     exchangeCode,
     refreshDiscordAuth,
     exchangeTwitterCode,
+    refreshTwitterAuth,
+    invalidateTwitterToken,
     logout,
     refreshAuth
 }

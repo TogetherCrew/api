@@ -8,7 +8,7 @@ import { IDiscordUser, IDiscordOathBotCallback } from '@togethercrew.dev/db';
 import { catchAsync } from "../utils";
 import { authTokens } from '../interfaces/token.interface'
 import querystring from 'querystring';
-import { generateState, generateCodeChallenge, generateCodeVerifier, base64UrlEncode } from '../config/oauth2';
+import { generateState, generateCodeChallenge, generateCodeVerifier } from '../config/oauth2';
 import { ISessionRequest } from '../interfaces/request.interface';
 import logger from '../config/logger';
 
@@ -128,7 +128,7 @@ const twitterLoginCallback = catchAsync(async function (req: ISessionRequest, re
         if (!code || !returnedState || (returnedState !== storedState)) {
             throw new Error();
         }
-        const discordOathCallback: IDiscordOathBotCallback = await authService.exchangeTwitterCode(code, config.twitter.callbackURI.login, storedCodeVerifier);
+        const discordOathCallback = await authService.exchangeTwitterCode(code, config.twitter.callbackURI.login, storedCodeVerifier);
         console.log(discordOathCallback)
 
     } catch (error) {
