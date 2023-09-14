@@ -1,6 +1,9 @@
 import { Connection } from 'mongoose';
 import { sort } from '../utils';
 import { IGuildMember } from '@togethercrew.dev/db';
+import parentLogger from '../config/logger';
+
+const logger = parentLogger.child({ module: 'GuildMemberService' });
 
 type Filter = {
     activityComposition?: Array<string>;
@@ -115,8 +118,8 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
             totalPages,
             totalResults,
         }
-    } catch (err) {
-        console.log(err);
+    } catch (error) {
+        logger.error({ database: connection.name, filter, options, memberActivity, activityCompostionsTypes, error }, 'Failed to query guild members');
         return {
             results: [],
             limit: 10,
@@ -126,6 +129,7 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
         }
     }
 }
+
 
 /**
  * Determines the ngu (name to be displayed) for a given guild member.
@@ -161,12 +165,7 @@ function getUsername(guildMember: IGuildMember): string {
  * @returns {Promise<IGuildMember | null>} - A promise that resolves to the matching guild member object or null if not found.
  */
 async function getGuildMember(connection: Connection, filter: object): Promise<IGuildMember | null> {
-    try {
-        return await connection.models.GuildMember.findOne(filter);
-    } catch (error) {
-        console.log('Failed to retrieve  guild member', error);
-        return null;
-    }
+    return await connection.models.GuildMember.findOne(filter);
 }
 
 

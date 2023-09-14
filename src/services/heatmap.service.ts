@@ -1,15 +1,18 @@
 import { Connection } from 'mongoose';
 import { IHeatmapChartRequestBody } from '../interfaces/request.interface';
 import { date, math } from '../utils';
+import parentLogger from '../config/logger';
+
+const logger = parentLogger.child({ module: 'HeatmapService' });
 
 /**
  * get heatmap chart 
  * @param {Connection} connection
- * @param {IHeatmapChartRequestBody} Body
+ * @param {IHeatmapChartRequestBody} body
  * @returns {Array<Array<number>>}
  */
-async function getHeatmapChart(connection: Connection, Body: IHeatmapChartRequestBody) {
-    const { startDate, endDate, channelIds } = Body;
+async function getHeatmapChart(connection: Connection, body: IHeatmapChartRequestBody) {
+    const { startDate, endDate, channelIds } = body;
     try {
         const heatmaps = await connection.models.HeatMap.aggregate([
 
@@ -72,8 +75,8 @@ async function getHeatmapChart(connection: Connection, Body: IHeatmapChartReques
         // Convert Arrays of objects to array of 2D arrays
         return heatmaps.map(object => [object._id.dayOfWeek, object._id.hour, object.interactions]);
 
-    } catch (err) {
-        console.log(err);
+    } catch (error) {
+        logger.error({ database: connection.name, body, error }, 'Failed to get heatmap chart');
         return [];
     }
 }
@@ -335,7 +338,7 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
         }
 
     } catch (err) {
-        console.log(err);
+        logger.error({ database: connection.name, startDate, endDate }, 'Failed to get line graph data');
         return {
             categories: [],
             series: [],

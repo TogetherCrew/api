@@ -6,6 +6,14 @@ import userService from './user.service';
 import { tokenTypes } from '../config/tokens';
 import { ApiError } from '../utils';
 import { Token, IDiscordOathBotCallback } from '@togethercrew.dev/db';
+import parentLogger from '../config/logger';
+
+const logger = parentLogger.child({ module: 'AuthService' });
+const discordAuthFields = {
+    client_id: config.discord.clientId,
+    client_secret: config.discord.clientSecret,
+};
+
 /**
  * exchange code with access token
  * @param {string} code
@@ -33,7 +41,8 @@ async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscor
         else {
             throw new Error();
         }
-    } catch (err) {
+    } catch (error) {
+        logger.error({ discordAuthFields, code, redirect_uri, error }, 'Failed to exchange discord code');
         throw new ApiError(590, 'Can not fetch from discord API');
     }
 }
@@ -63,7 +72,8 @@ async function refreshDiscordAuth(refreshToken: string): Promise<IDiscordOathBot
         else {
             throw new Error();
         }
-    } catch (err) {
+    } catch (error) {
+        logger.error({ discordAuthFields, refreshToken, error }, 'Failed to refresh discord auth');
         throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Can not fetch from discord API');
     }
 }

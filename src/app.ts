@@ -8,9 +8,15 @@ import httpStatus from "http-status";
 import { error, sentry } from "./middlewares";
 import { ApiError } from "./utils";
 import routes from "./routes/v1";
+import morgan from "./config/morgan";
+import config from "./config";
 
 const app: Application = express();
 
+if (config.env !== 'test') {
+    app.use(morgan.successHandler);
+    app.use(morgan.errorHandler);
+}
 sentry.InitSentry(app)
 
 // set security HTTP headers

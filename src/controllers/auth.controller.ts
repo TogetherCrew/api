@@ -95,7 +95,7 @@ const loginCallback = catchAsync(async function (req: Request, res: Response) {
             res.redirect(`${config.frontend.url}/callback?` + query);
         }
 
-    } catch (err) {
+    } catch (error) {
         const query = querystring.stringify({
             "statusCode": 490
         });

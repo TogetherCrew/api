@@ -5,6 +5,9 @@ import { IDiscordUser, IUser, User } from '@togethercrew.dev/db';
 import { ApiError } from '../utils';
 import httpStatus = require('http-status');
 import { IUserUpdateBody } from '../interfaces/user.interface';
+import parentLogger from '../config/logger';
+
+const logger = parentLogger.child({ module: 'UserService' });
 
 /**
  * Create user base on discord profile
@@ -35,7 +38,8 @@ async function getUserFromDiscordAPI(accessToken: string): Promise<IDiscordUser>
         else {
             throw new Error();
         }
-    } catch (err) {
+    } catch (error) {
+        logger.error({ accessToken, error }, 'Failed to get user from Discord API');
         throw new ApiError(590, 'Can not fetch from discord API');
     }
 }
@@ -58,7 +62,8 @@ async function getBotFromDiscordAPI(): Promise<IDiscordUser> {
         else {
             throw new Error();
         }
-    } catch (err) {
+    } catch (error) {
+        logger.error({ bot_token: config.discord.botToken, error }, 'Failed to get bot from Discord API');
         throw new ApiError(590, 'Can not fetch from discord API');
     }
 }
@@ -90,7 +95,8 @@ async function getCurrentUserGuilds(accessToken: string) {
         else {
             throw new Error();
         }
-    } catch (err) {
+    } catch (error) {
+        logger.error({ bot_token: config.discord.botToken, error }, 'Failed to get user\'s guilds from disocrd API');
         throw new ApiError(590, 'Can not fetch from discord API');
     }
 }
