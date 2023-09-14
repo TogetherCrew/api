@@ -6,7 +6,7 @@ import userService from './user.service';
 import { tokenTypes } from '../config/tokens';
 import { ApiError } from '../utils';
 import { Token, IDiscordOathBotCallback } from '@togethercrew.dev/db';
-import { twitterAuthTokens } from '../interfaces/token.interface';
+import { ITwitterAuthTokens } from '../interfaces/token.interface';
 import parentLogger from '../config/logger';
 
 const logger = parentLogger.child({ module: 'AuthService' });
@@ -80,9 +80,9 @@ async function refreshDiscordAuth(refreshToken: string): Promise<IDiscordOathBot
  * exchange twitter code with access token
  * @param {string} code
    @param {string} redirect_uri
- * @returns {Promise<twitterAuthTokens>}
+ * @returns {Promise<ITwitterAuthTokens>}
  */
-async function exchangeTwitterCode(code: string, redirect_uri: string, code_verifier: string): Promise<twitterAuthTokens> {
+async function exchangeTwitterCode(code: string, redirect_uri: string, code_verifier: string): Promise<ITwitterAuthTokens> {
     try {
         const credentials = `${config.twitter.clientId}:${config.twitter.clientSecret}`;
         const encodedCredentials = Buffer.from(credentials).toString('base64');
@@ -116,9 +116,9 @@ async function exchangeTwitterCode(code: string, redirect_uri: string, code_veri
 /**
  * refresh twitter token
  * @param {string} refreshToken
- * @returns {Promise<twitterAuthTokens>}
+ * @returns {Promise<ITwitterAuthTokens>}
  */
-async function refreshTwitterAuth(refreshToken: string): Promise<twitterAuthTokens> {
+async function refreshTwitterAuth(refreshToken: string): Promise<ITwitterAuthTokens> {
     try {
         const data = {
             client_id: config.twitter.clientId,

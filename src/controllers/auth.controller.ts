@@ -123,27 +123,27 @@ const twitterLoginCallback = catchAsync(async function (req: ISessionRequest, re
     const storedState = req.session.state;
     const storedCodeVerifier = req.session.codeVerifier;
     const discordId = req.session.discordId;
-    console.log(storedState, storedCodeVerifier, discordId)
-    logger.info({ storedState, storedCodeVerifier, discordId }, 'session')
+    const statusCode = 801;
     try {
         if (!code || !returnedState || (returnedState !== storedState)) {
             throw new Error();
         }
         const twitterOAuthCallback = await authService.exchangeTwitterCode(code, config.twitter.callbackURI.login, storedCodeVerifier);
-        console.log(twitterOAuthCallback)
         const twitterUser = await userService.getUserFromTwitterAPI(twitterOAuthCallback.access_token);
-        console.log(twitterUser)
         const user = await userService.updateUserByDiscordId(discordId, {
             twitterId: twitterUser.id,
             twitterUsername: twitterUser.username,
-            twitterProfileImageUrl: twitterUser.profile_image_url
+            twitterProfileImageUrl: twitterUser.profile_image_url,
+            twitterConnectedAt: new Date()
         })
-        console.log(user)
-
-    } catch (error) {
-        logger.error({ error })
+        tokenService.saveTwitterAuth(user.discordId, twitterOAuthCallback);
         const query = querystring.stringify({
-            "statusCode": 490
+            "statusCode": statusCode, "twitterId": twitterUser.id, "twitterUsername": twitterUser.username,
+        });
+        res.redirect(`${config.frontend.url}/callback?` + query);
+    } catch (error) {
+        const query = querystring.stringify({
+            "statusCode": 890
         });
         res.redirect(`${config.frontend.url}/callback?` + query);
     }
