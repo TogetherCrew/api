@@ -19,6 +19,14 @@ components:
         avatar:
           type: string
           format: Hash
+        twitterId:
+          type: string
+        twitterUsername:
+          type: string
+        twitterProfileImageUrl:
+          type: string
+        twitterConnectedAt:
+          type: string
       required:
         - discordId
       example:

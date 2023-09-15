@@ -19,6 +19,9 @@ const envVarsSchema = Joi.object()
         DISCORD_TRY_NOW_CALLBACK_URI: Joi.string().required().description('Discord try now callback uri'),
         DISCORD_LOGIN_CALLBACK_URI: Joi.string().required().description('Discord login callback uri'),
         DISCORD_CONNECT_GUILD_CALLBACK_URI: Joi.string().required().description('Discord connect guild callback uri'),
+        TWITTER_CLIENT_ID: Joi.string().required().description('Twitter clinet id'),
+        TWITTER_CLIENT_SECRET: Joi.string().required().description('Twitter clinet secret'),
+        TWITTER_LOGIN_CALLBACK_URI: Joi.string().required().description('Twitter try now callback uri'),
         JWT_SECRET: Joi.string().required().description('JWT secret key'),
         JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().default(30).description('minutes after which access tokens expire'),
         JWT_REFRESH_EXPIRATION_DAYS: Joi.number().default(30).description('days after which refresh tokens expire'),
@@ -35,6 +38,8 @@ const envVarsSchema = Joi.object()
         NEO4J_PASSWORD: Joi.string().required().description('NEO4J password'),
         NEO4J_DB: Joi.string().required().description('NEO4J DB name'),
         LOG_LEVEL: Joi.string().required().description('Min allowed log level'),
+        SESSION_SECRET: Joi.string().required().description('Session secret'),
+
     })
     .unknown();
 
@@ -71,6 +76,13 @@ export default {
             connectGuild: envVars.DISCORD_CONNECT_GUILD_CALLBACK_URI
         },
     },
+    twitter: {
+        clientId: envVars.TWITTER_CLIENT_ID,
+        clientSecret: envVars.TWITTER_CLIENT_SECRET,
+        callbackURI: {
+            login: envVars.TWITTER_LOGIN_CALLBACK_URI,
+        }
+    },
     jwt: {
         secret: envVars.JWT_SECRET,
         accessExpirationMinutes: envVars.JWT_ACCESS_EXPIRATION_MINUTES,
@@ -92,4 +104,7 @@ export default {
     logger: {
         level: envVars.LOG_LEVEL,
     },
+    session: {
+        secret: envVars.SESSION_SECRET
+    }
 }

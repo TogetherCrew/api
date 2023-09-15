@@ -5,9 +5,8 @@ import setupTestDB from '../utils/setupTestDB';
 import { userOne, userTwo, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { discordResponseGuildOne, discordResponseGuildTwo, discordResponseGuildThree } from '../fixtures/guilds.fixture';
-import { IUserUpdateBody } from '../../src/interfaces/user.interface';
 import { userService, tokenService } from '../../src/services';
-import { User } from '@togethercrew.dev/db';
+import { User, IUserUpdateBody } from '@togethercrew.dev/db';
 setupTestDB();
 
 describe('User routes', () => {

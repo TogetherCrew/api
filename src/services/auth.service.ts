@@ -6,16 +6,13 @@ import userService from './user.service';
 import { tokenTypes } from '../config/tokens';
 import { ApiError } from '../utils';
 import { Token, IDiscordOathBotCallback } from '@togethercrew.dev/db';
+import { ITwitterAuthTokens } from '../interfaces/token.interface';
 import parentLogger from '../config/logger';
 
 const logger = parentLogger.child({ module: 'AuthService' });
-const discordAuthFields = {
-    client_id: config.discord.clientId,
-    client_secret: config.discord.clientSecret,
-};
 
 /**
- * exchange code with access token
+ * exchange discord code with access token
  * @param {string} code
    @param {string} redirect_uri
  * @returns {Promise<IDiscordOathBotCallback>}
@@ -42,7 +39,7 @@ async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscor
             throw new Error();
         }
     } catch (error) {
-        logger.error({ discordAuthFields, code, redirect_uri, error }, 'Failed to exchange discord code');
+        logger.error({ code, redirect_uri, error }, 'Failed to exchange discord code');
         throw new ApiError(590, 'Can not fetch from discord API');
     }
 }
@@ -73,8 +70,77 @@ async function refreshDiscordAuth(refreshToken: string): Promise<IDiscordOathBot
             throw new Error();
         }
     } catch (error) {
-        logger.error({ discordAuthFields, refreshToken, error }, 'Failed to refresh discord auth');
+        logger.error({ refreshToken, error }, 'Failed to refresh discord auth');
         throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Can not fetch from discord API');
+    }
+}
+
+
+/**
+ * exchange twitter code with access token
+ * @param {string} code
+   @param {string} redirect_uri
+ * @returns {Promise<ITwitterAuthTokens>}
+ */
+async function exchangeTwitterCode(code: string, redirect_uri: string, code_verifier: string): Promise<ITwitterAuthTokens> {
+    try {
+        const credentials = `${config.twitter.clientId}:${config.twitter.clientSecret}`;
+        const encodedCredentials = Buffer.from(credentials).toString('base64');
+
+        const data = {
+            code_verifier,
+            grant_type: 'authorization_code',
+            redirect_uri,
+            code
+        };
+        const response = await fetch('https://api.twitter.com/2/oauth2/token', {
+            method: 'POST',
+            body: new URLSearchParams(data),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': `Basic ${encodedCredentials}`
+            }
+        })
+        if (response.ok) {
+            return await response.json();
+        }
+        else {
+            throw new Error();
+        }
+    } catch (error) {
+        logger.error({ error }, 'Failed to exchange twitter code');
+        throw new ApiError(590, 'Can not fetch from discord API');
+    }
+}
+
+/**
+ * refresh twitter token
+ * @param {string} refreshToken
+ * @returns {Promise<ITwitterAuthTokens>}
+ */
+async function refreshTwitterAuth(refreshToken: string): Promise<ITwitterAuthTokens> {
+    try {
+        const data = {
+            client_id: config.twitter.clientId,
+            client_secret: config.twitter.clientSecret,
+            grant_type: 'refresh_token',
+            refresh_token: refreshToken
+        };
+
+        const response = await fetch('https://api.twitter.com/2/oauth2/token', {
+            method: 'POST',
+            body: new URLSearchParams(data),
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        })
+        if (response.ok) {
+            return await response.json();
+        }
+        else {
+            throw new Error();
+        }
+    } catch (error) {
+        logger.error({ refreshToken, error }, 'Failed to refresh twitter auth');
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Can not fetch from twitter API');
     }
 }
 
@@ -116,6 +182,8 @@ async function refreshAuth(refreshToken: string) {
 export default {
     exchangeCode,
     refreshDiscordAuth,
+    exchangeTwitterCode,
+    refreshTwitterAuth,
     logout,
     refreshAuth
 }

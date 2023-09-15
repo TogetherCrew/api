@@ -82,3 +82,15 @@ paths:
         "404":
           description: Not found
           $ref: "#/components/responses/NotFound"
+
+  /api/v1/auth/twitter/login:
+    get:
+      tags:
+        - [Auth]
+      summary: twitter OAuth2 
+      security:
+        - bearerAuth: []
+      responses:
+        "302":
+          description: Found
+          $ref: "#/components/responses/Found"
