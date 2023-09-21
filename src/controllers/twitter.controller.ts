@@ -120,7 +120,6 @@ const engagementMetrics = catchAsync(async function (req: IAuthRequest, res: Res
         const quoteInteractionNumber = quoteInteraction?.quoteCount || 0 
         const mentionInteractionNumber = mentionInteraction?.mentionCount || 0
 
-        console.log("[hqla + hqhe] ", replyInteractionNumber + quoteInteractionNumber + mentionInteractionNumber)
         if(replyInteractionNumber + quoteInteractionNumber + mentionInteractionNumber < 3)
             hqla++
         else
@@ -136,7 +135,6 @@ const engagementMetrics = catchAsync(async function (req: IAuthRequest, res: Res
         const retweetInteractionNumber = retweetInteraction?.retweetCount || 0
         const likeInteractionNumber = likeInteraction?.likeCount || 0 
 
-        console.log("[lqla + lqhe] ", retweetInteractionNumber + likeInteractionNumber)
         if(retweetInteractionNumber + likeInteractionNumber < 3)
             lqla++
         else

@@ -120,7 +120,7 @@ async function getAudienceReplyNumber(twitterId: string){
     const sevenDaysAgoEpoch = utils.get7daysAgoUTCtimestamp()
 
     const replyNumberQuery = `
-        MATCH (t:Tweet  {authorId: '$${twitterId}'} )<-[r:REPLIED]-(m:Tweet)
+        MATCH (t:Tweet  {authorId: '${twitterId}'} )<-[r:REPLIED]-(m:Tweet)
         WHERE r.createdAt >= ${sevenDaysAgoEpoch} AND m.authorId <> t.authorId
         RETURN COUNT(r) as reply_count
     `
