@@ -1,4 +1,4 @@
-paths:  
+paths:
   /api/v1/twitter/disconnect:
     post:
       tags:
@@ -14,8 +14,135 @@ paths:
         "401":
           description: Unauthorized
           $ref: "#/components/responses/Unauthorized"
+  
+  /api/v1/twitter/metrics/refresh:
+    post:
+      tags:
+        - [Twitter]
+      summary: Call Twitter Refresh saga
+      description: after calling this end-point a new TwitterRefresh saga will be called and new information will be received
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                twitter_username:
+                  type: string
+                  required: true   
+                  example: katerinabohlec
+      response:
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
 
+  /api/v1/twitter/{twitterId}/metrics/activity:
+    get:
+      tags:
+        - [Twitter]
+      summary: get twitter Activity Metrics
+      description: get twitter Activity Metrics
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: twitterId
+          required: true
+          schema:
+            type: string
+          description: Twitter ID
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  posts:
+                    type: number
+                  replies:
+                    type: number
+                  retweets:
+                    type: number
+                  likes:
+                    type: number
+                  mentions:
+                    type: number                 
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
 
+  /api/v1/twitter/{twitterId}/metrics/audience:
+    get:
+      tags:
+        - [Twitter]
+      summary: get twitter Audience Metrics
+      description: get twitter Audience Metrics
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: twitterId
+          required: true
+          schema:
+            type: string
+          description: Twitter ID
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  replies:
+                    type: number
+                  retweets:
+                    type: number
+                  likes:
+                    type: number
+                  mentions:
+                    type: number
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
 
-
+  /api/v1/twitter/{twitterId}/metrics/engagement:
+    get:
+      tags:
+        - [Twitter]
+      summary: get twitter Engagement Metrics
+      description: get twitter Engagement Metrics
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: twitterId
+          required: true
+          schema:
+            type: string
+          description: Twitter ID
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  hqla:
+                    type: number
+                  hqhe:
+                    type: number
+                  lqla:
+                    type: number
+                  lqhe:
+                    type: number
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
 
