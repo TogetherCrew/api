@@ -224,7 +224,6 @@ async function getRepliesInteraction(twitterId: string): Promise<ReplyInteractio
 
     const neo4jData = await Neo4j.read(repliesInteractionQuery)
     const { records: replyNumberRecords } = neo4jData
-    console.log("[replyNumberRecords] ", replyNumberRecords)
     if (replyNumberRecords.length == 0) return []
 
     const repliesInteraction: ReplyInteraction[] = replyNumberRecords.map((replyNumberRecord) => {
@@ -234,7 +233,6 @@ async function getRepliesInteraction(twitterId: string): Promise<ReplyInteractio
 
         return { userId, replyCount }
     })
-    console.log("[repliesInteraction] ", repliesInteraction)
 
     return repliesInteraction
 }
@@ -251,7 +249,6 @@ async function getQuotesInteraction(twitterId: string): Promise<QuoteInteraction
 
     const neo4jData = await Neo4j.read(quotesInteractionQuery)
     const { records: quoteNumberRecords } = neo4jData
-    console.log("[quoteNumberRecords] ", quoteNumberRecords)
     if (quoteNumberRecords.length == 0) return []
 
     const quotesInteraction: QuoteInteraction[] = quoteNumberRecords.map((quoteNumberRecord) => {
@@ -261,7 +258,6 @@ async function getQuotesInteraction(twitterId: string): Promise<QuoteInteraction
 
         return { userId, quoteCount }
     })
-    console.log("[quotesInteraction] ", quotesInteraction)
 
     return quotesInteraction
 }
@@ -278,7 +274,6 @@ async function getMentionsInteraction(twitterId: string): Promise<MentionInterac
 
     const neo4jData = await Neo4j.read(mentionsInteractionQuery)
     const { records: mentionNumberRecords } = neo4jData
-    console.log("[mentionNumberRecords] ", mentionNumberRecords)
     if (mentionNumberRecords.length == 0) return []
 
     const mentionsInteraction: MentionInteraction[] = mentionNumberRecords.map((mentionNumberRecord) => {
@@ -288,7 +283,6 @@ async function getMentionsInteraction(twitterId: string): Promise<MentionInterac
 
         return { userId, mentionCount }
     })
-    console.log("[mentionsInteraction] ", mentionsInteraction)
 
     return mentionsInteraction
 }
@@ -305,7 +299,6 @@ async function getRetweetsInteraction(twitterId: string): Promise<RetweetInterac
 
     const neo4jData = await Neo4j.read(retweetsInteractionQuery)
     const { records: retweetNumberRecords } = neo4jData
-    console.log("[retweetNumberRecords] ", retweetNumberRecords)
     if (retweetNumberRecords.length == 0) return []
 
     const retweetsInteraction: RetweetInteraction[] = retweetNumberRecords.map((retweetNumberRecord) => {
@@ -315,7 +308,6 @@ async function getRetweetsInteraction(twitterId: string): Promise<RetweetInterac
 
         return { userId, retweetCount }
     })
-    console.log("[retweetsInteraction] ", retweetsInteraction)
 
     return retweetsInteraction
 }
@@ -331,7 +323,6 @@ async function getLikesInteraction(twitterId: string): Promise<LikeInteraction[]
     
     const neo4jData = await Neo4j.read(userLikeNumberInteractionQuery)
     const { records: likeNumberRecords } = neo4jData
-    console.log("[likeNumberRecords] ", likeNumberRecords)
     if (likeNumberRecords.length == 0) return []
     
     const likesInteraction: LikeInteraction[] = likeNumberRecords.map((likeNumberRecord) => {
@@ -341,7 +332,6 @@ async function getLikesInteraction(twitterId: string): Promise<LikeInteraction[]
 
         return { userId, likeCount }
     })
-    console.log("[likesInteraction] ", likesInteraction)
 
     return likesInteraction
 }
