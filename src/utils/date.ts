@@ -53,10 +53,40 @@ function getYesterdayUTCtimestamp(){
     return yesterdayUTCtimestamp
 }
 
+function get7daysAgoUTCtimestamp(){
+    const sevenDaysAgo = new Date()
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+    
+    const year = sevenDaysAgo.getUTCFullYear()
+    const month = sevenDaysAgo.getUTCMonth()
+    const day = sevenDaysAgo.getUTCDate()
+
+    const sevenDaysAgoUTC = new Date(Date.UTC(year, month, day))
+    const sevenDaysAgoUTCtimestamp = sevenDaysAgoUTC.getTime()
+
+    return sevenDaysAgoUTCtimestamp
+}
+
+function getXDaysAgoUTCtimestamp(x: number){
+    const sevenDaysAgo = new Date()
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - x)
+    
+    const year = sevenDaysAgo.getUTCFullYear()
+    const month = sevenDaysAgo.getUTCMonth()
+    const day = sevenDaysAgo.getUTCDate()
+
+    const sevenDaysAgoUTC = new Date(Date.UTC(year, month, day))
+    const sevenDaysAgoUTCtimestamp = sevenDaysAgoUTC.getTime()
+
+    return sevenDaysAgoUTCtimestamp
+}
+
 export default {
     shiftHeatmapsHours,
     calculateAdjustedDate,
-    getYesterdayUTCtimestamp
+    getYesterdayUTCtimestamp,
+    get7daysAgoUTCtimestamp,
+    getXDaysAgoUTCtimestamp
 }
 
 

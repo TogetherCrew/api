@@ -23,7 +23,20 @@ async function createAndStartFetchMemberSaga(guildId: Snowflake) {
     await saga.start(() => { })
 }
 
+async function createAndStartRefreshTwitterSaga(twitter_username:string, other: { discordId: Snowflake, guildId: string, message: string }) {
+    const saga = await MBConnection.models.Saga.create({
+        status: Status.NOT_STARTED,
+        data: { twitter_username, ...other },
+        choreography: ChoreographyDict.TWITTER_REFRESH
+    })
+
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    await saga.start(() => { })
+    return saga
+}
+
 export default {
     createAndStartGuildSaga,
-    createAndStartFetchMemberSaga
+    createAndStartFetchMemberSaga,
+    createAndStartRefreshTwitterSaga
 }
