@@ -10,6 +10,7 @@ import { IAuthTokens } from '../interfaces/token.interface'
 import querystring from 'querystring';
 import { generateState, generateCodeChallenge, generateCodeVerifier } from '../config/oauth2';
 import { ISessionRequest, IAuthAndSessionRequest } from '../interfaces/request.interface';
+import { Token } from 'tc_dbcomm';
 
 const tryNow = catchAsync(async function (req: Request, res: Response) {
     res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.tryNow}&response_type=code&scope=${scopes.tryNow}&permissions=${permissions.ViewChannels | permissions.readMessageHistory}`);
@@ -112,7 +113,12 @@ const twitterLogin = catchAsync(async function (req: IAuthAndSessionRequest, res
     const state = generateState();
     req.session.codeVerifier = codeVerifier;
     req.session.state = state;
-    req.session.discordId = req.user.discordId
+    // req.session.discordId = req.user.discordId
+
+    const token = Token.findOne({ token: req.body.accessToken })
+    if (!token) {
+        res.send('haj nima ridi amoooo')
+    }
     res.redirect(`https://twitter.com/i/oauth2/authorize?response_type=code&client_id=${config.twitter.clientId}&redirect_uri=${config.twitter.callbackURI.login}&scope=${twitterScopes.login}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256`);
 });
 
@@ -129,18 +135,25 @@ const twitterLoginCallback = catchAsync(async function (req: ISessionRequest, re
         }
         const twitterOAuthCallback = await authService.exchangeTwitterCode(code, config.twitter.callbackURI.login, storedCodeVerifier);
         const twitterUser = await userService.getUserFromTwitterAPI(twitterOAuthCallback.access_token);
-        const user = await userService.updateUserByDiscordId(discordId, {
-            twitterId: twitterUser.id,
-            twitterUsername: twitterUser.username,
-            twitterProfileImageUrl: twitterUser.profile_image_url,
-            twitterConnectedAt: new Date()
-        })
-        tokenService.saveTwitterAuth(user.discordId, twitterOAuthCallback);
+        // const user = await userService.updateUserByDiscordId(discordId, {
+        //     twitterId: twitterUser.id,
+        //     twitterUsername: twitterUser.username,
+        //     twitterProfileImageUrl: twitterUser.profile_image_url,
+        //     twitterConnectedAt: new Date()
+        // })
+        // tokenService.saveTwitterAuth(user.discordId, twitterOAuthCallback);
+        // const query = querystring.stringify({
+        //     "statusCode": statusCode, "twitterId": twitterUser.id, "twitterUsername": twitterUser.username,
+        // });
         const query = querystring.stringify({
             "statusCode": statusCode, "twitterId": twitterUser.id, "twitterUsername": twitterUser.username,
         });
         res.redirect(`${config.frontend.url}/callback?` + query);
     } catch (error) {
+        // const query = querystring.stringify({
+        //     "statusCode": 890
+        // });
+        // res.redirect(`${config.frontend.url}/callback?` + query);
         const query = querystring.stringify({
             "statusCode": 890
         });
