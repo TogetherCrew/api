@@ -4,13 +4,12 @@ import config from '../config';
 import { scopes, permissions } from '../config/dicord';
 import { twitterScopes } from '../config/twitter';
 import { userService, authService, tokenService, guildService } from '../services';
-import { IDiscordUser, IDiscordOathBotCallback } from '@togethercrew.dev/db';
+import { IDiscordUser, IDiscordOathBotCallback, Token } from '@togethercrew.dev/db';
 import { catchAsync } from "../utils";
 import { IAuthTokens } from '../interfaces/token.interface'
 import querystring from 'querystring';
 import { generateState, generateCodeChallenge, generateCodeVerifier } from '../config/oauth2';
 import { ISessionRequest, IAuthAndSessionRequest } from '../interfaces/request.interface';
-import { Token } from 'tc_dbcomm';
 
 const tryNow = catchAsync(async function (req: Request, res: Response) {
     res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.tryNow}&response_type=code&scope=${scopes.tryNow}&permissions=${permissions.ViewChannels | permissions.readMessageHistory}`);
