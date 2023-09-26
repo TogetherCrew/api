@@ -4,7 +4,7 @@ import config from '../config';
 import { scopes, permissions } from '../config/dicord';
 import { twitterScopes } from '../config/twitter';
 import { userService, authService, tokenService, guildService } from '../services';
-import { IDiscordUser, IDiscordOathBotCallback, Token } from '@togethercrew.dev/db';
+import { IDiscordUser, IDiscordOathBotCallback, } from '@togethercrew.dev/db';
 import { catchAsync } from "../utils";
 import { IAuthTokens } from '../interfaces/token.interface'
 import querystring from 'querystring';
@@ -112,13 +112,10 @@ const twitterLogin = catchAsync(async function (req: IAuthAndSessionRequest, res
     const state = generateState();
     req.session.codeVerifier = codeVerifier;
     req.session.state = state;
-    // req.session.discordId = req.user.discordId
+    req.session.discordId = req.user.discordId
+    console.log(req.session.state)
 
-    const token = Token.findOne({ token: req.body.accessToken })
-    if (!token) {
-        res.send('haj nima ridi amoooo')
-    }
-    res.redirect(`https://twitter.com/i/oauth2/authorize?response_type=code&client_id=${config.twitter.clientId}&redirect_uri=${config.twitter.callbackURI.login}&scope=${twitterScopes.login}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256`);
+    res.send(`https://twitter.com/i/oauth2/authorize?response_type=code&client_id=${config.twitter.clientId}&redirect_uri=${config.twitter.callbackURI.login}&scope=${twitterScopes.login}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256`);
 });
 
 const twitterLoginCallback = catchAsync(async function (req: ISessionRequest, res: Response) {
@@ -130,29 +127,24 @@ const twitterLoginCallback = catchAsync(async function (req: ISessionRequest, re
     const statusCode = 801;
     try {
         if (!code || !returnedState || (returnedState !== storedState)) {
+            console.log(code, storedState)
             throw new Error();
         }
         const twitterOAuthCallback = await authService.exchangeTwitterCode(code, config.twitter.callbackURI.login, storedCodeVerifier);
         const twitterUser = await userService.getUserFromTwitterAPI(twitterOAuthCallback.access_token);
-        // const user = await userService.updateUserByDiscordId(discordId, {
-        //     twitterId: twitterUser.id,
-        //     twitterUsername: twitterUser.username,
-        //     twitterProfileImageUrl: twitterUser.profile_image_url,
-        //     twitterConnectedAt: new Date()
-        // })
-        // tokenService.saveTwitterAuth(user.discordId, twitterOAuthCallback);
-        // const query = querystring.stringify({
-        //     "statusCode": statusCode, "twitterId": twitterUser.id, "twitterUsername": twitterUser.username,
-        // });
+        const user = await userService.updateUserByDiscordId(discordId, {
+            twitterId: twitterUser.id,
+            twitterUsername: twitterUser.username,
+            twitterProfileImageUrl: twitterUser.profile_image_url,
+            twitterConnectedAt: new Date()
+        })
+        tokenService.saveTwitterAuth(user.discordId, twitterOAuthCallback);
         const query = querystring.stringify({
             "statusCode": statusCode, "twitterId": twitterUser.id, "twitterUsername": twitterUser.username,
         });
         res.redirect(`${config.frontend.url}/callback?` + query);
     } catch (error) {
-        // const query = querystring.stringify({
-        //     "statusCode": 890
-        // });
-        // res.redirect(`${config.frontend.url}/callback?` + query);
+        console.log(error)
         const query = querystring.stringify({
             "statusCode": 890
         });
