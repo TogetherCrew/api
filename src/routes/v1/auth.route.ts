@@ -11,7 +11,7 @@ router.get('/login', authController.login);
 router.get('/login/callback', authController.loginCallback);
 router.post('/logout', validate(authValidation.logout), authController.logout);
 router.post('/refresh-tokens', validate(authValidation.refreshTokens), authController.refreshTokens);
-router.post('/twitter/login', authController.twitterLogin);
+router.post('/twitter/login', auth(), authController.twitterLogin);
 router.get('/twitter/login/callback', authController.twitterLoginCallback);
 
 export default router;
