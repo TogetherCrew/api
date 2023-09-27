@@ -43,8 +43,10 @@ const getRoles = catchAsync(async function (req: IAuthRequest, res: Response) {
     if (! await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
         throw new ApiError(440, 'Oops, something went wrong! Could you please try logging in');
     }
+    const filter = pick(req.query, ['activityComposition', 'roles', 'ngu']);
+    const options = pick(req.query, ['sortBy', 'limit', 'page']);
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
-    const roles = await roleService.getRoles(connection, { deletedAt: null });
+    const roles = await roleService.QueryRoles(connection, { deletedAt: null, ...filter }, options);
     await closeConnection(connection)
     res.send(roles)
 });
