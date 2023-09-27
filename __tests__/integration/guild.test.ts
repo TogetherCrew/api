@@ -647,7 +647,7 @@ describe('Guild routes', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
         });
-        test('should return 200 and array of roles of the guild if data is ok', async () => {
+        test('should return 200 and apply the default query options', async () => {
             await insertUsers([userOne]);
             await insertGuilds([guildFive]);
             await insertRoles([role1, role2, role3, role4], connection);
@@ -655,18 +655,42 @@ describe('Guild routes', () => {
             const res = await request(app)
                 .get(`/api/v1/guilds/${guildFive.guildId}/roles`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send()
                 .expect(httpStatus.OK);
 
-            expect(res.body).toHaveLength(3);
-            expect(res.body[0].roleId).toBe(role1.roleId);
-            expect(res.body[1].roleId).toBe(role2.roleId);
-            expect(res.body[2].roleId).toBe(role3.roleId);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 3,
+            });
+            expect(res.body.results).toHaveLength(3);
+
+            expect(res.body.results[0]).toEqual({
+                roleId: role1.roleId,
+                name: role1.name,
+                color: role1.color,
+            });
+            expect(res.body.results[1]).toEqual({
+                roleId: role3.roleId,
+                name: role3.name,
+                color: role3.color,
+            });
+
+            expect(res.body.results[2]).toEqual({
+                roleId: role2.roleId,
+                name: role2.name,
+                color: role2.color,
+            });
         })
 
         test('should return 401 if access token is missing', async () => {
             await insertUsers([userOne]);
             await request(app)
                 .get(`/api/v1/guilds/${guildFive.guildId}/roles`)
+                .send()
                 .expect(httpStatus.UNAUTHORIZED);
         })
         test('should return 400 if guild id is not valid', async () => {
@@ -683,6 +707,132 @@ describe('Guild routes', () => {
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(440);
+        })
+
+        test('should correctly apply filter on name field', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildFive]);
+            await insertRoles([role1, role2, role3, role4], connection);
+
+            const res = await request(app)
+                .get(`/api/v1/guilds/${guildFive.guildId}/roles`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ name: "Member" })
+                .send()
+                .expect(httpStatus.OK);
+
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 1,
+            });
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].roleId).toBe(role3.roleId);
+
+        })
+
+        test('should correctly sort the returned array if descending sort param is specified', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildFive]);
+            await insertRoles([role1, role2, role3, role4], connection);
+
+            const res = await request(app)
+                .get(`/api/v1/guilds/${guildFive.guildId}/roles`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ sortBy: 'name:desc' })
+                .send()
+                .expect(httpStatus.OK);
+
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 3,
+            });
+            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results[0].roleId).toBe(role2.roleId);
+            expect(res.body.results[1].roleId).toBe(role3.roleId);
+            expect(res.body.results[2].roleId).toBe(role1.roleId);
+        })
+
+        test('should correctly sort the returned array if ascending  sort param is specified', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildFive]);
+            await insertRoles([role1, role2, role3, role4], connection);
+
+            const res = await request(app)
+                .get(`/api/v1/guilds/${guildFive.guildId}/roles`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ sortBy: 'name:asc' })
+                .send()
+                .expect(httpStatus.OK);
+
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 3,
+            });
+            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results[0].roleId).toBe(role1.roleId);
+            expect(res.body.results[1].roleId).toBe(role3.roleId);
+            expect(res.body.results[2].roleId).toBe(role2.roleId);
+        })
+
+        test('should limit returned array if limit param is specified', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildFive]);
+            await insertRoles([role1, role2, role3, role4], connection);
+
+            const res = await request(app)
+                .get(`/api/v1/guilds/${guildFive.guildId}/roles`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ limit: 2 })
+                .send()
+                .expect(httpStatus.OK);
+
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 2,
+                totalPages: 2,
+                totalResults: 3,
+            });
+            expect(res.body.results).toHaveLength(2);
+            expect(res.body.results[0].roleId).toBe(role1.roleId);
+            expect(res.body.results[1].roleId).toBe(role3.roleId);
+        })
+
+        test('should correctly sort the returned array if page and limit are  specified', async () => {
+            await insertUsers([userOne]);
+            await insertGuilds([guildFive]);
+            await insertRoles([role1, role2, role3, role4], connection);
+
+            const res = await request(app)
+                .get(`/api/v1/guilds/${guildFive.guildId}/roles`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ page: 2, limit: 2 })
+                .send()
+                .expect(httpStatus.OK);
+
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 2,
+                limit: 2,
+                totalPages: 2,
+                totalResults: 3,
+            });
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].roleId).toBe(role2.roleId);
         })
     })
 
