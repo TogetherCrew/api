@@ -10,6 +10,7 @@ import { IAuthTokens } from '../interfaces/token.interface'
 import querystring from 'querystring';
 import { generateState, generateCodeChallenge, generateCodeVerifier } from '../config/oauth2';
 import { ISessionRequest, IAuthAndSessionRequest } from '../interfaces/request.interface';
+import logger from '../config/logger';
 
 const tryNow = catchAsync(async function (req: Request, res: Response) {
     res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.tryNow}&response_type=code&scope=${scopes.tryNow}&permissions=${permissions.ViewChannels | permissions.readMessageHistory}`);
@@ -112,10 +113,8 @@ const twitterLogin = catchAsync(async function (req: IAuthAndSessionRequest, res
     const state = generateState();
     req.session.codeVerifier = codeVerifier;
     req.session.state = state;
-    req.session.discordId = req.user.discordId
-    console.log(req.session.state)
-
-    res.send(`https://twitter.com/i/oauth2/authorize?response_type=code&client_id=${config.twitter.clientId}&redirect_uri=${config.twitter.callbackURI.login}&scope=${twitterScopes.login}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256`);
+    req.session.discordId = req.params.discordId
+    res.redirect(`https://twitter.com/i/oauth2/authorize?response_type=code&client_id=${config.twitter.clientId}&redirect_uri=${config.twitter.callbackURI.login}&scope=${twitterScopes.login}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256`);
 });
 
 const twitterLoginCallback = catchAsync(async function (req: ISessionRequest, res: Response) {
@@ -127,7 +126,6 @@ const twitterLoginCallback = catchAsync(async function (req: ISessionRequest, re
     const statusCode = 801;
     try {
         if (!code || !returnedState || (returnedState !== storedState)) {
-            console.log(code, storedState)
             throw new Error();
         }
         const twitterOAuthCallback = await authService.exchangeTwitterCode(code, config.twitter.callbackURI.login, storedCodeVerifier);
@@ -144,7 +142,7 @@ const twitterLoginCallback = catchAsync(async function (req: ISessionRequest, re
         });
         res.redirect(`${config.frontend.url}/callback?` + query);
     } catch (error) {
-        console.log(error)
+        logger.error(error)
         const query = querystring.stringify({
             "statusCode": 890
         });
