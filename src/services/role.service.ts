@@ -23,6 +23,21 @@ async function getRole(connection: Connection, filter: object): Promise<IRole | 
 }
 
 /**
+ * Get roles from the database based on the filter criteria.
+ * @param {Connection} connection - Mongoose connection object for the database.
+ * @param {object} filter - An object specifying the filter criteria to match the desired role entries.
+ * @returns {Promise<IRole[] | []>} - A promise that resolves to an array of the matching role objects.
+ */
+async function getRoles(connection: Connection, filter: object): Promise<IRole[] | []> {
+    try {
+        return await connection.models.Role.find(filter);
+    } catch (error) {
+        console.log('Failed to retrieve  roles', error);
+        return [];
+    }
+}
+
+/**
  * Query roles with a filter and options.
  * @param {Connection} connection - Mongoose connection object for the database.
  * @param {Filter} filter - An object specifying the filter criteria to match the desired role entries.
@@ -40,7 +55,7 @@ async function QueryRoles(connection: Connection, filter: Filter, options: Optio
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const matchStage: any = {};
         if (name) matchStage.name = { $regex: name, $options: 'i' };
-        if (deletedAt) matchStage.deletedAt = deletedAt;
+        matchStage.deletedAt = deletedAt;
 
         const totalResults = await connection.models.Role.countDocuments(matchStage);
 
@@ -51,10 +66,9 @@ async function QueryRoles(connection: Connection, filter: Filter, options: Optio
             { $limit: limit },
             {
                 $project: {
-                    id: 1,
+                    roleId: 1,
                     name: 1,
                     color: 1,
-                    deletedAt: 1,
                     _id: 0
                 }
             }
@@ -101,5 +115,6 @@ function getRolesForGuildMember(guildMember: IGuildMember, roles: Array<IRole>) 
 export default {
     getRole,
     QueryRoles,
-    getRolesForGuildMember
+    getRolesForGuildMember,
+    getRoles
 };
