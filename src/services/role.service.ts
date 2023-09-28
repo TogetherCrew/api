@@ -32,7 +32,6 @@ async function getRoles(connection: Connection, filter: object): Promise<IRole[]
     try {
         return await connection.models.Role.find(filter);
     } catch (error) {
-        console.log('Failed to retrieve  roles', error);
         return [];
     }
 }
@@ -84,7 +83,6 @@ async function QueryRoles(connection: Connection, filter: Filter, options: Optio
             totalResults,
         };
     } catch (error) {
-        console.log('Failed to retrieve  roles', error);
         return {
             results: [],
             limit: 10,

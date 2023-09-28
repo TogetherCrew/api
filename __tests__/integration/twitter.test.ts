@@ -110,7 +110,7 @@ describe('Twitter routes', () => {
                 MERGE (t2) -[:MENTIONED {createdAt: ${threeDaysAgoTimestamp}}] -> (a2)
                 MERGE (t3) -[:MENTIONED {createdAt: ${fourDaysAgoTimestamp}}] -> (a2)
             `
-            
+
             await insertUsers([userOne]);
             await Neo4j.write("match (n) detach delete (n);")
             await Neo4j.write(numberOfPostsMockData)
@@ -123,14 +123,14 @@ describe('Twitter routes', () => {
                 .get(`/api/v1/twitter/1111/metrics/activity`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
-                
+
             expect(res.body.posts).toEqual(7)
             expect(res.body.replies).toEqual(0)
             expect(res.body.retweets).toEqual(0)
             expect(res.body.likes).toEqual(1)
             expect(res.body.mentions).toEqual(2)
         })
-            
+
         test('should return 401 if access token is missing', async () => {
             await request(app)
                 .get(`/api/v1/twitter/112/metrics/activity`)
@@ -362,7 +362,6 @@ describe('Twitter routes', () => {
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
 
-            console.log(res.body)
             expect(res.body.hqla).toEqual(2)
             expect(res.body.hqhe).toEqual(0)
             expect(res.body.lqla).toEqual(0)

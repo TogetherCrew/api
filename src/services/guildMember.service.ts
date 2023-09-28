@@ -38,7 +38,7 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
         let matchStage: any = {};
         let allActivityIds: string[] = [];
 
-        const memberActivityDate = await connection.models.MemberActivity.findOne().sort({ date: -1 }).select({ date: 1, _id: 0 });
+        const memberActivityDocument = await connection.models.MemberActivity.findOne().sort({ date: -1 }).select({ date: 1, _id: 0 });
 
         if (activityComposition && activityComposition.length > 0) {
             // If 'others' is in activityComposition, we exclude all IDs that are part of other activities
@@ -63,6 +63,8 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
                 }
             }
         }
+
+
         if (ngu) {
             matchStage.$or = [
                 { "username": { $regex: ngu, $options: 'i' } },
@@ -75,8 +77,10 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
             matchStage.roles = { $in: roles };
         }
 
-        if (memberActivityDate) {
-            matchStage.joinedAt = { $lte: memberActivityDate.date };
+        if (memberActivityDocument) {
+            const date = new Date(memberActivityDocument.date);
+            date.setHours(23, 59, 59, 999);
+            matchStage.joinedAt = { $lte: date };
         }
 
         const totalResults = await connection.models.GuildMember.countDocuments(matchStage);
@@ -175,4 +179,3 @@ export default {
     getNgu,
     getUsername
 }
-
