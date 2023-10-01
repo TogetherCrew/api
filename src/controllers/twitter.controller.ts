@@ -51,7 +51,7 @@ const activityMetrics = catchAsync(async function (req: IAuthRequest, res: Respo
     if(!user?.twitterId){
         throw new ApiError(400, 'Oops, It seems you have not connected your `Twitter` account, try setup `Twitter` and try again!');
     }
-    
+
     // TODO: also we can make it in a way that all below functions run in parallel
     const twitterId = user.twitterId
     const postNumber = await twitterService.getUserPostNumber(twitterId)
@@ -105,18 +105,25 @@ type TwitterEngagementResponse = {
     lqhe: number
 }
 const engagementMetrics = catchAsync(async function (req: IAuthRequest, res: Response<TwitterEngagementResponse>) {
-    const userId = req.params.twitterId
+    const discordId = req.user.discordId
+
+    const user = await userService.getUserByDiscordId(discordId)
+    if(!user?.twitterId){
+        throw new ApiError(400, 'Oops, It seems you have not connected your `Twitter` account, try setup `Twitter` and try again!');
+    }
+    const twitterId = user.twitterId
+
     let hqla = 0
     let hqhe = 0 
     let lqla = 0
     let lqhe = 0
 
-    const repliesInteraction = await twitterService.getRepliesInteraction(userId)
-    const quotesInteraction = await twitterService.getQuotesInteraction(userId)
-    const mentionsInteraction = await twitterService.getMentionsInteraction(userId)
+    const repliesInteraction = await twitterService.getRepliesInteraction(twitterId)
+    const quotesInteraction = await twitterService.getQuotesInteraction(twitterId)
+    const mentionsInteraction = await twitterService.getMentionsInteraction(twitterId)
 
-    const retweetsInteraction = await twitterService.getRetweetsInteraction(userId)
-    const likesInteraction = await twitterService.getLikesInteraction(userId)
+    const retweetsInteraction = await twitterService.getRetweetsInteraction(twitterId)
+    const likesInteraction = await twitterService.getLikesInteraction(twitterId)
 
     const repliesInteractionUsers = repliesInteraction.map(ri => ri.userId)
     const quotesInteractionUsers = quotesInteraction.map(qi => qi.userId)

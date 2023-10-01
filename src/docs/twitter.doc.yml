@@ -149,4 +149,6 @@ paths:
         "401":
           description: Unauthorized
           $ref: "#/components/responses/Unauthorized"
-
+        "400":
+          description: Oops, It seems you have not connected your `Twitter` account, try setup `Twitter` and try again!
+          $ref: "#/components/responses/BadRequest"
