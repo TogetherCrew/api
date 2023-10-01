@@ -23,21 +23,19 @@ paths:
       description: after calling this end-point a new TwitterRefresh saga will be called and new information will be received
       security:
         - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                twitter_username:
-                  type: string
-                  required: true   
-                  example: katerinabohlec
       response:
+        "204":
+          description: No Content
+          $ref: "#/components/responses/NoContent"
         "401":
           description: Unauthorized
           $ref: "#/components/responses/Unauthorized"
+        "440":
+          description: Oops, something went wrong! Could you please try logging in
+          $ref: "#/components/responses/Oops_Something_Went_Wrong_Could_You_Please_Try_Logging_In"
+        "400":
+          description: Oops, It seems you have not connected your `Twitter` account, try setup `Twitter` and try again!
+          $ref: "#/components/responses/BadRequest"
 
   /api/v1/twitter/{twitterId}/metrics/activity:
     get:

@@ -20,7 +20,6 @@ const disconnectTwitter = catchAsync(async function (req: IAuthRequest, res: Res
 });
 
 const refreshTwitter = catchAsync(async function (req: IAuthRequest, res: Response) {
-    const { twitter_username } = req.body;
     const discordId = req.user.discordId
 
     const guild = await guildService.getGuild({ user: discordId });
@@ -28,7 +27,13 @@ const refreshTwitter = catchAsync(async function (req: IAuthRequest, res: Respon
         throw new ApiError(440, 'Oops, something went wrong! Could you please try logging in');
     }
 
-    twitterService.twitterRefresh(twitter_username, { discordId, guildId: guild.guildId })
+    const user = await userService.getUserByDiscordId(discordId)
+    if(!user?.twitterUsername){
+        throw new ApiError(400, 'Oops, It seems you have not connected your `Twitter` account, try setup `Twitter` and try again!');
+    }
+
+    const twitterUsername = user.twitterUsername
+    twitterService.twitterRefresh(twitterUsername, { discordId, guildId: guild.guildId })
     res.status(httpStatus.NO_CONTENT).send();
 })
 
