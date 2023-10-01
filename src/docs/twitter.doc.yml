@@ -45,13 +45,6 @@ paths:
       description: get twitter Activity Metrics
       security:
         - bearerAuth: []
-      parameters:
-        - in: path
-          name: twitterId
-          required: true
-          schema:
-            type: string
-          description: Twitter ID
       responses:
         "200":
           description: OK
@@ -85,13 +78,6 @@ paths:
       description: get twitter Audience Metrics
       security:
         - bearerAuth: []
-      parameters:
-        - in: path
-          name: twitterId
-          required: true
-          schema:
-            type: string
-          description: Twitter ID
       responses:
         "200":
           description: OK
@@ -123,13 +109,6 @@ paths:
       description: get twitter Engagement Metrics
       security:
         - bearerAuth: []
-      parameters:
-        - in: path
-          name: twitterId
-          required: true
-          schema:
-            type: string
-          description: Twitter ID
       responses:
         "200":
           description: OK
