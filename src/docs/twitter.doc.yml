@@ -37,7 +37,7 @@ paths:
           description: Oops, It seems you have not connected your `Twitter` account, try setup `Twitter` and try again!
           $ref: "#/components/responses/BadRequest"
 
-  /api/v1/twitter/{twitterId}/metrics/activity:
+  /api/v1/twitter/metrics/activity:
     get:
       tags:
         - [Twitter]
@@ -77,7 +77,7 @@ paths:
           description: Oops, It seems you have not connected your `Twitter` account, try setup `Twitter` and try again!
           $ref: "#/components/responses/BadRequest"
 
-  /api/v1/twitter/{twitterId}/metrics/audience:
+  /api/v1/twitter/metrics/audience:
     get:
       tags:
         - [Twitter]
@@ -115,7 +115,7 @@ paths:
           description: Oops, It seems you have not connected your `Twitter` account, try setup `Twitter` and try again!
           $ref: "#/components/responses/BadRequest"
 
-  /api/v1/twitter/{twitterId}/metrics/engagement:
+  /api/v1/twitter/metrics/engagement:
     get:
       tags:
         - [Twitter]
