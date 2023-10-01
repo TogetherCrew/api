@@ -45,14 +45,20 @@ type TwitterActivityResponse = {
     mentions: number | null
 }
 const activityMetrics = catchAsync(async function (req: IAuthRequest, res: Response<TwitterActivityResponse>) {
-    const userId = req.params.twitterId
+    const discordId = req.user.discordId
 
+    const user = await userService.getUserByDiscordId(discordId)
+    if(!user?.twitterId){
+        throw new ApiError(400, 'Oops, It seems you have not connected your `Twitter` account, try setup `Twitter` and try again!');
+    }
+    
     // TODO: also we can make it in a way that all below functions run in parallel
-    const postNumber = await twitterService.getUserPostNumber(userId)
-    const replyNumber = await twitterService.getUserReplyNumber(userId)
-    const retweetNumber = await twitterService.getUserRetweetNumber(userId)
-    const likeNumber = await twitterService.getUserLikeNumber(userId)
-    const mentionNumber = await twitterService.getUserMentionNumber(userId)
+    const twitterId = user.twitterId
+    const postNumber = await twitterService.getUserPostNumber(twitterId)
+    const replyNumber = await twitterService.getUserReplyNumber(twitterId)
+    const retweetNumber = await twitterService.getUserRetweetNumber(twitterId)
+    const likeNumber = await twitterService.getUserLikeNumber(twitterId)
+    const mentionNumber = await twitterService.getUserMentionNumber(twitterId)
     const activityMetrics = {
         posts: postNumber,
         replies: replyNumber,
