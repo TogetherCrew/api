@@ -49,6 +49,7 @@ describe('User routes', () => {
                 email: userOne.email,
                 verified: userOne.verified,
                 avatar: userOne.avatar,
+                twitterId: userOne.twitterId
             });
         })
         test('should return 401 if access token is missing', async () => {
@@ -83,6 +84,8 @@ describe('User routes', () => {
                 email: updateBody.email,
                 verified: userOne.verified,
                 avatar: userOne.avatar,
+                twitterId: userOne.twitterId
+
             });
 
             const dbUser = await User.findById(userOne._id);

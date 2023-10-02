@@ -134,7 +134,8 @@ const twitterLoginCallback = catchAsync(async function (req: ISessionRequest, re
             twitterId: twitterUser.id,
             twitterUsername: twitterUser.username,
             twitterProfileImageUrl: twitterUser.profile_image_url,
-            twitterConnectedAt: new Date()
+            twitterConnectedAt: new Date(),
+            twitterIsInProgress: true
         })
         tokenService.saveTwitterAuth(user.discordId, twitterOAuthCallback);
         const query = querystring.stringify({
