@@ -4,9 +4,9 @@ import app from '../../src/app';
 import setupTestDB from '../utils/setupTestDB';
 import config from '../../src/config';
 import * as Neo4j from '../../src/neo4j';
-import { userOneAccessToken } from '../fixtures/token.fixture';
+import { userOneAccessToken, userTwoAccessToken } from '../fixtures/token.fixture';
 import dateUtils from '../../src/utils/date';
-import { insertUsers, userOne } from '../fixtures/user.fixture';
+import { insertUsers, userOne, userTwo } from '../fixtures/user.fixture';
 setupTestDB();
 
 describe('Twitter routes', () => {
@@ -130,7 +130,15 @@ describe('Twitter routes', () => {
             expect(res.body.likes).toEqual(1)
             expect(res.body.mentions).toEqual(2)
         })
-            
+        
+        test("should return 400 if user has not connected his Twitter account yet!", async () => {
+            await insertUsers([userTwo]);
+            const res = await request(app)
+                .get(`/api/v1/twitter/metrics/activity`)
+                .set('Authorization', `Bearer ${userTwoAccessToken}`)
+                .expect(httpStatus.BAD_REQUEST);
+        })
+
         test('should return 401 if access token is missing', async () => {
             await request(app)
                 .get(`/api/v1/twitter/metrics/activity`)
@@ -242,6 +250,14 @@ describe('Twitter routes', () => {
             expect(res.body.retweets).toEqual(1)
             expect(res.body.likes).toEqual(0)
             expect(res.body.mentions).toEqual(0)
+        })
+
+        test("should return 400 if user has not connected his Twitter account yet!", async () => {
+            await insertUsers([userTwo]);
+            const res = await request(app)
+                .get(`/api/v1/twitter/metrics/audience`)
+                .set('Authorization', `Bearer ${userTwoAccessToken}`)
+                .expect(httpStatus.BAD_REQUEST);
         })
 
         test('should return 401 if access token is missing', async () => {
@@ -367,6 +383,14 @@ describe('Twitter routes', () => {
             expect(res.body.hqhe).toEqual(0)
             expect(res.body.lqla).toEqual(0)
             expect(res.body.lqhe).toEqual(0)
+        })
+
+        test("should return 400 if user has not connected his Twitter account yet!", async () => {
+            await insertUsers([userTwo]);
+            const res = await request(app)
+                .get(`/api/v1/twitter/metrics/engagement`)
+                .set('Authorization', `Bearer ${userTwoAccessToken}`)
+                .expect(httpStatus.BAD_REQUEST);
         })
 
         test('should return 401 if access token is missing', async () => {
