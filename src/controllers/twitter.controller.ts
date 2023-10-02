@@ -174,11 +174,35 @@ const engagementMetrics = catchAsync(async function (req: IAuthRequest, res: Res
     res.send(engagementMetrics)
 });
 
+type TwitterAccountResponse = {
+    follower: number | null
+    engagement: number | null
+}
+const accountMetrics = catchAsync(async function (req: IAuthRequest, res: Response<TwitterAccountResponse>) {
+    const discordId = req.user.discordId
+
+    const user = await userService.getUserByDiscordId(discordId)
+    if(!user?.twitterId){
+        throw new ApiError(400, 'Oops, It seems you have not connected your `Twitter` account, try setup `Twitter` and try again!');
+    }
+    const twitterId = user.twitterId
+
+    const followerNumber = await twitterService.getUserFollowerNumber(twitterId)
+    const engagementNumber = await twitterService.getEngagementNumber(twitterId)
+
+    const accountMetrics = {
+        follower: followerNumber, 
+        engagement: engagementNumber
+    }
+    res.send(accountMetrics)
+})
+
 export default {
     disconnectTwitter,
     refreshTwitter,
     activityMetrics,
     audienceMetrics,
-    engagementMetrics
+    engagementMetrics,
+    accountMetrics
 }
 
