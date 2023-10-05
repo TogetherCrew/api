@@ -1,9 +1,5 @@
 const twitterScopes = {
-    login: "tweet.read offline.access users.read"
+  login: 'tweet.read offline.access users.read',
 };
 
-
-export {
-    twitterScopes,
-}
-
+export { twitterScopes };

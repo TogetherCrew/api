@@ -1,5 +1,5 @@
-import express from "express";
-import { guildController } from "../../controllers";
+import express from 'express';
+import { guildController } from '../../controllers';
 import { guildValidation } from '../../validations';
 
 import { auth, validate } from '../../middlewares';
@@ -13,16 +13,26 @@ router.get('/connect', guildController.connectGuild);
 router.get('/connect/callback', guildController.connectGuildCallback);
 
 router.get('/:guildId/channels', auth(), validate(guildValidation.getChannels), guildController.getChannels);
-router.get('/:guildId/selected-channels', auth(), validate(guildValidation.getSelectedChannels), guildController.getSelectedChannels);
+router.get(
+  '/:guildId/selected-channels',
+  auth(),
+  validate(guildValidation.getSelectedChannels),
+  guildController.getSelectedChannels,
+);
 router.get('/:guildId/roles', auth(), validate(guildValidation.getRoles), guildController.getRoles);
 
 router.post('/:guildId/disconnect', auth(), validate(guildValidation.disconnectGuild), guildController.disconnectGuild);
 
-router.route('/:guildId')
-    .get(auth(), validate(guildValidation.getGuild), guildController.getGuild)
-    .patch(auth(), validate(guildValidation.updateGuild), guildController.updateGuild);
+router
+  .route('/:guildId')
+  .get(auth(), validate(guildValidation.getGuild), guildController.getGuild)
+  .patch(auth(), validate(guildValidation.updateGuild), guildController.updateGuild);
 
-router.get('/discord-api/:guildId', auth(), validate(guildValidation.getGuildFromDiscordAPI), guildController.getGuildFromDiscordAPI);
+router.get(
+  '/discord-api/:guildId',
+  auth(),
+  validate(guildValidation.getGuildFromDiscordAPI),
+  guildController.getGuildFromDiscordAPI,
+);
 
 export default router;
-

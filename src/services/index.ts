@@ -9,14 +9,14 @@ import sagaService from './saga.service';
 import guildMemberService from './guildMember.service';
 import roleService from './role.service';
 export {
-    userService,
-    authService,
-    tokenService,
-    guildService,
-    heatmapService,
-    memberActivityService,
-    channelService,
-    sagaService,
-    guildMemberService,
-    roleService
-}
+  userService,
+  authService,
+  tokenService,
+  guildService,
+  heatmapService,
+  memberActivityService,
+  channelService,
+  sagaService,
+  guildMemberService,
+  roleService,
+};

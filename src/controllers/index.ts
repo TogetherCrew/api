@@ -6,11 +6,11 @@ import notionController from './notion.controller';
 import memberActivityController from './memberActivity.controller';
 import twitterController from './twitter.controller';
 export {
-    authController,
-    userController,
-    guildController,
-    heatmapController,
-    notionController,
-    memberActivityController,
-    twitterController
-}
+  authController,
+  userController,
+  guildController,
+  heatmapController,
+  notionController,
+  memberActivityController,
+  twitterController,
+};

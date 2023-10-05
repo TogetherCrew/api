@@ -1,6 +1,5 @@
-import { IChannel } from "@togethercrew.dev/db";
+import { IChannel } from '@togethercrew.dev/db';
 
 export interface IChannelWithViewAndReadPermissions extends IChannel {
-    canReadMessageHistoryAndViewChannel?: boolean
+  canReadMessageHistoryAndViewChannel?: boolean;
 }
-

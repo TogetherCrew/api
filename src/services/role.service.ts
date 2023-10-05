@@ -8,7 +8,7 @@ import { IRole, IGuildMember } from '@togethercrew.dev/db';
  * @returns {Promise<IRole | null>} - A promise that resolves to the matching role object or null if not found.
  */
 async function getRole(connection: Connection, filter: object): Promise<IRole | null> {
-    return await connection.models.Role.findOne(filter);
+  return await connection.models.Role.findOne(filter);
 }
 
 /**
@@ -18,7 +18,7 @@ async function getRole(connection: Connection, filter: object): Promise<IRole | 
  * @returns {Promise<IRole[] | []>} - A promise that resolves to an array of the matching role objects.
  */
 async function getRoles(connection: Connection, filter: object): Promise<IRole[] | []> {
-    return await connection.models.Role.find(filter);
+  return await connection.models.Role.find(filter);
 }
 
 /**
@@ -30,16 +30,18 @@ async function getRoles(connection: Connection, filter: object): Promise<IRole[]
  * @returns {Array<{ roleId: string; color: string; name: string }>} - An array of roles for the guild member.
  */
 function getRolesForGuildMember(guildMember: IGuildMember, roles: Array<IRole>) {
-    return guildMember.roles.map((roleId: string) => {
-        const role = roles.find((role: IRole) => role.roleId === roleId);
-        if (role) {
-            return { roleId: role.roleId, color: role.color, name: role.name };
-        }
-    }).filter(role => role !== undefined);
+  return guildMember.roles
+    .map((roleId: string) => {
+      const role = roles.find((role: IRole) => role.roleId === roleId);
+      if (role) {
+        return { roleId: role.roleId, color: role.color, name: role.name };
+      }
+    })
+    .filter((role) => role !== undefined);
 }
 
 export default {
-    getRole,
-    getRoles,
-    getRolesForGuildMember
+  getRole,
+  getRoles,
+  getRolesForGuildMember,
 };

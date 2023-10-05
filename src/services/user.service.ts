@@ -16,10 +16,10 @@ const logger = parentLogger.child({ module: 'UserService' });
  * @returns {Promise<IUser>}
  */
 async function createUser(data: IDiscordUser): Promise<IUser> {
-    return User.create({
-        discordId: data.id,
-        ...data
-    });
+  return User.create({
+    discordId: data.id,
+    ...data,
+  });
 }
 
 /**
@@ -28,21 +28,20 @@ async function createUser(data: IDiscordUser): Promise<IUser> {
  * @returns {Promise<IDiscordUser>}
  */
 async function getUserFromDiscordAPI(accessToken: string): Promise<IDiscordUser> {
-    try {
-        const response = await fetch('https://discord.com/api/users/@me', {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${accessToken}` }
-        });
-        if (response.ok) {
-            return await response.json();
-        }
-        else {
-            throw new Error();
-        }
-    } catch (error) {
-        logger.error({ accessToken, error }, 'Failed to get user from Discord API');
-        throw new ApiError(590, 'Can not fetch from discord API');
+  try {
+    const response = await fetch('https://discord.com/api/users/@me', {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (response.ok) {
+      return await response.json();
+    } else {
+      throw new Error();
     }
+  } catch (error) {
+    logger.error({ accessToken, error }, 'Failed to get user from Discord API');
+    throw new ApiError(590, 'Can not fetch from discord API');
+  }
 }
 
 /**
@@ -51,21 +50,20 @@ async function getUserFromDiscordAPI(accessToken: string): Promise<IDiscordUser>
  * @returns {Promise<IDiscordUser>}
  */
 async function getBotFromDiscordAPI(): Promise<IDiscordUser> {
-    try {
-        const response = await fetch('https://discord.com/api/users/@me', {
-            method: 'GET',
-            headers: { 'Authorization': `Bot ${config.discord.botToken}` }
-        });
-        if (response.ok) {
-            return await response.json();
-        }
-        else {
-            throw new Error();
-        }
-    } catch (error) {
-        logger.error({ bot_token: config.discord.botToken, error }, 'Failed to get bot from Discord API');
-        throw new ApiError(590, 'Can not fetch from discord API');
+  try {
+    const response = await fetch('https://discord.com/api/users/@me', {
+      method: 'GET',
+      headers: { Authorization: `Bot ${config.discord.botToken}` },
+    });
+    if (response.ok) {
+      return await response.json();
+    } else {
+      throw new Error();
     }
+  } catch (error) {
+    logger.error({ bot_token: config.discord.botToken, error }, 'Failed to get bot from Discord API');
+    throw new ApiError(590, 'Can not fetch from discord API');
+  }
 }
 
 /**
@@ -74,8 +72,8 @@ async function getBotFromDiscordAPI(): Promise<IDiscordUser> {
  * @returns {Promise<IUser | null>}
  */
 async function getUserByDiscordId(discordId: Snowflake): Promise<IUser | null> {
-    const user = await User.findOne({ discordId });
-    return user;
+  const user = await User.findOne({ discordId });
+  return user;
 }
 
 /**
@@ -84,23 +82,21 @@ async function getUserByDiscordId(discordId: Snowflake): Promise<IUser | null> {
  * @returns {Promise<Array<IDiscordGuild>>}
  */
 async function getCurrentUserGuilds(accessToken: string) {
-    try {
-        const response = await fetch('https://discord.com/api/users/@me/guilds', {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${accessToken}` }
-        });
-        if (response.ok) {
-            return await response.json();
-        }
-        else {
-            throw new Error();
-        }
-    } catch (error) {
-        logger.error({ bot_token: config.discord.botToken, error }, 'Failed to get user\'s guilds from disocrd API');
-        throw new ApiError(590, 'Can not fetch from discord API');
+  try {
+    const response = await fetch('https://discord.com/api/users/@me/guilds', {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (response.ok) {
+      return await response.json();
+    } else {
+      throw new Error();
     }
+  } catch (error) {
+    logger.error({ bot_token: config.discord.botToken, error }, "Failed to get user's guilds from disocrd API");
+    throw new ApiError(590, 'Can not fetch from discord API');
+  }
 }
-
 
 /**
  * update user by discordId
@@ -109,16 +105,16 @@ async function getCurrentUserGuilds(accessToken: string) {
  * @returns {Promise<IGuild>}
  */
 async function updateUserByDiscordId(discordId: Snowflake, updateBody: IUserUpdateBody) {
-    const user = await User.findOne({ discordId });
-    if (!user) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
-    }
-    if (updateBody.email && (await User.findOne({ email: updateBody.email, discordId: { $ne: discordId } }))) {
-        throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
-    }
-    Object.assign(user, updateBody);
-    await user.save();
-    return user;
+  const user = await User.findOne({ discordId });
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
+  if (updateBody.email && (await User.findOne({ email: updateBody.email, discordId: { $ne: discordId } }))) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+  }
+  Object.assign(user, updateBody);
+  await user.save();
+  return user;
 }
 
 /**
@@ -127,29 +123,28 @@ async function updateUserByDiscordId(discordId: Snowflake, updateBody: IUserUpda
  * @returns {Promise<ITwitterUser>}
  */
 async function getUserFromTwitterAPI(accessToken: string): Promise<ITwitterUser> {
-    try {
-        const response = await fetch('https://api.twitter.com/2/users/me?user.fields=profile_image_url,name,id', {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${accessToken}` }
-        });
-        if (response.ok) {
-            return (await response.json()).data;
-        }
-        else {
-            throw new Error();
-        }
-    } catch (error) {
-        logger.error({ accessToken, error }, 'Failed to get user from twitter API');
-        throw new ApiError(590, 'Can not fetch from twitter API');
+  try {
+    const response = await fetch('https://api.twitter.com/2/users/me?user.fields=profile_image_url,name,id', {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (response.ok) {
+      return (await response.json()).data;
+    } else {
+      throw new Error();
     }
+  } catch (error) {
+    logger.error({ accessToken, error }, 'Failed to get user from twitter API');
+    throw new ApiError(590, 'Can not fetch from twitter API');
+  }
 }
 
 export default {
-    createUser,
-    getUserFromDiscordAPI,
-    getBotFromDiscordAPI,
-    getUserByDiscordId,
-    getCurrentUserGuilds,
-    updateUserByDiscordId,
-    getUserFromTwitterAPI
-}
+  createUser,
+  getUserFromDiscordAPI,
+  getBotFromDiscordAPI,
+  getUserByDiscordId,
+  getCurrentUserGuilds,
+  updateUserByDiscordId,
+  getUserFromTwitterAPI,
+};

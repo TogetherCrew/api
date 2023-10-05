@@ -1,20 +1,24 @@
 {
     "env": {
-        "browser": true,
-        "es2021": true
+        "ES2017": true,
+        "node": true
     },
     "extends": [
         "eslint:recommended",
-        "plugin:@typescript-eslint/recommended"
+        "plugin:@typescript-eslint/recommended",
+        "prettier",
+        "prettier/@typescript-eslint"
     ],
-    "overrides": [],
+    "plugins": [
+        "@typescript-eslint",
+        "prettier"
+    ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "ecmaVersion": "latest",
+        "ecmaVersion": 2018,
         "sourceType": "module"
     },
-    "plugins": [
-        "@typescript-eslint"
-    ],
-    "rules": {}
+    "rules": {
+        "prettier/prettier": "error"
+    }
 }

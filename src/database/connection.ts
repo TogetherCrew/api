@@ -10,10 +10,10 @@ const logger = parentLogger.child({ module: 'Connection' });
  * @throws {MongooseError} - If there is an error closing the connection, it is logged to the console and the error is thrown.
  */
 export async function closeConnection(connection: Connection) {
-    try {
-        await connection.close();
-        logger.info({ database: connection.name }, 'The connection to database has been successfully closed');
-    } catch (error) {
-        logger.fatal({ database: connection.name, error }, 'Failed to close the connection to the database');
-    }
+  try {
+    await connection.close();
+    logger.info({ database: connection.name }, 'The connection to database has been successfully closed');
+  } catch (error) {
+    logger.fatal({ database: connection.name, error }, 'Failed to close the connection to the database');
+  }
 }
