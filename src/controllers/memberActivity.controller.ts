@@ -98,6 +98,7 @@ const activeMembersCompositionTable = catchAsync(async function (req: IAuthReque
     const activityCompostionFields = memberActivityService.getActivityCompositionOfActiveMembersComposition()
     const memberActivity = await memberActivityService.getLastDocumentForTablesUsage(connection, activityCompostionFields);
     const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options, memberActivity, activityCompostionsTypes.activeMembersComposition);
+
     const roles = await roleService.getRoles(connection, {});
     if (guildMembers) {
         guildMembers.results.forEach((guildMember) => {
