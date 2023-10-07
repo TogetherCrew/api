@@ -23,23 +23,21 @@ paths:
       description: after calling this end-point a new TwitterRefresh saga will be called and new information will be received
       security:
         - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                twitter_username:
-                  type: string
-                  required: true   
-                  example: katerinabohlec
       response:
+        "204":
+          description: No Content
+          $ref: "#/components/responses/NoContent"
         "401":
           description: Unauthorized
           $ref: "#/components/responses/Unauthorized"
+        "440":
+          description: Oops, something went wrong! Could you please try logging in
+          $ref: "#/components/responses/Oops_Something_Went_Wrong_Could_You_Please_Try_Logging_In"
+        "400":
+          description: Oops, It seems you have not connected your `Twitter` account, try setup `Twitter` and try again!
+          $ref: "#/components/responses/BadRequest"
 
-  /api/v1/twitter/{twitterId}/metrics/activity:
+  /api/v1/twitter/metrics/activity:
     get:
       tags:
         - [Twitter]
@@ -47,13 +45,6 @@ paths:
       description: get twitter Activity Metrics
       security:
         - bearerAuth: []
-      parameters:
-        - in: path
-          name: twitterId
-          required: true
-          schema:
-            type: string
-          description: Twitter ID
       responses:
         "200":
           description: OK
@@ -75,8 +66,11 @@ paths:
         "401":
           description: Unauthorized
           $ref: "#/components/responses/Unauthorized"
+        "400":
+          description: Oops, It seems you have not connected your `Twitter` account, try setup `Twitter` and try again!
+          $ref: "#/components/responses/BadRequest"
 
-  /api/v1/twitter/{twitterId}/metrics/audience:
+  /api/v1/twitter/metrics/audience:
     get:
       tags:
         - [Twitter]
@@ -84,13 +78,6 @@ paths:
       description: get twitter Audience Metrics
       security:
         - bearerAuth: []
-      parameters:
-        - in: path
-          name: twitterId
-          required: true
-          schema:
-            type: string
-          description: Twitter ID
       responses:
         "200":
           description: OK
@@ -110,8 +97,11 @@ paths:
         "401":
           description: Unauthorized
           $ref: "#/components/responses/Unauthorized"
+        "400":
+          description: Oops, It seems you have not connected your `Twitter` account, try setup `Twitter` and try again!
+          $ref: "#/components/responses/BadRequest"
 
-  /api/v1/twitter/{twitterId}/metrics/engagement:
+  /api/v1/twitter/metrics/engagement:
     get:
       tags:
         - [Twitter]
@@ -119,13 +109,6 @@ paths:
       description: get twitter Engagement Metrics
       security:
         - bearerAuth: []
-      parameters:
-        - in: path
-          name: twitterId
-          required: true
-          schema:
-            type: string
-          description: Twitter ID
       responses:
         "200":
           description: OK
@@ -145,4 +128,33 @@ paths:
         "401":
           description: Unauthorized
           $ref: "#/components/responses/Unauthorized"
-
+        "400":
+          description: Oops, It seems you have not connected your `Twitter` account, try setup `Twitter` and try again!
+          $ref: "#/components/responses/BadRequest"
+  
+  /api/v1/twitter/metrics/account:
+    get:
+      tags:
+        - [Twitter]
+      summary: get twitter Account Metrics
+      description: get twitter Account Metrics
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  follower:
+                    type: number
+                  engagement:
+                    type: number
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "400":
+          description: Oops, It seems you have not connected your `Twitter` account, try setup `Twitter` and try again!
+          $ref: "#/components/responses/BadRequest"

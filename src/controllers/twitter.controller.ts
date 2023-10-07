@@ -14,13 +14,13 @@ const disconnectTwitter = catchAsync(async function (req: IAuthRequest, res: Res
         twitterId: null,
         twitterUsername: null,
         twitterProfileImageUrl: null,
-        twitterConnectedAt: null
+        twitterConnectedAt: null,
+        twitterIsInProgress: null
     })
     res.status(httpStatus.NO_CONTENT).send();
 });
 
 const refreshTwitter = catchAsync(async function (req: IAuthRequest, res: Response) {
-    const { twitter_username } = req.body;
     const discordId = req.user.discordId
 
     const guild = await guildService.getGuild({ user: discordId });
@@ -28,7 +28,13 @@ const refreshTwitter = catchAsync(async function (req: IAuthRequest, res: Respon
         throw new ApiError(440, 'Oops, something went wrong! Could you please try logging in');
     }
 
-    twitterService.twitterRefresh(twitter_username, { discordId, guildId: guild.guildId })
+    const user = await userService.getUserByDiscordId(discordId)
+    if (!user?.twitterUsername) {
+        throw new ApiError(400, 'Oops, It seems you have not connected your `Twitter` account, try setup `Twitter` and try again!');
+    }
+
+    const twitterUsername = user.twitterUsername
+    twitterService.twitterRefresh(twitterUsername, { discordId, guildId: guild.guildId })
     res.status(httpStatus.NO_CONTENT).send();
 })
 
@@ -40,19 +46,25 @@ type TwitterActivityResponse = {
     mentions: number | null
 }
 const activityMetrics = catchAsync(async function (req: IAuthRequest, res: Response<TwitterActivityResponse>) {
-    const userId = req.params.twitterId
+    const discordId = req.user.discordId
+
+    const user = await userService.getUserByDiscordId(discordId)
+    if (!user?.twitterId) {
+        throw new ApiError(400, 'Oops, It seems you have not connected your `Twitter` account, try setup `Twitter` and try again!');
+    }
 
     // TODO: also we can make it in a way that all below functions run in parallel
-    const postNumber = await twitterService.getUserPostNumber(userId)
-    const replyNumber = await twitterService.getUserReplyNumber(userId)
-    const retweetNumber = await twitterService.getUserRetweetNumber(userId)
-    const likeNumber = await twitterService.getUserLikeNumber(userId)
-    const mentionNumber = await twitterService.getUserMentionNumber(userId)
+    const twitterId = user.twitterId
+    const postNumber = await twitterService.getUserPostNumber(twitterId)
+    const replyNumber = await twitterService.getUserReplyNumber(twitterId)
+    const retweetNumber = await twitterService.getUserRetweetNumber(twitterId)
+    const likeNumber = await twitterService.getUserLikeNumber(twitterId)
+    const mentionNumber = await twitterService.getUserMentionNumber(twitterId)
     const activityMetrics = {
         posts: postNumber,
         replies: replyNumber,
         retweets: retweetNumber,
-        likes: likeNumber, 
+        likes: likeNumber,
         mentions: mentionNumber
     }
     res.send(activityMetrics)
@@ -65,13 +77,19 @@ type TwitterAudienceResponse = {
     mentions: number | null
 }
 const audienceMetrics = catchAsync(async function (req: IAuthRequest, res: Response<TwitterAudienceResponse>) {
-    const userId = req.params.twitterId
+    const discordId = req.user.discordId
+
+    const user = await userService.getUserByDiscordId(discordId)
+    if (!user?.twitterId) {
+        throw new ApiError(400, 'Oops, It seems you have not connected your `Twitter` account, try setup `Twitter` and try again!');
+    }
 
     // TODO: also we can make it in a way that all below functions run in parallel
-    const replyNumber = await twitterService.getAudienceReplyNumber(userId)
-    const retweetNumber = await twitterService.getAudienceRetweetNumber(userId)
-    const likeNumber = await twitterService.getAudienceLikeNumber(userId)
-    const mentionNumber = await twitterService.getAudienceMentionNumber(userId)
+    const twitterId = user.twitterId
+    const replyNumber = await twitterService.getAudienceReplyNumber(twitterId)
+    const retweetNumber = await twitterService.getAudienceRetweetNumber(twitterId)
+    const likeNumber = await twitterService.getAudienceLikeNumber(twitterId)
+    const mentionNumber = await twitterService.getAudienceMentionNumber(twitterId)
     const audienceMetrics = {
         replies: replyNumber,
         retweets: retweetNumber,
@@ -88,18 +106,25 @@ type TwitterEngagementResponse = {
     lqhe: number
 }
 const engagementMetrics = catchAsync(async function (req: IAuthRequest, res: Response<TwitterEngagementResponse>) {
-    const userId = req.params.twitterId
+    const discordId = req.user.discordId
+
+    const user = await userService.getUserByDiscordId(discordId)
+    if (!user?.twitterId) {
+        throw new ApiError(400, 'Oops, It seems you have not connected your `Twitter` account, try setup `Twitter` and try again!');
+    }
+    const twitterId = user.twitterId
+
     let hqla = 0
-    let hqhe = 0 
+    let hqhe = 0
     let lqla = 0
     let lqhe = 0
 
-    const repliesInteraction = await twitterService.getRepliesInteraction(userId)
-    const quotesInteraction = await twitterService.getQuotesInteraction(userId)
-    const mentionsInteraction = await twitterService.getMentionsInteraction(userId)
+    const repliesInteraction = await twitterService.getRepliesInteraction(twitterId)
+    const quotesInteraction = await twitterService.getQuotesInteraction(twitterId)
+    const mentionsInteraction = await twitterService.getMentionsInteraction(twitterId)
 
-    const retweetsInteraction = await twitterService.getRetweetsInteraction(userId)
-    const likesInteraction = await twitterService.getLikesInteraction(userId)
+    const retweetsInteraction = await twitterService.getRetweetsInteraction(twitterId)
+    const likesInteraction = await twitterService.getLikesInteraction(twitterId)
 
     const repliesInteractionUsers = repliesInteraction.map(ri => ri.userId)
     const quotesInteractionUsers = quotesInteraction.map(qi => qi.userId)
@@ -111,16 +136,16 @@ const engagementMetrics = catchAsync(async function (req: IAuthRequest, res: Res
 
     // calculate `hqla` and `hqhe`
     const replyQuoteMentionUsers = new Set([...repliesInteractionUsers, ...quotesInteractionUsers, ...mentionsInteractionUsers])
-    for(const userId of Array.from(replyQuoteMentionUsers)){
+    for (const userId of Array.from(replyQuoteMentionUsers)) {
         const replyInteraction = repliesInteraction.find(ri => ri.userId == userId)
         const quoteInteraction = quotesInteraction.find(qi => qi.userId == userId)
         const mentionInteraction = mentionsInteraction.find(mi => mi.userId == userId)
 
         const replyInteractionNumber = replyInteraction?.replyCount || 0
-        const quoteInteractionNumber = quoteInteraction?.quoteCount || 0 
+        const quoteInteractionNumber = quoteInteraction?.quoteCount || 0
         const mentionInteractionNumber = mentionInteraction?.mentionCount || 0
 
-        if(replyInteractionNumber + quoteInteractionNumber + mentionInteractionNumber < 3)
+        if (replyInteractionNumber + quoteInteractionNumber + mentionInteractionNumber < 3)
             hqla++
         else
             hqhe++
@@ -128,14 +153,14 @@ const engagementMetrics = catchAsync(async function (req: IAuthRequest, res: Res
 
     // calculate `lqla` and `lqhe`
     const retweetLikeUsers = new Set([...retweetsInteractionUsers, ...likesInteractionUsers])
-    for(const userId of Array.from(retweetLikeUsers)){
+    for (const userId of Array.from(retweetLikeUsers)) {
         const retweetInteraction = retweetsInteraction.find(ri => ri.userId == userId)
         const likeInteraction = likesInteraction.find(li => li.userId == userId)
-        
-        const retweetInteractionNumber = retweetInteraction?.retweetCount || 0
-        const likeInteractionNumber = likeInteraction?.likeCount || 0 
 
-        if(retweetInteractionNumber + likeInteractionNumber < 3)
+        const retweetInteractionNumber = retweetInteraction?.retweetCount || 0
+        const likeInteractionNumber = likeInteraction?.likeCount || 0
+
+        if (retweetInteractionNumber + likeInteractionNumber < 3)
             lqla++
         else
             lqhe++
@@ -150,11 +175,35 @@ const engagementMetrics = catchAsync(async function (req: IAuthRequest, res: Res
     res.send(engagementMetrics)
 });
 
+type TwitterAccountResponse = {
+    follower: number | null
+    engagement: number | null
+}
+const accountMetrics = catchAsync(async function (req: IAuthRequest, res: Response<TwitterAccountResponse>) {
+    const discordId = req.user.discordId
+
+    const user = await userService.getUserByDiscordId(discordId)
+    if (!user?.twitterId) {
+        throw new ApiError(400, 'Oops, It seems you have not connected your `Twitter` account, try setup `Twitter` and try again!');
+    }
+    const twitterId = user.twitterId
+
+    const followerNumber = await twitterService.getUserFollowerNumber(twitterId)
+    const engagementNumber = await twitterService.getEngagementNumber(twitterId)
+
+    const accountMetrics = {
+        follower: followerNumber,
+        engagement: engagementNumber
+    }
+    res.send(accountMetrics)
+})
+
 export default {
     disconnectTwitter,
     refreshTwitter,
     activityMetrics,
     audienceMetrics,
-    engagementMetrics
+    engagementMetrics,
+    accountMetrics
 }
 

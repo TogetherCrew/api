@@ -4,13 +4,13 @@ import app from '../../src/app';
 import setupTestDB from '../utils/setupTestDB';
 import config from '../../src/config';
 import * as Neo4j from '../../src/neo4j';
-import { userOneAccessToken } from '../fixtures/token.fixture';
+import { userOneAccessToken, userTwoAccessToken } from '../fixtures/token.fixture';
 import dateUtils from '../../src/utils/date';
-import { insertUsers, userOne } from '../fixtures/user.fixture';
+import { insertUsers, userOne, userTwo } from '../fixtures/user.fixture';
 setupTestDB();
 
 describe('Twitter routes', () => {
-    describe('GET /api/v1/twitter/{twitterId}/metrics/activity', () => {
+    describe('GET /api/v1/twitter/metrics/activity', () => {
 
         test('should return 200 and Activity Metrics data if req data is ok', async () => {
             const oneDaysAgoTimestamp = dateUtils.getXDaysAgoUTCtimestamp(1);
@@ -22,12 +22,12 @@ describe('Twitter routes', () => {
             const eightDaysAgoTimestamp = dateUtils.getXDaysAgoUTCtimestamp(8);
 
             const numberOfPostsMockData = `
-                MERGE (a:TwitterAccount {userId: "1111"})
+                MERGE (a:TwitterAccount {userId: "${userOne.twitterId}"})
                 MERGE (a2:TwitterAccount {userId: "1112"})
-                MERGE (t:Tweet {tweetId: "123", authorId: "1111"})
-                MERGE (t2:Tweet {tweetId: '124', authorId: "1111"})
+                MERGE (t:Tweet {tweetId: "123", authorId: "${userOne.twitterId}"})
+                MERGE (t2:Tweet {tweetId: '124', authorId: "${userOne.twitterId}"})
                 MERGE (t3:Tweet {tweetId: '125', authorId: "1112"})
-                MERGE (t4:Tweet {tweetId: '126', authorId: "1111"})
+                MERGE (t4:Tweet {tweetId: '126', authorId: "${userOne.twitterId}"})
                 
                 MERGE (a)-[:TWEETED {createdAt: ${twoDaysAgoTimestamp}}]->(t)
                 MERGE (a)-[:TWEETED {createdAt: ${eightDaysAgoTimestamp}}]->(t2)
@@ -35,12 +35,12 @@ describe('Twitter routes', () => {
                 MERGE (a)-[:TWEETED {createdAt: ${threeDaysAgoTimestamp}}]->(t4)
             `
             const numberOfRepliesMockData = `
-                MERGE (a:TwitterAccount {userId: "1111"})
+                MERGE (a:TwitterAccount {userId: "${userOne.twitterId}"})
                 MERGE (a2:TwitterAccount {userId: "1112"})
-                MERGE (t:Tweet {tweetId: "123", authorId: "1111"})
-                MERGE (t2:Tweet {tweetId: '124', authorId: "1111"})
+                MERGE (t:Tweet {tweetId: "123", authorId: "${userOne.twitterId}"})
+                MERGE (t2:Tweet {tweetId: '124', authorId: "${userOne.twitterId}"})
                 MERGE (t3:Tweet {tweetId: '125', authorId: "1112"})
-                MERGE (t4:Tweet {tweetId: '126', authorId: "1111"})
+                MERGE (t4:Tweet {tweetId: '126', authorId: "${userOne.twitterId}"})
                 MERGE (t5:Tweet {tweetId: '127', authorId: "1112"})
 
                 MERGE (a)-[:TWEETED {createdAt: ${twoDaysAgoTimestamp}}]->(t)
@@ -51,12 +51,12 @@ describe('Twitter routes', () => {
                 MERGE (t5)-[:REPLIED {createdAt: ${fourDaysAgoTimestamp}}]->(t4)
             `
             const numberOfRetweetsMockData = `
-                MERGE (a:TwitterAccount {userId: "1111"})
+                MERGE (a:TwitterAccount {userId: "${userOne.twitterId}"})
                 MERGE (a2:TwitterAccount {userId: "1112"})
-                MERGE (t:Tweet {tweetId: "123", authorId: "1111"})
-                MERGE (t2:Tweet {tweetId: '124', authorId: "1111"})
+                MERGE (t:Tweet {tweetId: "123", authorId: "${userOne.twitterId}"})
+                MERGE (t2:Tweet {tweetId: '124', authorId: "${userOne.twitterId}"})
                 MERGE (t3:Tweet {tweetId: '125', authorId: "1112"})
-                MERGE (t4:Tweet {tweetId: '126', authorId: "1111"})
+                MERGE (t4:Tweet {tweetId: '126', authorId: "${userOne.twitterId}"})
                 MERGE (t5:Tweet {tweetId: '127', authorId: "1112"})
                 
                 MERGE (a)-[:TWEETED {createdAt: ${twoDaysAgoTimestamp}}]->(t)
@@ -67,12 +67,12 @@ describe('Twitter routes', () => {
                 MERGE (t5)-[:RETWEETED {createdAt: ${fourDaysAgoTimestamp}}]->(t4)
             `
             const numberOfLikesMockData = `
-                MERGE (a:TwitterAccount {userId: "1111"})
+                MERGE (a:TwitterAccount {userId: "${userOne.twitterId}"})
                 MERGE (a2:TwitterAccount {userId: "1112"})
-                MERGE (t:Tweet {tweetId: "123", authorId: "1111", createdAt: ${fiveDaysAgoTimestamp}})
-                MERGE (t2:Tweet {tweetId: '124', authorId: "1111", createdAt: ${fourDaysAgoTimestamp}})
+                MERGE (t:Tweet {tweetId: "123", authorId: "${userOne.twitterId}", createdAt: ${fiveDaysAgoTimestamp}})
+                MERGE (t2:Tweet {tweetId: '124', authorId: "${userOne.twitterId}", createdAt: ${fourDaysAgoTimestamp}})
                 MERGE (t3:Tweet {tweetId: '125', authorId: "1112", createdAt: ${sevenDaysAgoTimestamp}})
-                MERGE (t4:Tweet {tweetId: '126', authorId: "1111", createdAt: ${threeDaysAgoTimestamp}})
+                MERGE (t4:Tweet {tweetId: '126', authorId: "${userOne.twitterId}", createdAt: ${threeDaysAgoTimestamp}})
                 MERGE (t5:Tweet {tweetId: '127', authorId: "1112", createdAt: ${eightDaysAgoTimestamp}})
                 
                 MERGE (a)-[:TWEETED {createdAt: ${twoDaysAgoTimestamp}}]->(t)
@@ -91,12 +91,12 @@ describe('Twitter routes', () => {
                 MERGE (a2)-[:LIKED {latestSavedAt: ${oneDaysAgoTimestamp}}]->(t5)
             `
             const numberOfMentionsMockData = `
-                MERGE (a:TwitterAccount {userId: "1111"})
+                MERGE (a:TwitterAccount {userId: "${userOne.twitterId}"})
                 MERGE (a2:TwitterAccount {userId: "1112"})
-                MERGE (t:Tweet {tweetId: "123", authorId: "1111", createdAt: ${fiveDaysAgoTimestamp}})
-                MERGE (t2:Tweet {tweetId: '124', authorId: "1111", createdAt: ${fourDaysAgoTimestamp}})
+                MERGE (t:Tweet {tweetId: "123", authorId: "${userOne.twitterId}", createdAt: ${fiveDaysAgoTimestamp}})
+                MERGE (t2:Tweet {tweetId: '124', authorId: "${userOne.twitterId}", createdAt: ${fourDaysAgoTimestamp}})
                 MERGE (t3:Tweet {tweetId: '125', authorId: "1112", createdAt: ${sevenDaysAgoTimestamp}})
-                MERGE (t4:Tweet {tweetId: '126', authorId: "1111", createdAt: ${threeDaysAgoTimestamp}})
+                MERGE (t4:Tweet {tweetId: '126', authorId: "${userOne.twitterId}", createdAt: ${threeDaysAgoTimestamp}})
                 MERGE (t5:Tweet {tweetId: '127', authorId: "1112", createdAt: ${eightDaysAgoTimestamp}})
                 
                 MERGE (a)-[:TWEETED {createdAt: ${twoDaysAgoTimestamp}}]->(t)
@@ -120,7 +120,7 @@ describe('Twitter routes', () => {
             await Neo4j.write(numberOfMentionsMockData)
 
             const res = await request(app)
-                .get(`/api/v1/twitter/1111/metrics/activity`)
+                .get(`/api/v1/twitter/metrics/activity`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
 
@@ -131,15 +131,24 @@ describe('Twitter routes', () => {
             expect(res.body.mentions).toEqual(2)
         })
 
+        
+        test("should return 400 if user has not connected his Twitter account yet!", async () => {
+            await insertUsers([userTwo]);
+            const res = await request(app)
+                .get(`/api/v1/twitter/metrics/activity`)
+                .set('Authorization', `Bearer ${userTwoAccessToken}`)
+                .expect(httpStatus.BAD_REQUEST);
+        })
+
         test('should return 401 if access token is missing', async () => {
             await request(app)
-                .get(`/api/v1/twitter/112/metrics/activity`)
+                .get(`/api/v1/twitter/metrics/activity`)
                 .send()
                 .expect(httpStatus.UNAUTHORIZED);
         })
     })
 
-    describe('GET /api/v1/twitter/{twitterId}/metrics/audience', () => {
+    describe('GET /api/v1/twitter/metrics/audience', () => {
 
         test('should return 200 and Audience Metrics data if req data is ok', async () => {
             const oneDaysAgoTimestamp = dateUtils.getXDaysAgoUTCtimestamp(1);
@@ -151,12 +160,12 @@ describe('Twitter routes', () => {
             const eightDaysAgoTimestamp = dateUtils.getXDaysAgoUTCtimestamp(8);
 
             const NumberOfRepliesOthersMackMockData = `
-                MERGE (a:TwitterAccount {userId: "1111"})
+                MERGE (a:TwitterAccount {userId: "${userOne.twitterId}"})
                 MERGE (a2:TwitterAccount {userId: "1112"})
-                MERGE (t:Tweet {tweetId: "123", authorId: "1111"})
-                MERGE (t2:Tweet {tweetId: '124', authorId: "1111"})
+                MERGE (t:Tweet {tweetId: "123", authorId: "${userOne.twitterId}"})
+                MERGE (t2:Tweet {tweetId: '124', authorId: "${userOne.twitterId}"})
                 MERGE (t3:Tweet {tweetId: '125', authorId: "1112"})
-                MERGE (t4:Tweet {tweetId: '126', authorId: "1111"})
+                MERGE (t4:Tweet {tweetId: '126', authorId: "${userOne.twitterId}"})
                 MERGE (t5:Tweet {tweetId: '127', authorId: "1112"})
                 
                 MERGE (a)-[:TWEETED {createdAt: ${twoDaysAgoTimestamp}}]->(t)
@@ -167,12 +176,12 @@ describe('Twitter routes', () => {
                 MERGE (t5)-[:REPLIED {createdAt: ${fourDaysAgoTimestamp}}]->(t4)
             `
             const NumberOfRetweetsOthersMackMockData = `
-                MERGE (a:TwitterAccount {userId: "1111"})
+                MERGE (a:TwitterAccount {userId: "${userOne.twitterId}"})
                 MERGE (a2:TwitterAccount {userId: "1112"})
-                MERGE (t:Tweet {tweetId: "123", authorId: "1111"})
-                MERGE (t2:Tweet {tweetId: '124', authorId: "1111"})
+                MERGE (t:Tweet {tweetId: "123", authorId: "${userOne.twitterId}"})
+                MERGE (t2:Tweet {tweetId: '124', authorId: "${userOne.twitterId}"})
                 MERGE (t3:Tweet {tweetId: '125', authorId: "1112"})
-                MERGE (t4:Tweet {tweetId: '126', authorId: "1111"})
+                MERGE (t4:Tweet {tweetId: '126', authorId: "${userOne.twitterId}"})
                 MERGE (t5:Tweet {tweetId: '127', authorId: "1112"})
                 
                 MERGE (a)-[:TWEETED {createdAt: ${twoDaysAgoTimestamp}}]->(t)
@@ -183,12 +192,12 @@ describe('Twitter routes', () => {
                 MERGE (t5)-[:RETWEETED {createdAt: ${fourDaysAgoTimestamp}}]->(t4)
             `
             const NumberOfLikesOthersMackMockData = `
-                MERGE (a:TwitterAccount {userId: "1111"})
+                MERGE (a:TwitterAccount {userId: "${userOne.twitterId}"})
                 MERGE (a2:TwitterAccount {userId: "1112"})
-                MERGE (t:Tweet {tweetId: "123", authorId: "1111", createdAt: ${fiveDaysAgoTimestamp}})
-                MERGE (t2:Tweet {tweetId: '124', authorId: "1111", createdAt: ${fourDaysAgoTimestamp}})
+                MERGE (t:Tweet {tweetId: "123", authorId: "${userOne.twitterId}", createdAt: ${fiveDaysAgoTimestamp}})
+                MERGE (t2:Tweet {tweetId: '124', authorId: "${userOne.twitterId}", createdAt: ${fourDaysAgoTimestamp}})
                 MERGE (t3:Tweet {tweetId: '125', authorId: "1112", createdAt: ${sevenDaysAgoTimestamp}})
-                MERGE (t4:Tweet {tweetId: '126', authorId: "1111", createdAt: ${threeDaysAgoTimestamp}})
+                MERGE (t4:Tweet {tweetId: '126', authorId: "${userOne.twitterId}", createdAt: ${threeDaysAgoTimestamp}})
                 MERGE (t5:Tweet {tweetId: '127', authorId: "1112", createdAt: ${eightDaysAgoTimestamp}})
                 
                 MERGE (a)-[:TWEETED {createdAt: ${twoDaysAgoTimestamp}}]->(t)
@@ -206,12 +215,12 @@ describe('Twitter routes', () => {
                 MERGE (a2)-[:LIKED {latestSavedAt: ${oneDaysAgoTimestamp}}]->(t5)
             `
             const NumberOfMentionsOthersMackMockData = `
-                MERGE (a:TwitterAccount {userId: "1111"})
+                MERGE (a:TwitterAccount {userId: "${userOne.twitterId}"})
                 MERGE (a2:TwitterAccount {userId: "1112"})
-                MERGE (t:Tweet {tweetId: "123", authorId: "1111", createdAt: ${fiveDaysAgoTimestamp}})
-                MERGE (t2:Tweet {tweetId: '124', authorId: "1111", createdAt: ${fourDaysAgoTimestamp}})
+                MERGE (t:Tweet {tweetId: "123", authorId: "${userOne.twitterId}", createdAt: ${fiveDaysAgoTimestamp}})
+                MERGE (t2:Tweet {tweetId: '124', authorId: "${userOne.twitterId}", createdAt: ${fourDaysAgoTimestamp}})
                 MERGE (t3:Tweet {tweetId: '125', authorId: "1112", createdAt: ${sevenDaysAgoTimestamp}})
-                MERGE (t4:Tweet {tweetId: '126', authorId: "1111", createdAt: ${threeDaysAgoTimestamp}})
+                MERGE (t4:Tweet {tweetId: '126', authorId: "${userOne.twitterId}", createdAt: ${threeDaysAgoTimestamp}})
                 MERGE (t5:Tweet {tweetId: '127', authorId: "1112", createdAt: "{Epoch8dayAgo}"})
                 
                 MERGE (a)-[:TWEETED {createdAt: ${twoDaysAgoTimestamp}}]->(t)
@@ -234,7 +243,7 @@ describe('Twitter routes', () => {
             await Neo4j.write(NumberOfMentionsOthersMackMockData)
 
             const res = await request(app)
-                .get(`/api/v1/twitter/1111/metrics/audience`)
+                .get(`/api/v1/twitter/metrics/audience`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
 
@@ -244,16 +253,24 @@ describe('Twitter routes', () => {
             expect(res.body.mentions).toEqual(0)
         })
 
+        test("should return 400 if user has not connected his Twitter account yet!", async () => {
+            await insertUsers([userTwo]);
+            const res = await request(app)
+                .get(`/api/v1/twitter/metrics/audience`)
+                .set('Authorization', `Bearer ${userTwoAccessToken}`)
+                .expect(httpStatus.BAD_REQUEST);
+        })
+
         test('should return 401 if access token is missing', async () => {
             config.notion.apiKey = 'invalid'
             await request(app)
-                .get(`/api/v1/twitter/112/metrics/audience`)
+                .get(`/api/v1/twitter/metrics/audience`)
                 .send()
                 .expect(httpStatus.UNAUTHORIZED);
         })
     })
 
-    describe('GET /api/v1/twitter/{twitterId}/metrics/engagement', () => {
+    describe('GET /api/v1/twitter/metrics/engagement', () => {
 
         test('should return 200 and Engagement Metrics data if req data is ok (1)', async () => {
             const oneDaysAgoTimestamp = dateUtils.getXDaysAgoUTCtimestamp(1);
@@ -264,7 +281,7 @@ describe('Twitter routes', () => {
                 MERGE (a:TwitterAccount {userId: "1111"})
                 MERGE (a2:TwitterAccount {userId: "1112"})
                 MERGE (a3:TwitterAccount {userId: "1113"})
-                MERGE (a4:TwitterAccount {userId: "1114"})
+                MERGE (a4:TwitterAccount {userId: "${userOne.twitterId}"})
                 MERGE (t:Tweet {tweetId: "123", authorId: "1111"})
                 MERGE (t2:Tweet {tweetId: '124', authorId: "1111"})
                 MERGE (t3:Tweet {tweetId: '125', authorId: "1112"})
@@ -272,10 +289,10 @@ describe('Twitter routes', () => {
                 MERGE (t5:Tweet {tweetId: '127', authorId: "1112"})
                 MERGE (t6:Tweet {tweetId: '128', authorId: "1113"})
                 MERGE (t7:Tweet {tweetId: '129', authorId: "1113"})
-                MERGE (t8:Tweet {tweetId: '130', authorId: "1114"})
-                MERGE (t9:Tweet {tweetId: '131', authorId: "1114"})
-                MERGE (t10:Tweet {tweetId: '132', authorId: "1114"})
-                MERGE (t11:Tweet {tweetId: '133', authorId: "1114"})
+                MERGE (t8:Tweet {tweetId: '130', authorId: "${userOne.twitterId}"})
+                MERGE (t9:Tweet {tweetId: '131', authorId: "${userOne.twitterId}"})
+                MERGE (t10:Tweet {tweetId: '132', authorId: "${userOne.twitterId}"})
+                MERGE (t11:Tweet {tweetId: '133', authorId: "${userOne.twitterId}"})
                 
                 
                 MERGE (a)-[:TWEETED {createdAt: ${twoDaysAgoTimestamp}}]->(t)
@@ -303,7 +320,7 @@ describe('Twitter routes', () => {
             await Neo4j.write(mockQuery)
 
             const res = await request(app)
-                .get(`/api/v1/twitter/1114/metrics/engagement`)
+                .get(`/api/v1/twitter/metrics/engagement`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
 
@@ -322,18 +339,18 @@ describe('Twitter routes', () => {
                 MERGE (a:TwitterAccount {userId: "1111"})
                 MERGE (a2:TwitterAccount {userId: "1112"})
                 MERGE (a3:TwitterAccount {userId: "1113"})
-                MERGE (a4:TwitterAccount {userId: "1114"})
+                MERGE (a4:TwitterAccount {userId: "${userOne.twitterId}"})
                 MERGE (t:Tweet {tweetId: "123", authorId: "1111"})
                 MERGE (t2:Tweet {tweetId: '124', authorId: "1111"})
                 MERGE (t3:Tweet {tweetId: '125', authorId: "1112"})
                 MERGE (t4:Tweet {tweetId: '126', authorId: "1111"})
                 MERGE (t5:Tweet {tweetId: '127', authorId: "1112"})
                 MERGE (t6:Tweet {tweetId: '128', authorId: "1113"})
-                MERGE (t7:Tweet {tweetId: '129', authorId: "1114"})
-                MERGE (t8:Tweet {tweetId: '130', authorId: "1114"})
-                MERGE (t9:Tweet {tweetId: '131', authorId: "1114"})
-                MERGE (t10:Tweet {tweetId: '132', authorId: "1114"})
-                MERGE (t11:Tweet {tweetId: '133', authorId: "1114"})
+                MERGE (t7:Tweet {tweetId: '129', authorId: "${userOne.twitterId}"})
+                MERGE (t8:Tweet {tweetId: '130', authorId: "${userOne.twitterId}"})
+                MERGE (t9:Tweet {tweetId: '131', authorId: "${userOne.twitterId}"})
+                MERGE (t10:Tweet {tweetId: '132', authorId: "${userOne.twitterId}"})
+                MERGE (t11:Tweet {tweetId: '133', authorId: "${userOne.twitterId}"})
                 
                 
                 MERGE (a)-[:TWEETED {createdAt: ${twoDaysAgoTimestamp}}]->(t)
@@ -358,7 +375,7 @@ describe('Twitter routes', () => {
             await Neo4j.write(mockQuery)
 
             const res = await request(app)
-                .get(`/api/v1/twitter/1114/metrics/engagement`)
+                .get(`/api/v1/twitter/metrics/engagement`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
 
@@ -368,10 +385,168 @@ describe('Twitter routes', () => {
             expect(res.body.lqhe).toEqual(0)
         })
 
+        test("should return 400 if user has not connected his Twitter account yet!", async () => {
+            await insertUsers([userTwo]);
+            const res = await request(app)
+                .get(`/api/v1/twitter/metrics/engagement`)
+                .set('Authorization', `Bearer ${userTwoAccessToken}`)
+                .expect(httpStatus.BAD_REQUEST);
+        })
+
         test('should return 401 if access token is missing', async () => {
             config.notion.apiKey = 'invalid'
             await request(app)
-                .get(`/api/v1/twitter/112/metrics/engagement`)
+                .get(`/api/v1/twitter/metrics/engagement`)
+                .send()
+                .expect(httpStatus.UNAUTHORIZED);
+        })
+    })
+
+    describe('GET /api/v1/twitter/metrics/account', () => {
+
+        test('should return 200 and Account Metrics data if req data is ok (1)', async () => {
+            const oneDaysAgoTimestamp = dateUtils.getXDaysAgoUTCtimestamp(1);
+            const twoDaysAgoTimestamp = dateUtils.getXDaysAgoUTCtimestamp(2);
+            const threeDaysAgoTimestamp = dateUtils.getXDaysAgoUTCtimestamp(3);
+            const fourDaysAgoTimestamp = dateUtils.getXDaysAgoUTCtimestamp(4);
+            const fiveDaysAgoTimestamp = dateUtils.getXDaysAgoUTCtimestamp(5);
+
+            const numberOfFollowersMockData = `
+                MERGE (a1:TwitterAccount {userId: '1111'})
+                MERGE (a2:TwitterAccount {userId: '${userOne.twitterId}'})
+                MERGE (a3:TwitterAccount {userId: '1113'})
+                SET a1.followerCount = 0
+                SET a2.followerCount = 3
+                SET a3.followerCount = 9
+                SET a1.followingCount = 12
+                SET a2.followingCount = 20
+                SET a3.followingCount = 50
+            `
+            const numberOfEngagementsMockData = `
+                MERGE (a:TwitterAccount {userId: "1111"})
+                MERGE (a2:TwitterAccount {userId: "${userOne.twitterId}"})
+                MERGE (t:Tweet {tweetId: "123", authorId: "1111", createdAt: ${fourDaysAgoTimestamp}})
+                MERGE (t2:Tweet {tweetId: '124', authorId: "1111", createdAt: ${fiveDaysAgoTimestamp}})
+                MERGE (t3:Tweet {tweetId: '125', authorId: "${userOne.twitterId}", createdAt: ${twoDaysAgoTimestamp}})
+                MERGE (t4:Tweet {tweetId: '126', authorId: "1111", createdAt: ${oneDaysAgoTimestamp}})
+                MERGE (t5:Tweet {tweetId: '127', authorId: "${userOne.twitterId}", createdAt: ${threeDaysAgoTimestamp}})
+                
+                MERGE (a)-[:TWEETED {createdAt: ${twoDaysAgoTimestamp} }]->(t)
+                MERGE (a)-[:TWEETED {createdAt: ${oneDaysAgoTimestamp} }]->(t4)
+                
+                MERGE (t2)-[:REPLIED {createdAt: ${oneDaysAgoTimestamp} }]->(t)
+                MERGE (t3)-[:REPLIED {createdAt: ${twoDaysAgoTimestamp} }]->(t)  // 1
+                MERGE (t5)-[:REPLIED {createdAt: ${fourDaysAgoTimestamp} }]->(t4)  // 2
+                
+                MERGE (t2)-[:RETWEETED {createdAt: ${oneDaysAgoTimestamp} }]->(t)
+                MERGE (t3)-[:REPLIED {createdAt: ${twoDaysAgoTimestamp} }]->(t)  // 3
+                MERGE (t5)-[:RETWEETED {createdAt: ${fourDaysAgoTimestamp} }]->(t4) // 4
+                
+                MERGE (a)-[:LIKED {latestSavedAt: ${oneDaysAgoTimestamp} }]->(t)
+                MERGE (a)-[:LIKED {latestSavedAt: ${oneDaysAgoTimestamp} }]->(t2)
+                MERGE (a)-[:LIKED {latestSavedAt: ${oneDaysAgoTimestamp} }]->(t3)
+                MERGE (a)-[:LIKED {latestSavedAt:${twoDaysAgoTimestamp} }]->(t5)
+                
+                MERGE (a2)-[:LIKED {latestSavedAt: ${oneDaysAgoTimestamp} }]->(t3)
+                MERGE (a2)-[:LIKED {latestSavedAt: ${threeDaysAgoTimestamp} }]->(t)  // 5
+                MERGE (a2)-[:LIKED {latestSavedAt: ${oneDaysAgoTimestamp} }]->(t5)
+                
+                MERGE (t) -[:MENTIONED {createdAt: ${twoDaysAgoTimestamp} }] -> (a)
+                MERGE (t) -[:MENTIONED {createdAt: ${twoDaysAgoTimestamp} }] -> (a2)
+                MERGE (t2) -[:MENTIONED {createdAt: ${threeDaysAgoTimestamp} }] -> (a1)
+                MERGE (t3) -[:MENTIONED {createdAt: ${fourDaysAgoTimestamp} }] -> (a1)  // 6
+            `
+
+            await insertUsers([userOne]);
+            await Neo4j.write("match (n) detach delete (n);")
+            await Neo4j.write(numberOfFollowersMockData)
+            await Neo4j.write(numberOfEngagementsMockData)
+
+            const res = await request(app)
+                .get(`/api/v1/twitter/metrics/account`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .expect(httpStatus.OK);
+
+            expect(res.body.follower).toEqual(3)
+            expect(res.body.engagement).toEqual(1)
+        })
+
+        test('should return 200 and Account Metrics data if req data is ok (2)', async () => {
+            const oneDaysAgoTimestamp = dateUtils.getXDaysAgoUTCtimestamp(1);
+            const twoDaysAgoTimestamp = dateUtils.getXDaysAgoUTCtimestamp(2);
+            const threeDaysAgoTimestamp = dateUtils.getXDaysAgoUTCtimestamp(3);
+            const fourDaysAgoTimestamp = dateUtils.getXDaysAgoUTCtimestamp(4);
+            const fiveDaysAgoTimestamp = dateUtils.getXDaysAgoUTCtimestamp(5);
+
+            const numberOfFollowersMockData = `
+                MERGE (a1:TwitterAccount {userId: '1111'})
+                MERGE (a2:TwitterAccount {userId: '${userOne.twitterId}'})
+                MERGE (a3:TwitterAccount {userId: '1113'})
+                SET a1.followerCount = 0
+                SET a2.followerCount = 3
+                SET a3.followerCount = 9
+                SET a1.followingCount = 12
+                SET a2.followingCount = 20
+                SET a3.followingCount = 50
+            `
+            const numberOfEngagementsMockData = `
+                MERGE (a:TwitterAccount {userId: "${userOne.twitterId}"})
+                MERGE (a2:TwitterAccount {userId: "1112"})
+                MERGE (t:Tweet {tweetId: "123", authorId: "${userOne.twitterId}", createdAt: ${fourDaysAgoTimestamp} })
+                MERGE (t2:Tweet {tweetId: '124', authorId: "${userOne.twitterId}", createdAt: ${fiveDaysAgoTimestamp} })
+                MERGE (t3:Tweet {tweetId: '125', authorId: "1112", createdAt: ${twoDaysAgoTimestamp} })
+                MERGE (t4:Tweet {tweetId: '126', authorId: "${userOne.twitterId}", createdAt: ${oneDaysAgoTimestamp} })
+                MERGE (t5:Tweet {tweetId: '127', authorId: "1112", createdAt: ${threeDaysAgoTimestamp} })
+                
+                MERGE (a)-[:TWEETED {createdAt: ${twoDaysAgoTimestamp} }]->(t)
+                MERGE (a)-[:TWEETED {createdAt: ${oneDaysAgoTimestamp} }]->(t4)
+                
+                MERGE (t2)-[:REPLIED {createdAt: ${oneDaysAgoTimestamp} }]->(t)
+                MERGE (t3)-[:REPLIED {createdAt: ${twoDaysAgoTimestamp} }]->(t)  // 1
+                MERGE (t5)-[:REPLIED {createdAt: ${fourDaysAgoTimestamp} }]->(t4)  // 2
+                
+                MERGE (t2)-[:RETWEETED {createdAt: ${oneDaysAgoTimestamp} }]->(t)
+                MERGE (t3)-[:REPLIED {createdAt: ${twoDaysAgoTimestamp} }]->(t)  // 3
+                MERGE (t5)-[:RETWEETED {createdAt: ${fourDaysAgoTimestamp} }]->(t4) // 4
+                
+                MERGE (a)-[:LIKED {latestSavedAt: ${oneDaysAgoTimestamp} }]->(t)
+                MERGE (a)-[:LIKED {latestSavedAt: ${oneDaysAgoTimestamp} }]->(t2)
+                
+                MERGE (a2)-[:LIKED {latestSavedAt: ${oneDaysAgoTimestamp} }]->(t3)
+                MERGE (a2)-[:LIKED {latestSavedAt: ${threeDaysAgoTimestamp} }]->(t)  // 5
+                MERGE (a2)-[:LIKED {latestSavedAt: ${oneDaysAgoTimestamp} }]->(t5)
+                
+                MERGE (t) -[:MENTIONED {createdAt: ${twoDaysAgoTimestamp} }] -> (a)
+                MERGE (t2) -[:MENTIONED {createdAt: ${threeDaysAgoTimestamp} }] -> (a1)
+                MERGE (t3) -[:MENTIONED {createdAt: ${fourDaysAgoTimestamp} }] -> (a1)  // 6
+            `
+
+            await insertUsers([userOne]);
+            await Neo4j.write("match (n) detach delete (n);")
+            await Neo4j.write(numberOfFollowersMockData)
+            await Neo4j.write(numberOfEngagementsMockData)
+
+            const res = await request(app)
+                .get(`/api/v1/twitter/metrics/account`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .expect(httpStatus.OK);
+
+            expect(res.body.follower).toEqual(3)
+            expect(res.body.engagement).toEqual(1)
+        })
+
+        test("should return 400 if user has not connected his Twitter account yet!", async () => {
+            await insertUsers([userTwo]);
+            const res = await request(app)
+                .get(`/api/v1/twitter/metrics/account`)
+                .set('Authorization', `Bearer ${userTwoAccessToken}`)
+                .expect(httpStatus.BAD_REQUEST);
+        })
+
+        test('should return 401 if access token is missing', async () => {
+            config.notion.apiKey = 'invalid'
+            await request(app)
+                .get(`/api/v1/twitter/metrics/account`)
                 .send()
                 .expect(httpStatus.UNAUTHORIZED);
         })

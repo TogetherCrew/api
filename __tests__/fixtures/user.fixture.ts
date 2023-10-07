@@ -8,6 +8,7 @@ export const userOne = {
     email: "some@yahoo.com",
     verified: false,
     avatar: '947f3e19e6e36a2679c6fe854b79a615',
+    twitterId: '234344343443'
 };
 
 export const userTwo = {

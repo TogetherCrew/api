@@ -338,6 +338,62 @@ async function getLikesInteraction(twitterId: string): Promise<LikeInteraction[]
 
 //#endregion
 
+//#region Account Metrics
+
+async function getUserFollowerNumber(twitterId: string){
+    const userFollowerNumberQuery = `
+        MATCH (a:TwitterAccount {userId: '${twitterId}'})
+        RETURN a.followerCount as follower_count
+    `
+    const neo4jData = await Neo4j.read(userFollowerNumberQuery)
+    const { records: followerNumberRecords } = neo4jData
+    if (followerNumberRecords.length == 0) return null
+    
+    const followerNumberRecord = followerNumberRecords[0]
+    const { _fieldLookup, _fields } = followerNumberRecord as unknown as { _fieldLookup: Record<string, number>, _fields: number[] }
+    
+    const followerNumber = _fields[_fieldLookup['follower_count']]
+    return followerNumber
+}
+
+/**
+ * Number of accounts that engages with you
+ * @param twitterId id of a user
+ */
+async function getEngagementNumber(twitterId: string){
+    const sevenDaysAgoEpoch = utils.get7daysAgoUTCtimestamp()
+
+    const engagementNumberQuery = `
+        OPTIONAL MATCH (t:Tweet {authorId: '${twitterId}'})<-[r:QUOTED|REPLIED|RETWEETED]-(m:Tweet)
+        WHERE m.authorId <> t.authorId AND r.createdAt >= ${sevenDaysAgoEpoch}
+        WITH COLLECT(DISTINCT m.authorId) as interaction_authors
+        
+        OPTIONAL MATCH (a:TwitterAccount {userId: '${twitterId}'}) <-[r:MENTIONED]-(t:Tweet)
+        WHERE t.authorId <> a.userId AND r.createdAt >= ${sevenDaysAgoEpoch}
+        WITH COLLECT(DISTINCT t.authorId) as mention_authors, interaction_authors
+        
+        OPTIONAL MATCH (t:Tweet {authorId: '${twitterId}'}) <-[r:LIKED]-(a:TwitterAccount)
+        WHERE t.authorId <> a.userId AND t.createdAt >= ${sevenDaysAgoEpoch}
+        WITH COLLECT(DISTINCT a.userId) as liked_authors, mention_authors, interaction_authors
+        
+        WITH liked_authors + interaction_authors + mention_authors as people_list
+        UNWIND people_list as people
+        RETURN COUNT( DISTINCT people) as account_count
+    `
+
+    const neo4jData = await Neo4j.read(engagementNumberQuery)
+    const { records: engagementNumberRecords } = neo4jData
+    if (engagementNumberRecords.length == 0) return null
+
+    const engagementNumberRecord = engagementNumberRecords[0]
+    const { _fieldLookup, _fields } = engagementNumberRecord as unknown as { _fieldLookup: Record<string, number>, _fields: number[] }
+    
+    const engagementNumber = _fields[_fieldLookup['account_count']]
+    return engagementNumber
+}
+
+//#endregion
+
 export default {
     twitterRefresh,
 
@@ -360,4 +416,8 @@ export default {
     getMentionsInteraction,
     getRetweetsInteraction,
     getLikesInteraction,
+
+    // Account Metrics
+    getUserFollowerNumber,
+    getEngagementNumber
 }
