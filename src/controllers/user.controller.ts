@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { tokenService, userService, } from '../services';
-import { IAuthRequest } from '../interfaces/request.interface';
+import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync } from "../utils";
 import { permissions } from '../config/dicord';
 

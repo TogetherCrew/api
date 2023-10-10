@@ -1,6 +1,6 @@
 import { Response } from 'express';
-import { guildService, memberActivityService, guildMemberService, roleService } from '../services';
-import { IAuthRequest } from '../interfaces/request.interface';
+import { memberActivityService, guildMemberService, roleService } from '../services';
+import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync, ApiError, charts } from "../utils";
 import { databaseService } from '@togethercrew.dev/db'
 import httpStatus from 'http-status';
@@ -11,9 +11,9 @@ import { activityCompostionsTypes } from '../config/memberBreakDownTables';
 
 
 const activeMembersCompositionLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    }
+    // if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+    //     throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    // }
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     let activeMembersCompositionLineGraph = await memberActivityService.activeMembersCompositionLineGraph(connection, req.body.startDate, req.body.endDate);
     activeMembersCompositionLineGraph = charts.fillActiveMembersCompositionLineGraph(activeMembersCompositionLineGraph, req.body.startDate, req.body.endDate);
@@ -22,9 +22,9 @@ const activeMembersCompositionLineGraph = catchAsync(async function (req: IAuthR
 });
 
 const activeMembersOnboardingLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    }
+    // if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+    //     throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    // }
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     let activeMembersOnboardingLineGraph = await memberActivityService.activeMembersOnboardingLineGraph(connection, req.body.startDate, req.body.endDate);
     activeMembersOnboardingLineGraph = charts.fillActiveMembersOnboardingLineGraph(activeMembersOnboardingLineGraph, req.body.startDate, req.body.endDate);
@@ -34,9 +34,9 @@ const activeMembersOnboardingLineGraph = catchAsync(async function (req: IAuthRe
 
 
 const disengagedMembersCompositionLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    }
+    // if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+    //     throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    // }
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     let disengagedMembersLineGraph = await memberActivityService.disengagedMembersCompositionLineGraph(connection, req.body.startDate, req.body.endDate);
     disengagedMembersLineGraph = charts.fillDisengagedMembersCompositionLineGraph(disengagedMembersLineGraph, req.body.startDate, req.body.endDate);
@@ -46,9 +46,9 @@ const disengagedMembersCompositionLineGraph = catchAsync(async function (req: IA
 
 
 const inactiveMembersLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    }
+    // if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+    //     throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    // }
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     let inactiveMembersLineGraph = await memberActivityService.inactiveMembersLineGraph(connection, req.body.startDate, req.body.endDate);
     inactiveMembersLineGraph = charts.fillInactiveMembersLineGraph(inactiveMembersLineGraph, req.body.startDate, req.body.endDate);
@@ -57,9 +57,9 @@ const inactiveMembersLineGraph = catchAsync(async function (req: IAuthRequest, r
 });
 
 const membersInteractionsNetworkGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    }
+    // if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+    //     throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    // }
     const guildId = req.params.guildId
     const connection = databaseService.connectionFactory(guildId, config.mongoose.botURL);
 
@@ -69,9 +69,9 @@ const membersInteractionsNetworkGraph = catchAsync(async function (req: IAuthReq
 })
 
 const decentralisationScore = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    }
+    // if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+    //     throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    // }
     const guildId = req.params.guildId
 
     const decentralizationScoreData = await memberActivityService.getDecentralisationScore(guildId)
@@ -79,9 +79,9 @@ const decentralisationScore = catchAsync(async function (req: IAuthRequest, res:
 })
 
 const fragmentationScore = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    }
+    // if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+    //     throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    // }
     const guildId = req.params.guildId
 
     const fragmentationScoreData = await memberActivityService.getFragmentationScore(guildId)
@@ -89,9 +89,9 @@ const fragmentationScore = catchAsync(async function (req: IAuthRequest, res: Re
 })
 
 const activeMembersCompositionTable = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    }
+    // if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+    //     throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    // }
     const filter = pick(req.query, ['activityComposition', 'roles', 'ngu']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
@@ -112,9 +112,9 @@ const activeMembersCompositionTable = catchAsync(async function (req: IAuthReque
 });
 
 const activeMembersOnboardingTable = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    }
+    // if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+    //     throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    // }
     const filter = pick(req.query, ['activityComposition', 'roles', 'ngu']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
@@ -135,9 +135,9 @@ const activeMembersOnboardingTable = catchAsync(async function (req: IAuthReques
 });
 
 const disengagedMembersCompositionTable = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    }
+    // if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
+    //     throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
+    // }
     const filter = pick(req.query, ['activityComposition', 'roles', 'ngu']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);

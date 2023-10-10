@@ -16,9 +16,7 @@ const envVarsSchema = Joi.object()
         DISCROD_CLIENT_ID: Joi.string().required().description('Discord clinet id'),
         DISCORD_CLIENT_SECRET: Joi.string().required().description('Discord clinet secret'),
         DISCORD_BOT_TOKEN: Joi.string().required().description('Discord bot token'),
-        DISCORD_TRY_NOW_CALLBACK_URI: Joi.string().required().description('Discord try now callback uri'),
-        DISCORD_LOGIN_CALLBACK_URI: Joi.string().required().description('Discord login callback uri'),
-        DISCORD_CONNECT_GUILD_CALLBACK_URI: Joi.string().required().description('Discord connect guild callback uri'),
+        DISCORD_AUTHORIZE_CALLBACK_URI: Joi.string().required().description('Discord authorize callback uri'),
         TWITTER_CLIENT_ID: Joi.string().required().description('Twitter clinet id'),
         TWITTER_CLIENT_SECRET: Joi.string().required().description('Twitter clinet secret'),
         TWITTER_LOGIN_CALLBACK_URI: Joi.string().required().description('Twitter try now callback uri'),
@@ -71,9 +69,7 @@ export default {
         clientSecret: envVars.DISCORD_CLIENT_SECRET,
         botToken: envVars.DISCORD_BOT_TOKEN,
         callbackURI: {
-            tryNow: envVars.DISCORD_TRY_NOW_CALLBACK_URI,
-            login: envVars.DISCORD_LOGIN_CALLBACK_URI,
-            connectGuild: envVars.DISCORD_CONNECT_GUILD_CALLBACK_URI
+            authorize: envVars.DISCORD_AUTHORIZE_CALLBACK_URI,
         },
     },
     twitter: {

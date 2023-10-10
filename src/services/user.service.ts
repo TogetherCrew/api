@@ -1,12 +1,12 @@
 import fetch from 'node-fetch';
 import { Snowflake } from 'discord.js';
 import config from '../config';
-import { IDiscordUser, IUser, User } from '@togethercrew.dev/db';
+import { IUser, User } from '@togethercrew.dev/db';
 import { ApiError } from '../utils';
 import httpStatus = require('http-status');
 import parentLogger from '../config/logger';
 import { IUserUpdateBody } from '@togethercrew.dev/db';
-import { ITwitterUser } from 'src/interfaces/twitter.interface';
+import { IDiscordUser } from 'src/interfaces';
 
 const logger = parentLogger.child({ module: 'UserService' });
 
@@ -15,57 +15,10 @@ const logger = parentLogger.child({ module: 'UserService' });
  * @param {IDiscordUser} data
  * @returns {Promise<IUser>}
  */
-async function createUser(data: IDiscordUser): Promise<IUser> {
+async function createUser(data: IDiscordUser) {
     return User.create({
-        discordId: data.id,
-        ...data
+        discordId: data.id
     });
-}
-
-/**
- * get user data from discord api by access token
- * @param {String} accessToken
- * @returns {Promise<IDiscordUser>}
- */
-async function getUserFromDiscordAPI(accessToken: string): Promise<IDiscordUser> {
-    try {
-        const response = await fetch('https://discord.com/api/users/@me', {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${accessToken}` }
-        });
-        if (response.ok) {
-            return await response.json();
-        }
-        else {
-            throw new Error();
-        }
-    } catch (error) {
-        logger.error({ accessToken, error }, 'Failed to get user from Discord API');
-        throw new ApiError(590, 'Can not fetch from discord API');
-    }
-}
-
-/**
- * get user data from discord api by access token
- * @param {String} accessToken
- * @returns {Promise<IDiscordUser>}
- */
-async function getBotFromDiscordAPI(): Promise<IDiscordUser> {
-    try {
-        const response = await fetch('https://discord.com/api/users/@me', {
-            method: 'GET',
-            headers: { 'Authorization': `Bot ${config.discord.botToken}` }
-        });
-        if (response.ok) {
-            return await response.json();
-        }
-        else {
-            throw new Error();
-        }
-    } catch (error) {
-        logger.error({ bot_token: config.discord.botToken, error }, 'Failed to get bot from Discord API');
-        throw new ApiError(590, 'Can not fetch from discord API');
-    }
 }
 
 /**
@@ -73,7 +26,7 @@ async function getBotFromDiscordAPI(): Promise<IDiscordUser> {
  * @param {Snowflake} discordId
  * @returns {Promise<IUser | null>}
  */
-async function getUserByDiscordId(discordId: Snowflake): Promise<IUser | null> {
+async function getUserByDiscordId(discordId: Snowflake) {
     const user = await User.findOne({ discordId });
     return user;
 }
@@ -121,35 +74,33 @@ async function updateUserByDiscordId(discordId: Snowflake, updateBody: IUserUpda
     return user;
 }
 
-/**
- * get user data from twitter api by access token
- * @param {String} accessToken
- * @returns {Promise<ITwitterUser>}
- */
-async function getUserFromTwitterAPI(accessToken: string): Promise<ITwitterUser> {
-    try {
-        const response = await fetch('https://api.twitter.com/2/users/me?user.fields=profile_image_url,name,id', {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${accessToken}` }
-        });
-        if (response.ok) {
-            return (await response.json()).data;
-        }
-        else {
-            throw new Error();
-        }
-    } catch (error) {
-        logger.error({ accessToken, error }, 'Failed to get user from twitter API');
-        throw new ApiError(590, 'Can not fetch from twitter API');
-    }
-}
+// /**
+//  * get user data from twitter api by access token
+//  * @param {String} accessToken
+//  * @returns {Promise<ITwitterUser>}
+//  */
+// async function getUserFromTwitterAPI(accessToken: string): Promise<ITwitterUser> {
+//     try {
+//         const response = await fetch('https://api.twitter.com/2/users/me?user.fields=profile_image_url,name,id', {
+//             method: 'GET',
+//             headers: { 'Authorization': `Bearer ${accessToken}` }
+//         });
+//         if (response.ok) {
+//             return (await response.json()).data;
+//         }
+//         else {
+//             throw new Error();
+//         }
+//     } catch (error) {
+//         logger.error({ accessToken, error }, 'Failed to get user from twitter API');
+//         throw new ApiError(590, 'Can not fetch from twitter API');
+//     }
+// }
 
 export default {
     createUser,
-    getUserFromDiscordAPI,
-    getBotFromDiscordAPI,
     getUserByDiscordId,
     getCurrentUserGuilds,
     updateUserByDiscordId,
-    getUserFromTwitterAPI
+    // getUserFromTwitterAPI
 }

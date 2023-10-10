@@ -1,12 +1,12 @@
 import express from "express"
 import docsRoute from './docs.route';
 import authRoute from './auth.route';
-import guildsRoute from './guilds.route';
 import usersRoute from './users.route'
 import heatmapsRoute from './heatmaps.route';
 import notionRoute from './notion.route';
 import memberActivityRoute from './memberActivity.route';
-import twitterRoute from './twitter.route';
+// import twitterRoute from './twitter.route';
+// import guildsRoute from './guilds.route';
 
 const router = express.Router();
 
@@ -19,10 +19,7 @@ const defaultRoutes = [
         path: '/auth',
         route: authRoute,
     },
-    {
-        path: '/guilds',
-        route: guildsRoute,
-    },
+
     {
         path: '/users',
         route: usersRoute,
@@ -39,10 +36,14 @@ const defaultRoutes = [
         path: '/member-activity',
         route: memberActivityRoute
     },
-    {
-        path: '/twitter',
-        route: twitterRoute
-    }
+    // {
+    //     path: '/twitter',
+    //     route: twitterRoute
+    // },
+    // {
+    //     path: '/guilds',
+    //     route: guildsRoute,
+    // },
 ];
 
 defaultRoutes.forEach((route) => {

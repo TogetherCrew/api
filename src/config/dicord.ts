@@ -10,9 +10,7 @@ async function getDiscordClient() {
 }
 
 const scopes = {
-    tryNow: "bot identify email guilds",
-    login: "identify",
-    connectGuild: "bot",
+    authorize: "identify",
 };
 
 const permissions = {
