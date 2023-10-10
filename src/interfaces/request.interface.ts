@@ -1,9 +1,10 @@
 import { IUser } from "@togethercrew.dev/db";
+import { HydratedDocument } from 'mongoose';
 import { Request } from "express";
 import { Session, SessionData } from 'express-session';
 
 export interface IAuthRequest extends Request {
-    user: IUser
+    user: HydratedDocument<IUser>
 }
 export interface ISessionRequest extends Request {
     session: Session & Partial<SessionData> & { [key: string]: any };
@@ -11,7 +12,7 @@ export interface ISessionRequest extends Request {
 
 export interface IAuthAndSessionRequest extends Request {
     session: Session & Partial<SessionData> & { [key: string]: any };
-    user: IUser
+    user: HydratedDocument<IUser>
 }
 
 export interface IHeatmapChartRequestBody extends Request {
