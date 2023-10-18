@@ -1,18 +1,18 @@
 import httpStatus from 'http-status';
 import { Request, Response } from 'express';
 import config from '../config';
-import { scopes } from '../config/dicord';
+import { discord } from '../config/OAuth2';
 import { userService, authService, tokenService, discordService } from '../services';
 import { catchAsync } from "../utils";
 import querystring from 'querystring';
-import { generateState } from '../config/oauth2';
+import { generateState } from '../config/OAuth2';
 import { ISessionRequest } from '../interfaces';
 import logger from '../config/logger';
 
 const discordAuthorize = catchAsync(async function (req: ISessionRequest, res: Response) {
     const state = generateState();
     req.session.state = state;
-    res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.authorize}&response_type=code&scope=${scopes.authorize}&state=${state}`);
+    res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.authorize}&response_type=code&scope=${discord.scopes.authorize}&state=${state}`);
 });
 
 const discordAuthorizeCallback = catchAsync(async function (req: ISessionRequest, res: Response) {
@@ -29,10 +29,10 @@ const discordAuthorizeCallback = catchAsync(async function (req: ISessionRequest
         }
         const discordOathCallback = await authService.exchangeCode(code, config.discord.callbackURI.authorize);
         const discordUser = await discordService.getUserFromDiscordAPI(discordOathCallback.access_token);
-        let user = await userService.getUserByDiscordId(discordUser.id);
+        let user = await userService.getUserByFilter({ discordId: discordUser.id });
 
         if (!user) {
-            user = await userService.createUser(discordUser);
+            user = await userService.createUser({ discordId: discordUser.id });
             statusCode = STATUS_CODE_SINGIN;
         }
         tokenService.saveDiscordOAuth2Tokens(user.id, discordOathCallback);

@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import { Types } from 'mongoose';
 import httpStatus from 'http-status';
 import config from '../config';
 import tokenService from './token.service';
@@ -36,7 +37,7 @@ async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscor
             return await response.json();
         }
         else {
-            throw new Error();
+            throw new Error(await response.json());
         }
     } catch (error) {
         logger.error({ code, redirect_uri, error }, 'Failed to exchange discord code');
@@ -167,12 +168,12 @@ async function logout(refreshToken: string) {
 async function refreshAuth(refreshToken: string) {
     try {
         const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
-        const user = await userService.getUserByDiscordId(refreshTokenDoc.user);
+        const user = await userService.getUserById(new Types.ObjectId(refreshTokenDoc.user));
         if (!user) {
             throw new Error();
         }
         await refreshTokenDoc.remove();
-        return tokenService.generateAuthTokens(user.id);
+        return tokenService.generateAuthTokens(user);
     } catch (error) {
         throw new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate');
     }

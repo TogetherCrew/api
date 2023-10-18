@@ -17,9 +17,10 @@ const envVarsSchema = Joi.object()
         DISCORD_CLIENT_SECRET: Joi.string().required().description('Discord clinet secret'),
         DISCORD_BOT_TOKEN: Joi.string().required().description('Discord bot token'),
         DISCORD_AUTHORIZE_CALLBACK_URI: Joi.string().required().description('Discord authorize callback uri'),
+        DISCORD_CONNECT_CALLBACK_URI: Joi.string().required().description('Discord connect callback uri'),
+        TWITTER_CONNECT_CALLBACK_URI: Joi.string().required().description('Twitter connect callback uri'),
         TWITTER_CLIENT_ID: Joi.string().required().description('Twitter clinet id'),
         TWITTER_CLIENT_SECRET: Joi.string().required().description('Twitter clinet secret'),
-        TWITTER_LOGIN_CALLBACK_URI: Joi.string().required().description('Twitter try now callback uri'),
         JWT_SECRET: Joi.string().required().description('JWT secret key'),
         JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().default(30).description('minutes after which access tokens expire'),
         JWT_REFRESH_EXPIRATION_DAYS: Joi.number().default(30).description('days after which refresh tokens expire'),
@@ -70,13 +71,14 @@ export default {
         botToken: envVars.DISCORD_BOT_TOKEN,
         callbackURI: {
             authorize: envVars.DISCORD_AUTHORIZE_CALLBACK_URI,
+            connect: envVars.DISCORD_CONNECT_CALLBACK_URI
         },
     },
     twitter: {
         clientId: envVars.TWITTER_CLIENT_ID,
         clientSecret: envVars.TWITTER_CLIENT_SECRET,
         callbackURI: {
-            login: envVars.TWITTER_LOGIN_CALLBACK_URI,
+            connect: envVars.TWITTER_CONNECT_CALLBACK_URI,
         }
     },
     jwt: {

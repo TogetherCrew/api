@@ -7,8 +7,10 @@ import channelService from './channel.service';
 import sagaService from './saga.service';
 import guildMemberService from './guildMember.service';
 import roleService from './role.service';
-// import guildService from './guild.service';
 import discordService from './discord.service';
+import communityService from './community.service';
+import platformService from './platform.service';
+import twitterService from './twitter.service';
 export {
     userService,
     authService,
@@ -19,6 +21,8 @@ export {
     sagaService,
     guildMemberService,
     roleService,
-    // guildService,
-    discordService
+    discordService,
+    communityService,
+    platformService,
+    twitterService
 }

@@ -1,11 +1,15 @@
 import Joi from "joi";
 
 const updateUser = {
-    body: Joi.object().required().keys({
-        email: Joi.string().email()
-    }),
+    body: Joi.object()
+        .keys({
+            email: Joi.string().required().email(),
+        })
+        .min(1),
 };
 
+
+
 export default {
-    updateUser
+    updateUser,
 }

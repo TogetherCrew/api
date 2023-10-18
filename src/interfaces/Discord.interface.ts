@@ -26,4 +26,6 @@ export interface IDiscordOAuth2EchangeCode {
     expires_in: number;
     refresh_token: string;
     scope: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    guild?: any;
 }

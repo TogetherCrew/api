@@ -11,13 +11,13 @@ import { IDiscordOAuth2EchangeCode, IAuthTokens } from 'src/interfaces';
 
 /**
  * Generate token
- * @param {HydratedDocument<IUser>} user
+ * @param {IUser} user
  * @param {Moment} expires
  * @param {string} type
  * @param {string} [secret]
  * @returns {string}
  */
-function generateToken(user: HydratedDocument<IUser>, expires: moment.Moment, type: string, secret = config.jwt.secret) {
+function generateToken(user: IUser, expires: moment.Moment, type: string, secret = config.jwt.secret) {
     const payload = {
         sub: user,
         iat: moment().unix(),

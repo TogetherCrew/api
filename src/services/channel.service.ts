@@ -1,7 +1,7 @@
 import { Connection } from 'mongoose';
 import { IChannel } from '@togethercrew.dev/db';
 import config from '../config';
-import { permissions } from '../config//dicord';
+import { discord } from '../config/OAuth2';
 import guildMemberService from './guildMember.service';
 import parentLogger from '../config/logger';
 
@@ -49,13 +49,13 @@ async function checkReadMessageHistoryAndViewChannelpPermissions(connection: Con
         let canReadMessageHistoryAndViewChannel = true;
         const botMember = await guildMemberService.getGuildMember(connection, { discordId: config.discord.clientId });
         if (botMember && botMember.permissions) {
-            canReadMessageHistoryAndViewChannel = ((BigInt(botMember?.permissions) & BigInt(permissions.readMessageHistory)) !== BigInt(0)) && ((BigInt(botMember?.permissions) & BigInt(permissions.ViewChannels)) !== BigInt(0))
+            canReadMessageHistoryAndViewChannel = ((BigInt(botMember?.permissions) & BigInt(discord.permissions.readMessageHistory)) !== BigInt(0)) && ((BigInt(botMember?.permissions) & BigInt(discord.permissions.ViewChannels)) !== BigInt(0))
         }
         channel.permissionOverwrites?.forEach(overwrite => {
             if (overwrite.id === config.discord.clientId && overwrite.type === 1) {
                 const allowed = BigInt(overwrite.allow);
                 const denied = BigInt(overwrite.deny);
-                canReadMessageHistoryAndViewChannel = ((allowed & BigInt(permissions.readMessageHistory)) !== BigInt(0) && (denied & BigInt(permissions.readMessageHistory)) === BigInt(0)) && ((allowed & BigInt(permissions.ViewChannels)) !== BigInt(0) && (denied & BigInt(permissions.ViewChannels)) === BigInt(0))
+                canReadMessageHistoryAndViewChannel = ((allowed & BigInt(discord.permissions.readMessageHistory)) !== BigInt(0) && (denied & BigInt(discord.permissions.readMessageHistory)) === BigInt(0)) && ((allowed & BigInt(discord.permissions.ViewChannels)) !== BigInt(0) && (denied & BigInt(discord.permissions.ViewChannels)) === BigInt(0))
             }
         })
         return canReadMessageHistoryAndViewChannel;
