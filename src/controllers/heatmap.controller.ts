@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { heatmapService } from '../services';
-import { IAuthRequest } from '../interfaces/Request.interface';
+import { IAuthRequest } from '../interfaces/request.interface';
 import { catchAsync, ApiError, date, charts } from "../utils";
 import { databaseService } from '@togethercrew.dev/db'
 import httpStatus from 'http-status';

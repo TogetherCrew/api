@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { Types } from 'mongoose';
 import { userService } from '../services';
-import { IAuthRequest } from '../interfaces/Request.interface';
+import { IAuthRequest } from '../interfaces/request.interface';
 import { catchAsync } from "../utils";
 
 const getUser = catchAsync(async function (req: IAuthRequest, res: Response) {

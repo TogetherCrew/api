@@ -1,7 +1,7 @@
 
-export * from './Discord.interface';
-export * from './Request.interface';
-export * from './Token.interface';
-export * from './Channel.interface';
-export * from './Guild.interface';
-export * from './Twitter.interface';
+export * from './discord.interface';
+export * from './request.interface';
+export * from './token.interface';
+export * from './channel.interface';
+export * from './guild.interface';
+export * from './twitter.interface';

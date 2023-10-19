@@ -1,5 +1,5 @@
 import { Connection } from 'mongoose';
-import { IHeatmapChartRequestBody } from '../interfaces/Request.interface';
+import { IHeatmapChartRequestBody } from '../interfaces/request.interface';
 import { date, math } from '../utils';
 import parentLogger from '../config/logger';
 
