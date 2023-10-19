@@ -1,7 +1,7 @@
 import { Connection } from 'mongoose';
 import { IChannel } from '@togethercrew.dev/db';
 import config from '../config';
-import { discord } from '../config/oatuh2';
+import { discord } from '../config/oatuh21';
 import guildMemberService from './guildMember.service';
 import parentLogger from '../config/logger';
 
