@@ -1,11 +1,11 @@
 import httpStatus from 'http-status';
 import { Request, Response } from 'express';
 import config from '../config';
-import { discord } from '../config/oatuh21';
+import { discord } from '../config/oAtuh2';
 import { userService, authService, tokenService, discordService } from '../services';
 import { catchAsync } from "../utils";
 import querystring from 'querystring';
-import { generateState } from '../config/oatuh21';
+import { generateState } from '../config/oAtuh2';
 import { ISessionRequest } from '../interfaces';
 import logger from '../config/logger';
 

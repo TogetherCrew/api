@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { memberActivityService, guildMemberService, roleService } from '../services';
-import { IAuthRequest } from '../interfaces/request1.interface';
+import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync, ApiError, charts } from "../utils";
 import { databaseService } from '@togethercrew.dev/db'
 import httpStatus from 'http-status';

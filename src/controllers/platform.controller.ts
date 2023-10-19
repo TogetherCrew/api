@@ -1,11 +1,11 @@
 import { Response } from 'express';
 import { platformService, authService, twitterService, communityService } from '../services';
-import { IAuthRequest } from '../interfaces/request1.interface';
+import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync, pick, ApiError } from "../utils";
-import { generateState, generateCodeVerifier, generateCodeChallenge, twitter } from '../config/oatuh21';
+import { generateState, generateCodeVerifier, generateCodeChallenge, twitter } from '../config/oAtuh2';
 import { ISessionRequest } from '../interfaces';
 import config from '../config';
-import { discord } from '../config/oatuh21'
+import { discord } from '../config/oAtuh2'
 import httpStatus from 'http-status';
 import querystring from 'querystring';
 

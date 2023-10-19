@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { communityService, userService } from '../services';
-import { IAuthRequest } from '../interfaces/request1.interface';
+import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync, pick, ApiError } from "../utils";
 import httpStatus from 'http-status';
 
