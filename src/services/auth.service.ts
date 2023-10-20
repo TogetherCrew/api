@@ -168,6 +168,9 @@ async function logout(refreshToken: string) {
 async function refreshAuth(refreshToken: string) {
     try {
         const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
+        console.log(172, refreshTokenDoc.user)
+        console.log(typeof refreshTokenDoc.user)
+        console.log(new Types.ObjectId(refreshTokenDoc.user))
         const user = await userService.getUserById(new Types.ObjectId(refreshTokenDoc.user));
         if (!user) {
             throw new Error();

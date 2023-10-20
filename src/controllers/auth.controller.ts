@@ -16,9 +16,9 @@ const discordAuthorize = catchAsync(async function (req: ISessionRequest, res: R
 });
 
 const discordAuthorizeCallback = catchAsync(async function (req: ISessionRequest, res: Response) {
-    const STATUS_CODE_LOGIN = 1001;
-    const STATUS_CODE_SINGIN = 1002;
-    const STATUS_CODE_ERROR = 1003;
+    const STATUS_CODE_SINGIN = 1001;
+    const STATUS_CODE_LOGIN = 1002;
+    const STATUS_CODE_ERROR = 1004;
     const code = req.query.code as string;
     const returnedState = req.query.state as string;
     const storedState = req.session.state;

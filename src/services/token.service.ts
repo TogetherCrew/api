@@ -17,7 +17,8 @@ import { IDiscordOAuth2EchangeCode, IAuthTokens } from 'src/interfaces';
  * @param {string} [secret]
  * @returns {string}
  */
-function generateToken(user: IUser, expires: moment.Moment, type: string, secret = config.jwt.secret) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function generateToken(user: any, expires: moment.Moment, type: string, secret = config.jwt.secret) {
     const payload = {
         sub: user,
         iat: moment().unix(),
@@ -55,8 +56,10 @@ async function saveToken(token: string, userId: Types.ObjectId, expires: moment.
  * @returns {Promise<IToken>}
  */
 async function verifyToken(token: string, type: string) {
-    const payload = jwt.verify(token, config.jwt.secret);
-    const tokenDoc = await Token.findOne({ token, type, user: payload.sub, blacklisted: false });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const payload = jwt.verify(token, config.jwt.secret) as any;
+    const userId = typeof payload.sub === 'object' ? payload.sub?.id : undefined;
+    const tokenDoc = await Token.findOne({ token, type, user: userId, blacklisted: false });
     if (!tokenDoc) {
         throw new Error('Token not found');
     }

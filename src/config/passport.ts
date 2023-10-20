@@ -21,7 +21,7 @@ const jwtVerify = async (payload: any, done: VerifiedCallback) => {
         if (payload.type !== tokenTypes.ACCESS) {
             throw new Error('Invalid token type');
         }
-        const user = await userService.getUserByFilter(payload.sub);
+        const user = await userService.getUserById(payload.sub.id);
         if (!user) {
             return done(null, false);
         }

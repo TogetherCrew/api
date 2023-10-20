@@ -34,8 +34,8 @@ const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Re
 });
 
 const connectDiscordCallback = catchAsync(async function (req: ISessionRequest, res: Response) {
-    const STATUS_CODE_SUCCESS = 1004;
-    const STATUS_CODE_FAILURE = 1005;
+    const STATUS_CODE_SUCCESS = 1003;
+    const STATUS_CODE_ERROR = 1004;
     const code = req.query.code as string;
     const returnedState = req.query.state as string;
     const storedState = req.session.state;
@@ -55,7 +55,7 @@ const connectDiscordCallback = catchAsync(async function (req: ISessionRequest, 
 
     } catch (err) {
         const params = {
-            statusCode: STATUS_CODE_FAILURE
+            statusCode: STATUS_CODE_ERROR
         };
         const query = querystring.stringify(params);
         res.redirect(`${config.frontend.url}/callback?` + query);

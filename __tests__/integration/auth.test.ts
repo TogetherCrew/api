@@ -16,7 +16,7 @@ describe('Auth routes', () => {
         test('should return 204 if refresh token is valid', async () => {
             await insertUsers([userOne]);
             const expires = moment().add(config.jwt.refreshExpirationDays, 'days');
-            const refreshToken = tokenService.generateToken(userOne, expires, tokenTypes.REFRESH);
+            const refreshToken = tokenService.generateToken({ ...userOne, id: userOne._id }, expires, tokenTypes.REFRESH);
             await tokenService.saveToken(refreshToken, userOne._id, expires, tokenTypes.REFRESH);
 
             await request(app)
@@ -64,7 +64,7 @@ describe('Auth routes', () => {
         test('should return 200 and new auth tokens if refresh token is valid', async () => {
             await insertUsers([userOne]);
             const expires = moment().add(config.jwt.refreshExpirationDays, 'days');
-            const refreshToken = tokenService.generateToken(userOne, expires, tokenTypes.REFRESH);
+            const refreshToken = tokenService.generateToken({ ...userOne, id: userOne._id }, expires, tokenTypes.REFRESH);
             await tokenService.saveToken(refreshToken, userOne._id, expires, tokenTypes.REFRESH);
 
             const res = await request(app)
@@ -87,7 +87,7 @@ describe('Auth routes', () => {
         test('should return 401 error if refresh token is signed using an invalid secret', async () => {
             await insertUsers([userOne]);
             const expires = moment().add(config.jwt.refreshExpirationDays, 'days');
-            const refreshToken = tokenService.generateToken(userOne, expires, tokenTypes.REFRESH, 'invalidSecret');
+            const refreshToken = tokenService.generateToken({ ...userOne, id: userOne._id }, expires, tokenTypes.REFRESH, 'invalidSecret');
             await tokenService.saveToken(refreshToken, userOne._id, expires, tokenTypes.REFRESH);
 
             await request(app)
@@ -99,7 +99,7 @@ describe('Auth routes', () => {
         test('should return 401 error if refresh token is not found in the database', async () => {
             await insertUsers([userOne]);
             const expires = moment().add(config.jwt.refreshExpirationDays, 'days');
-            const refreshToken = tokenService.generateToken(userOne, expires, tokenTypes.REFRESH);
+            const refreshToken = tokenService.generateToken({ ...userOne, id: userOne._id }, expires, tokenTypes.REFRESH);
 
             await request(app)
                 .post('/api/v1/auth/refresh-tokens')
@@ -110,7 +110,7 @@ describe('Auth routes', () => {
         test('should return 401 error if refresh token is blacklisted', async () => {
             await insertUsers([userOne]);
             const expires = moment().add(config.jwt.refreshExpirationDays, 'days');
-            const refreshToken = tokenService.generateToken(userOne, expires, tokenTypes.REFRESH);
+            const refreshToken = tokenService.generateToken({ ...userOne, id: userOne._id }, expires, tokenTypes.REFRESH);
             await tokenService.saveToken(refreshToken, userOne._id, expires, tokenTypes.REFRESH, true);
 
             await request(app)
@@ -122,7 +122,7 @@ describe('Auth routes', () => {
         test('should return 401 error if refresh token is expired', async () => {
             await insertUsers([userOne]);
             const expires = moment().subtract(1, 'minutes');
-            const refreshToken = tokenService.generateToken(userOne, expires, tokenTypes.REFRESH);
+            const refreshToken = tokenService.generateToken({ ...userOne, id: userOne._id }, expires, tokenTypes.REFRESH);
             await tokenService.saveToken(refreshToken, userOne._id, expires, tokenTypes.REFRESH);
 
             await request(app)
@@ -133,7 +133,7 @@ describe('Auth routes', () => {
 
         test('should return 401 error if user is not found', async () => {
             const expires = moment().add(config.jwt.refreshExpirationDays, 'days');
-            const refreshToken = tokenService.generateToken(userOne, expires, tokenTypes.REFRESH);
+            const refreshToken = tokenService.generateToken({ ...userOne, id: userOne._id }, expires, tokenTypes.REFRESH);
             await tokenService.saveToken(refreshToken, userOne._id, expires, tokenTypes.REFRESH);
 
             await request(app)
