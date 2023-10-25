@@ -31,6 +31,7 @@ async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscor
             return await response.json();
         }
         else {
+            console.log('34', await response.json())
             throw new Error();
         }
     } catch (err) {

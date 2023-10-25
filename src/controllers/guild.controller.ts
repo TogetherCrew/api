@@ -110,6 +110,7 @@ const connectGuildCallback = catchAsync(async function (req: Request, res: Respo
     let statusCode = 701;
     try {
         if (!code) {
+            console.log('CODE 113', code)
             throw new Error();
         }
         const discordOathCallback: IDiscordOathBotCallback = await authService.exchangeCode(code, config.discord.callbackURI.connectGuild);
@@ -135,6 +136,7 @@ const connectGuildCallback = catchAsync(async function (req: Request, res: Respo
             throw new Error();
         }
     } catch (err) {
+        console.log('Connect 139', err)
         const query = querystring.stringify({
             "statusCode": 491
         });

@@ -30,6 +30,7 @@ async function getUserFromDiscordAPI(accessToken: string): Promise<IDiscordUser>
             headers: { 'Authorization': `Bearer ${accessToken}` }
         });
         if (response.ok) {
+            console.log('33', await response.json())
             return await response.json();
         }
         else {

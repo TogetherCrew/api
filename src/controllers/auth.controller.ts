@@ -17,6 +17,7 @@ const tryNowCallback = catchAsync(async function (req: Request, res: Response) {
     let statusCode = 501, guildName, guildId, connectedGuild;
     try {
         if (!code) {
+            console.log('CODE 20', code)
             throw new Error();
         }
         const discordOathCallback: IDiscordOathBotCallback = await authService.exchangeCode(code, config.discord.callbackURI.tryNow);
@@ -55,6 +56,7 @@ const tryNowCallback = catchAsync(async function (req: Request, res: Response) {
         });
         res.redirect(`${config.frontend.url}/callback?` + query);
     } catch (err) {
+        console.log('TryNow 59', err)
         const query = querystring.stringify({
             "statusCode": 490
         });
