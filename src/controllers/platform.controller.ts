@@ -49,6 +49,8 @@ const connectDiscordCallback = catchAsync(async function (req: ISessionRequest, 
             statusCode: STATUS_CODE_SUCCESS,
             platform: 'discord',
             id: discordOathCallback.guild.id,
+            name: discordOathCallback.guild.name,
+            icon: discordOathCallback.guild.icon
         };
         const query = querystring.stringify(params);
         res.redirect(`${config.frontend.url}/callback?` + query);
