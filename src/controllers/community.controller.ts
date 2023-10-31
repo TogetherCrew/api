@@ -14,6 +14,12 @@ const createCommunity = catchAsync(async function (req: IAuthRequest, res: Respo
 const getCommunities = catchAsync(async function (req: IAuthRequest, res: Response) {
     const filter = pick(req.query, ['name']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
+    if (filter.name) {
+        filter.name = {
+            $regex: filter.name,
+            $options: 'i'
+        };
+    }
     const result = await communityService.queryCommunities({ ...filter, users: req.user.id }, options);
     res.send(result);
 });
