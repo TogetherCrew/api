@@ -65,8 +65,8 @@ const connectDiscordCallback = catchAsync(async function (req: ISessionRequest, 
 });
 
 const connectTwitterCallback = catchAsync(async function (req: ISessionRequest, res: Response) {
-    const STATUS_CODE_SUCCESS = 1004;
-    const STATUS_CODE_FAILURE = 1005;
+    const STATUS_CODE_SUCCESS = 1005;
+    const STATUS_CODE_FAILURE = 1006;
     const code = req.query.code as string;
     const returnedState = req.query.state as string;
     const storedState = req.session.state;
