@@ -5,6 +5,7 @@ const createCommunity = {
     body: Joi.object().keys({
         name: Joi.string().required().max(100),
         avatarURL: Joi.string(),
+        tcaAt: Joi.date()
     }),
 };
 
@@ -31,6 +32,7 @@ const updateCommunity = {
         .keys({
             name: Joi.string(),
             avatarURL: Joi.string(),
+            tcaAt: Joi.date()
         })
         .min(1),
 };
