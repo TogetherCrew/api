@@ -1,24 +1,25 @@
 import request from 'supertest';
 import httpStatus from 'http-status';
-import moment from 'moment';
 import app from '../../src/app';
 import setupTestDB from '../utils/setupTestDB';
 import { userOne, insertUsers, userTwo } from '../fixtures/user.fixture';
 import { userOneAccessToken, userTwoAccessToken } from '../fixtures/token.fixture';
-import { User, Community, Platform, ICommunity, IChannelUpdateBody, ICommunityUpdateBody } from '@togethercrew.dev/db';
-import config from '../../src/config';
+import { User, Community, ICommunityUpdateBody } from '@togethercrew.dev/db';
 import { communityOne, communityTwo, insertCommunities } from '../fixtures/community.fixture';
 
 setupTestDB();
 
 describe('Community routes', () => {
     describe('POST api/v1/communities', () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let newCommunity: any;
+        const currentDate = new Date();
 
         beforeEach(() => {
             newCommunity = {
                 name: 'Community A',
                 avatarURL: 'path',
+                tcaAt: currentDate
             };
         });
 
@@ -36,12 +37,15 @@ describe('Community routes', () => {
                 name: newCommunity.name,
                 avatarURL: newCommunity.avatarURL,
                 users: [userOne._id.toHexString()],
-                platforms: []
+                platforms: [],
+                tcaAt: currentDate.toISOString()
             });
 
             const dbCommunity = await Community.findById(res.body.id);
             expect(dbCommunity).toBeDefined();
-            expect(dbCommunity).toMatchObject({ name: newCommunity.name, avatarURL: newCommunity.avatarURL, users: [userOne._id], });
+            expect(dbCommunity).toMatchObject({
+                name: newCommunity.name, avatarURL: newCommunity.avatarURL, users: [userOne._id], tcaAt: newCommunity.tcaAt
+            });
 
             const dbUser = await User.findById(userOne._id);
             expect(dbUser?.communities?.map(String)).toEqual(expect.arrayContaining([res.body.id]));
@@ -72,6 +76,15 @@ describe('Community routes', () => {
                 .post(`/api/v1/communities`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send({ name: "1", avatarURL: 1 })
+                .expect(httpStatus.BAD_REQUEST);
+        });
+
+        test('should return 400 error if tcaAt is invalid', async () => {
+            await insertUsers([userOne]);
+            await request(app)
+                .post(`/api/v1/communities`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ name: "1", tcaAt: "tcaAt" })
                 .expect(httpStatus.BAD_REQUEST);
         });
     });
@@ -316,11 +329,14 @@ describe('Community routes', () => {
 
     describe('PATCH /api/v1/communities/:communityId', () => {
         let updateBody: ICommunityUpdateBody;
+        const currentDate = new Date();
 
         beforeEach(() => {
             updateBody = {
                 name: 'Community A',
                 avatarURL: 'path',
+                tcaAt: currentDate
+
             };
         });
         test('should return 200 and successfully update community if data is ok', async () => {
@@ -342,11 +358,14 @@ describe('Community routes', () => {
                 avatarURL: updateBody.avatarURL,
                 users: [communityOne.users[0].toHexString()],
                 platforms: [],
+                tcaAt: currentDate.toISOString()
             });
 
             const dbCommunity = await Community.findById(communityOne._id);
             expect(dbCommunity).toBeDefined();
-            expect(dbCommunity).toMatchObject({ name: updateBody.name, avatarURL: updateBody.avatarURL });
+            expect(dbCommunity).toMatchObject({
+                name: updateBody.name, avatarURL: updateBody.avatarURL, tcaAt: updateBody.tcaAt
+            });
         });
 
         test('should return 401 error if access token is missing', async () => {
@@ -397,6 +416,16 @@ describe('Community routes', () => {
                 .send({ name: "1", avatarURL: 1 })
                 .expect(httpStatus.BAD_REQUEST);
         });
+
+        test('should return 400 error if tcaAt is invalid', async () => {
+            await insertUsers([userOne]);
+            await request(app)
+                .patch(`/api/v1/communities/${communityOne._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ name: "1", tcaAt: "tcaAt" })
+                .expect(httpStatus.BAD_REQUEST);
+        });
+
     });
     describe('DELETE /api/v1/communities/:communityId', () => {
         test('should return 204 if data is ok', async () => {

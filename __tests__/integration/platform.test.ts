@@ -44,13 +44,15 @@ describe('Platform routes', () => {
                 metadata: newPlatform.metadata,
                 community: communityOne._id.toHexString(),
                 disconnectedAt: null,
+                isInProgress: true
             });
 
 
             const dbPlatform = await Platform.findById(res.body.id);
             expect(dbPlatform).toBeDefined();
             expect(dbPlatform).toMatchObject({
-                name: newPlatform.name, metadata: newPlatform.metadata
+                name: newPlatform.name, metadata: newPlatform.metadata, isInProgress: true
+
             });
 
             // const dbCommunity = await Community.findById(res.body.community);
@@ -119,6 +121,7 @@ describe('Platform routes', () => {
                 name: platformOne.name,
                 metadata: platformOne.metadata,
                 community: communityOne._id.toHexString(),
+                isInProgress: true
             });
         });
 
@@ -301,6 +304,8 @@ describe('Platform routes', () => {
                 metadata: platformOne.metadata,
                 community: communityOne._id.toHexString(),
                 disconnectedAt: null,
+                isInProgress: true
+
             });
         });
 
@@ -391,12 +396,14 @@ describe('Platform routes', () => {
                 metadata: updateBody.metadata,
                 community: communityOne._id.toHexString(),
                 disconnectedAt: null,
+                isInProgress: true
             });
 
             const dbPlatform = await Platform.findById(res.body.id);
             expect(dbPlatform).toBeDefined();
             expect(dbPlatform).toMatchObject({
-                name: updateBody.name, metadata: updateBody.metadata
+                name: updateBody.name, metadata: updateBody.metadata, isInProgress: true
+
             });
         });
 
