@@ -21,6 +21,10 @@ components:
           items:
             type: string
             description: Mongoose ObjectId representing community IDs associated with the user.
+        tcaAt:
+          type: string
+          format: date-time
+          description: term and condition accepted date 
 
     # ********Community********
     Community:
@@ -46,6 +50,10 @@ components:
           items:
             type: string
             description: Mongoose ObjectId representing platform IDs associated with the community.
+        tcaAt:
+          type: string
+          format: date-time
+          description: term and condition accepted date 
 
     # ********Platform********
     Platform:
@@ -70,6 +78,9 @@ components:
           format: date-time
           nullable: true
           description: Date and time when the platform was disconnected.
+        isInProgress:
+          type: boolean
+          default: true
 
     # ********Token********
     Token:

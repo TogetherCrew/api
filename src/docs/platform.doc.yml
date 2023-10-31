@@ -35,9 +35,9 @@ paths:
               properties:
                 name:
                   type: string
-                enum:
-                  - twitter
-                  - discord
+                  enum:
+                    - twitter
+                    - discord
                 community:
                   type: string
                   format: objectId

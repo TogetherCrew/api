@@ -33,8 +33,13 @@ paths:
                 email:
                   type: string
                   format: email
+                tcaAt:
+                  type: string
+                  format: date-time
+                  description: term and condition accepted date 
               example:
                 email: some@yahoo.com
+                tcaAt: 2023-10-31T12:48:55.432Z
 
       responses:
         "200":

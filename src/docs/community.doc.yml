@@ -17,6 +17,14 @@ paths:
                   type: string
                 avatarURL:
                   type: string
+                tcaAt:
+                  type: string
+                  format: date-time
+                  description: term and condition accepted date 
+              example:
+                name: community
+                avatarURL: path
+                tcaAt: 2023-10-31T12:48:55.432Z
       responses:
         "201":
           description: Community created successfully.
@@ -154,6 +162,10 @@ paths:
                   type: string
                 avatarURL:
                   type: string
+                tcaAt:
+                  type: string
+                  format: date-time
+                  description: term and condition accepted date 
       responses:
         "200":
           description: Community updated successfully.
