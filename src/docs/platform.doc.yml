@@ -72,6 +72,11 @@ paths:
             enum:
               - twitter
               - discord
+        - in: query
+          name: community
+          schema:
+            type: string
+            format: objectId
           description: 
         - in: query
           name: sortBy
