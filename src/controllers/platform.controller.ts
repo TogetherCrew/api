@@ -97,9 +97,19 @@ const connectTwitterCallback = catchAsync(async function (req: ISessionRequest, 
 });
 
 const getPlatforms = catchAsync(async function (req: IAuthRequest, res: Response) {
-    const filter = pick(req.query, ['name']);
+    const filter = pick(req.query, ['name', 'community']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
-    const result = await platformService.queryPlatforms({ ...filter, community: { $in: req.user.communities } }, options);
+    if (filter.name) {
+        filter.name = {
+            $regex: filter.name,
+            $options: 'i'
+        };
+    }
+    if (!filter.community) {
+        filter.community = { $in: req.user.communities }
+    }
+
+    const result = await platformService.queryPlatforms(filter, options);
     res.send(result);
 });
 

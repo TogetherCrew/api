@@ -25,6 +25,7 @@ const connectPlatform = {
 const getPlatforms = {
     query: Joi.object().keys({
         name: Joi.string().valid('twitter', 'discord'),
+        community: Joi.string(),
         sortBy: Joi.string(),
         limit: Joi.number().integer(),
         page: Joi.number().integer(),
