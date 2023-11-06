@@ -35,8 +35,18 @@ export const platformThree: PlatformFixture = {
     }
 };
 
+export const platformFour: PlatformFixture = {
+    _id: new Types.ObjectId(),
+    name: "twitter",
+    metadata: {
+        guildId: "3333",
+    }
+};
+
 
 
 export const insertPlatforms = async function <Type>(platforms: Array<Type>) {
-    await Platform.insertMany(platforms.map((platform) => (platform)));
+    for (const platform of platforms) {
+        await Platform.create(platform);
+    }
 };

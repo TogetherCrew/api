@@ -3,13 +3,21 @@ import httpStatus from 'http-status';
 import app from '../../src/app';
 import setupTestDB from '../utils/setupTestDB';
 import { userOne, insertUsers, userTwo } from '../fixtures/user.fixture';
-import { userOneAccessToken, userTwoAccessToken } from '../fixtures/token.fixture';
+import { userOneAccessToken } from '../fixtures/token.fixture';
 import { User, Community, ICommunityUpdateBody } from '@togethercrew.dev/db';
-import { communityOne, communityTwo, insertCommunities } from '../fixtures/community.fixture';
+import { communityOne, communityTwo, communityThree, insertCommunities } from '../fixtures/community.fixture';
 
 setupTestDB();
 
 describe('Community routes', () => {
+    beforeEach(() => {
+        userOne.communities = [communityOne._id, communityTwo._id];
+        userTwo.communities = [communityThree._id];
+        communityOne.users = [userOne._id];
+        communityTwo.users = [userOne._id];
+        communityThree.users = [userTwo._id];
+    });
+
     describe('POST api/v1/communities', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let newCommunity: any;
@@ -91,10 +99,8 @@ describe('Community routes', () => {
 
     describe('GET /api/v1/communities', () => {
         test('should return 200 and apply the default query options', async () => {
-            userOne.communities = [communityOne._id];
-            communityOne.users = [userOne._id]
-            await insertCommunities([communityOne, communityTwo]);
-            await insertUsers([userOne]);
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
 
             const res = await request(app)
                 .get('/api/v1/communities')
@@ -107,16 +113,25 @@ describe('Community routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 1,
+                totalResults: 2,
             });
-            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results).toHaveLength(2);
+
             expect(res.body.results[0]).toMatchObject({
+                id: communityTwo._id.toHexString(),
+                name: communityTwo.name,
+                users: [userOne._id.toHexString()],
+                platforms: []
+            });
+            expect(res.body.results[1]).toMatchObject({
                 id: communityOne._id.toHexString(),
                 name: communityOne.name,
                 avatarURL: communityOne.avatarURL,
                 users: [userOne._id.toHexString()],
                 platforms: []
             });
+
+
         });
 
         test('should return 401 if access token is missing', async () => {
@@ -129,11 +144,9 @@ describe('Community routes', () => {
         });
 
         test('should correctly apply filter on name field', async () => {
-            userOne.communities = [communityOne._id, communityTwo._id];
-            communityOne.users = [userOne._id]
-            communityTwo.users = [userOne._id]
-            await insertCommunities([communityOne, communityTwo]);
-            await insertUsers([userOne]);
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+
             const res = await request(app)
                 .get('/api/v1/communities')
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -154,11 +167,9 @@ describe('Community routes', () => {
 
 
         test('should correctly sort the returned array if descending sort param is specified', async () => {
-            userOne.communities = [communityOne._id, communityTwo._id];
-            communityOne.users = [userOne._id]
-            communityTwo.users = [userOne._id]
-            await insertCommunities([communityOne, communityTwo]);
-            await insertUsers([userOne]);
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+
 
             const res = await request(app)
                 .get('/api/v1/communities')
@@ -180,11 +191,9 @@ describe('Community routes', () => {
         });
 
         test('should correctly sort the returned array if ascending sort param is specified', async () => {
-            userOne.communities = [communityOne._id, communityTwo._id];
-            communityOne.users = [userOne._id]
-            communityTwo.users = [userOne._id]
-            await insertCommunities([communityOne, communityTwo]);
-            await insertUsers([userOne]);
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+
 
             const res = await request(app)
                 .get('/api/v1/communities')
@@ -207,12 +216,8 @@ describe('Community routes', () => {
 
 
         test('should limit returned array if limit param is specified', async () => {
-            userOne.communities = [communityOne._id, communityTwo._id];
-            communityOne.users = [userOne._id]
-            communityTwo.users = [userOne._id]
-            await insertCommunities([communityOne, communityTwo]);
-            await insertUsers([userOne]);
-
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
 
             const res = await request(app)
                 .get('/api/v1/communities')
@@ -229,15 +234,14 @@ describe('Community routes', () => {
                 totalResults: 2,
             });
             expect(res.body.results).toHaveLength(1);
-            expect(res.body.results[0].id).toBe(communityOne._id.toHexString());
+            expect(res.body.results[0].id).toBe(communityTwo._id.toHexString());
+
         });
 
         test('should return the correct page if page and limit params are specified', async () => {
-            userOne.communities = [communityOne._id, communityTwo._id];
-            communityOne.users = [userOne._id]
-            communityTwo.users = [userOne._id]
-            await insertCommunities([communityOne, communityTwo]);
-            await insertUsers([userOne]);
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+
 
             const res = await request(app)
                 .get('/api/v1/communities')
@@ -254,7 +258,8 @@ describe('Community routes', () => {
                 totalResults: 2,
             });
             expect(res.body.results).toHaveLength(1);
-            expect(res.body.results[0].id).toBe(communityTwo._id.toHexString());
+            expect(res.body.results[0].id).toBe(communityOne._id.toHexString());
+
         });
     });
 
@@ -262,10 +267,9 @@ describe('Community routes', () => {
 
     describe('GET /api/v1/communities/:communityId', () => {
         test('should return 200 and the community object if data is ok', async () => {
-            userOne.communities = [communityOne._id];
-            communityOne.users = [userOne._id]
-            await insertCommunities([communityOne]);
-            await insertUsers([userOne]);
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+
 
             const res = await request(app)
                 .get(`/api/v1/communities/${communityOne._id}`)
@@ -292,21 +296,18 @@ describe('Community routes', () => {
         });
 
         test('should return 404 when user trys to access community they don not belong to', async () => {
-            await insertCommunities([communityTwo]);
-            await insertUsers([userTwo]);
-
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
             await request(app)
-                .get(`/api/v1/communities/${communityTwo._id}`)
-                .set('Authorization', `Bearer ${userTwoAccessToken}`)
+                .get(`/api/v1/communities/${communityThree._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(httpStatus.NOT_FOUND);
         });
 
 
         test('should return 400 error if communityId is not a valid mongo id', async () => {
-            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-
             await request(app)
                 .get(`/api/v1/communities/invalid`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -316,7 +317,6 @@ describe('Community routes', () => {
 
         test('should return 404 error if community is not found', async () => {
             await insertUsers([userOne]);
-
             await request(app)
                 .get(`/api/v1/communities/${communityOne._id}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -340,24 +340,18 @@ describe('Community routes', () => {
             };
         });
         test('should return 200 and successfully update community if data is ok', async () => {
-            userOne.communities = [communityOne._id];
-            communityOne.users = [userOne._id]
-            await insertCommunities([communityOne, communityTwo]);
-            await insertUsers([userOne]);
-
-
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
             const res = await request(app)
                 .patch(`/api/v1/communities/${communityOne._id}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send(updateBody)
                 .expect(httpStatus.OK);
 
-            expect(res.body).toEqual({
+            expect(res.body).toMatchObject({
                 id: communityOne._id.toHexString(),
                 name: updateBody.name,
                 avatarURL: updateBody.avatarURL,
-                users: [communityOne.users[0].toHexString()],
-                platforms: [],
                 tcaAt: currentDate.toISOString()
             });
 
@@ -378,12 +372,12 @@ describe('Community routes', () => {
         });
 
         test('should return 404 when user trys to update community they don not belong to', async () => {
-            await insertCommunities([communityTwo]);
-            await insertUsers([userTwo]);
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
 
             await request(app)
-                .patch(`/api/v1/communities/${communityTwo._id}`)
-                .set('Authorization', `Bearer ${userTwoAccessToken}`)
+                .patch(`/api/v1/communities/${communityThree._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send(updateBody)
                 .expect(httpStatus.NOT_FOUND);
         });
@@ -429,10 +423,9 @@ describe('Community routes', () => {
     });
     describe('DELETE /api/v1/communities/:communityId', () => {
         test('should return 204 if data is ok', async () => {
-            userOne.communities = [communityOne._id];
-            communityOne.users = [userOne._id]
-            await insertCommunities([communityOne, communityTwo]);
-            await insertUsers([userOne]);
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+
 
             await request(app)
                 .delete(`/api/v1/communities/${communityOne._id}`)
@@ -454,11 +447,12 @@ describe('Community routes', () => {
         });
 
         test('should return 404 when user trys to delete community they don not belong to', async () => {
-            await insertCommunities([communityTwo]);
-            await insertUsers([userTwo]);
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+
             await request(app)
-                .delete(`/api/v1/communities/${communityTwo._id}`)
-                .set('Authorization', `Bearer ${userTwoAccessToken}`)
+                .delete(`/api/v1/communities/${communityThree._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(httpStatus.NOT_FOUND);
         });

@@ -25,5 +25,7 @@ export const userThree: UserFixture = {
 };
 
 export const insertUsers = async function <Type>(users: Array<Type>) {
-    await User.insertMany(users.map((user) => (user)));
+    for (const user of users) {
+        await User.create(user);
+    }
 };

@@ -1,19 +1,36 @@
 import request from 'supertest';
 import httpStatus from 'http-status';
-import moment from 'moment';
 import app from '../../src/app';
 import setupTestDB from '../utils/setupTestDB';
 import { userOne, insertUsers, userTwo } from '../fixtures/user.fixture';
-import { userOneAccessToken, userTwoAccessToken } from '../fixtures/token.fixture';
-import { User, Community, Platform, ICommunity, IChannelUpdateBody, ICommunityUpdateBody, IPlatformUpdateBody } from '@togethercrew.dev/db';
-import config from '../../src/config';
-import { communityOne, communityTwo, insertCommunities } from '../fixtures/community.fixture';
-import { insertPlatforms, platformOne, platformThree, platformTwo } from '../fixtures/platform.fixture';
+import { userOneAccessToken } from '../fixtures/token.fixture';
+import { Platform, IPlatformUpdateBody } from '@togethercrew.dev/db';
+import { communityOne, communityTwo, communityThree, insertCommunities } from '../fixtures/community.fixture';
+import { platformOne, platformTwo, platformThree, platformFour, insertPlatforms, } from '../fixtures/platform.fixture';
 
 setupTestDB();
 
 describe('Platform routes', () => {
+    beforeEach(() => {
+        userOne.communities = [communityOne._id, communityTwo._id];
+        userTwo.communities = [communityThree._id];
+
+        communityOne.users = [userOne._id];
+        communityTwo.users = [userOne._id];
+        communityThree.users = [userTwo._id];
+
+        communityOne.platforms = [platformOne._id, platformTwo._id]
+        communityTwo.platforms = [platformThree._id];
+        communityThree.platforms = [platformFour._id];
+
+        platformOne.community = communityOne._id
+        platformTwo.community = communityOne._id
+        platformThree.community = communityTwo._id
+        platformFour.community = communityThree._id
+    });
+
     describe('POST api/v1/platforms', () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let newPlatform: any;
 
         beforeEach(() => {
@@ -93,15 +110,9 @@ describe('Platform routes', () => {
 
     describe('GET /api/v1/platforms', () => {
         test('should return 200 and apply the default query options', async () => {
-            userOne.communities = [communityOne._id];
-            communityOne.users = [userOne._id]
-            communityOne.platforms = [platformOne._id]
-            await insertCommunities([communityOne, communityTwo]);
-            await insertUsers([userOne]);
-            platformOne.community = communityOne._id
-            platformTwo.community = communityTwo._id
-            await insertPlatforms([platformOne, platformTwo]);
-
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
             const res = await request(app)
                 .get('/api/v1/platforms')
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -113,21 +124,46 @@ describe('Platform routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 1,
+                totalResults: 3,
             });
-            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results).toHaveLength(3);
+
+
+
+
+
             expect(res.body.results[0]).toMatchObject({
+                id: platformThree._id.toHexString(),
+                name: platformThree.name,
+                metadata: platformThree.metadata,
+                community: communityTwo._id.toHexString(),
+                isInProgress: true
+            });
+
+            expect(res.body.results[1]).toMatchObject({
+                id: platformTwo._id.toHexString(),
+                name: platformTwo.name,
+                metadata: platformTwo.metadata,
+                community: communityOne._id.toHexString(),
+                isInProgress: true
+            });
+
+            expect(res.body.results[2]).toMatchObject({
                 id: platformOne._id.toHexString(),
                 name: platformOne.name,
                 metadata: platformOne.metadata,
                 community: communityOne._id.toHexString(),
                 isInProgress: true
             });
+
+
+
         });
 
         test('should return 401 if access token is missing', async () => {
-            await insertUsers([userOne]);
-
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
             await request(app)
                 .get('/api/v1/platforms')
                 .send()
@@ -135,18 +171,13 @@ describe('Platform routes', () => {
         });
 
         test('should correctly apply filter on name field', async () => {
-            userOne.communities = [communityOne._id];
-            communityOne.users = [userOne._id]
-            communityOne.platforms = [platformOne._id, platformTwo._id]
-            await insertCommunities([communityOne, communityTwo]);
-            await insertUsers([userOne]);
-            platformOne.community = communityOne._id
-            platformTwo.community = communityOne._id
-            await insertPlatforms([platformOne, platformTwo]);
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
             const res = await request(app)
                 .get('/api/v1/platforms')
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .query({ name: platformTwo.name })
+                .query({ name: platformOne.name })
                 .send()
                 .expect(httpStatus.OK);
 
@@ -155,29 +186,26 @@ describe('Platform routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 1,
+                totalResults: 2,
             });
-            expect(res.body.results).toHaveLength(1);
-            expect(res.body.results[0].id).toBe(platformTwo._id.toHexString());
+            expect(res.body.results).toHaveLength(2);
+            expect(res.body.results[0].id).toBe(platformThree._id.toHexString());
+            expect(res.body.results[1].id).toBe(platformOne._id.toHexString());
+
         });
 
-
-        test('should correctly sort the returned array if descending sort param is specified', async () => {
-            userOne.communities = [communityOne._id];
-            communityOne.users = [userOne._id]
-            communityOne.platforms = [platformOne._id, platformTwo._id]
-            await insertCommunities([communityOne, communityTwo]);
-            await insertUsers([userOne]);
-            platformOne.community = communityOne._id
-            platformTwo.community = communityOne._id
-            await insertPlatforms([platformOne, platformTwo]);
+        test('should correctly apply filter on community field', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
 
             const res = await request(app)
                 .get('/api/v1/platforms')
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .query({ sortBy: 'name:desc' })
+                .query({ community: communityOne._id.toHexString() })
                 .send()
                 .expect(httpStatus.OK);
+
 
             expect(res.body).toEqual({
                 results: expect.any(Array),
@@ -192,16 +220,36 @@ describe('Platform routes', () => {
 
         });
 
-        test('should correctly sort the returned array if ascending sort param is specified', async () => {
-            userOne.communities = [communityOne._id];
-            communityOne.users = [userOne._id]
-            communityOne.platforms = [platformOne._id, platformTwo._id]
-            await insertCommunities([communityOne, communityTwo]);
-            await insertUsers([userOne]);
-            platformOne.community = communityOne._id
-            platformTwo.community = communityOne._id
-            await insertPlatforms([platformOne, platformTwo]);
 
+        test('should correctly sort the returned array if descending sort param is specified', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
+            const res = await request(app)
+                .get('/api/v1/platforms')
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ sortBy: 'name:desc' })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 3,
+            });
+            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results[0].id).toBe(platformTwo._id.toHexString());
+            expect(res.body.results[1].id).toBe(platformOne._id.toHexString());
+            expect(res.body.results[2].id).toBe(platformThree._id.toHexString());
+
+        });
+
+        test('should correctly sort the returned array if ascending sort param is specified', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
             const res = await request(app)
                 .get('/api/v1/platforms')
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -214,25 +262,21 @@ describe('Platform routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 2,
+                totalResults: 3,
             });
-            expect(res.body.results).toHaveLength(2);
+            expect(res.body.results).toHaveLength(3);
             expect(res.body.results[0].id).toBe(platformOne._id.toHexString());
-            expect(res.body.results[1].id).toBe(platformTwo._id.toHexString());
+            expect(res.body.results[1].id).toBe(platformThree._id.toHexString());
+            expect(res.body.results[2].id).toBe(platformTwo._id.toHexString());
+
 
         });
 
 
         test('should limit returned array if limit param is specified', async () => {
-            userOne.communities = [communityOne._id];
-            communityOne.users = [userOne._id]
-            communityOne.platforms = [platformOne._id, platformTwo._id]
-            await insertCommunities([communityOne, communityTwo]);
-            await insertUsers([userOne]);
-            platformOne.community = communityOne._id
-            platformTwo.community = communityOne._id
-            await insertPlatforms([platformOne, platformTwo]);
-
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
             const res = await request(app)
                 .get('/api/v1/platforms')
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -244,23 +288,17 @@ describe('Platform routes', () => {
                 results: expect.any(Array),
                 page: 1,
                 limit: 1,
-                totalPages: 2,
-                totalResults: 2,
+                totalPages: 3,
+                totalResults: 3,
             });
             expect(res.body.results).toHaveLength(1);
-            expect(res.body.results[0].id).toBe(platformOne._id.toHexString());
+            expect(res.body.results[0].id).toBe(platformThree._id.toHexString());
         });
 
         test('should return the correct page if page and limit params are specified', async () => {
-            userOne.communities = [communityOne._id];
-            communityOne.users = [userOne._id]
-            communityOne.platforms = [platformOne._id, platformTwo._id]
-            await insertCommunities([communityOne, communityTwo]);
-            await insertUsers([userOne]);
-            platformOne.community = communityOne._id
-            platformTwo.community = communityOne._id
-            await insertPlatforms([platformOne, platformTwo]);
-
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
             const res = await request(app)
                 .get('/api/v1/platforms')
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -272,8 +310,8 @@ describe('Platform routes', () => {
                 results: expect.any(Array),
                 page: 2,
                 limit: 1,
-                totalPages: 2,
-                totalResults: 2,
+                totalPages: 3,
+                totalResults: 3,
             });
             expect(res.body.results).toHaveLength(1);
             expect(res.body.results[0].id).toBe(platformTwo._id.toHexString());
@@ -284,14 +322,9 @@ describe('Platform routes', () => {
 
     describe('GET /api/v1/platforms/:platformId', () => {
         test('should return 200 and the community object if data is ok', async () => {
-            userOne.communities = [communityOne._id];
-            communityOne.users = [userOne._id]
-            communityOne.platforms = [platformOne._id]
-            await insertCommunities([communityOne]);
-            await insertUsers([userOne]);
-            platformOne.community = communityOne._id
-            await insertPlatforms([platformOne]);
-
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
             const res = await request(app)
                 .get(`/api/v1/platforms/${platformOne._id}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -319,31 +352,20 @@ describe('Platform routes', () => {
         });
 
         test('should return 404 when user trys to access platoform they don not belong to', async () => {
-            userOne.communities = [communityOne._id];
-            communityOne.users = [userOne._id]
-            communityOne.platforms = [platformOne._id]
-            await insertCommunities([communityOne]);
-            await insertUsers([userTwo]);
-            platformOne.community = communityOne._id
-            await insertPlatforms([platformOne]);
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
 
             await request(app)
-                .get(`/api/v1/platforms/${platformOne._id}`)
-                .set('Authorization', `Bearer ${userTwoAccessToken}`)
+                .get(`/api/v1/platforms/${platformFour._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(httpStatus.NOT_FOUND);
         });
 
 
         test('should return 400 error if platformId is not a valid mongo id', async () => {
-            userOne.communities = [communityOne._id];
-            communityOne.users = [userOne._id]
-            communityOne.platforms = [platformOne._id]
-            await insertCommunities([communityOne]);
-            await insertUsers([userOne]);
-            platformOne.community = communityOne._id
-            await insertPlatforms([platformOne]);
-
+            await insertUsers([userOne, userTwo]);
             await request(app)
                 .get(`/api/v1/platforms/invalid`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -376,13 +398,9 @@ describe('Platform routes', () => {
             };
         });
         test('should return 200 and successfully update platform if data is ok', async () => {
-            userOne.communities = [communityOne._id];
-            communityOne.users = [userOne._id]
-            communityOne.platforms = [platformOne._id]
-            await insertCommunities([communityOne]);
-            await insertUsers([userOne]);
-            platformOne.community = communityOne._id
-            await insertPlatforms([platformOne]);
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
 
             const res = await request(app)
                 .patch(`/api/v1/platforms/${platformOne._id}`)
@@ -417,17 +435,14 @@ describe('Platform routes', () => {
         });
 
         test('should return 404 when user trys to update platform they don not belong to', async () => {
-            userOne.communities = [communityOne._id];
-            communityOne.users = [userOne._id]
-            communityOne.platforms = [platformOne._id]
-            await insertCommunities([communityOne]);
-            await insertUsers([userTwo]);
-            platformOne.community = communityOne._id
-            await insertPlatforms([platformOne]);
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
+
 
             await request(app)
-                .patch(`/api/v1/platforms/${platformOne._id}`)
-                .set('Authorization', `Bearer ${userTwoAccessToken}`)
+                .patch(`/api/v1/platforms/${platformFour._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send(updateBody)
                 .expect(httpStatus.NOT_FOUND);
         });
@@ -455,13 +470,9 @@ describe('Platform routes', () => {
     });
     describe('DELETE /api/v1/platforms/:platformId', () => {
         test('should return 204 if data is ok', async () => {
-            userOne.communities = [communityOne._id];
-            communityOne.users = [userOne._id]
-            communityOne.platforms = [platformOne._id]
-            await insertCommunities([communityOne]);
-            await insertUsers([userOne]);
-            platformOne.community = communityOne._id
-            await insertPlatforms([platformOne]);
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
 
             const res = await request(app)
                 .delete(`/api/v1/platforms/${platformOne._id}`)
@@ -483,17 +494,13 @@ describe('Platform routes', () => {
         });
 
         test('should return 404 when user trys to delete platform they don not belong to', async () => {
-            userOne.communities = [communityOne._id];
-            communityOne.users = [userOne._id]
-            communityOne.platforms = [platformOne._id]
-            await insertCommunities([communityOne]);
-            await insertUsers([userTwo]);
-            platformOne.community = communityOne._id
-            await insertPlatforms([platformOne]);
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
 
             await request(app)
-                .delete(`/api/v1/platforms/${communityTwo._id}`)
-                .set('Authorization', `Bearer ${userTwoAccessToken}`)
+                .delete(`/api/v1/platforms/${platformFour._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(httpStatus.NOT_FOUND);
         });

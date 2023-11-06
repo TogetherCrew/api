@@ -21,6 +21,13 @@ export const communityTwo: CommunityFixture = {
     name: "Community Beta",
 };
 
+export const communityThree: CommunityFixture = {
+    _id: new Types.ObjectId(),
+    name: "Community Teta",
+};
+
 export const insertCommunities = async function <Type>(communities: Array<Type>) {
-    await Community.insertMany(communities.map((community) => (community)));
+    for (const community of communities) {
+        await Community.create(community);
+    }
 };
