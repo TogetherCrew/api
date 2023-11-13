@@ -73,6 +73,9 @@ const dynamicPlatformValidation = (req: Request) => {
     const { platform } = authReq;
     if (platform?.name === 'discord' && property === 'channel') {
         return {
+            params: Joi.object().keys({
+                platformId: Joi.required().custom(objectId),
+            }),
             query: Joi.object().required().keys({
                 property: Joi.string().valid('channel'),
                 name: Joi.string(),
@@ -86,6 +89,9 @@ const dynamicPlatformValidation = (req: Request) => {
         };
     } else if (platform?.name === 'discord' && property === 'role') {
         return {
+            params: Joi.object().keys({
+                platformId: Joi.required().custom(objectId),
+            }),
             query: Joi.object().required().keys({
                 property: Joi.string().valid('role'),
                 name: Joi.string(),
@@ -101,9 +107,10 @@ const dynamicPlatformValidation = (req: Request) => {
     }
     else {
         return {
-            query: Joi.object().required().keys({
-                nothing: Joi.string(),
-            }),
+            query: Joi.object().required().keys({}),
+            params: Joi.object().required().keys({}),
+            body: Joi.object().required().keys({}),
+
         };
     }
 };
