@@ -529,7 +529,17 @@ describe('Platform routes', () => {
 
     describe('POST /:platformId/properties', () => {
         test('should return 200 and apply the default query options if requested property is discord-role', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformOne]);
 
+
+            const res = await request(app)
+                .get(`/api/v1/platforms/${platformOne._id}/properties`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({})
+                .send()
+                .expect(httpStatus.OK);
         });
 
         test('should return 200 and channels data if requested property is discord-channel', async () => {
