@@ -4,8 +4,8 @@ import ScoreStatus from '../utils/enums/scoreStatus.enum';
 import NodeStats from '../utils/enums/nodeStats.enum';
 import { IGuildMember, IRole } from '@togethercrew.dev/db';
 import * as Neo4j from '../neo4j';
-import roleService from './role.service';
-import guildMemberService from './guildMember.service';
+import roleService from './discord/role.service';
+import guildMemberService from './discord/guildMember.service';
 import { Snowflake } from 'discord.js';
 import parentLogger from '../config/logger';
 

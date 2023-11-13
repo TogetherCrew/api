@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { memberActivityService, guildMemberService, roleService } from '../services';
+import { memberActivityService, discordServices } from '../services';
 import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync, ApiError, charts } from "../utils";
 import { databaseService } from '@togethercrew.dev/db'
@@ -97,15 +97,15 @@ const activeMembersCompositionTable = catchAsync(async function (req: IAuthReque
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     const activityCompostionFields = memberActivityService.getActivityCompositionOfActiveMembersComposition()
     const memberActivity = await memberActivityService.getLastDocumentForTablesUsage(connection, activityCompostionFields);
-    const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options, memberActivity, activityCompostionsTypes.activeMembersComposition);
+    const guildMembers = await discordServices.guildMemberService.queryGuildMembers(connection, filter, options, memberActivity, activityCompostionsTypes.activeMembersComposition);
 
-    const roles = await roleService.getRoles(connection, {});
+    const roles = await discordServices.roleService.getRoles(connection, {});
     if (guildMembers) {
         guildMembers.results.forEach((guildMember) => {
-            guildMember.roles = roleService.getRolesForGuildMember(guildMember, roles);
-            guildMember.ngu = guildMemberService.getNgu(guildMember);
+            guildMember.roles = discordServices.roleService.getRolesForGuildMember(guildMember, roles);
+            guildMember.ngu = discordServices.guildMemberService.getNgu(guildMember);
             guildMember.activityComposition = memberActivityService.getActivityComposition(guildMember, memberActivity, filter.activityComposition);
-            guildMember.username = guildMemberService.getUsername(guildMember);
+            guildMember.username = discordServices.guildMemberService.getUsername(guildMember);
         });
     }
     await closeConnection(connection)
@@ -121,14 +121,14 @@ const activeMembersOnboardingTable = catchAsync(async function (req: IAuthReques
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     const activityCompostionFields = memberActivityService.getActivityCompositionOfActiveMembersOnboarding();
     const memberActivity = await memberActivityService.getLastDocumentForTablesUsage(connection, activityCompostionFields);
-    const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options, memberActivity, activityCompostionsTypes.activeMembersOnboarding);
-    const roles = await roleService.getRoles(connection, {});
+    const guildMembers = await discordServices.guildMemberService.queryGuildMembers(connection, filter, options, memberActivity, activityCompostionsTypes.activeMembersOnboarding);
+    const roles = await discordServices.roleService.getRoles(connection, {});
     if (guildMembers) {
         guildMembers.results.forEach((guildMember) => {
-            guildMember.roles = roleService.getRolesForGuildMember(guildMember, roles);
-            guildMember.ngu = guildMemberService.getNgu(guildMember);
+            guildMember.roles = discordServices.roleService.getRolesForGuildMember(guildMember, roles);
+            guildMember.ngu = discordServices.guildMemberService.getNgu(guildMember);
             guildMember.activityComposition = memberActivityService.getActivityComposition(guildMember, memberActivity, filter.activityComposition);
-            guildMember.username = guildMemberService.getUsername(guildMember);
+            guildMember.username = discordServices.guildMemberService.getUsername(guildMember);
         });
     }
     await closeConnection(connection)
@@ -144,14 +144,14 @@ const disengagedMembersCompositionTable = catchAsync(async function (req: IAuthR
     const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
     const activityCompostionFields = memberActivityService.getActivityCompositionOfDisengagedComposition();
     const memberActivity = await memberActivityService.getLastDocumentForTablesUsage(connection, activityCompostionFields);
-    const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options, memberActivity, activityCompostionsTypes.disengagedMembersCompostion);
-    const roles = await roleService.getRoles(connection, {});
+    const guildMembers = await discordServices.guildMemberService.queryGuildMembers(connection, filter, options, memberActivity, activityCompostionsTypes.disengagedMembersCompostion);
+    const roles = await discordServices.roleService.getRoles(connection, {});
     if (guildMembers) {
         guildMembers.results.forEach((guildMember) => {
-            guildMember.roles = roleService.getRolesForGuildMember(guildMember, roles);
-            guildMember.ngu = guildMemberService.getNgu(guildMember);
+            guildMember.roles = discordServices.roleService.getRolesForGuildMember(guildMember, roles);
+            guildMember.ngu = discordServices.guildMemberService.getNgu(guildMember);
             guildMember.activityComposition = memberActivityService.getActivityComposition(guildMember, memberActivity, filter.activityComposition);
-            guildMember.username = guildMemberService.getUsername(guildMember);
+            guildMember.username = discordServices.guildMemberService.getUsername(guildMember);
         });
     }
     await closeConnection(connection)

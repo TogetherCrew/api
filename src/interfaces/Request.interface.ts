@@ -1,10 +1,11 @@
-import { IUser } from "@togethercrew.dev/db";
+import { IPlatform, IUser } from "@togethercrew.dev/db";
 import { HydratedDocument } from 'mongoose';
 import { Request } from "express";
 import { Session, SessionData } from 'express-session';
 
 export interface IAuthRequest extends Request {
-    user: HydratedDocument<IUser>
+    user: HydratedDocument<IUser>;
+    platform?: HydratedDocument<IPlatform>
 }
 export interface ISessionRequest extends Request {
     session: Session & Partial<SessionData> & { [key: string]: any };

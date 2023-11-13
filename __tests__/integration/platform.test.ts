@@ -7,7 +7,7 @@ import { userOneAccessToken } from '../fixtures/token.fixture';
 import { Platform, IPlatformUpdateBody } from '@togethercrew.dev/db';
 import { communityOne, communityTwo, communityThree, insertCommunities } from '../fixtures/community.fixture';
 import { platformOne, platformTwo, platformThree, platformFour, insertPlatforms, } from '../fixtures/platform.fixture';
-
+import { discordRole1, discordRole2, discordRole3, discordRole4 } from '../fixtures/discord/roles.fixture';
 setupTestDB();
 
 describe('Platform routes', () => {
@@ -507,6 +507,97 @@ describe('Platform routes', () => {
 
 
         test('should return 400 error if platformId is not a valid mongo id', async () => {
+            await insertUsers([userOne]);
+
+            await request(app)
+                .delete(`/api/v1/platforms/invalid`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send()
+                .expect(httpStatus.BAD_REQUEST);
+        });
+
+        test('should return 404 error if platform already is not found', async () => {
+            await insertUsers([userOne]);
+
+            await request(app)
+                .delete(`/api/v1/platforms/${platformOne._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send()
+                .expect(httpStatus.NOT_FOUND);
+        });
+    });
+
+    describe('POST /:platformId/properties', () => {
+        test('should return 200 and apply the default query options if requested property is discord-role', async () => {
+
+        });
+
+        test('should return 200 and channels data if requested property is discord-channel', async () => {
+
+        });
+
+        test('should return 401 error if access token is missing', async () => {
+            await insertUsers([userOne]);
+
+            await request(app)
+                .delete(`/api/v1/platforms/${platformOne._id}`)
+                .send()
+                .expect(httpStatus.UNAUTHORIZED);
+        });
+
+        test('should return 404 when user trys to delete platform they don not belong to', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
+
+            await request(app)
+                .delete(`/api/v1/platforms/${platformFour._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send()
+                .expect(httpStatus.NOT_FOUND);
+        });
+
+        test('should return 400 error if platformId is not a valid mongo id', async () => {
+            await insertUsers([userOne]);
+
+            await request(app)
+                .delete(`/api/v1/platforms/invalid`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send()
+                .expect(httpStatus.BAD_REQUEST);
+        });
+
+        test('should return 400 error if requested property is invalid', async () => {
+            await insertUsers([userOne]);
+
+            await request(app)
+                .delete(`/api/v1/platforms/invalid`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send()
+                .expect(httpStatus.BAD_REQUEST);
+        });
+
+        test('should return 400 error if include field is not valid', async () => {
+            await insertUsers([userOne]);
+
+            await request(app)
+                .delete(`/api/v1/platforms/invalid`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send()
+                .expect(httpStatus.BAD_REQUEST);
+        });
+
+        test('should return 400 error if exculde field is not valid', async () => {
+            await insertUsers([userOne]);
+
+            await request(app)
+                .delete(`/api/v1/platforms/invalid`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send()
+                .expect(httpStatus.BAD_REQUEST);
+        });
+
+        test('should return 400 error if inculde and exculde fields send together', async () => {
             await insertUsers([userOne]);
 
             await request(app)

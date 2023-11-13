@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { platformService, authService, twitterService, communityService } from '../services';
+import { platformService, authService, twitterService, communityService, discordServices } from '../services';
 import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync, pick, ApiError } from "../utils";
 import { generateState, generateCodeVerifier, generateCodeChallenge, twitter } from '../config/oAtuh2';
@@ -133,6 +133,17 @@ const deletePlatform = catchAsync(async function (req: IAuthRequest, res: Respon
     res.status(httpStatus.NO_CONTENT).send();
 });
 
+const getProperties = catchAsync(async function (req: IAuthRequest, res: Response) {
+    const { platform } = req;
+    let result;
+    if (platform?.name === 'discord') {
+        result = await discordServices.coreService.getPropertyHandler(req)
+    } else if (platform?.name === 'twitter') {
+        console.log(1)
+    }
+    res.status(httpStatus.OK).send(result);
+});
+
 export default {
     createPlatform,
     connectPlatform,
@@ -141,6 +152,7 @@ export default {
     getPlatforms,
     getPlatform,
     updatePlatform,
-    deletePlatform
+    deletePlatform,
+    getProperties
 }
 

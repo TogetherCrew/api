@@ -1,7 +1,7 @@
 import { Connection } from 'mongoose';
-import { sort } from '../utils';
+import { sort } from '../../utils';
 import { IGuildMember } from '@togethercrew.dev/db';
-import parentLogger from '../config/logger';
+import parentLogger from '../../config/logger';
 
 const logger = parentLogger.child({ module: 'GuildMemberService' });
 

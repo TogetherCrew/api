@@ -1,9 +1,9 @@
 import { Connection } from 'mongoose';
 import { IChannel } from '@togethercrew.dev/db';
-import config from '../config';
-import { discord } from '../config/oAtuh2';
+import config from '../../config';
+import { discord } from '../../config/oAtuh2';
 import guildMemberService from './guildMember.service';
-import parentLogger from '../config/logger';
+import parentLogger from '../../config/logger';
 
 const logger = parentLogger.child({ module: 'ChannelService' });
 
@@ -66,9 +66,23 @@ async function checkReadMessageHistoryAndViewChannelpPermissions(connection: Con
     }
 }
 
+/**
+ * Query for platforms
+ * @param {Object} filter - Mongo filter
+ * @param {Object} options - Query options
+ * @param {string} [options.sortBy] - Sort option in the format: sortField:(desc|asc)
+ * @param {number} [options.limit] - Maximum number of results per page (default = 10)
+ * @param {number} [options.page] - Current page (default = 1)
+ */
+const queryChannels = async (connection: Connection, filter: object, options: object) => {
+    return await connection.models.Channel.paginate(filter, options);
+
+};
+
 export default {
     hasReadMessageHistory,
     getChannel,
     getChannels,
-    checkReadMessageHistoryAndViewChannelpPermissions
+    checkReadMessageHistoryAndViewChannelpPermissions,
+    queryChannels
 }

@@ -2,7 +2,7 @@ import httpStatus from 'http-status';
 import { Request, Response } from 'express';
 import config from '../config';
 import { discord } from '../config/oAtuh2';
-import { userService, authService, tokenService, discordService } from '../services';
+import { userService, authService, tokenService, discordServices } from '../services';
 import { catchAsync } from "../utils";
 import querystring from 'querystring';
 import { generateState } from '../config/oAtuh2';
@@ -28,7 +28,7 @@ const discordAuthorizeCallback = catchAsync(async function (req: ISessionRequest
             throw new Error("Invalid code or state mismatch");
         }
         const discordOathCallback = await authService.exchangeCode(code, config.discord.callbackURI.authorize);
-        const discordUser = await discordService.getUserFromDiscordAPI(discordOathCallback.access_token);
+        const discordUser = await discordServices.coreService.getUserFromDiscordAPI(discordOathCallback.access_token);
         let user = await userService.getUserByFilter({ discordId: discordUser.id });
 
         if (!user) {

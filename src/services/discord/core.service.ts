@@ -1,10 +1,64 @@
 import fetch from 'node-fetch';
-import config from '../config';
-import { ApiError } from '../utils';
-import parentLogger from '../config/logger';
-import { IDiscordOAuth2EchangeCode, IDiscordUser } from '../interfaces';
-
+import config from '../../config';
+import { databaseService } from '@togethercrew.dev/db';
+import { ApiError, pick, sort } from '../../utils';
+import parentLogger from '../../config/logger';
+import { IAuthRequest, IDiscordOAuth2EchangeCode, IDiscordUser } from '../../interfaces';
+import channelService from './channel.service';
+import roleService from './role.service';
 const logger = parentLogger.child({ module: 'DiscordService' });
+
+/**
+ * exchange discord code with access token
+ * @param {string} code
+   @param {string} redirect_uri
+ * @returns {Promise<IDiscordOAuth2EchangeCode>}
+ */
+async function getPropertyHandler(req: IAuthRequest) {
+    const connection = databaseService.connectionFactory(req.platform?.metadata?.id, config.mongoose.dbURL);
+    const filter = pick(req.query, ['name']);
+    if (filter.name) {
+        filter.name = {
+            $regex: filter.name,
+            $options: 'i'
+        };
+    }
+    if (req.body.include) {
+        filter._id = { $in: req.body.include };
+    } else if (req.body.exclude) {
+        filter._id = { $nin: req.body.exclude };
+    }
+    filter.deletedAt = null;
+
+
+    try {
+        if (req.query.property === 'role') {
+            const options = pick(req.query, ['sortBy', 'limit', 'page']);
+
+            return await roleService.queryRoles(connection, filter, options)
+        }
+        else if (req.query.property === 'channel') {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const channels: any = await channelService.getChannels(connection, filter);
+            for (let i = 0; i < channels.length; i++) {
+                const canReadMessageHistoryAndViewChannel = await channelService.checkReadMessageHistoryAndViewChannelpPermissions(connection, channels[i]);
+                channels[i] = {
+                    channelId: channels[i].channelId,
+                    name: channels[i].name,
+                    parentId: channels[i].parentId,
+                    canReadMessageHistoryAndViewChannel
+                }
+            }
+            return await sort.sortChannels(channels);
+
+        }
+    } catch (error) {
+        logger.error({ paltform_id: req.platform?.id, property: req.query.property, error }, 'Failed to exchange discord code');
+        throw new ApiError(590, 'Can not fetch from discord API');
+    }
+}
+
+
 
 /**
  * exchange discord code with access token
@@ -86,8 +140,13 @@ async function getBotFromDiscordAPI(): Promise<IDiscordUser> {
 }
 
 
+
+
+
+
 export default {
     exchangeCode,
     getUserFromDiscordAPI,
     getBotFromDiscordAPI,
+    getPropertyHandler
 }

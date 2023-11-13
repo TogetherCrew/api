@@ -1,5 +1,7 @@
 import Joi from "joi";
+import { Request } from 'express';
 import { objectId } from './custom.validation';
+import { IAuthRequest } from "src/interfaces";
 
 const createPlatform = {
     body: Joi.object().keys({
@@ -25,7 +27,7 @@ const connectPlatform = {
 const getPlatforms = {
     query: Joi.object().keys({
         name: Joi.string().valid('twitter', 'discord'),
-        community: Joi.string(),
+        community: Joi.string().required(),
         sortBy: Joi.string(),
         limit: Joi.number().integer(),
         page: Joi.number().integer(),
@@ -65,11 +67,53 @@ const deletePlatform = {
 
 
 
+const dynamicPlatformValidation = (req: Request) => {
+    const authReq = req as IAuthRequest;
+    const { property } = authReq.query;
+    const { platform } = authReq;
+    if (platform?.name === 'discord' && property === 'channel') {
+        return {
+            query: Joi.object().required().keys({
+                property: Joi.string().valid('channel'),
+                name: Joi.string(),
+            }),
+            body: Joi.object().required().keys({
+                include: Joi.array().items(Joi.string().custom(objectId)),
+                exclude: Joi.array().items(Joi.string().custom(objectId)),
+            }).nand('include', 'exclude')
+
+
+        };
+    } else if (platform?.name === 'discord' && property === 'role') {
+        return {
+            query: Joi.object().required().keys({
+                property: Joi.string().valid('role'),
+                name: Joi.string(),
+                sortBy: Joi.string(),
+                limit: Joi.number().integer(),
+                page: Joi.number().integer(),
+            }),
+            body: Joi.object().required().keys({
+                include: Joi.array().items(Joi.string().custom(objectId)),
+                exclude: Joi.array().items(Joi.string().custom(objectId)),
+            }).nand('include', 'exclude')
+        };
+    }
+    else {
+        return {
+            query: Joi.object().required().keys({
+                nothing: Joi.string(),
+            }),
+        };
+    }
+};
+
 export default {
     createPlatform,
     getPlatforms,
     getPlatform,
     updatePlatform,
     deletePlatform,
-    connectPlatform
+    connectPlatform,
+    dynamicPlatformValidation
 }

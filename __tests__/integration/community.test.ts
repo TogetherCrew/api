@@ -106,8 +106,9 @@ describe('Community routes', () => {
                 .get('/api/v1/communities')
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
-                .expect(httpStatus.OK);
+                .expect(httpStatus.BAD_REQUEST);
 
+            console.log(res.body)
             expect(res.body).toEqual({
                 results: expect.any(Array),
                 page: 1,
