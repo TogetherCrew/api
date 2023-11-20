@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import config from '../../config';
-import { databaseService } from '@togethercrew.dev/db';
+import { DatabaseManager } from '@togethercrew.dev/db';
 import { ApiError, pick, sort } from '../../utils';
 import parentLogger from '../../config/logger';
 import { IAuthRequest, IDiscordOAuth2EchangeCode, IDiscordUser } from '../../interfaces';
@@ -15,18 +15,14 @@ const logger = parentLogger.child({ module: 'DiscordService' });
  * @returns {Promise<IDiscordOAuth2EchangeCode>}
  */
 async function getPropertyHandler(req: IAuthRequest) {
-    const connection = databaseService.connectionFactory(req.platform?.metadata?.id, config.mongoose.dbURL);
+    const connection = DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
+
     const filter = pick(req.query, ['name']);
     if (filter.name) {
         filter.name = {
             $regex: filter.name,
             $options: 'i'
         };
-    }
-    if (req.body.include) {
-        filter._id = { $in: req.body.include };
-    } else if (req.body.exclude) {
-        filter._id = { $nin: req.body.exclude };
     }
     filter.deletedAt = null;
 
@@ -38,6 +34,10 @@ async function getPropertyHandler(req: IAuthRequest) {
             return await roleService.queryRoles(connection, filter, options)
         }
         else if (req.query.property === 'channel') {
+
+            if (req.body.channelIds) {
+                filter.channelId = { $in: req.body.channelIds };
+            }
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const channels: any = await channelService.getChannels(connection, filter);
             for (let i = 0; i < channels.length; i++) {

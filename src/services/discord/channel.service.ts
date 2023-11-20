@@ -74,7 +74,7 @@ async function checkReadMessageHistoryAndViewChannelpPermissions(connection: Con
  * @param {number} [options.limit] - Maximum number of results per page (default = 10)
  * @param {number} [options.page] - Current page (default = 1)
  */
-const queryChannels = async (connection: Connection, filter: object, options: object) => {
+const queryChannels = async (connection: any, filter: object, options: object) => {
     return await connection.models.Channel.paginate(filter, options);
 
 };

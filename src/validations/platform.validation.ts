@@ -78,14 +78,10 @@ const dynamicPlatformValidation = (req: Request) => {
             }),
             query: Joi.object().required().keys({
                 property: Joi.string().valid('channel'),
-                name: Joi.string(),
             }),
             body: Joi.object().required().keys({
-                include: Joi.array().items(Joi.string().custom(objectId)),
-                exclude: Joi.array().items(Joi.string().custom(objectId)),
-            }).nand('include', 'exclude')
-
-
+                channelIds: Joi.array().items(Joi.string()),
+            })
         };
     } else if (platform?.name === 'discord' && property === 'role') {
         return {
@@ -98,11 +94,7 @@ const dynamicPlatformValidation = (req: Request) => {
                 sortBy: Joi.string(),
                 limit: Joi.number().integer(),
                 page: Joi.number().integer(),
-            }),
-            body: Joi.object().required().keys({
-                include: Joi.array().items(Joi.string().custom(objectId)),
-                exclude: Joi.array().items(Joi.string().custom(objectId)),
-            }).nand('include', 'exclude')
+            })
         };
     }
     else {

@@ -1,6 +1,6 @@
 import { Connection } from 'mongoose';
 
-export const memberActivityOne = {
+export const memberActivity1 = {
     date: new Date("2023-04-07"),
     all_active: [],
     all_new_active: ["123456789", "987654321", "555555555"],
@@ -19,7 +19,7 @@ export const memberActivityOne = {
     all_disengaged_were_vital: [],
 }
 
-export const memberActivityTwo = {
+export const memberActivity2 = {
     date: new Date("2023-03-31"),
     all_active: [],
     all_new_active: ["123456789",],
@@ -39,7 +39,7 @@ export const memberActivityTwo = {
 }
 
 
-export const memberActivityThree = {
+export const memberActivity3 = {
     date: new Date("2022-06-01"),
     all_active: [],
     all_new_active: ["123456789",],
@@ -58,7 +58,7 @@ export const memberActivityThree = {
     all_disengaged_were_vital: ["123456789", "987654321", "555555555", "444444444"],
 }
 
-export const memberActivityFour = {
+export const memberActivity4 = {
     date: new Date("2023-04-01"),
     all_active: [],
     all_new_active: ["123456789",],
@@ -78,5 +78,7 @@ export const memberActivityFour = {
 }
 
 export const insertMemberActivities = async function <Type>(memberActivities: Array<Type>, connection: Connection) {
-    await connection.models.MemberActivity.insertMany(memberActivities.map((memberActivity) => (memberActivity)));
+    for (const memberActivity of memberActivities) {
+        await connection.models.MemberActivity.create(memberActivity);
+    }
 };

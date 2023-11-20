@@ -4,10 +4,12 @@ import app from '../../src/app';
 import setupTestDB from '../utils/setupTestDB';
 import { userOne, insertUsers, userTwo } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
-import { Platform, IPlatformUpdateBody } from '@togethercrew.dev/db';
+import { Platform, IPlatformUpdateBody, DatabaseManager } from '@togethercrew.dev/db';
 import { communityOne, communityTwo, communityThree, insertCommunities } from '../fixtures/community.fixture';
 import { platformOne, platformTwo, platformThree, platformFour, insertPlatforms, } from '../fixtures/platform.fixture';
-import { discordRole1, discordRole2, discordRole3, discordRole4 } from '../fixtures/discord/roles.fixture';
+import { discordRole1, discordRole2, discordRole3, discordRole4, insertRoles } from '../fixtures/discord/roles.fixture';
+import { discordChannel1, discordChannel2, discordChannel3, discordChannel4, discordChannel5, insertChannels } from '../fixtures/discord/channels.fixture';
+
 setupTestDB();
 
 describe('Platform routes', () => {
@@ -116,6 +118,7 @@ describe('Platform routes', () => {
             const res = await request(app)
                 .get('/api/v1/platforms')
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ community: communityOne._id.toHexString() })
                 .send()
                 .expect(httpStatus.OK);
 
@@ -124,23 +127,11 @@ describe('Platform routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 2,
             });
-            expect(res.body.results).toHaveLength(3);
-
-
-
-
+            expect(res.body.results).toHaveLength(2);
 
             expect(res.body.results[0]).toMatchObject({
-                id: platformThree._id.toHexString(),
-                name: platformThree.name,
-                metadata: platformThree.metadata,
-                community: communityTwo._id.toHexString(),
-                isInProgress: true
-            });
-
-            expect(res.body.results[1]).toMatchObject({
                 id: platformTwo._id.toHexString(),
                 name: platformTwo.name,
                 metadata: platformTwo.metadata,
@@ -148,7 +139,7 @@ describe('Platform routes', () => {
                 isInProgress: true
             });
 
-            expect(res.body.results[2]).toMatchObject({
+            expect(res.body.results[1]).toMatchObject({
                 id: platformOne._id.toHexString(),
                 name: platformOne.name,
                 metadata: platformOne.metadata,
@@ -177,7 +168,7 @@ describe('Platform routes', () => {
             const res = await request(app)
                 .get('/api/v1/platforms')
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .query({ name: platformOne.name })
+                .query({ name: platformOne.name, community: communityOne._id.toHexString() })
                 .send()
                 .expect(httpStatus.OK);
 
@@ -186,40 +177,12 @@ describe('Platform routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 2,
+                totalResults: 1,
             });
-            expect(res.body.results).toHaveLength(2);
-            expect(res.body.results[0].id).toBe(platformThree._id.toHexString());
-            expect(res.body.results[1].id).toBe(platformOne._id.toHexString());
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].id).toBe(platformOne._id.toHexString());
 
         });
-
-        test('should correctly apply filter on community field', async () => {
-            await insertCommunities([communityOne, communityTwo, communityThree]);
-            await insertUsers([userOne, userTwo]);
-            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
-
-            const res = await request(app)
-                .get('/api/v1/platforms')
-                .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .query({ community: communityOne._id.toHexString() })
-                .send()
-                .expect(httpStatus.OK);
-
-
-            expect(res.body).toEqual({
-                results: expect.any(Array),
-                page: 1,
-                limit: 10,
-                totalPages: 1,
-                totalResults: 2,
-            });
-            expect(res.body.results).toHaveLength(2);
-            expect(res.body.results[0].id).toBe(platformTwo._id.toHexString());
-            expect(res.body.results[1].id).toBe(platformOne._id.toHexString());
-
-        });
-
 
         test('should correctly sort the returned array if descending sort param is specified', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
@@ -228,7 +191,7 @@ describe('Platform routes', () => {
             const res = await request(app)
                 .get('/api/v1/platforms')
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .query({ sortBy: 'name:desc' })
+                .query({ sortBy: 'name:desc', community: communityOne._id.toHexString() })
                 .send()
                 .expect(httpStatus.OK);
 
@@ -237,12 +200,11 @@ describe('Platform routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 2,
             });
-            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results).toHaveLength(2);
             expect(res.body.results[0].id).toBe(platformTwo._id.toHexString());
             expect(res.body.results[1].id).toBe(platformOne._id.toHexString());
-            expect(res.body.results[2].id).toBe(platformThree._id.toHexString());
 
         });
 
@@ -253,7 +215,7 @@ describe('Platform routes', () => {
             const res = await request(app)
                 .get('/api/v1/platforms')
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .query({ sortBy: 'name:asc' })
+                .query({ sortBy: 'name:asc', community: communityOne._id.toHexString() })
                 .send()
                 .expect(httpStatus.OK);
 
@@ -262,12 +224,11 @@ describe('Platform routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 3,
+                totalResults: 2,
             });
-            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results).toHaveLength(2);
             expect(res.body.results[0].id).toBe(platformOne._id.toHexString());
-            expect(res.body.results[1].id).toBe(platformThree._id.toHexString());
-            expect(res.body.results[2].id).toBe(platformTwo._id.toHexString());
+            expect(res.body.results[1].id).toBe(platformTwo._id.toHexString());
 
 
         });
@@ -280,7 +241,7 @@ describe('Platform routes', () => {
             const res = await request(app)
                 .get('/api/v1/platforms')
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .query({ limit: 1 })
+                .query({ limit: 1, community: communityOne._id.toHexString() })
                 .send()
                 .expect(httpStatus.OK);
 
@@ -288,11 +249,11 @@ describe('Platform routes', () => {
                 results: expect.any(Array),
                 page: 1,
                 limit: 1,
-                totalPages: 3,
-                totalResults: 3,
+                totalPages: 2,
+                totalResults: 2,
             });
             expect(res.body.results).toHaveLength(1);
-            expect(res.body.results[0].id).toBe(platformThree._id.toHexString());
+            expect(res.body.results[0].id).toBe(platformTwo._id.toHexString());
         });
 
         test('should return the correct page if page and limit params are specified', async () => {
@@ -302,7 +263,7 @@ describe('Platform routes', () => {
             const res = await request(app)
                 .get('/api/v1/platforms')
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .query({ page: 2, limit: 1 })
+                .query({ page: 2, limit: 1, community: communityOne._id.toHexString() })
                 .send()
                 .expect(httpStatus.OK);
 
@@ -310,11 +271,11 @@ describe('Platform routes', () => {
                 results: expect.any(Array),
                 page: 2,
                 limit: 1,
-                totalPages: 3,
-                totalResults: 3,
+                totalPages: 2,
+                totalResults: 2,
             });
             expect(res.body.results).toHaveLength(1);
-            expect(res.body.results[0].id).toBe(platformTwo._id.toHexString());
+            expect(res.body.results[0].id).toBe(platformOne._id.toHexString());
         });
     });
 
@@ -528,29 +489,276 @@ describe('Platform routes', () => {
     });
 
     describe('POST /:platformId/properties', () => {
+        const connection = DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+        beforeEach(async () => {
+            await connection.dropDatabase();
+        });
         test('should return 200 and apply the default query options if requested property is discord-role', async () => {
             await insertCommunities([communityOne]);
             await insertUsers([userOne]);
             await insertPlatforms([platformOne]);
+            await insertRoles([discordRole1, discordRole2, discordRole3, discordRole4], connection)
 
 
             const res = await request(app)
-                .get(`/api/v1/platforms/${platformOne._id}/properties`)
+                .post(`/api/v1/platforms/${platformOne._id}/properties`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .query({})
+                .query({ property: 'role' })
                 .send()
                 .expect(httpStatus.OK);
+
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 3,
+            });
+            expect(res.body.results).toHaveLength(3);
+
+
+            expect(res.body.results[0]).toMatchObject({
+                roleId: discordRole1.roleId,
+                name: discordRole1.name,
+                color: discordRole1.color,
+            });
+            expect(res.body.results[1]).toMatchObject({
+                roleId: discordRole2.roleId,
+                name: discordRole2.name,
+                color: discordRole2.color,
+            });
+
+            expect(res.body.results[2]).toMatchObject({
+                roleId: discordRole3.roleId,
+                name: discordRole3.name,
+                color: discordRole3.color,
+            });
+        });
+
+
+        test('should correctly apply filter on name field if requested property is discord-role', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformOne]);
+            await insertRoles([discordRole1, discordRole2, discordRole3, discordRole4], connection)
+
+
+            const res = await request(app)
+                .post(`/api/v1/platforms/${platformOne._id}/properties`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ property: 'role', name: 'Member' })
+                .send()
+                .expect(httpStatus.OK);
+
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 1,
+            });
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].roleId).toBe(discordRole3.roleId);
+        });
+
+        test('should correctly sort the returned array if descending sort param is specified and requested property is discord-role', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformOne]);
+            await insertRoles([discordRole1, discordRole2, discordRole3, discordRole4], connection)
+
+
+            const res = await request(app)
+                .post(`/api/v1/platforms/${platformOne._id}/properties`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ property: 'role', sortBy: 'name:desc' })
+                .send()
+                .expect(httpStatus.OK);
+
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 3,
+            });
+            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results[0].roleId).toBe(discordRole2.roleId);
+            expect(res.body.results[1].roleId).toBe(discordRole3.roleId);
+            expect(res.body.results[2].roleId).toBe(discordRole1.roleId);
+        });
+
+        test('should correctly sort the returned array if ascending sort param is specified and requested property is discord-role', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformOne]);
+            await insertRoles([discordRole1, discordRole2, discordRole3, discordRole4], connection)
+
+
+            const res = await request(app)
+                .post(`/api/v1/platforms/${platformOne._id}/properties`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ property: 'role', sortBy: 'name:asc' })
+                .send()
+                .expect(httpStatus.OK);
+
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 3,
+            });
+            expect(res.body.results).toHaveLength(3);
+            expect(res.body.results[0].roleId).toBe(discordRole1.roleId);
+            expect(res.body.results[1].roleId).toBe(discordRole3.roleId);
+            expect(res.body.results[2].roleId).toBe(discordRole2.roleId);
+        });
+
+        test('should limit returned array if limit param is specified and requested property is discord-role', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformOne]);
+            await insertRoles([discordRole1, discordRole2, discordRole3, discordRole4], connection)
+
+
+            const res = await request(app)
+                .post(`/api/v1/platforms/${platformOne._id}/properties`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ property: 'role', limit: 1 })
+                .send()
+                .expect(httpStatus.OK);
+
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 1,
+                totalPages: 3,
+                totalResults: 3,
+            });
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].roleId).toBe(discordRole1.roleId);
+
+        });
+
+        test('should return the correct page if page and limit params are specified and requested property is discord-role', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformOne]);
+            await insertRoles([discordRole1, discordRole2, discordRole3, discordRole4], connection)
+
+
+            const res = await request(app)
+                .post(`/api/v1/platforms/${platformOne._id}/properties`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ property: 'role', page: 2, limit: 1 })
+                .send()
+                .expect(httpStatus.OK);
+
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 2,
+                limit: 1,
+                totalPages: 3,
+                totalResults: 3,
+            });
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].roleId).toBe(discordRole2.roleId);
         });
 
         test('should return 200 and channels data if requested property is discord-channel', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformOne]);
+            await insertChannels([discordChannel1, discordChannel2, discordChannel3, discordChannel4, discordChannel5], connection)
 
+
+            const res = await request(app)
+                .post(`/api/v1/platforms/${platformOne._id}/properties`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ property: 'channel' })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toHaveLength(2);
+            expect(res.body[0].subChannels).toHaveLength(2);
+            expect(res.body[1].subChannels).toHaveLength(1);
+
+
+            expect(res.body[0]).toMatchObject({
+                channelId: "987654321098765432",
+                title: "Channel 1",
+                subChannels: [{
+                    channelId: "234567890123456789",
+                    name: "Channel 2",
+                    parentId: "987654321098765432",
+                    canReadMessageHistoryAndViewChannel: false
+                },
+                {
+                    channelId: "345678901234567890",
+                    name: "Channel 3",
+                    parentId: "987654321098765432",
+                    canReadMessageHistoryAndViewChannel: true
+                }]
+            });
+            expect(res.body[1]).toMatchObject({
+                channelId: "0",
+                title: "unCategorized",
+                subChannels: [{
+                    channelId: "345678901234567000",
+                    name: "Channel 4",
+                    parentId: "345678901234567000",
+                    canReadMessageHistoryAndViewChannel: true
+                }]
+            });
+        });
+
+        test('should correctly apply filter on channelId field if requested property is discord-channel', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformOne]);
+            await insertChannels([discordChannel1, discordChannel2, discordChannel3, discordChannel4, discordChannel5], connection)
+
+
+            const res = await request(app)
+                .post(`/api/v1/platforms/${platformOne._id}/properties`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ property: 'channel' })
+                .send({ channelIds: [discordChannel1.channelId, discordChannel2.channelId, discordChannel3.channelId] })
+                .expect(httpStatus.OK);
+
+            expect(res.body).toHaveLength(1);
+            expect(res.body[0].subChannels).toHaveLength(2);
+
+
+            expect(res.body[0]).toMatchObject({
+                channelId: "987654321098765432",
+                title: "Channel 1",
+                subChannels: [{
+                    channelId: "234567890123456789",
+                    name: "Channel 2",
+                    parentId: "987654321098765432",
+                    canReadMessageHistoryAndViewChannel: false
+                },
+                {
+                    channelId: "345678901234567890",
+                    name: "Channel 3",
+                    parentId: "987654321098765432",
+                    canReadMessageHistoryAndViewChannel: true
+                }]
+            });
         });
 
         test('should return 401 error if access token is missing', async () => {
             await insertUsers([userOne]);
-
             await request(app)
-                .delete(`/api/v1/platforms/${platformOne._id}`)
+                .post(`/api/v1/platforms/${platformOne._id}/properties`)
                 .send()
                 .expect(httpStatus.UNAUTHORIZED);
         });
@@ -559,72 +767,47 @@ describe('Platform routes', () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
             await insertUsers([userOne, userTwo]);
             await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
-
             await request(app)
-                .delete(`/api/v1/platforms/${platformFour._id}`)
+                .post(`/api/v1/platforms/${platformFour._id}/properties`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(httpStatus.NOT_FOUND);
         });
 
         test('should return 400 error if platformId is not a valid mongo id', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-
+            await insertPlatforms([platformOne]);
             await request(app)
-                .delete(`/api/v1/platforms/invalid`)
+                .post(`/api/v1/platforms/invalid/properties`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(httpStatus.BAD_REQUEST);
+
         });
 
         test('should return 400 error if requested property is invalid', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-
+            await insertPlatforms([platformOne]);
             await request(app)
-                .delete(`/api/v1/platforms/invalid`)
+                .post(`/api/v1/platforms/${platformOne._id}/properties`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ property: 'member' })
                 .send()
                 .expect(httpStatus.BAD_REQUEST);
-        });
 
-        test('should return 400 error if include field is not valid', async () => {
-            await insertUsers([userOne]);
-
-            await request(app)
-                .delete(`/api/v1/platforms/invalid`)
-                .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send()
-                .expect(httpStatus.BAD_REQUEST);
-        });
-
-        test('should return 400 error if exculde field is not valid', async () => {
-            await insertUsers([userOne]);
-
-            await request(app)
-                .delete(`/api/v1/platforms/invalid`)
-                .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send()
-                .expect(httpStatus.BAD_REQUEST);
-        });
-
-        test('should return 400 error if inculde and exculde fields send together', async () => {
-            await insertUsers([userOne]);
-
-            await request(app)
-                .delete(`/api/v1/platforms/invalid`)
-                .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send()
-                .expect(httpStatus.BAD_REQUEST);
         });
 
         test('should return 404 error if platform already is not found', async () => {
             await insertUsers([userOne]);
-
             await request(app)
-                .delete(`/api/v1/platforms/${platformOne._id}`)
+                .post(`/api/v1/platforms/${platformOne._id}/properties`)
+                .query({ property: 'role' })
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(httpStatus.NOT_FOUND);
+
         });
     });
 });

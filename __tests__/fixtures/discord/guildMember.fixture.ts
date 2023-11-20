@@ -1,6 +1,6 @@
 import { Connection } from 'mongoose';
 
-export const guildMemberOne = {
+export const discordGuildMember1 = {
     discordId: "123456789",
     username: "behzad_rabiei",
     avatar: null,
@@ -12,7 +12,7 @@ export const guildMemberOne = {
     globalName: "Behzad"
 };
 
-export const guildMemberTwo = {
+export const discordGuildMember2 = {
     discordId: "987654321",
     username: "mrjackalop",
     avatar: "AvatarLink",
@@ -24,7 +24,7 @@ export const guildMemberTwo = {
     globalName: "Danielo"
 };
 
-export const guildMemberThree = {
+export const discordGuildMember3 = {
     discordId: "555555555",
     username: "amin_torabi",
     avatar: "AvatarLink",
@@ -36,7 +36,7 @@ export const guildMemberThree = {
     globalName: null
 };
 
-export const guildMemberFour = {
+export const discordGuildMember4 = {
     discordId: "444444444",
     username: "zc_behzad",
     avatar: "AvatarLink",
@@ -48,7 +48,7 @@ export const guildMemberFour = {
     globalName: null
 };
 
-export const guildMemberFive = {
+export const discordGuildMember5 = {
     discordId: "444444444",
     username: "User4",
     avatar: "AvatarLink",
@@ -60,7 +60,9 @@ export const guildMemberFive = {
     globalName: null
 };
 
-export const insertGuildMembers = async function <Type>(guildMembers: Array<Type>, connection: Connection) {
-    await connection.models.GuildMember.insertMany(guildMembers.map((guildMember) => (guildMember)));
 
+export const insertGuildMembers = async function <Type>(guildMembers: Array<Type>, connection: Connection) {
+    for (const guildMember of guildMembers) {
+        await connection.models.GuildMember.create(guildMember);
+    }
 };

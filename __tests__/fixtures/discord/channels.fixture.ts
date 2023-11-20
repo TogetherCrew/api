@@ -1,7 +1,7 @@
 import { IChannel } from '@togethercrew.dev/db';
 import { Connection } from 'mongoose';
 
-export const channel1: IChannel = {
+export const discordChannel1: IChannel = {
     channelId: '987654321098765432',
     name: 'Channel 1',
     parentId: null,
@@ -17,7 +17,7 @@ export const channel1: IChannel = {
     deletedAt: null
 };
 
-export const channel2: IChannel = {
+export const discordChannel2: IChannel = {
     channelId: '234567890123456789',
     name: 'Channel 2',
     parentId: '987654321098765432',
@@ -38,7 +38,7 @@ export const channel2: IChannel = {
     deletedAt: null
 };
 
-export const channel3: IChannel = {
+export const discordChannel3: IChannel = {
     channelId: '345678901234567890',
     name: 'Channel 3',
     parentId: '987654321098765432',
@@ -59,14 +59,14 @@ export const channel3: IChannel = {
     deletedAt: null
 };
 
-export const channel4: IChannel = {
+export const discordChannel4: IChannel = {
     channelId: '345678901234567000',
     name: 'Channel 4',
     parentId: null,
     deletedAt: null
 };
 
-export const channel5: IChannel = {
+export const discordChannel5: IChannel = {
     channelId: '345678901234567333',
     name: 'Channel 5',
     parentId: '987654321098765432',
@@ -75,5 +75,7 @@ export const channel5: IChannel = {
 
 
 export const insertChannels = async function <Type>(channels: Array<Type>, connection: Connection) {
-    await connection.models.Channel.insertMany(channels.map((channel) => (channel)));
+    for (const channel of channels) {
+        await connection.models.Channel.create(channel);
+    }
 };

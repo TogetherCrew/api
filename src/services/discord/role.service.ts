@@ -118,7 +118,7 @@ function getRolesForGuildMember(guildMember: IGuildMember, roles: Array<IRole>) 
  * @param {number} [options.limit] - Maximum number of results per page (default = 10)
  * @param {number} [options.page] - Current page (default = 1)
  */
-const queryRoles = async (connection: Connection, filter: object, options: object) => {
+const queryRoles = async (connection: any, filter: object, options: object) => {
     return await connection.models.Role.paginate(filter, options);
 
 };

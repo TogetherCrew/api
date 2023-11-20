@@ -9,6 +9,9 @@ type Filter = {
     activityComposition?: Array<string>;
     roles?: Array<string>;
     ngu?: string;
+    allRoles: boolean,
+    include?: Array<string>
+    exclude?: Array<string>
 };
 
 type Options = {
@@ -28,7 +31,7 @@ type Options = {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function queryGuildMembers(connection: Connection, filter: Filter, options: Options, memberActivity: any, activityCompostionsTypes: Array<string>) {
     try {
-        const { roles, ngu, activityComposition } = filter;
+        const { allRoles, include, exclude, ngu, activityComposition } = filter;
         const { sortBy } = options;
         const limit = options.limit && parseInt(options.limit, 10) > 0 ? parseInt(options.limit, 10) : 10;
         const page = options.page && parseInt(options.page, 10) > 0 ? parseInt(options.page, 10) : 1;
@@ -73,8 +76,16 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
             ];
         }
 
-        if (roles && roles.length > 0) {
-            matchStage.roles = { $in: roles };
+
+        if (allRoles === false) {
+            if (include?.length) {
+                matchStage.roles = { $in: include };
+
+            } else if (exclude?.length) {
+                matchStage.roles = { $nin: exclude };
+
+
+            }
         }
 
         if (memberActivityDocument) {

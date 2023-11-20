@@ -6,14 +6,14 @@ interface PlatformFixture {
     name: string;
     community?: Types.ObjectId;
     disconnectedAt?: Date | null;
-    metadata: object
+    metadata?: Record<string, any>,
 }
 
 export const platformOne: PlatformFixture = {
     _id: new Types.ObjectId(),
     name: "discord",
     metadata: {
-        guildId: "1111",
+        id: "681946187490000901",
     },
     disconnectedAt: null,
 };
@@ -22,7 +22,7 @@ export const platformTwo: PlatformFixture = {
     _id: new Types.ObjectId(),
     name: "twitter",
     metadata: {
-        id: "4444",
+        id: "681946187490000803",
     },
     disconnectedAt: new Date(),
 };
@@ -31,7 +31,7 @@ export const platformThree: PlatformFixture = {
     _id: new Types.ObjectId(),
     name: "discord",
     metadata: {
-        guildId: "2222",
+        id: "681946187490000802",
     }
 };
 
@@ -39,7 +39,7 @@ export const platformFour: PlatformFixture = {
     _id: new Types.ObjectId(),
     name: "twitter",
     metadata: {
-        guildId: "3333",
+        id: "681946187490000801",
     }
 };
 
