@@ -66,7 +66,7 @@ const updatePlatformByFilter = async (filter: object, updateBody: Partial<IPlatf
  * @param {Object} filter - Mongo filter
  * @returns {Promise<HydratedDocument<IPlatform>>}
  */
-const deletePlatformById = async (filter: object,): Promise<HydratedDocument<IPlatform>> => {
+const deletePlatformByFilter = async (filter: object,): Promise<HydratedDocument<IPlatform>> => {
     const platform = await getPlatformByFilter(filter);
     if (!platform) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Platform not found');
@@ -81,5 +81,5 @@ export default {
     getPlatformByFilter,
     queryPlatforms,
     updatePlatformByFilter,
-    deletePlatformById,
+    deletePlatformByFilter,
 };

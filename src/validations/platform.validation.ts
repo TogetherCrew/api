@@ -63,6 +63,9 @@ const deletePlatform = {
     params: Joi.object().keys({
         platformId: Joi.string().custom(objectId),
     }),
+    body: Joi.object().required().keys({
+        deleteType: Joi.string().required().valid('soft', 'hard')
+    }),
 };
 
 

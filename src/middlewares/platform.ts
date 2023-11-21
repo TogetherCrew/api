@@ -6,7 +6,7 @@ import { IAuthRequest } from "../interfaces";
 import { platformService } from '../services';
 
 
-const platform = () => async (req: Request, res: Response, next: NextFunction) => {
+const platform = (platformName?: string) => async (req: Request, res: Response, next: NextFunction) => {
     const authReq = req as IAuthRequest;
     try {
         if (!authReq.params.platformId) {
@@ -21,6 +21,10 @@ const platform = () => async (req: Request, res: Response, next: NextFunction) =
         });
         if (!platform) {
             throw new ApiError(httpStatus.NOT_FOUND, 'Platform not found');
+        }
+        if (platformName && platformName !== platform.name) {
+            throw new ApiError(httpStatus.BAD_REQUEST, 'Platform is not valid for this API');
+
         }
         authReq.platform = platform;
         return next();

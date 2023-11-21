@@ -129,7 +129,15 @@ const updatePlatform = catchAsync(async function (req: IAuthRequest, res: Respon
     res.send(platform);
 });
 const deletePlatform = catchAsync(async function (req: IAuthRequest, res: Response) {
-    await platformService.deletePlatformById({ _id: req.params.platformId, community: { $in: req.user.communities } });
+
+
+    // if (req.body.deleteType === "soft") {
+    //     await platformService.updatePlatformByFilter({ _id: req.params.platformId, community: { $in: req.user.communities } });
+    // }
+    if (req.body.deleteType === "hard") {
+        await platformService.deletePlatformByFilter({ _id: req.params.platformId, community: { $in: req.user.communities } });
+    }
+
     res.status(httpStatus.NO_CONTENT).send();
 });
 
