@@ -1,0 +1,130 @@
+paths:
+  /api/v1/heatmaps/{platformId}/heatmap-chart:
+    post:
+      tags:
+        - [Heatmap]
+      summary: Get data for heatmap chart - discord only 
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: platformId
+          required: true
+          schema:
+            type: string
+          description: Platform Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startDate:
+                  type: string
+                  format: date-time     
+                endDate:
+                  type: string
+                  format: date-time  
+                timeZone:
+                  type: string      
+                channelIds:
+                  type: array
+                  items:
+                    type: string  
+              example:
+                startDate: "2023-01-17T13:02:10.911+00:00"
+                endDate: "2023-01-29T10:50:01.513Z"
+                timeZone: "America/Fortaleza"
+                channelIds: ["1012430565959553148"]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  type: array
+                  items:
+                    type: number
+                example: [[6,5,28],[7,10,28]]
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
+  /api/v1/heatmaps/{platformId}/line-graph:
+    post:
+      tags:
+        - [Heatmap]
+      summary: Get data for line graph - discord only 
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: platformId
+          required: true
+          schema:
+            type: string
+          description: Platform Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startDate:
+                  type: string
+                  format: date-time     
+                endDate:
+                  type: string
+                  format: date-time        
+              example:
+                startDate: "2023-01-17T13:02:10.911+00:00"
+                endDate: "2023-01-29T10:50:01.513Z"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      type: string
+                  series:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        data:
+                          type: array
+                          items:
+                            type: number
+                  emojis:
+                    type: number
+                  messages:
+                    type: number
+                  emojiPercentageChange:
+                    type: number
+                  msgPercentageChange:
+                    type: number
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"

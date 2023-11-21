@@ -7,7 +7,7 @@ components:
       properties:
         id:
           type: string
-          description: Mongoose ObjectId representing the user.
+          format: objectId 
         discordId:
           type: string
           format: Snowflake
@@ -33,7 +33,7 @@ components:
       properties:
         id:
           type: string
-          description: Mongoose ObjectId representing the community.
+          format: objectId 
         name:
           type: string
           description: Name of the community.
@@ -62,7 +62,7 @@ components:
       properties:
         id:
           type: string
-          description: Mongoose ObjectId representing the platform.
+          format: objectId 
         name:
           type: string
           description: Name of the platform.
@@ -89,7 +89,7 @@ components:
       properties:
         id:
           type: string
-          description: Mongoose ObjectId representing the token.
+          format: objectId 
         token:
           type: string
           description: Token string.
@@ -116,3 +116,60 @@ components:
           type: number
         message:
           type: string
+
+
+    # ********Role********
+    Role:
+      type: object
+      properties:
+        roleId:
+          type: string
+          format: Snowflake
+        name:
+          type: string
+        color:
+          type: integer
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+        id:
+          type: string
+          format: objectId 
+
+
+    # ********Channel********
+    Channel:
+      type: object
+      properties:
+        channelId:
+          type: string
+          format: Snowflake
+        name:
+          type: string
+          nullable: true
+        parentId:
+          type: string
+          nullable: true
+        permissionOverwrites:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: Snowflake
+              type:
+                type: integer
+                enum: [0, 1] # 0 for role, 1 for member
+              allow:
+                type: string
+              deny:
+                type: string
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+        _id:
+          type: string
+          format: objectId # assuming MongoDB ObjectId format
