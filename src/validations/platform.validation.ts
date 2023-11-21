@@ -46,7 +46,6 @@ const updatePlatform = {
     }),
     body: Joi.object()
         .keys({
-            name: Joi.string().valid('twitter', 'discord'),
             metadata: Joi.alternatives().try(
                 Joi.string(),
                 Joi.number(),

@@ -20,7 +20,7 @@ describe('Heatmap routes', () => {
         platformOne.community = communityOne._id
     });
     const connection = DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
-    describe('POST /api/v1/heatmaps/:guildId/heatmap-chart', () => {
+    describe('POST /api/v1/heatmaps/:platformId/heatmap-chart', () => {
         let requestBody: {
             startDate: Date,
             endDate: Date,
@@ -163,7 +163,7 @@ describe('Heatmap routes', () => {
         })
     })
 
-    describe('POST /api/v1/heatmaps/:guildId/line-graph', () => {
+    describe('POST /api/v1/heatmaps/:platformId/line-graph', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
         });

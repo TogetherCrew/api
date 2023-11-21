@@ -24,7 +24,7 @@ export const platformTwo: PlatformFixture = {
     metadata: {
         id: "681946187490000803",
     },
-    disconnectedAt: new Date(),
+    disconnectedAt: null,
 };
 
 export const platformThree: PlatformFixture = {
@@ -40,7 +40,19 @@ export const platformFour: PlatformFixture = {
     name: "twitter",
     metadata: {
         id: "681946187490000801",
-    }
+    },
+    disconnectedAt: null,
+
+};
+
+export const platformFive: PlatformFixture = {
+    _id: new Types.ObjectId(),
+    name: "twitter",
+    metadata: {
+        id: "681946187490000888",
+    },
+    disconnectedAt: new Date(),
+
 };
 
 

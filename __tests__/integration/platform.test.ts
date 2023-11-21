@@ -6,7 +6,7 @@ import { userOne, insertUsers, userTwo } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { Platform, IPlatformUpdateBody, DatabaseManager } from '@togethercrew.dev/db';
 import { communityOne, communityTwo, communityThree, insertCommunities } from '../fixtures/community.fixture';
-import { platformOne, platformTwo, platformThree, platformFour, insertPlatforms, } from '../fixtures/platform.fixture';
+import { platformOne, platformTwo, platformThree, platformFour, platformFive, insertPlatforms, } from '../fixtures/platform.fixture';
 import { discordRole1, discordRole2, discordRole3, discordRole4, insertRoles } from '../fixtures/discord/roles.fixture';
 import { discordChannel1, discordChannel2, discordChannel3, discordChannel4, discordChannel5, insertChannels } from '../fixtures/discord/channels.fixture';
 
@@ -21,7 +21,7 @@ describe('Platform routes', () => {
         communityTwo.users = [userOne._id];
         communityThree.users = [userTwo._id];
 
-        communityOne.platforms = [platformOne._id, platformTwo._id]
+        communityOne.platforms = [platformOne._id, platformTwo._id, platformFive._id]
         communityTwo.platforms = [platformThree._id];
         communityThree.platforms = [platformFour._id];
 
@@ -29,6 +29,8 @@ describe('Platform routes', () => {
         platformTwo.community = communityOne._id
         platformThree.community = communityTwo._id
         platformFour.community = communityThree._id
+        platformFive.community = communityOne._id
+
     });
 
     describe('POST api/v1/platforms', () => {
@@ -88,6 +90,17 @@ describe('Platform routes', () => {
         });
 
 
+        test('should return 400 error if community has same connected platform already', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformOne]);
+            await request(app)
+                .post(`/api/v1/platforms`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send(newPlatform)
+                .expect(httpStatus.BAD_REQUEST);
+        });
+
         test('should return 400 error if name is invalid', async () => {
             await insertUsers([userOne]);
             newPlatform.name = 'invalid'
@@ -114,7 +127,7 @@ describe('Platform routes', () => {
         test('should return 200 and apply the default query options', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
             await insertUsers([userOne, userTwo]);
-            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
             const res = await request(app)
                 .get('/api/v1/platforms')
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -151,7 +164,7 @@ describe('Platform routes', () => {
         test('should return 401 if access token is missing', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
             await insertUsers([userOne, userTwo]);
-            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
             await request(app)
                 .get('/api/v1/platforms')
                 .send()
@@ -161,7 +174,7 @@ describe('Platform routes', () => {
         test('should correctly apply filter on name field', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
             await insertUsers([userOne, userTwo]);
-            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
             const res = await request(app)
                 .get('/api/v1/platforms')
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -185,7 +198,7 @@ describe('Platform routes', () => {
         test('should correctly sort the returned array if descending sort param is specified', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
             await insertUsers([userOne, userTwo]);
-            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
             const res = await request(app)
                 .get('/api/v1/platforms')
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -209,7 +222,7 @@ describe('Platform routes', () => {
         test('should correctly sort the returned array if ascending sort param is specified', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
             await insertUsers([userOne, userTwo]);
-            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
             const res = await request(app)
                 .get('/api/v1/platforms')
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -235,7 +248,7 @@ describe('Platform routes', () => {
         test('should limit returned array if limit param is specified', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
             await insertUsers([userOne, userTwo]);
-            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
             const res = await request(app)
                 .get('/api/v1/platforms')
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -257,7 +270,7 @@ describe('Platform routes', () => {
         test('should return the correct page if page and limit params are specified', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
             await insertUsers([userOne, userTwo]);
-            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
             const res = await request(app)
                 .get('/api/v1/platforms')
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -283,7 +296,7 @@ describe('Platform routes', () => {
         test('should return 200 and the community object if data is ok', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
             await insertUsers([userOne, userTwo]);
-            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
             const res = await request(app)
                 .get(`/api/v1/platforms/${platformOne._id}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -313,7 +326,7 @@ describe('Platform routes', () => {
         test('should return 404 when user trys to access platoform they don not belong to', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
             await insertUsers([userOne, userTwo]);
-            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
 
             await request(app)
                 .get(`/api/v1/platforms/${platformFour._id}`)
@@ -350,7 +363,6 @@ describe('Platform routes', () => {
 
         beforeEach(() => {
             updateBody = {
-                name: 'twitter',
                 metadata: {
                     id: "8765"
                 }
@@ -359,7 +371,7 @@ describe('Platform routes', () => {
         test('should return 200 and successfully update platform if data is ok', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
             await insertUsers([userOne, userTwo]);
-            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
 
             const res = await request(app)
                 .patch(`/api/v1/platforms/${platformOne._id}`)
@@ -369,7 +381,7 @@ describe('Platform routes', () => {
 
             expect(res.body).toEqual({
                 id: expect.anything(),
-                name: updateBody.name,
+                name: platformOne.name,
                 metadata: updateBody.metadata,
                 community: communityOne._id.toHexString(),
                 disconnectedAt: null,
@@ -379,7 +391,7 @@ describe('Platform routes', () => {
             const dbPlatform = await Platform.findById(res.body.id);
             expect(dbPlatform).toBeDefined();
             expect(dbPlatform).toMatchObject({
-                name: updateBody.name, metadata: updateBody.metadata, isInProgress: true
+                name: platformOne.name, metadata: updateBody.metadata, isInProgress: true
 
             });
         });
@@ -396,7 +408,7 @@ describe('Platform routes', () => {
         test('should return 404 when user trys to update platform they don not belong to', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
             await insertUsers([userOne, userTwo]);
-            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
 
 
             await request(app)
@@ -417,21 +429,30 @@ describe('Platform routes', () => {
                 .send(updateBody)
                 .expect(httpStatus.BAD_REQUEST);
         });
-        test('should return 400 error if name is invalid', async () => {
-            await insertUsers([userOne]);
-            updateBody.name = 'invalid'
-            await request(app)
-                .patch(`/api/v1/platforms/${platformOne._id}`)
-                .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send(updateBody)
-                .expect(httpStatus.BAD_REQUEST);
-        });
     });
     describe('DELETE /api/v1/platforms/:platformId', () => {
-        test('should return 204 if data is ok', async () => {
+        test('should return 204 and soft delete the platform is deleteType is soft', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
             await insertUsers([userOne, userTwo]);
-            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
+
+            const res = await request(app)
+                .delete(`/api/v1/platforms/${platformOne._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ deleteType: 'soft' })
+                .expect(httpStatus.NO_CONTENT);
+
+            const dbPlatform = await Platform.findById(platformOne._id);
+            expect(dbPlatform).toBeDefined();
+            expect(dbPlatform).toMatchObject({
+                disconnectedAt: expect.any(Date)
+            });
+        });
+
+        test('should return 204 and hard delete the platform is deleteType is hard', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
 
             const res = await request(app)
                 .delete(`/api/v1/platforms/${platformOne._id}`)
@@ -455,7 +476,7 @@ describe('Platform routes', () => {
         test('should return 404 when user trys to delete platform they don not belong to', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
             await insertUsers([userOne, userTwo]);
-            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
 
             await request(app)
                 .delete(`/api/v1/platforms/${platformFour._id}`)
@@ -764,7 +785,7 @@ describe('Platform routes', () => {
         test('should return 404 when user trys to delete platform they don not belong to', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
             await insertUsers([userOne, userTwo]);
-            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
             await request(app)
                 .post(`/api/v1/platforms/${platformFour._id}/properties`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)

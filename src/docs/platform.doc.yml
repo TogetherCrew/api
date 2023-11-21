@@ -175,11 +175,6 @@ paths:
             schema:
               type: object
               properties:
-                name:
-                  type: string
-                  enum:
-                    - twitter
-                    - discord
                 metadata:
                   type: object
                   additionalProperties: true

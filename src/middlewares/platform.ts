@@ -18,6 +18,7 @@ const platform = (platformName?: string) => async (req: Request, res: Response, 
         const platform = await platformService.getPlatformByFilter({
             _id: authReq.params.platformId,
             community: { $in: authReq.user?.communities },
+            disconnectedAt: null
         });
         if (!platform) {
             throw new ApiError(httpStatus.NOT_FOUND, 'Platform not found');

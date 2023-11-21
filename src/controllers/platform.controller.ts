@@ -10,9 +10,13 @@ import httpStatus from 'http-status';
 import querystring from 'querystring';
 
 const createPlatform = catchAsync(async function (req: IAuthRequest, res: Response) {
-    const community = await communityService.getCommunityByFilter({ _id: req.body.community, users: req.user.id });
-    if (!community) {
+    const communityDoc = await communityService.getCommunityByFilter({ _id: req.body.community, users: req.user.id });
+    if (!communityDoc) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Community not found');
+    }
+    const platformDoc = await platformService.getPlatformByFilter({ community: { $in: req.user.communities }, disconnectedAt: null, name: req.body.name });
+    if (platformDoc) {
+        throw new ApiError(httpStatus.BAD_REQUEST, `Only can connect one ${req.body.name} platform`);
     }
     const platform = await platformService.createPlatform(req.body);
     await communityService.addPlatformToCommunityById(platform.community, platform.id);
@@ -108,13 +112,13 @@ const getPlatforms = catchAsync(async function (req: IAuthRequest, res: Response
     if (!filter.community) {
         filter.community = { $in: req.user.communities }
     }
-
+    filter.disconnectedAt = null;
     const result = await platformService.queryPlatforms(filter, options);
     res.send(result);
 });
 
 const getPlatform = catchAsync(async function (req: IAuthRequest, res: Response) {
-    const platform = await platformService.getPlatformByFilter({ _id: req.params.platformId, community: { $in: req.user.communities } });
+    const platform = await platformService.getPlatformByFilter({ _id: req.params.platformId, community: { $in: req.user.communities }, disconnectedAt: null });
     if (!platform) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Platform not found');
     }
@@ -125,16 +129,14 @@ const getPlatform = catchAsync(async function (req: IAuthRequest, res: Response)
     res.send(platform);
 });
 const updatePlatform = catchAsync(async function (req: IAuthRequest, res: Response) {
-    const platform = await platformService.updatePlatformByFilter({ _id: req.params.platformId, community: { $in: req.user.communities } }, req.body);
+    const platform = await platformService.updatePlatformByFilter({ _id: req.params.platformId, community: { $in: req.user.communities }, disconnectedAt: null }, req.body);
     res.send(platform);
 });
 const deletePlatform = catchAsync(async function (req: IAuthRequest, res: Response) {
-
-
-    // if (req.body.deleteType === "soft") {
-    //     await platformService.updatePlatformByFilter({ _id: req.params.platformId, community: { $in: req.user.communities } });
-    // }
-    if (req.body.deleteType === "hard") {
+    if (req.body.deleteType === "soft") {
+        await platformService.updatePlatformByFilter({ _id: req.params.platformId, community: { $in: req.user.communities } }, { disconnectedAt: new Date() });
+    }
+    else if (req.body.deleteType === "hard") {
         await platformService.deletePlatformByFilter({ _id: req.params.platformId, community: { $in: req.user.communities } });
     }
 
@@ -146,8 +148,6 @@ const getProperties = catchAsync(async function (req: IAuthRequest, res: Respons
     let result;
     if (platform?.name === 'discord') {
         result = await discordServices.coreService.getPropertyHandler(req)
-    } else if (platform?.name === 'twitter') {
-        console.log(1)
     }
     res.status(httpStatus.OK).send(result);
 });
