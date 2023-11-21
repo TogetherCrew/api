@@ -6,7 +6,7 @@ import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { memberActivity1, memberActivity2, memberActivity3, memberActivity4, insertMemberActivities } from '../fixtures/memberActivity.fixture';
 import { discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4, discordGuildMember5, insertGuildMembers } from '../fixtures/discord//guildMember.fixture';
-import { platformOne, platformTwo, insertPlatforms } from '../fixtures/platform.fixture';
+import { platformOne, platformTwo, platformFour, insertPlatforms } from '../fixtures/platform.fixture';
 import { DatabaseManager } from '@togethercrew.dev/db';
 import { communityOne, insertCommunities } from '../fixtures/community.fixture';
 import { discordRole1, discordRole2, discordRole3, insertRoles } from '../fixtures/discord/roles.fixture';
@@ -21,9 +21,10 @@ describe('member-activity routes', () => {
     beforeEach(() => {
         userOne.communities = [communityOne._id];
         communityOne.users = [userOne._id];
-        communityOne.platforms = [platformOne._id, platformTwo._id]
+        communityOne.platforms = [platformOne._id, platformTwo._id, platformFour._id]
         platformOne.community = communityOne._id
         platformTwo.community = communityOne._id
+        platformFour.community = communityOne._id
 
     });
     const connection = DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
@@ -93,6 +94,17 @@ describe('member-activity routes', () => {
                 vitalMembersPercentageChange: 0,
                 becameDisengagedPercentageChange: 0,
             });
+        })
+
+        test('should return 400 if given platform is not discord', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformFour]);
+            await request(app)
+                .post(`/api/v1/member-activity/${platformFour._id}/active-members-composition-line-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.BAD_REQUEST);
         })
 
         test('should return 401 if access token is missing', async () => {
@@ -184,6 +196,17 @@ describe('member-activity routes', () => {
                 .expect(httpStatus.UNAUTHORIZED);
         })
 
+        test('should return 400 if given platform is not discord', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformFour]);
+            await request(app)
+                .post(`/api/v1/member-activity/${platformFour._id}/disengaged-members-composition-line-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.BAD_REQUEST);
+        })
+
         test('should return 404 if guild not found', async () => {
             await insertUsers([userOne]);
             await request(app)
@@ -262,6 +285,17 @@ describe('member-activity routes', () => {
                 .expect(httpStatus.UNAUTHORIZED);
         })
 
+        test('should return 400 if given platform is not discord', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformFour]);
+            await request(app)
+                .post(`/api/v1/member-activity/${platformFour._id}/active-members-onboarding-line-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.BAD_REQUEST);
+        })
+
         test('should return 404 if guild not found', async () => {
             await insertUsers([userOne]);
             await request(app)
@@ -320,6 +354,17 @@ describe('member-activity routes', () => {
                 .post(`/api/v1/member-activity/${platformOne._id}/inactive-members-line-graph`)
                 .send({ startDate: new Date(), endDate: new Date() })
                 .expect(httpStatus.UNAUTHORIZED);
+        })
+
+        test('should return 400 if given platform is not discord', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformFour]);
+            await request(app)
+                .post(`/api/v1/member-activity/${platformFour._id}/inactive-members-line-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.BAD_REQUEST);
         })
 
         test('should return 404 if guild not found', async () => {
@@ -405,6 +450,17 @@ describe('member-activity routes', () => {
                 .post(`/api/v1/member-activity/${platformOne._id}/members-interactions-network-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.NOT_FOUND);
+        })
+
+        test('should return 400 if given platform is not discord', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformFour]);
+            await request(app)
+                .post(`/api/v1/member-activity/${platformFour._id}/members-interactions-network-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.BAD_REQUEST);
         })
     })
 
@@ -570,6 +626,17 @@ describe('member-activity routes', () => {
                 .get(`/api/v1/member-activity/${platformOne._id}/fragmentation-score`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.NOT_FOUND);
+        })
+
+        test('should return 400 if given platform is not discord', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformFour]);
+            await request(app)
+                .get(`/api/v1/member-activity/${platformFour._id}/fragmentation-score`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.BAD_REQUEST);
         })
     })
 
@@ -738,6 +805,17 @@ describe('member-activity routes', () => {
                 .get(`/api/v1/member-activity/${platformOne._id}/decentralisation-score`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.NOT_FOUND);
+        })
+
+        test('should return 400 if given platform is not discord', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformFour]);
+            await request(app)
+                .get(`/api/v1/member-activity/${platformFour._id}/decentralisation-score`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.BAD_REQUEST);
         })
     })
 
@@ -1151,6 +1229,17 @@ describe('member-activity routes', () => {
             expect(res.body.results).toHaveLength(2);
             expect(res.body.results[0].discordId).toBe(discordGuildMember2.discordId);
             expect(res.body.results[1].discordId).toBe(discordGuildMember4.discordId);
+        })
+
+        test('should return 400 if given platform is not discord', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformFour]);
+            await request(app)
+                .post(`/api/v1/member-activity/${platformFour._id}/active-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.BAD_REQUEST);
         })
     })
 
@@ -1568,6 +1657,18 @@ describe('member-activity routes', () => {
             expect(res.body.results).toHaveLength(2);
             expect(res.body.results[0].discordId).toBe(discordGuildMember2.discordId);
             expect(res.body.results[1].discordId).toBe(discordGuildMember4.discordId);
+        })
+
+
+        test('should return 400 if given platform is not discord', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformFour]);
+            await request(app)
+                .post(`/api/v1/member-activity/${platformFour._id}/active-members-onboarding-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.BAD_REQUEST);
         })
     })
 
@@ -1996,6 +2097,19 @@ describe('member-activity routes', () => {
             expect(res.body.results).toHaveLength(2);
             expect(res.body.results[0].discordId).toBe(discordGuildMember2.discordId);
             expect(res.body.results[1].discordId).toBe(discordGuildMember4.discordId);
+        })
+
+
+
+        test('should return 400 if given platform is not discord', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformFour]);
+            await request(app)
+                .post(`/api/v1/member-activity/${platformFour._id}/disengaged-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.BAD_REQUEST);
         })
     })
 

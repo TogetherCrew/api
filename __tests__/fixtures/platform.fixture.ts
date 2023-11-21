@@ -20,7 +20,7 @@ export const platformOne: PlatformFixture = {
 
 export const platformTwo: PlatformFixture = {
     _id: new Types.ObjectId(),
-    name: "twitter",
+    name: "discord",
     metadata: {
         id: "681946187490000803",
     },

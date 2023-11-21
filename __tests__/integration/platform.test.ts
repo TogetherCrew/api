@@ -146,9 +146,6 @@ describe('Platform routes', () => {
                 community: communityOne._id.toHexString(),
                 isInProgress: true
             });
-
-
-
         });
 
         test('should return 401 if access token is missing', async () => {
@@ -177,10 +174,11 @@ describe('Platform routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 1,
+                totalResults: 2,
             });
-            expect(res.body.results).toHaveLength(1);
-            expect(res.body.results[0].id).toBe(platformOne._id.toHexString());
+            expect(res.body.results).toHaveLength(2);
+            expect(res.body.results[0].id).toBe(platformTwo._id.toHexString());
+            expect(res.body.results[1].id).toBe(platformOne._id.toHexString());
 
         });
 
@@ -203,8 +201,8 @@ describe('Platform routes', () => {
                 totalResults: 2,
             });
             expect(res.body.results).toHaveLength(2);
-            expect(res.body.results[0].id).toBe(platformTwo._id.toHexString());
-            expect(res.body.results[1].id).toBe(platformOne._id.toHexString());
+            expect(res.body.results[0].id).toBe(platformOne._id.toHexString());
+            expect(res.body.results[1].id).toBe(platformTwo._id.toHexString());
 
         });
 
@@ -438,7 +436,7 @@ describe('Platform routes', () => {
             const res = await request(app)
                 .delete(`/api/v1/platforms/${platformOne._id}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send()
+                .send({ deleteType: 'hard' })
                 .expect(httpStatus.NO_CONTENT);
 
             const dbPlatform = await Platform.findById(res.body.id);
@@ -462,7 +460,7 @@ describe('Platform routes', () => {
             await request(app)
                 .delete(`/api/v1/platforms/${platformFour._id}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send()
+                .send({ deleteType: 'hard' })
                 .expect(httpStatus.NOT_FOUND);
         });
 
@@ -483,7 +481,7 @@ describe('Platform routes', () => {
             await request(app)
                 .delete(`/api/v1/platforms/${platformOne._id}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send()
+                .send({ deleteType: 'hard' })
                 .expect(httpStatus.NOT_FOUND);
         });
     });
