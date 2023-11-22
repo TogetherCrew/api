@@ -42,7 +42,9 @@ describe('Platform routes', () => {
                 name: 'discord',
                 community: communityOne._id,
                 metadata: {
-                    id: "1234"
+                    id: "1234",
+                    name: 'guild',
+                    icon: 'path'
                 }
             };
         });
@@ -65,7 +67,8 @@ describe('Platform routes', () => {
                 metadata: newPlatform.metadata,
                 community: communityOne._id.toHexString(),
                 disconnectedAt: null,
-                isInProgress: true
+                isInProgress: true,
+                connectedAt: expect.anything()
             });
 
 
@@ -309,8 +312,8 @@ describe('Platform routes', () => {
                 metadata: platformOne.metadata,
                 community: communityOne._id.toHexString(),
                 disconnectedAt: null,
-                isInProgress: true
-
+                isInProgress: true,
+                connectedAt: expect.anything()
             });
         });
 
@@ -385,7 +388,8 @@ describe('Platform routes', () => {
                 metadata: updateBody.metadata,
                 community: communityOne._id.toHexString(),
                 disconnectedAt: null,
-                isInProgress: true
+                isInProgress: true,
+                connectedAt: expect.anything()
             });
 
             const dbPlatform = await Platform.findById(res.body.id);

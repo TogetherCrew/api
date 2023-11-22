@@ -54,6 +54,14 @@ components:
           type: string
           format: date-time
           description: term and condition accepted date 
+        connectedAt:
+          type: string
+          format: date-time
+          description: connected date 
+        disconnectedAt:
+          type: string
+          format: date-time
+          description: disconnected date 
 
     # ********Platform********
     Platform:
