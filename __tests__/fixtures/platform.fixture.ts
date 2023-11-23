@@ -6,6 +6,7 @@ interface PlatformFixture {
     name: string;
     community?: Types.ObjectId;
     disconnectedAt?: Date | null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata?: Record<string, any>,
 }
 
