@@ -1,11 +1,11 @@
 import { Response } from 'express';
 import { heatmapService } from '../services';
-import { IAuthRequest } from '../interfaces/Request.interface';
+import { IAuthAndPlatform } from '../interfaces/Request.interface';
 import { catchAsync, date, charts } from "../utils";
 import { DatabaseManager } from '@togethercrew.dev/db'
 import moment from 'moment-timezone';
 
-const heatmapChart = catchAsync(async function (req: IAuthRequest, res: Response) {
+const heatmapChart = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
     if (req.body.channelIds.length === 0) {
         return res.send(charts.fillHeatmapChart([]))
     }
@@ -20,7 +20,7 @@ const heatmapChart = catchAsync(async function (req: IAuthRequest, res: Response
     res.send(heatmaps);
 });
 
-const lineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
+const lineGraph = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
     const connection = DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
     let lineGraph = await heatmapService.lineGraph(connection, req.body.startDate, req.body.endDate);
     lineGraph = charts.fillHeatmapLineGraph(lineGraph, req.body.startDate, req.body.endDate);

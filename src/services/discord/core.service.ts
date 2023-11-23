@@ -3,7 +3,7 @@ import config from '../../config';
 import { DatabaseManager } from '@togethercrew.dev/db';
 import { ApiError, pick, sort } from '../../utils';
 import parentLogger from '../../config/logger';
-import { IAuthRequest, IDiscordOAuth2EchangeCode, IDiscordUser } from '../../interfaces';
+import { IAuthAndPlatform, IDiscordOAuth2EchangeCode, IDiscordUser } from '../../interfaces';
 import channelService from './channel.service';
 import roleService from './role.service';
 const logger = parentLogger.child({ module: 'DiscordService' });
@@ -14,7 +14,7 @@ const logger = parentLogger.child({ module: 'DiscordService' });
    @param {string} redirect_uri
  * @returns {Promise<IDiscordOAuth2EchangeCode>}
  */
-async function getPropertyHandler(req: IAuthRequest) {
+async function getPropertyHandler(req: IAuthAndPlatform) {
     const connection = DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
 
     const filter = pick(req.query, ['name']);

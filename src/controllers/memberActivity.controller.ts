@@ -1,20 +1,20 @@
 import { Response } from 'express';
 import { memberActivityService, discordServices } from '../services';
-import { IAuthRequest } from '../interfaces/Request.interface';
+import { IAuthAndPlatform } from '../interfaces/Request.interface';
 import { catchAsync, charts } from "../utils";
 import { DatabaseManager } from '@togethercrew.dev/db'
 import { pick } from '../utils';
 import { activityCompostionsTypes } from '../config/memberBreakDownTables';
 
 
-const activeMembersCompositionLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
+const activeMembersCompositionLineGraph = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
     const connection = DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
     let activeMembersCompositionLineGraph = await memberActivityService.activeMembersCompositionLineGraph(connection, req.body.startDate, req.body.endDate);
     activeMembersCompositionLineGraph = charts.fillActiveMembersCompositionLineGraph(activeMembersCompositionLineGraph, req.body.startDate, req.body.endDate);
     res.send(activeMembersCompositionLineGraph);
 });
 
-const activeMembersOnboardingLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
+const activeMembersOnboardingLineGraph = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
     const connection = DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
     let activeMembersOnboardingLineGraph = await memberActivityService.activeMembersOnboardingLineGraph(connection, req.body.startDate, req.body.endDate);
     activeMembersOnboardingLineGraph = charts.fillActiveMembersOnboardingLineGraph(activeMembersOnboardingLineGraph, req.body.startDate, req.body.endDate);
@@ -22,7 +22,7 @@ const activeMembersOnboardingLineGraph = catchAsync(async function (req: IAuthRe
 });
 
 
-const disengagedMembersCompositionLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
+const disengagedMembersCompositionLineGraph = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
     const connection = DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
     let disengagedMembersLineGraph = await memberActivityService.disengagedMembersCompositionLineGraph(connection, req.body.startDate, req.body.endDate);
     disengagedMembersLineGraph = charts.fillDisengagedMembersCompositionLineGraph(disengagedMembersLineGraph, req.body.startDate, req.body.endDate);
@@ -30,30 +30,30 @@ const disengagedMembersCompositionLineGraph = catchAsync(async function (req: IA
 });
 
 
-const inactiveMembersLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
+const inactiveMembersLineGraph = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
     const connection = DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
     let inactiveMembersLineGraph = await memberActivityService.inactiveMembersLineGraph(connection, req.body.startDate, req.body.endDate);
     inactiveMembersLineGraph = charts.fillInactiveMembersLineGraph(inactiveMembersLineGraph, req.body.startDate, req.body.endDate);
     res.send(inactiveMembersLineGraph);
 });
 
-const membersInteractionsNetworkGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
+const membersInteractionsNetworkGraph = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
     const connection = DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
     const networkGraphData = await memberActivityService.getMembersInteractionsNetworkGraph(req.platform?.metadata?.id, connection)
     res.send(networkGraphData)
 })
 
-const decentralisationScore = catchAsync(async function (req: IAuthRequest, res: Response) {
+const decentralisationScore = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
     const decentralizationScoreData = await memberActivityService.getDecentralisationScore(req.platform?.metadata?.id)
     res.send(decentralizationScoreData)
 })
 
-const fragmentationScore = catchAsync(async function (req: IAuthRequest, res: Response) {
+const fragmentationScore = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
     const fragmentationScoreData = await memberActivityService.getFragmentationScore(req.platform?.metadata?.id)
     res.send(fragmentationScoreData)
 })
 
-const activeMembersCompositionTable = catchAsync(async function (req: IAuthRequest, res: Response) {
+const activeMembersCompositionTable = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
 
     const filter = pick({ ...req.query, ...req.body }, ['activityComposition', 'ngu', 'allRoles', 'include', 'exclude']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
@@ -74,7 +74,7 @@ const activeMembersCompositionTable = catchAsync(async function (req: IAuthReque
     res.send(guildMembers);
 });
 
-const activeMembersOnboardingTable = catchAsync(async function (req: IAuthRequest, res: Response) {
+const activeMembersOnboardingTable = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
     const filter = pick({ ...req.query, ...req.body }, ['activityComposition', 'ngu', 'allRoles', 'include', 'exclude']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
     const connection = DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
@@ -93,7 +93,7 @@ const activeMembersOnboardingTable = catchAsync(async function (req: IAuthReques
     res.send(guildMembers);
 });
 
-const disengagedMembersCompositionTable = catchAsync(async function (req: IAuthRequest, res: Response) {
+const disengagedMembersCompositionTable = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
     const filter = pick({ ...req.query, ...req.body }, ['activityComposition', 'ngu', 'allRoles', 'include', 'exclude']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
     const connection = DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);

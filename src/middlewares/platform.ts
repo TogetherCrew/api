@@ -2,12 +2,12 @@ import httpStatus from "http-status";
 import { Types } from "mongoose";
 import { ApiError } from "../utils";
 import { Request, Response, NextFunction } from "express";
-import { IAuthRequest } from "../interfaces";
+import { IAuthAndPlatform } from "../interfaces";
 import { platformService } from '../services';
 
 
 const platform = (platformName?: string) => async (req: Request, res: Response, next: NextFunction) => {
-    const authReq = req as IAuthRequest;
+    const authReq = req as IAuthAndPlatform;
     try {
         if (!authReq.params.platformId) {
             throw new ApiError(httpStatus.BAD_REQUEST, 'PlatformId is required');

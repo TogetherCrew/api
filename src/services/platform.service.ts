@@ -56,9 +56,32 @@ const updatePlatformByFilter = async (filter: object, updateBody: Partial<IPlatf
     if (!platform) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Platform not found');
     }
+    if (updateBody.metadata) {
+        updateBody.metadata = {
+            ...platform.metadata,
+            ...updateBody.metadata
+        };
+    }
     Object.assign(platform, updateBody);
     await platform.save();
     return platform;
+};
+
+/**
+ * Update Platform 
+ * @param {HydratedDocument<IPlatform>} platform - platform doc
+ * @param {Partial<IPlatform>} updateBody
+ * @returns {Promise<HydratedDocument<IPlatform>>}
+ */
+const updatePlatform = async (platform: HydratedDocument<IPlatform>, updateBody: Partial<IPlatform>): Promise<HydratedDocument<IPlatform>> => {
+    if (updateBody.metadata) {
+        updateBody.metadata = {
+            ...platform.metadata,
+            ...updateBody.metadata
+        };
+    }
+    Object.assign(platform, updateBody);
+    return await platform.save();
 };
 
 /**
@@ -82,4 +105,5 @@ export default {
     queryPlatforms,
     updatePlatformByFilter,
     deletePlatformByFilter,
+    updatePlatform
 };

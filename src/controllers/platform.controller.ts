@@ -3,7 +3,7 @@ import { platformService, authService, twitterService, communityService, discord
 import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync, pick, ApiError } from "../utils";
 import { generateState, generateCodeVerifier, generateCodeChallenge, twitter } from '../config/oAtuh2';
-import { ISessionRequest } from '../interfaces';
+import { ISessionRequest, IAuthAndPlatform } from '../interfaces';
 import config from '../config';
 import { discord } from '../config/oAtuh2'
 import httpStatus from 'http-status';
@@ -128,8 +128,8 @@ const getPlatform = catchAsync(async function (req: IAuthRequest, res: Response)
     }
     res.send(platform);
 });
-const updatePlatform = catchAsync(async function (req: IAuthRequest, res: Response) {
-    const platform = await platformService.updatePlatformByFilter({ _id: req.params.platformId, community: { $in: req.user.communities }, disconnectedAt: null }, req.body);
+const updatePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
+    const platform = await platformService.updatePlatform(req.platform, req.body);
     res.send(platform);
 });
 const deletePlatform = catchAsync(async function (req: IAuthRequest, res: Response) {
@@ -143,7 +143,7 @@ const deletePlatform = catchAsync(async function (req: IAuthRequest, res: Respon
     res.status(httpStatus.NO_CONTENT).send();
 });
 
-const getProperties = catchAsync(async function (req: IAuthRequest, res: Response) {
+const getProperties = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
     const { platform } = req;
     let result;
     if (platform?.name === 'discord') {

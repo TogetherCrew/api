@@ -14,11 +14,11 @@ router.route('/')
     .post(auth(), validate(platformValidation.createPlatform), platformController.createPlatform)
     .get(auth(), validate(platformValidation.getPlatforms), platformController.getPlatforms);
 
-router.post('/:platformId/properties', auth(), platform(), validate(platformValidation.dynamicPlatformValidation), platformController.getProperties);
+router.post('/:platformId/properties', auth(), platform(), validate(platformValidation.dynamicPlatformProperty), platformController.getProperties);
 
 router.route('/:platformId')
     .get(auth(), validate(platformValidation.getPlatform), platformController.getPlatform)
-    .patch(auth(), validate(platformValidation.updatePlatform), platformController.updatePlatform)
+    .patch(auth(), platform(), validate(platformValidation.dynamicUpdatePlatform), platformController.updatePlatform)
     .delete(auth(), validate(platformValidation.deletePlatform), platformController.deletePlatform);
 
 

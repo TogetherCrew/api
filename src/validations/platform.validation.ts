@@ -1,20 +1,30 @@
 import Joi from "joi";
 import { Request } from 'express';
 import { objectId } from './custom.validation';
-import { IAuthRequest } from "src/interfaces";
+import { IAuthAndPlatform } from "src/interfaces";
 
 const createPlatform = {
     body: Joi.object().keys({
         name: Joi.string().required().valid('twitter', 'discord'),
         community: Joi.string().custom(objectId),
-        metadata: Joi.alternatives().try(
-            Joi.string(),
-            Joi.number(),
-            Joi.boolean(),
-            Joi.array(),
-            Joi.object(),
-            Joi.valid(null)
-        ).required()
+        metadata: Joi.when('name', {
+            switch: [
+                {
+                    is: 'discord', then: Joi.object().keys({
+                        id: Joi.string().required(),
+                        name: Joi.string().required(),
+                        icon: Joi.string().required(),
+                    })
+                },
+                {
+                    is: 'twitter', then: Joi.object().keys({
+                        id: Joi.string().required(),
+                        username: Joi.string().required(),
+                        profileImageUrl: Joi.string().required(),
+                    })
+                }
+            ]
+        }).required()
     }),
 };
 
@@ -40,24 +50,6 @@ const getPlatform = {
     }),
 };
 
-const updatePlatform = {
-    params: Joi.object().keys({
-        platformId: Joi.required().custom(objectId),
-    }),
-    body: Joi.object()
-        .keys({
-            metadata: Joi.alternatives().try(
-                Joi.string(),
-                Joi.number(),
-                Joi.boolean(),
-                Joi.array(),
-                Joi.object(),
-                Joi.valid(null)
-            )
-        })
-        .min(1),
-};
-
 const deletePlatform = {
     params: Joi.object().keys({
         platformId: Joi.string().custom(objectId),
@@ -68,12 +60,37 @@ const deletePlatform = {
 };
 
 
+const dynamicUpdatePlatform = (req: Request) => {
+    const authReq = req as IAuthAndPlatform;
+    const { platform } = authReq;
+    if (platform.name === 'discord') {
+        return {
+            params: Joi.object().keys({
+                platformId: Joi.required().custom(objectId),
+            }),
+            body: Joi.object().required().keys({
+                metadata: Joi.object().required().keys({
+                    selectedChannels: Joi.array().items(Joi.string()),
+                    period: Joi.date(),
+                    analyzerStartedAt: Joi.date()
+                })
+            }),
+        };
+    }
+    else {
+        return {
+            query: Joi.object().required().keys({}),
+            params: Joi.object().required().keys({}),
+            body: Joi.object().required().keys({}),
+        };
+    }
+};
 
-const dynamicPlatformValidation = (req: Request) => {
-    const authReq = req as IAuthRequest;
+const dynamicPlatformProperty = (req: Request) => {
+    const authReq = req as IAuthAndPlatform;
     const { property } = authReq.query;
     const { platform } = authReq;
-    if (platform?.name === 'discord' && property === 'channel') {
+    if (platform.name === 'discord' && property === 'channel') {
         return {
             params: Joi.object().keys({
                 platformId: Joi.required().custom(objectId),
@@ -113,8 +130,8 @@ export default {
     createPlatform,
     getPlatforms,
     getPlatform,
-    updatePlatform,
     deletePlatform,
     connectPlatform,
-    dynamicPlatformValidation
+    dynamicUpdatePlatform,
+    dynamicPlatformProperty
 }
