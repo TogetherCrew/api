@@ -26,36 +26,31 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
     }
     filter.deletedAt = null;
 
+    if (req.query.property === 'role') {
+        const options = pick(req.query, ['sortBy', 'limit', 'page']);
 
-    try {
-        if (req.query.property === 'role') {
-            const options = pick(req.query, ['sortBy', 'limit', 'page']);
-
-            return await roleService.queryRoles(connection, filter, options)
-        }
-        else if (req.query.property === 'channel') {
-
-            if (req.body.channelIds) {
-                filter.channelId = { $in: req.body.channelIds };
-            }
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const channels: any = await channelService.getChannels(connection, filter);
-            for (let i = 0; i < channels.length; i++) {
-                const canReadMessageHistoryAndViewChannel = await channelService.checkReadMessageHistoryAndViewChannelpPermissions(connection, channels[i]);
-                channels[i] = {
-                    channelId: channels[i].channelId,
-                    name: channels[i].name,
-                    parentId: channels[i].parentId,
-                    canReadMessageHistoryAndViewChannel
-                }
-            }
-            return await sort.sortChannels(channels);
-
-        }
-    } catch (error) {
-        logger.error({ paltform_id: req.platform?.id, property: req.query.property, error }, 'Failed to exchange discord code');
-        throw new ApiError(590, 'Can not fetch from discord API');
+        return await roleService.queryRoles(connection, filter, options)
     }
+    else if (req.query.property === 'channel') {
+
+        if (req.body.channelIds) {
+            filter.channelId = { $in: req.body.channelIds };
+        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const channels: any = await channelService.getChannels(connection, filter);
+        for (let i = 0; i < channels.length; i++) {
+            const canReadMessageHistoryAndViewChannel = await channelService.checkReadMessageHistoryAndViewChannelpPermissions(connection, channels[i]);
+            channels[i] = {
+                channelId: channels[i].channelId,
+                name: channels[i].name,
+                parentId: channels[i].parentId,
+                canReadMessageHistoryAndViewChannel
+            }
+        }
+        return await sort.sortChannels(channels);
+
+    }
+
 }
 
 
