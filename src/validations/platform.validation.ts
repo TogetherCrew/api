@@ -13,7 +13,7 @@ const createPlatform = {
                     is: 'discord', then: Joi.object().keys({
                         id: Joi.string().required(),
                         name: Joi.string().required(),
-                        icon: Joi.string().required(),
+                        icon: Joi.string().required().allow(''),
                     })
                 },
                 {
