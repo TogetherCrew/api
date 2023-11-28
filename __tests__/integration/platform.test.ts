@@ -84,6 +84,42 @@ describe('Platform routes', () => {
 
         });
 
+        test('should return 201 and successfully connect a disconneced platform if data is ok', async () => {
+            userOne.communities = [communityOne._id];
+            communityOne.users = [userOne._id]
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            platformOne.disconnectedAt = new Date();
+            await insertPlatforms([platformOne]);
+            platformOne.disconnectedAt = null;
+            newPlatform.metadata.id = platformOne.metadata?.id;
+
+            const res = await request(app)
+                .post(`/api/v1/platforms`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send(newPlatform)
+                .expect(httpStatus.CREATED);
+
+            expect(res.body).toEqual({
+                id: expect.anything(),
+                name: platformOne.name,
+                metadata: platformOne.metadata,
+                community: communityOne._id.toHexString(),
+                disconnectedAt: null,
+                isInProgress: true,
+                connectedAt: expect.anything()
+            });
+
+
+            const dbPlatform = await Platform.findById(res.body.id);
+            expect(dbPlatform).toBeDefined();
+            expect(dbPlatform).toMatchObject({
+                name: platformOne.name, metadata: platformOne.metadata, disconnectedAt: null
+
+            });
+
+        });
+
 
         test('should return 401 error if access token is missing', async () => {
             await request(app)
@@ -102,6 +138,23 @@ describe('Platform routes', () => {
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send(newPlatform)
                 .expect(httpStatus.BAD_REQUEST);
+        });
+
+        test('should return 400 error if platform is already connected to another community', async () => {
+            await insertCommunities([communityOne, communityTwo]);
+            await insertUsers([userOne, userTwo]);
+            if (platformFour.metadata) {
+                platformFour.metadata.id = platformOne.metadata?.id;
+                newPlatform.metadata.id = platformOne.metadata?.id;
+                await insertPlatforms([platformFour]);
+                platformFour.metadata.id = '681946187490000802';
+            }
+            await request(app)
+                .post(`/api/v1/platforms`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send(newPlatform)
+                .expect(httpStatus.BAD_REQUEST);
+
         });
 
         test('should return 400 error if name is invalid', async () => {
