@@ -2,6 +2,8 @@ import { HydratedDocument, Types } from 'mongoose';
 import httpStatus from 'http-status';
 import { Platform, IPlatform } from '@togethercrew.dev/db';
 import ApiError from '../utils/ApiError';
+import sagaService from './saga.service';
+import { Snowflake } from 'discord.js';
 
 /**
  * Create a platform
@@ -9,7 +11,11 @@ import ApiError from '../utils/ApiError';
  * @returns {Promise<HydratedDocument<IPlatform>>}
  */
 const createPlatform = async (PlatformBody: IPlatform): Promise<HydratedDocument<IPlatform>> => {
-    return Platform.create(PlatformBody);
+    const platform = await Platform.create(PlatformBody);
+    if (platform.name === 'discord') {
+        await sagaService.createAndStartFetchMemberSaga(platform._id)
+    }
+    return platform;
 };
 
 
@@ -73,12 +79,20 @@ const updatePlatformByFilter = async (filter: object, updateBody: Partial<IPlatf
  * @param {Partial<IPlatform>} updateBody
  * @returns {Promise<HydratedDocument<IPlatform>>}
  */
-const updatePlatform = async (platform: HydratedDocument<IPlatform>, updateBody: Partial<IPlatform>): Promise<HydratedDocument<IPlatform>> => {
+const updatePlatform = async (platform: HydratedDocument<IPlatform>, updateBody: Partial<IPlatform>, userDiscordId?: Snowflake): Promise<HydratedDocument<IPlatform>> => {
     if (updateBody.metadata) {
         updateBody.metadata = {
             ...platform.metadata,
             ...updateBody.metadata
         };
+    }
+    if ((updateBody.metadata?.period || updateBody.metadata?.selectedChannels) && userDiscordId) {
+        await sagaService.createAndStartGuildSaga(platform._id, {
+            created: false,
+            discordId: userDiscordId,
+            message: "Your data import into TogetherCrew is complete! See your insights on your dashboard https://app.togethercrew.com/",
+            useFallback: true
+        })
     }
     Object.assign(platform, updateBody);
     return await platform.save();
