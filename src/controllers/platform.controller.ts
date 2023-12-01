@@ -14,16 +14,18 @@ const createPlatform = catchAsync(async function (req: IAuthRequest, res: Respon
     if (!communityDoc) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Community not found');
     }
-    let platformDoc = await platformService.getPlatformByFilter({ community: { $in: req.user.communities }, 'metadata.id': req.body.metadata.id, disconnectedAt: { $ne: null } });
+
+    let platformDoc = await platformService.getPlatformByFilter({ community: { $in: req.user.communities }, disconnectedAt: null, name: req.body.name });
+    if (platformDoc) {
+        throw new ApiError(httpStatus.BAD_REQUEST, `Only can connect one ${req.body.name} platform`);
+    }
+
+    platformDoc = await platformService.getPlatformByFilter({ community: { $in: req.user.communities }, 'metadata.id': req.body.metadata.id, disconnectedAt: { $ne: null } });
     if (platformDoc) {
         const platform = await platformService.updatePlatform(platformDoc, { disconnectedAt: null });
         return res.status(httpStatus.CREATED).send(platform);
     }
 
-    platformDoc = await platformService.getPlatformByFilter({ community: { $in: req.user.communities }, disconnectedAt: null, name: req.body.name });
-    if (platformDoc) {
-        throw new ApiError(httpStatus.BAD_REQUEST, `Only can connect one ${req.body.name} platform`);
-    }
 
     platformDoc = await platformService.getPlatformByFilter({ 'metadata.id': req.body.metadata.id });
     if (platformDoc) {
