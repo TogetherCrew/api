@@ -20,12 +20,21 @@ const getCommunities = catchAsync(async function (req: IAuthRequest, res: Respon
             $options: 'i'
         };
     }
-    options.populate = 'platforms';
+    options.populate = {
+        path: 'platforms',
+        select: '_id name metadata disconnectedAt'
+    };
+
+
     const result = await communityService.queryCommunities({ ...filter, users: req.user.id }, options);
     res.send(result);
 });
 const getCommunity = catchAsync(async function (req: IAuthRequest, res: Response) {
     const community = await communityService.getCommunityByFilter({ _id: req.params.communityId, users: req.user.id });
+    await community?.populate({
+        path: 'platforms',
+        select: '_id name metadata disconnectedAt'
+    });
     if (!community) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Community not found');
     }
