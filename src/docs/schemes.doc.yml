@@ -86,9 +86,6 @@ components:
           format: date-time
           nullable: true
           description: Date and time when the platform was disconnected.
-        isInProgress:
-          type: boolean
-          default: true
 
     # ********Token********
     Token:

@@ -14,10 +14,22 @@ const createPlatform = catchAsync(async function (req: IAuthRequest, res: Respon
     if (!communityDoc) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Community not found');
     }
-    const platformDoc = await platformService.getPlatformByFilter({ community: { $in: req.user.communities }, disconnectedAt: null, name: req.body.name });
+    let platformDoc = await platformService.getPlatformByFilter({ community: { $in: req.user.communities }, 'metadata.id': req.body.metadata.id, disconnectedAt: { $ne: null } });
+    if (platformDoc) {
+        const platform = await platformService.updatePlatform(platformDoc, { disconnectedAt: null });
+        return res.status(httpStatus.CREATED).send(platform);
+    }
+
+    platformDoc = await platformService.getPlatformByFilter({ community: { $in: req.user.communities }, disconnectedAt: null, name: req.body.name });
     if (platformDoc) {
         throw new ApiError(httpStatus.BAD_REQUEST, `Only can connect one ${req.body.name} platform`);
     }
+
+    platformDoc = await platformService.getPlatformByFilter({ 'metadata.id': req.body.metadata.id });
+    if (platformDoc) {
+        throw new ApiError(httpStatus.BAD_REQUEST, `${req.body.name} is already connected to another community`);
+    }
+
     const platform = await platformService.createPlatform(req.body);
     await communityService.addPlatformToCommunityById(platform.community, platform.id);
     res.status(httpStatus.CREATED).send(platform);
@@ -129,7 +141,11 @@ const getPlatform = catchAsync(async function (req: IAuthRequest, res: Response)
     res.send(platform);
 });
 const updatePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
-    const platform = await platformService.updatePlatform(req.platform, req.body);
+    if (req.platform.name === 'discord' && req.platform.metadata?.isInProgress && (req.body.metadata.selectedChannels || req.body.metadata.period)) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Updating channels or date period is not allowed during server analysis.');
+
+    }
+    const platform = await platformService.updatePlatform(req.platform, req.body, req.user.discordId);
     res.send(platform);
 });
 const deletePlatform = catchAsync(async function (req: IAuthRequest, res: Response) {

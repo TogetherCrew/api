@@ -3,7 +3,6 @@ import Joi from "joi";
 const getGuilds = {
     query: Joi.object().keys({
         isDisconnected: Joi.boolean(),
-        isInProgress: Joi.boolean(),
         sortBy: Joi.string(),
         limit: Joi.number().integer(),
         page: Joi.number().integer(),

@@ -94,6 +94,7 @@ const updatePlatform = async (platform: HydratedDocument<IPlatform>, updateBody:
             useFallback: true
         })
     }
+
     Object.assign(platform, updateBody);
     return await platform.save();
 };

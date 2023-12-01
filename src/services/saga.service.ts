@@ -1,10 +1,11 @@
+import { Types } from 'mongoose';
 import { ChoreographyDict, MBConnection, Status } from "@togethercrew.dev/tc-messagebroker"
 import { Snowflake } from "discord.js"
 
-async function createAndStartGuildSaga(guildId: Snowflake, other: { created: boolean, discordId: Snowflake, message: string, useFallback: boolean }) {
+async function createAndStartGuildSaga(platformId: Types.ObjectId, other: { created: boolean, discordId: Snowflake, message: string, useFallback: boolean }) {
     const saga = await MBConnection.models.Saga.create({
         status: Status.NOT_STARTED,
-        data: { guildId, ...other },
+        data: { platformId, ...other },
         choreography: ChoreographyDict.DISCORD_UPDATE_CHANNELS
     })
 
@@ -12,10 +13,10 @@ async function createAndStartGuildSaga(guildId: Snowflake, other: { created: boo
     await saga.start(() => { })
 }
 
-async function createAndStartFetchMemberSaga(guildId: Snowflake) {
+async function createAndStartFetchMemberSaga(platformId: Types.ObjectId) {
     const saga = await MBConnection.models.Saga.create({
         status: Status.NOT_STARTED,
-        data: { guildId },
+        data: { platformId },
         choreography: ChoreographyDict.DISCORD_FETCH_MEMBERS
     })
 
@@ -23,7 +24,7 @@ async function createAndStartFetchMemberSaga(guildId: Snowflake) {
     await saga.start(() => { })
 }
 
-async function createAndStartRefreshTwitterSaga(twitter_username:string, other: { discordId: Snowflake, guildId: string, message: string }) {
+async function createAndStartRefreshTwitterSaga(twitter_username: string, other: { discordId: Snowflake, guildId: string, message: string }) {
     const saga = await MBConnection.models.Saga.create({
         status: Status.NOT_STARTED,
         data: { twitter_username, ...other },

@@ -67,7 +67,6 @@ describe('Platform routes', () => {
                 metadata: newPlatform.metadata,
                 community: communityOne._id.toHexString(),
                 disconnectedAt: null,
-                isInProgress: true,
                 connectedAt: expect.anything()
             });
 
@@ -75,7 +74,7 @@ describe('Platform routes', () => {
             const dbPlatform = await Platform.findById(res.body.id);
             expect(dbPlatform).toBeDefined();
             expect(dbPlatform).toMatchObject({
-                name: newPlatform.name, metadata: newPlatform.metadata, isInProgress: true
+                name: newPlatform.name, metadata: newPlatform.metadata
 
             });
 
@@ -106,7 +105,6 @@ describe('Platform routes', () => {
                 metadata: platformOne.metadata,
                 community: communityOne._id.toHexString(),
                 disconnectedAt: null,
-                isInProgress: true,
                 connectedAt: expect.anything()
             });
 
@@ -225,7 +223,6 @@ describe('Platform routes', () => {
                 name: platformTwo.name,
                 metadata: platformTwo.metadata,
                 community: communityOne._id.toHexString(),
-                isInProgress: true
             });
 
             expect(res.body.results[1]).toMatchObject({
@@ -233,7 +230,6 @@ describe('Platform routes', () => {
                 name: platformOne.name,
                 metadata: platformOne.metadata,
                 community: communityOne._id.toHexString(),
-                isInProgress: true
             });
         });
 
@@ -385,7 +381,6 @@ describe('Platform routes', () => {
                 metadata: platformOne.metadata,
                 community: communityOne._id.toHexString(),
                 disconnectedAt: null,
-                isInProgress: true,
                 connectedAt: expect.anything()
             });
         });
@@ -467,7 +462,6 @@ describe('Platform routes', () => {
                 },
                 community: communityOne._id.toHexString(),
                 disconnectedAt: null,
-                isInProgress: true,
                 connectedAt: expect.anything(),
 
             });
@@ -483,7 +477,6 @@ describe('Platform routes', () => {
                     analyzerStartedAt: expect.anything()
 
                 },
-                isInProgress: true
             });
         });
 
@@ -570,6 +563,32 @@ describe('Platform routes', () => {
                 .expect(httpStatus.BAD_REQUEST);
         });
 
+        test('should return 400 error if isInprogress is true and user trys to update selectedChannel', async () => {
+            await insertCommunities([communityOne, communityTwo]);
+            await insertUsers([userOne]);
+            if (platformOne.metadata) platformOne.metadata.isInProgress = true;
+            await insertPlatforms([platformOne]);
+            if (platformOne.metadata) platformOne.metadata.isInProgress = false;
+            await request(app)
+                .patch(`/api/v1/platforms/${platformOne._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send(updateBody)
+                .expect(httpStatus.BAD_REQUEST);
+        });
+
+        test('should return 400 error if isInprogress is true and user trys to update period', async () => {
+            await insertCommunities([communityOne, communityTwo]);
+            await insertUsers([userOne]);
+            if (platformOne.metadata) platformOne.metadata.isInProgress = true;
+            await insertPlatforms([platformOne]);
+            if (platformOne.metadata) platformOne.metadata.isInProgress = false;
+            await request(app)
+                .patch(`/api/v1/platforms/${platformOne._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send(updateBody)
+                .expect(httpStatus.BAD_REQUEST);
+
+        });
 
 
     });
