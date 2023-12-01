@@ -20,6 +20,7 @@ const getCommunities = catchAsync(async function (req: IAuthRequest, res: Respon
             $options: 'i'
         };
     }
+    options.populate = 'platforms';
     const result = await communityService.queryCommunities({ ...filter, users: req.user.id }, options);
     res.send(result);
 });
