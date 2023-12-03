@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import { Client, GatewayIntentBits, Snowflake, Guild } from 'discord.js';
 import config from '../../config';
 import { DatabaseManager } from '@togethercrew.dev/db';
 import { ApiError, pick, sort } from '../../utils';
@@ -51,6 +52,34 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
 
     }
 
+}
+
+/**
+ * get guild from discord js
+ * @param {Snowflake} guildId
+ * @returns {Promise<IDiscordOAuth2EchangeCode>}
+ */
+async function getGuildFromDiscordJS(guildId: Snowflake): Promise<Guild | null> {
+    const client = await DiscordBotManager.getClient();
+    try {
+        return await client.guilds.fetch(guildId);
+
+    } catch (error) {
+        logger.error({ error }, 'Failed to get guild from discordJS');
+        return null;
+    }
+}
+
+/**
+ * leave bot from guild 
+ * @param {Snowflake} guildId
+ * @returns {Promise<IDiscordOAuth2EchangeCode>}
+ */
+async function leaveBotFromGuild(guildId: Snowflake) {
+    const guild = await getGuildFromDiscordJS(guildId);
+    if (guild) {
+        guild.leave();
+    }
 }
 
 
@@ -134,8 +163,25 @@ async function getBotFromDiscordAPI(): Promise<IDiscordUser> {
     }
 }
 
+class DiscordBotManager {
+    private static client: Client;
+    public static async getClient(): Promise<Client> {
+        if (!DiscordBotManager.client) {
+            DiscordBotManager.client = new Client({
+                intents: [
+                    GatewayIntentBits.Guilds,
+                    GatewayIntentBits.GuildMembers,
+                    GatewayIntentBits.GuildMessages,
+                    GatewayIntentBits.GuildPresences,
+                    GatewayIntentBits.DirectMessages,
+                ],
+            });
+            await DiscordBotManager.client.login(config.discord.botToken);
 
-
+        }
+        return DiscordBotManager.client;
+    }
+}
 
 
 
@@ -143,5 +189,7 @@ export default {
     exchangeCode,
     getUserFromDiscordAPI,
     getBotFromDiscordAPI,
-    getPropertyHandler
+    getPropertyHandler,
+    leaveBotFromGuild,
+    DiscordBotManager
 }

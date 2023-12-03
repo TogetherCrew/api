@@ -19,7 +19,7 @@ router.post('/:platformId/properties', auth(), platform(), validate(platformVali
 router.route('/:platformId')
     .get(auth(), validate(platformValidation.getPlatform), platformController.getPlatform)
     .patch(auth(), platform(), validate(platformValidation.dynamicUpdatePlatform), platformController.updatePlatform)
-    .delete(auth(), validate(platformValidation.deletePlatform), platformController.deletePlatform);
+    .delete(auth(), platform(), validate(platformValidation.deletePlatform), platformController.deletePlatform);
 
 
 

@@ -150,14 +150,14 @@ const updatePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Re
     const platform = await platformService.updatePlatform(req.platform, req.body, req.user.discordId);
     res.send(platform);
 });
-const deletePlatform = catchAsync(async function (req: IAuthRequest, res: Response) {
+const deletePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
     if (req.body.deleteType === "soft") {
-        await platformService.updatePlatformByFilter({ _id: req.params.platformId, community: { $in: req.user.communities } }, { disconnectedAt: new Date() });
+        await platformService.updatePlatform(req.platform, { disconnectedAt: new Date() });
     }
     else if (req.body.deleteType === "hard") {
-        await platformService.deletePlatformByFilter({ _id: req.params.platformId, community: { $in: req.user.communities } });
+        await platformService.deletePlatform(req.platform);
+        await discordServices.coreService.leaveBotFromGuild(req.platform.metadata?.id)
     }
-
     res.status(httpStatus.NO_CONTENT).send();
 });
 

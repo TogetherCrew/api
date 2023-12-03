@@ -100,17 +100,25 @@ const updatePlatform = async (platform: HydratedDocument<IPlatform>, updateBody:
 };
 
 /**
+ * Delete Platform
+ * @param {HydratedDocument<IPlatform>} platform - platform doc
+ * @returns {Promise<HydratedDocument<IPlatform>>}
+ */
+const deletePlatform = async (platform: HydratedDocument<IPlatform>): Promise<HydratedDocument<IPlatform>> => {
+    return await platform.remove();
+};
+
+/**
  * Delete Platform by filter
  * @param {Object} filter - Mongo filter
  * @returns {Promise<HydratedDocument<IPlatform>>}
  */
-const deletePlatformByFilter = async (filter: object,): Promise<HydratedDocument<IPlatform>> => {
+const deletePlatformByFilter = async (filter: object): Promise<HydratedDocument<IPlatform>> => {
     const platform = await getPlatformByFilter(filter);
     if (!platform) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Platform not found');
     }
-    await platform.remove();
-    return platform;
+    return await platform.remove();
 };
 
 export default {
@@ -118,7 +126,8 @@ export default {
     getPlatformById,
     getPlatformByFilter,
     queryPlatforms,
+    updatePlatform,
     updatePlatformByFilter,
+    deletePlatform,
     deletePlatformByFilter,
-    updatePlatform
 };
