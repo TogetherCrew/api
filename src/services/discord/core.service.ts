@@ -164,7 +164,7 @@ async function getBotFromDiscordAPI(): Promise<IDiscordUser> {
 }
 
 class DiscordBotManager {
-    private static client: Client;
+    public static client: Client;
     public static async getClient(): Promise<Client> {
         if (!DiscordBotManager.client) {
             DiscordBotManager.client = new Client({
