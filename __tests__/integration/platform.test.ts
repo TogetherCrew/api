@@ -9,6 +9,7 @@ import { communityOne, communityTwo, communityThree, insertCommunities } from '.
 import { platformOne, platformTwo, platformThree, platformFour, platformFive, insertPlatforms, } from '../fixtures/platform.fixture';
 import { discordRole1, discordRole2, discordRole3, discordRole4, insertRoles } from '../fixtures/discord/roles.fixture';
 import { discordChannel1, discordChannel2, discordChannel3, discordChannel4, discordChannel5, insertChannels } from '../fixtures/discord/channels.fixture';
+import { discordServices } from '../../src/services';
 
 setupTestDB();
 
@@ -593,6 +594,7 @@ describe('Platform routes', () => {
 
     });
     describe('DELETE /api/v1/platforms/:platformId', () => {
+        discordServices.coreService.leaveBotFromGuild = jest.fn().mockReturnValue(null);
         test('should return 204 and soft delete the platform is deleteType is soft', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
             await insertUsers([userOne, userTwo]);
