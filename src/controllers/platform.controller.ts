@@ -16,12 +16,12 @@ const createPlatform = catchAsync(async function (req: IAuthRequest, res: Respon
     }
 
     // let platformDoc = await platformService.getPlatformByFilter({ community: { $in: req.user.communities }, disconnectedAt: null, name: req.body.name });
-    let platformDoc = await platformService.getPlatformByFilter({ community: req.body.community, disconnectedAt: null, name: req.body.name });
+    let platformDoc = await platformService.getPlatformByFilter({ community: communityDoc.id, disconnectedAt: null, name: req.body.name });
     if (platformDoc) {
         throw new ApiError(httpStatus.BAD_REQUEST, `Only can connect one ${req.body.name} platform`);
     }
 
-    platformDoc = await platformService.getPlatformByFilter({ community: req.body.community, 'metadata.id': req.body.metadata.id, disconnectedAt: { $ne: null } });
+    platformDoc = await platformService.getPlatformByFilter({ community: communityDoc.id, 'metadata.id': req.body.metadata.id, disconnectedAt: { $ne: null } });
     if (platformDoc) {
         const platform = await platformService.updatePlatform(platformDoc, { disconnectedAt: null });
         return res.status(httpStatus.CREATED).send(platform);
