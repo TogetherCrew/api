@@ -4,7 +4,8 @@ import config from '../../config';
 import { discord } from '../../config/oAtuh2';
 import guildMemberService from './guildMember.service';
 import parentLogger from '../../config/logger';
-
+import coreService from '../discord/core.service';
+import { Snowflake } from 'discord.js';
 const logger = parentLogger.child({ module: 'ChannelService' });
 
 /**
@@ -44,27 +45,57 @@ async function getChannels(connection: Connection, filter: object): Promise<ICha
  * @param {IChannel} channel - channel filed.
  * @returns {Promise<boolean>} - A promise that resolves to an boolean.
  */
-async function checkReadMessageHistoryAndViewChannelpPermissions(connection: Connection, channel: IChannel): Promise<boolean> {
+async function checkBotChannelAccess(guildId: Snowflake, channel: IChannel): Promise<boolean> {
     try {
-        let canReadMessageHistoryAndViewChannel = true;
-        const botMember = await guildMemberService.getGuildMember(connection, { discordId: config.discord.clientId });
-        if (botMember && botMember.permissions) {
-            canReadMessageHistoryAndViewChannel = ((BigInt(botMember?.permissions) & BigInt(discord.permissions.readMessageHistory)) !== BigInt(0)) && ((BigInt(botMember?.permissions) & BigInt(discord.permissions.ViewChannels)) !== BigInt(0))
-        }
-        channel.permissionOverwrites?.forEach(overwrite => {
-            if (overwrite.id === config.discord.clientId && overwrite.type === 1) {
-                const allowed = BigInt(overwrite.allow);
-                const denied = BigInt(overwrite.deny);
-                canReadMessageHistoryAndViewChannel = ((allowed & BigInt(discord.permissions.readMessageHistory)) !== BigInt(0) && (denied & BigInt(discord.permissions.readMessageHistory)) === BigInt(0)) && ((allowed & BigInt(discord.permissions.ViewChannels)) !== BigInt(0) && (denied & BigInt(discord.permissions.ViewChannels)) === BigInt(0))
-            }
-        })
-        return canReadMessageHistoryAndViewChannel;
+        const client = await coreService.DiscordBotManager.getClient();
+        const guild = await client.guilds.fetch(guildId);
+        const botMember = await guild.members.fetch(config.discord.clientId);
 
+        if (!channel || !botMember) {
+            return false;
+        }
+
+        // Permission constants
+        const readMessageHistoryPermission = BigInt(65536); // 0x10000
+        const viewChannelPermission = BigInt(1024); // 0x400
+
+        // Check if bot has global permissions
+        const botGlobalPermissions = BigInt(botMember.permissions.bitfield);
+        if (!(botGlobalPermissions & readMessageHistoryPermission) || !(botGlobalPermissions & viewChannelPermission)) {
+            return false;
+        }
+
+        // Check permission overwrites
+        let hasAccess = true;
+        const evaluateOverwrites = (overwrite: any) => {
+            const allowed = BigInt(overwrite.allow);
+            const denied = BigInt(overwrite.deny);
+
+            if ((denied & readMessageHistoryPermission) || (denied & viewChannelPermission)) {
+                hasAccess = false;
+            } else if ((allowed & readMessageHistoryPermission) && (allowed & viewChannelPermission)) {
+                hasAccess = true;
+            }
+        };
+
+        channel.permissionOverwrites?.forEach(overwrite => {
+            if (overwrite.type === 0 && botMember.roles.cache.has(overwrite.id)) { // Role specific overwrites
+                evaluateOverwrites(overwrite);
+            }
+        });
+
+        // User-specific overwrite for the bot
+        const botSpecificOverwrite = channel.permissionOverwrites?.find(overwrite => overwrite.id === botMember.id && overwrite.type === 1);
+        if (botSpecificOverwrite) {
+            evaluateOverwrites(botSpecificOverwrite);
+        }
+        return hasAccess;
     } catch (error) {
-        logger.error({ database: connection.name, error }, 'Failed to checkReadMessageHistoryAndViewChannelpPermissions');
+        console.error('Failed to check bot channel access:', error);
         return false;
     }
 }
+
 
 /**
  * Query for platforms
@@ -83,6 +114,6 @@ export default {
     hasReadMessageHistory,
     getChannel,
     getChannels,
-    checkReadMessageHistoryAndViewChannelpPermissions,
+    checkBotChannelAccess,
     queryChannels
 }

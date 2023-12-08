@@ -40,7 +40,7 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const channels: any = await channelService.getChannels(connection, filter);
         for (let i = 0; i < channels.length; i++) {
-            const canReadMessageHistoryAndViewChannel = await channelService.checkReadMessageHistoryAndViewChannelpPermissions(connection, channels[i]);
+            const canReadMessageHistoryAndViewChannel = await channelService.checkBotChannelAccess(req.platform?.metadata?.id, channels[i]);
             channels[i] = {
                 channelId: channels[i].channelId,
                 name: channels[i].name,
