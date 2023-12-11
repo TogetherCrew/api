@@ -1,7 +1,7 @@
+import 'dotenv/config';
 import mongoose from "mongoose";
 import config from '../../config';
 import logger from '../../config/logger';
-import 'dotenv/config';
 import { DatabaseManager } from '@togethercrew.dev/db';
 
 const connectToMongoDB = async () => {
@@ -15,6 +15,7 @@ const connectToMongoDB = async () => {
 
 export const up = async () => {
     // Connect to MongoDB
+    console.log
     await connectToMongoDB();
     const connection = DatabaseManager.getInstance().getTenantDb("database");
     await connection.createCollection('my_collection');

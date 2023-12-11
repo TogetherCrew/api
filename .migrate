@@ -1,0 +1,9 @@
+{
+  "lastRun": "1702287534517-migrate-to-cc.ts",
+  "migrations": [
+    {
+      "title": "1702287534517-migrate-to-cc.ts",
+      "timestamp": 1702302181573
+    }
+  ]
+}
