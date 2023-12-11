@@ -9,7 +9,10 @@
     "postbuild": "npm run copy-files",
     "copy-files": "copyfiles -u 1 src/**/*.yml lib",
     "dev": "env-cmd -f ./src/config/dev.env nodemon ./src/index.ts",
-    "test": "env-cmd -f ./src/config/test.env jest --detectOpenHandles"
+    "test": "env-cmd -f ./src/config/test.env jest --detectOpenHandles",
+    "migrate:create": "migrate create --template-file ./src/migrations/utils/template.ts --migrations-dir=\"./src/migrations/db\"",
+    "migrate:up": "migrate --migrations-dir=\"./lib/migrations/db\" up",
+    "migrate:down": "migrate --migrations-dir=\"./lib/migrations/db\" down"
   },
   "author": "",
   "license": "ISC",
@@ -35,6 +38,7 @@
     "http-status": "^1.6.2",
     "joi": "^17.7.0",
     "jsonwebtoken": "^9.0.0",
+    "migrate": "^2.0.1",
     "moment": "^2.29.4",
     "moment-timezone": "^0.5.40",
     "mongodb": "^4.12.1",
