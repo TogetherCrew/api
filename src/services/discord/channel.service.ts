@@ -91,7 +91,7 @@ async function checkBotChannelAccess(guildId: Snowflake, channel: IChannel): Pro
         }
         return hasAccess;
     } catch (error) {
-        console.error('Failed to check bot channel access:', error);
+        logger.error({ error }, 'Failed to check bot channel access');
         return false;
     }
 }

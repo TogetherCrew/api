@@ -10,7 +10,7 @@ import { platformOne, platformTwo, platformThree, platformFour, platformFive, in
 import { discordRole1, discordRole2, discordRole3, discordRole4, insertRoles } from '../fixtures/discord/roles.fixture';
 import { discordChannel1, discordChannel2, discordChannel3, discordChannel4, discordChannel5, insertChannels } from '../fixtures/discord/channels.fixture';
 import { discordServices } from '../../src/services';
-
+import { analyzerAction, analyzerWindow } from '../../src/config/analyzer.statics';
 setupTestDB();
 
 describe('Platform routes', () => {
@@ -65,7 +65,7 @@ describe('Platform routes', () => {
             expect(res.body).toEqual({
                 id: expect.anything(),
                 name: newPlatform.name,
-                metadata: newPlatform.metadata,
+                metadata: { ...newPlatform.metadata, action: analyzerAction, window: analyzerWindow },
                 community: communityOne._id.toHexString(),
                 disconnectedAt: null,
                 connectedAt: expect.anything()
@@ -887,7 +887,7 @@ describe('Platform routes', () => {
                     channelId: "345678901234567890",
                     name: "Channel 3",
                     parentId: "987654321098765432",
-                    canReadMessageHistoryAndViewChannel: true
+                    canReadMessageHistoryAndViewChannel: false
                 }]
             });
             expect(res.body[1]).toMatchObject({
@@ -897,7 +897,7 @@ describe('Platform routes', () => {
                     channelId: "345678901234567000",
                     name: "Channel 4",
                     parentId: "345678901234567000",
-                    canReadMessageHistoryAndViewChannel: true
+                    canReadMessageHistoryAndViewChannel: false
                 }]
             });
         });
@@ -933,7 +933,7 @@ describe('Platform routes', () => {
                     channelId: "345678901234567890",
                     name: "Channel 3",
                     parentId: "987654321098765432",
-                    canReadMessageHistoryAndViewChannel: true
+                    canReadMessageHistoryAndViewChannel: false
                 }]
             });
         });

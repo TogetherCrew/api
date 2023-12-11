@@ -4,6 +4,7 @@ import { Platform, IPlatform } from '@togethercrew.dev/db';
 import ApiError from '../utils/ApiError';
 import sagaService from './saga.service';
 import { Snowflake } from 'discord.js';
+import { analyzerAction, analyzerWindow } from '../config/analyzer.statics';
 
 /**
  * Create a platform
@@ -11,8 +12,17 @@ import { Snowflake } from 'discord.js';
  * @returns {Promise<HydratedDocument<IPlatform>>}
  */
 const createPlatform = async (PlatformBody: IPlatform): Promise<HydratedDocument<IPlatform>> => {
+    if (PlatformBody.name === 'discord') {
+        if (PlatformBody.metadata) {
+            PlatformBody.metadata = {
+                action: analyzerAction,
+                window: analyzerWindow,
+                ...PlatformBody.metadata
+            };
+        }
+    }
     const platform = await Platform.create(PlatformBody);
-    if (platform.name === 'discord') {
+    if (PlatformBody.name === 'discord') {
         await sagaService.createAndStartFetchMemberSaga(platform._id)
     }
     return platform;
