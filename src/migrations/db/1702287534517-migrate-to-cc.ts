@@ -2,9 +2,11 @@ import 'dotenv/config';
 import mongoose from "mongoose";
 import config from '../../config';
 import logger from '../../config/logger';
-import { IUser, User } from '@togethercrew.dev/db'
+import { IUser, ICommunity, User, Community, Platform } from '@togethercrew.dev/db'
 import { DatabaseManager } from '@togethercrew.dev/db';
-import { IOldUser, IGuild, oldUserSchema, guildSchema } from '../utils/oldSchemas'
+import { IOldUser, IGuild, oldUserSchema, guildSchema } from '../utils/oldSchemas';
+import { analyzerAction, analyzerWindow } from '../../config/analyzer.statics';
+
 
 const connectToMongoDB = async () => {
     try {
@@ -36,12 +38,72 @@ export const up = async () => {
         newUsers.push({
             discordId: oldUsers[i].discordId,
             communities: [],
-            tcaAt: oldUsers[i].createAt
+            tcaAt: oldUsers[i].createdAt
         })
     }
-    await User.create(newUsers)
+    const usersDoc = await User.create(newUsers);
+
+
+
+    const guilds = await connection.models.Guild.find({});
+    const communities: ICommunity[] = [];
+    for (let i = 0; i < guilds.length; i++) {
+        communities.push({
+            name: guilds[i].name,
+            users: [],
+            platforms: [],
+            tcaAt: guilds[i].connectedAt,
+        })
+    }
+
+    await Community.create(communities)
+
+    for (let i = 0; i < guilds.length; i++) {
+        const communityDoc = await Community.findOne({ tcaAt: guilds[i].connectedAt, name: guilds[i].name })
+        if (communityDoc) {
+            const platform = await Platform.create({
+                name: 'discord',
+                community: communityDoc._id,
+                disconnectedAt: guilds[i].isDisconnected ? new Date : null,
+                metadata: {
+                    action: analyzerAction,
+                    window: analyzerWindow,
+                    id: guilds[i].guildId,
+                    isInProgress: false,
+                    period: guilds[i].period,
+                    icon: guilds[i].icon === null ? "" : guilds[i].icon,
+                    selectedChannels: guilds[i].selectedChannels.map((selectedChannel: any) => selectedChannel.channelId)
+                },
+                connectedAt: guilds[i].connectedAt
+            })
+            communityDoc.platforms?.push(platform._id);
+            await communityDoc.save()
+
+        }
+
+    }
+
+
+    for (let i = 0; i < usersDoc.length; i++) {
+        const guild = guilds.find(guild => guild.user === usersDoc[i].discordId);
+        if (guild) {
+            const communityDoc = await Community.findOne({ tcaAt: guild.connectedAt, name: guild.name });
+            if (communityDoc) {
+                usersDoc[i].communities?.push(communityDoc?._id);
+                await usersDoc[i].save();
+                communityDoc.users.push(usersDoc[i]._id);
+                await communityDoc.save()
+            }
+        }
+    }
+
+
 };
 
 export const down = async () => {
-    // Do something   
+    await connectToMongoDB();
+    await User.deleteMany()
+    await Community.deleteMany()
+    await Platform.deleteMany()
+
 };
