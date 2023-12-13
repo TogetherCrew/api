@@ -16,7 +16,6 @@ const connectToRabbitMQ = async () => {
     }
 };
 
-
 // Connect to Message Broker DB
 const connectToMB = async () => {
     try {
