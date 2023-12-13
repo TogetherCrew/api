@@ -30,8 +30,6 @@ export const up = async () => {
     connection.model<IOldUser>('User', oldUserSchema);
     connection.model<IGuild>('Guild', guildSchema);
 
-
-
     const oldUsers = await connection.models.User.find({});
     const newUsers: IUser[] = [];
     for (let i = 0; i < oldUsers.length; i++) {
@@ -72,7 +70,8 @@ export const up = async () => {
                     isInProgress: false,
                     period: guilds[i].period,
                     icon: guilds[i].icon === null ? "" : guilds[i].icon,
-                    selectedChannels: guilds[i].selectedChannels.map((selectedChannel: any) => selectedChannel.channelId)
+                    selectedChannels: guilds[i].selectedChannels.map((selectedChannel: any) => selectedChannel.channelId),
+                    name: guilds[i].name
                 },
                 connectedAt: guilds[i].connectedAt
             })
