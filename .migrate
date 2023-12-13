@@ -3,7 +3,7 @@
   "migrations": [
     {
       "title": "1702287534517-migrate-to-cc.ts",
-      "timestamp": 1702392175842
+      "timestamp": 1702475464508
     }
   ]
 }
