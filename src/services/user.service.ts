@@ -1,155 +1,108 @@
-import fetch from 'node-fetch';
-import { Snowflake } from 'discord.js';
-import config from '../config';
-import { IDiscordUser, IUser, User } from '@togethercrew.dev/db';
-import { ApiError } from '../utils';
-import httpStatus = require('http-status');
-import parentLogger from '../config/logger';
-import { IUserUpdateBody } from '@togethercrew.dev/db';
-import { ITwitterUser } from 'src/interfaces/twitter.interface';
-
-const logger = parentLogger.child({ module: 'UserService' });
+import { HydratedDocument, Types } from 'mongoose';
+import httpStatus from 'http-status';
+import { User, IUser } from '@togethercrew.dev/db';
+import ApiError from '../utils/ApiError';
 
 /**
- * Create user base on discord profile
- * @param {IDiscordUser} data
- * @returns {Promise<IUser>}
+ * Create a user
+ * @param {IUser} userBody
+ * @returns {Promise<HydratedDocument<IUser>>}
  */
-async function createUser(data: IDiscordUser): Promise<IUser> {
-    return User.create({
-        discordId: data.id,
-        ...data
-    });
-}
-
-/**
- * get user data from discord api by access token
- * @param {String} accessToken
- * @returns {Promise<IDiscordUser>}
- */
-async function getUserFromDiscordAPI(accessToken: string): Promise<IDiscordUser> {
-    try {
-        const response = await fetch('https://discord.com/api/users/@me', {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${accessToken}` }
-        });
-        if (response.ok) {
-            return await response.json();
-        }
-        else {
-            throw new Error();
-        }
-    } catch (error) {
-        logger.error({ accessToken, error }, 'Failed to get user from Discord API');
-        throw new ApiError(590, 'Can not fetch from discord API');
-    }
-}
-
-/**
- * get user data from discord api by access token
- * @param {String} accessToken
- * @returns {Promise<IDiscordUser>}
- */
-async function getBotFromDiscordAPI(): Promise<IDiscordUser> {
-    try {
-        const response = await fetch('https://discord.com/api/users/@me', {
-            method: 'GET',
-            headers: { 'Authorization': `Bot ${config.discord.botToken}` }
-        });
-        if (response.ok) {
-            return await response.json();
-        }
-        else {
-            throw new Error();
-        }
-    } catch (error) {
-        logger.error({ bot_token: config.discord.botToken, error }, 'Failed to get bot from Discord API');
-        throw new ApiError(590, 'Can not fetch from discord API');
-    }
-}
-
-/**
- * Get user by discordId
- * @param {Snowflake} discordId
- * @returns {Promise<IUser | null>}
- */
-async function getUserByDiscordId(discordId: Snowflake): Promise<IUser | null> {
-    const user = await User.findOne({ discordId });
-    return user;
-}
-
-/**
- * Get user guilds
- * @param {String} accessToken
- * @returns {Promise<Array<IDiscordGuild>>}
- */
-async function getCurrentUserGuilds(accessToken: string) {
-    try {
-        const response = await fetch('https://discord.com/api/users/@me/guilds', {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${accessToken}` }
-        });
-        if (response.ok) {
-            return await response.json();
-        }
-        else {
-            throw new Error();
-        }
-    } catch (error) {
-        logger.error({ bot_token: config.discord.botToken, error }, 'Failed to get user\'s guilds from disocrd API');
-        throw new ApiError(590, 'Can not fetch from discord API');
-    }
-}
+const createUser = async (userBody: IUser): Promise<HydratedDocument<IUser>> => {
+    return User.create(userBody);
+};
 
 
 /**
- * update user by discordId
- * @param {Snowflake} discordId
- * @param {IGuildUpdateBody} updateBody
- * @returns {Promise<IGuild>}
+ * Query for users
+ * @param {Object} filter - Mongo filter
+ * @param {Object} options - Query options
+ * @param {string} [options.sortBy] - Sort option in the format: sortField:(desc|asc)
+ * @param {number} [options.limit] - Maximum number of results per page (default = 10)
+ * @param {number} [options.page] - Current page (default = 1)
  */
-async function updateUserByDiscordId(discordId: Snowflake, updateBody: IUserUpdateBody) {
-    const user = await User.findOne({ discordId });
+const queryUsers = async (filter: object, options: object) => {
+    return User.paginate(filter, options);
+};
+
+/**
+ * Get user by filter
+ * @param {Object} filter - Mongo filter
+ * @returns {Promise<HydratedDocument<IUser> | null>}
+ */
+const getUserByFilter = async (filter: object): Promise<HydratedDocument<IUser> | null> => {
+    return User.findOne(filter);
+};
+
+/**
+ * Get user by id
+ * @param {Types.ObjectId} id
+ * @returns {Promise<HydratedDocument<IUser> | null>}
+ */
+const getUserById = async (id: Types.ObjectId): Promise<HydratedDocument<IUser> | null> => {
+    return User.findById(id);
+};
+
+/**
+ * Update user by id
+ * @param {Types.ObjectId} userId
+ * @param {Partial<IUser>} updateBody
+ * @returns {Promise<HydratedDocument<IUser>>}
+ */
+const updateUserById = async (userId: Types.ObjectId, updateBody: Partial<IUser>): Promise<HydratedDocument<IUser>> => {
+    const user = await getUserById(userId);
     if (!user) {
         throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
-    }
-    if (updateBody.email && (await User.findOne({ email: updateBody.email, discordId: { $ne: discordId } }))) {
-        throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
     }
     Object.assign(user, updateBody);
     await user.save();
     return user;
-}
+};
 
 /**
- * get user data from twitter api by access token
- * @param {String} accessToken
- * @returns {Promise<ITwitterUser>}
+ * Delete user by id
+ * @param {Types.ObjectId} userId
+ * @returns {Promise<HydratedDocument<IUser>>}
  */
-async function getUserFromTwitterAPI(accessToken: string): Promise<ITwitterUser> {
-    try {
-        const response = await fetch('https://api.twitter.com/2/users/me?user.fields=profile_image_url,name,id', {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${accessToken}` }
-        });
-        if (response.ok) {
-            return (await response.json()).data;
-        }
-        else {
-            throw new Error();
-        }
-    } catch (error) {
-        logger.error({ accessToken, error }, 'Failed to get user from twitter API');
-        throw new ApiError(590, 'Can not fetch from twitter API');
+const deleteUserById = async (userId: Types.ObjectId): Promise<HydratedDocument<IUser>> => {
+    const user = await getUserById(userId);
+    if (!user) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
     }
-}
+    await user.remove();
+    return user;
+};
+
+/**
+ * Add a community to a user by user ID.
+ * @param {Types.ObjectId} userId
+ * @param {Types.ObjectId} communityId
+ * @returns {Promise<IUser | null>}
+ */
+const addCommunityToUserById = async (
+    userId: Types.ObjectId,
+    communityId: Types.ObjectId
+): Promise<IUser | null> => {
+
+    const user = await User.findByIdAndUpdate(
+        userId,
+        { $addToSet: { communities: communityId } },
+        { new: true }
+    );
+
+    if (!user) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+    }
+
+    return user;
+};
 
 export default {
     createUser,
-    getUserFromDiscordAPI,
-    getBotFromDiscordAPI,
-    getUserByDiscordId,
-    getCurrentUserGuilds,
-    updateUserByDiscordId,
-    getUserFromTwitterAPI
-}
+    getUserById,
+    queryUsers,
+    getUserByFilter,
+    updateUserById,
+    deleteUserById,
+    addCommunityToUserById
+};

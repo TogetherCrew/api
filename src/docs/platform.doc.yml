@@ -1,0 +1,343 @@
+paths:
+  /api/v1/platforms/connect/{platform}:
+    get:
+      tags:
+        - Platform
+      summary: Connect to a platform.
+      parameters:
+        - name: platform
+          in: path
+          required: true
+          description: The name of the platform to connect.
+          schema:
+            type: string
+            enum:
+              - twitter
+              - discord
+      responses:
+        "302":
+          description: Found (Redirect to Discord Or Twitter OAuth2 page)
+          $ref: "#/components/responses/Found"
+
+  /api/v1/platforms/:
+    post:
+      tags:
+        - Platform
+      summary: Create a new platform.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  enum:
+                    - twitter
+                    - discord
+                community:
+                  type: string
+                  format: objectId
+                metadata:
+                  type: object
+                  additionalProperties: true
+      responses:
+        "201":
+          description: Platform created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Platform"
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        
+    get:
+      tags:
+        - Platform
+      summary: Retrieve all platforms.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: name
+          schema:
+            type: string
+            enum:
+              - twitter
+              - discord
+        - in: query
+          name: community
+          schema:
+            type: string
+            format: objectId
+          description: 
+          required: true
+        - in: query
+          name: sortBy
+          schema:
+            type: string
+          description: sort by query in the form of field:desc/asc (ex. name:asc)
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            default: 10
+          description: Maximum number of communities
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Platform"
+                  page:
+                    type: integer
+                    example: 1
+                  limit:
+                    type: integer
+                    example: 10
+                  totalPages:
+                    type: integer
+                    example: 1
+                  totalResults:
+                    type: integer
+                    example: 1
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/v1/platforms/{platformId}:
+    get:
+      tags:
+        - Platform
+      summary: Retrieve details of a specific platform by its ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: platformId
+          in: path
+          required: true
+          description: The ID of the platform to retrieve.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Platform details retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Platform"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
+
+    patch:
+      tags:
+        - Platform
+      summary: Update a specific platform by its ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: platformId
+          in: path
+          required: true
+          description: The ID of the platform to update.
+          schema:
+            type: string
+            format: objectId
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                metadata:
+                  type: object
+                  additionalProperties: true
+              minProperties: 1
+      responses:
+        "200":
+          description: Platform updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Platform"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      tags:
+        - Platform
+      summary: Delete a specific platform by its ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: platformId
+          in: path
+          required: true
+          description: The ID of the platform to delete.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                deleteType:
+                  type: string
+                  required: true   
+                  enum: ['soft','hard']        
+                  example: soft 
+      responses:
+        "204":
+          description: Platform deleted successfully.
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
+
+  /api/v1/platforms/{platformId}/properties:
+    post:
+      tags:
+        - Platform
+      summary: Retrieve specific properties of a platform based on the platform ID and property type.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: platformId
+          in: path
+          required: true
+          description: The ID of the platform for which properties are to be retrieved.
+          schema:
+            type: string
+            format: objectId
+        - name: property
+          in: query
+          required: true
+          description: The type of property to retrieve (e.g., 'channel' or 'role' for Discord platform).
+          schema:
+            type: string
+            enum: ['channel','role']
+        - name: name
+          in: query
+          required: false
+          description: Name of the role (required if 'property' is 'role').
+          schema:
+            type: string
+        - name: sortBy
+          in: query
+          required: false
+          description: The parameter to sort by (required if 'property' is 'role').
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          description: Limit on the number of results (required if 'property' is 'role').
+          schema:
+            type: integer
+        - name: page
+          in: query
+          required: false
+          description: Page number for pagination (required if 'property' is 'role').
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                channelIds:
+                  type: array
+                  items:
+                    type: string
+                  description: Array of channel IDs (required if 'property' is 'channel').
+      responses:
+        "200":
+          description: Platformx properties retrieved successfully.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - schema:
+                  type: object
+                  properties:
+                    results:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/Role"
+                    page:
+                      type: integer
+                      example: 1
+                    limit:
+                      type: integer
+                      example: 10
+                    totalPages:
+                      type: integer
+                      example: 1
+                    totalResults:
+                      type: integer
+                      example: 1
+                - schema:
+                  type: array
+                  items: 
+                    type: object
+                    properties: 
+                      channelId: 
+                        type: string
+                        format: Snowflake
+                      title: 
+                        type: string
+                      subChannels: 
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            channelId: 
+                              type: Snowflake
+                            name: 
+                              type: string
+                            parentId: 
+                              type: Snowflake
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Not Found
+          $ref: "#/components/responses/NotFound"

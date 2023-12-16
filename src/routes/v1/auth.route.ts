@@ -1,17 +1,13 @@
 import express from "express";
 import { authController } from "../../controllers";
 import { authValidation } from '../../validations';
-import { validate, auth } from '../../middlewares';
+import { validate } from '../../middlewares';
 const router = express.Router();
 
 // Routes
-router.get('/try-now', authController.tryNow);
-router.get('/try-now/callback', authController.tryNowCallback);
-router.get('/login', authController.login);
-router.get('/login/callback', authController.loginCallback);
+router.get('/discord/authorize', authController.discordAuthorize);
+router.get('/discord/authorize/callback', authController.discordAuthorizeCallback);
 router.post('/logout', validate(authValidation.logout), authController.logout);
 router.post('/refresh-tokens', validate(authValidation.refreshTokens), authController.refreshTokens);
-router.get('/twitter/login/user/:discordId', authController.twitterLogin);
-router.get('/twitter/login/callback', authController.twitterLoginCallback);
 
 export default router;

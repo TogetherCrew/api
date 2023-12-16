@@ -1,124 +1,117 @@
 components:
-  # ********Schemes********
   schemas:
     # ********User********
     User:
-      description: See [Discord User Structure](https://discord.com/developers/docs/resources/user#user-object-user-structure) for more information
       type: object
+      description: Details about a user.
       properties:
         id:
           type: string
+          format: objectId 
         discordId:
           type: string
           format: Snowflake
+          description: The unique ID of the user on Discord.
         email:
           type: string
           format: email
-        verified:
-          type: boolean
-        avatar:
+          description: The email associated with the user.
+        communities:
+          type: array
+          items:
+            type: string
+            description: Mongoose ObjectId representing community IDs associated with the user.
+        tcaAt:
           type: string
-          format: Hash
-        twitterId:
-          type: string
-        twitterUsername:
-          type: string
-        twitterProfileImageUrl:
-          type: string
-        twitterConnectedAt:
-          type: string
-      required:
-        - discordId
-      example:
-        id: 5ebac534954b54139806c112
-        discordId: "681946187490000900"
-        email: "email@yahoo.com"
-        avatar: "947f3e19e6e36a2679c6fe854b79a615"
-        verified: true
+          format: date-time
+          description: term and condition accepted date 
 
-    # ********Guild********
-    Guild:
+    # ********Community********
+    Community:
       type: object
-      description: See [Discord Guild Structure](https://discord.com/developers/docs/resources/guild#guild-object-guild-structure) for more information
+      description: Details about a community.
       properties:
         id:
           type: string
-        guildId:
-          type: string
-          format: Snowflake
-        user: 
-          type: string
-          format: Snowflake
+          format: objectId 
         name:
           type: string
-        period:
+          description: Name of the community.
+        avatarURL:
           type: string
-          format: date-time   
+          description: URL to the community's avatar.
+        users:
+          type: array
+          items:
+            type: string
+            description: Mongoose ObjectId representing user IDs part of the community.
+        platforms:
+          type: array
+          items:
+            type: string
+            description: Mongoose ObjectId representing platform IDs associated with the community.
+        tcaAt:
+          type: string
+          format: date-time
+          description: term and condition accepted date 
         connectedAt:
           type: string
-          format: date-time   
-        isInProgress:
-          type: boolean
-          default: true
-        isDisconnected:
-          type: boolean
-          default: false
-        selectedChannels:
-          type: array
-        icon:
+          format: date-time
+          description: connected date 
+        disconnectedAt:
           type: string
-          items:
-            type: object
-            properties:
-              channelId:
-                type: string
-                format: Snowflake
-              channelName:
-                type: string
-      required:
-        - user
-        - guildId
-        - icon
-      example:
-        id: 5ebac534954b54139806c112
-        guildId: "1048535753103261706"
-        user: "681946187490000900"
-        name: "guildname"
-        period: "2023-01-23T06:38:05.157Z"
-        selectedChannels: [{
-          channelId: "1048535753103261706",
-          channelName: "channelName"
-        }]
-        isInProgress: true
-        isDisconnected: false
-        connectedAt: "2023-01-23T06:38:05.157Z"
-        icon: 'icon'
+          format: date-time
+          description: disconnected date 
+
+    # ********Platform********
+    Platform:
+      type: object
+      description: Details about a platform.
+      properties:
+        id:
+          type: string
+          format: objectId 
+        name:
+          type: string
+          description: Name of the platform.
+        community:
+          type: string
+          description: Mongoose ObjectId of the associated community.
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Dynamic metadata related to the platform.
+        disconnectedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date and time when the platform was disconnected.
 
     # ********Token********
     Token:
       type: object
+      description: Details about a token.
       properties:
         id:
           type: string
+          format: objectId 
         token:
           type: string
+          description: Token string.
         user:
           type: string
           format: Snowflake
+          description: The unique ID of the user associated with this token.
         type:
           type: string
-          enum: [access, refresh,discord_access,discord_refresh ]
+          description: Type of the token.
         expires:
           type: string
           format: date-time
+          description: Expiry date of the token.
         blacklisted:
           type: boolean
-          default: false
-      required:
-        - token
-        - user
-        - type
-        - expires
+          description: Flag indicating if the token is blacklisted.
 
     # ********Error********
     Error:
@@ -128,3 +121,60 @@ components:
           type: number
         message:
           type: string
+
+
+    # ********Role********
+    Role:
+      type: object
+      properties:
+        roleId:
+          type: string
+          format: Snowflake
+        name:
+          type: string
+        color:
+          type: integer
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+        id:
+          type: string
+          format: objectId 
+
+
+    # ********Channel********
+    Channel:
+      type: object
+      properties:
+        channelId:
+          type: string
+          format: Snowflake
+        name:
+          type: string
+          nullable: true
+        parentId:
+          type: string
+          nullable: true
+        permissionOverwrites:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: Snowflake
+              type:
+                type: integer
+                enum: [0, 1] # 0 for role, 1 for member
+              allow:
+                type: string
+              deny:
+                type: string
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+        _id:
+          type: string
+          format: objectId # assuming MongoDB ObjectId format
