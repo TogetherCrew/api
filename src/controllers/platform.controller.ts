@@ -19,9 +19,12 @@ const createPlatform = catchAsync(async function (req: IAuthRequest, res: Respon
     if (platformDoc) {
         throw new ApiError(httpStatus.BAD_REQUEST, `${req.body.name} is already connected`);
     }
-    // let platformDoc = await platformService.getPlatformByFilter({ community: { $in: req.user.communities }, disconnectedAt: null, name: req.body.name });
+
     platformDoc = await platformService.getPlatformByFilter({ community: communityDoc.id, disconnectedAt: null, name: req.body.name });
     if (platformDoc) {
+        if (req.body.name === 'discord') {
+            await discordServices.coreService.leaveBotFromGuild(req.body.metadata.id)
+        }
         throw new ApiError(httpStatus.BAD_REQUEST, `Only can connect one ${req.body.name} platform`);
     }
 
