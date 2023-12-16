@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { communityService, userService } from '../services';
+import { communityService, userService, platformService, discordServices } from '../services';
 import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync, pick, ApiError } from "../utils";
 import httpStatus from 'http-status';
@@ -45,6 +45,10 @@ const updateCommunity = catchAsync(async function (req: IAuthRequest, res: Respo
     res.send(community);
 });
 const deleteCommunity = catchAsync(async function (req: IAuthRequest, res: Response) {
+    const platforms = await platformService.queryPlatforms({ community: req.params.communityId }, {});
+    for (let i = 0; i < platforms.results.length; i++) {
+        await discordServices.coreService.leaveBotFromGuild(platforms.results[i].metadata.id)
+    }
     await communityService.deleteCommunityByFilter({ _id: req.params.communityId, users: req.user.id });
     res.status(httpStatus.NO_CONTENT).send();
 });
