@@ -149,7 +149,7 @@ const checkPlatformAlreadyConnected = async (communityId: Types.ObjectId, Platfo
     });
 
     if (platform) {
-        throw new ApiError(httpStatus.BAD_REQUEST, `${PlatformBody.metadata?.name} is already connected`);
+        throw new ApiError(httpStatus.BAD_REQUEST, `This Platform is already connected`);
     }
 }
 
@@ -193,7 +193,7 @@ const checkSinglePlatformConnection = async (communityId: Types.ObjectId, Platfo
 const reconnectOrAddNewPlatform = async (communityId: Types.ObjectId, PlatformBody: IPlatform): Promise<HydratedDocument<IPlatform>> => {
     let platformDoc = await getPlatformByFilter({
         community: communityId,
-        disconnectedAt: null,
+        disconnectedAt: { $ne: null }, // Check for platforms that are disconnected
         name: PlatformBody.name
     });
 
@@ -204,7 +204,7 @@ const reconnectOrAddNewPlatform = async (communityId: Types.ObjectId, PlatformBo
 
     platformDoc = await getPlatformByFilter({ 'metadata.id': PlatformBody.metadata?.id });
     if (platformDoc) {
-        throw new ApiError(httpStatus.BAD_REQUEST, `${PlatformBody.name} is already connected to another community`);
+        throw new ApiError(httpStatus.BAD_REQUEST, `This Platform is already connected to another community`);
     }
 
     const platform = await createPlatform(PlatformBody);
