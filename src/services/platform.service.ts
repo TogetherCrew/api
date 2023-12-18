@@ -193,8 +193,9 @@ const checkSinglePlatformConnection = async (communityId: Types.ObjectId, Platfo
 const reconnectOrAddNewPlatform = async (communityId: Types.ObjectId, PlatformBody: IPlatform): Promise<HydratedDocument<IPlatform>> => {
     let platformDoc = await getPlatformByFilter({
         community: communityId,
-        disconnectedAt: { $ne: null }, // Check for platforms that are disconnected
-        name: PlatformBody.name
+        disconnectedAt: { $ne: null }, // Check for platform if it is disconnected
+        name: PlatformBody.name,
+        'metadata.id': PlatformBody.metadata?.id
     });
 
 
