@@ -128,18 +128,34 @@ describe('Platform routes', () => {
         });
 
 
-        test('should return 400 error if community has same connected platform already', async () => {
+        test('should return 400 error if user trys to connect a connected platform', async () => {
             await insertCommunities([communityOne]);
             await insertUsers([userOne]);
             await insertPlatforms([platformOne]);
-            await request(app)
+            newPlatform.metadata.id = platformOne.metadata?.id;
+            const res = await request(app)
                 .post(`/api/v1/platforms`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send(newPlatform)
                 .expect(httpStatus.BAD_REQUEST);
+
+            expect(res.body.message).toBe('This Platform is already connected');
         });
 
-        test('should return 400 error if platform is already connected to another community', async () => {
+        test('should return 400 error if user trys to connect a same platform', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformOne]);
+            const res = await request(app)
+                .post(`/api/v1/platforms`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send(newPlatform)
+                .expect(httpStatus.BAD_REQUEST);
+
+            expect(res.body.message).toBe('Only can connect one discord platform');
+        });
+
+        test('should return 400 error if user trys to connect a platform which is already connected to another community', async () => {
             await insertCommunities([communityOne, communityTwo]);
             await insertUsers([userOne, userTwo]);
             if (platformFour.metadata) {
@@ -148,12 +164,13 @@ describe('Platform routes', () => {
                 await insertPlatforms([platformFour]);
                 platformFour.metadata.id = '681946187490000802';
             }
-            await request(app)
+            const res = await request(app)
                 .post(`/api/v1/platforms`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send(newPlatform)
                 .expect(httpStatus.BAD_REQUEST);
 
+            expect(res.body.message).toBe('This Platform is already connected to another community');
         });
 
         test('should return 400 error if name is invalid', async () => {

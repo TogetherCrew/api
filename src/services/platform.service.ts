@@ -5,7 +5,8 @@ import ApiError from '../utils/ApiError';
 import sagaService from './saga.service';
 import { Snowflake } from 'discord.js';
 import { analyzerAction, analyzerWindow } from '../config/analyzer.statics';
-
+import communityService from './community.service';
+import discordServices from './discord';
 /**
  * Create a platform
  * @param {IPlatform} PlatformBody
@@ -131,6 +132,87 @@ const deletePlatformByFilter = async (filter: object): Promise<HydratedDocument<
     return await platform.remove();
 };
 
+
+
+/**
+ * Checks if a platform with the specified metadata ID is already connected to the given community.
+ * Throws an error if such a platform exists.
+ * 
+ * @param {Types.ObjectId} communityId - The ID of the community to check within.
+ * @param {IPlatform} PlatformBody - The platform data to check against.
+ */
+const checkPlatformAlreadyConnected = async (communityId: Types.ObjectId, PlatformBody: IPlatform) => {
+    const platform = await getPlatformByFilter({
+        community: communityId,
+        'metadata.id': PlatformBody.metadata?.id,
+        disconnectedAt: null
+    });
+
+    if (platform) {
+        throw new ApiError(httpStatus.BAD_REQUEST, `This Platform is already connected`);
+    }
+}
+
+/**
+ * Checks if there is already a platform of the same name connected to the given community.
+ * If such a platform exists, and there is no platform with the same metadata ID in another community,
+ * the bot will leave the guild.
+ * 
+ * @param {Types.ObjectId} communityId - The ID of the community to check within.
+ * @param {IPlatform} PlatformBody - The platform data to check against.
+ */
+const checkSinglePlatformConnection = async (communityId: Types.ObjectId, PlatformBody: IPlatform) => {
+    const platform = await getPlatformByFilter({
+        community: communityId,
+        disconnectedAt: null,
+        name: PlatformBody.name
+    });
+
+    if (platform) {
+        const platformDoc = await getPlatformByFilter({
+            'metadata.id': PlatformBody.metadata?.id,
+            community: { $ne: communityId }
+        });
+        if (!platformDoc) {
+            await discordServices.coreService.leaveBotFromGuild(PlatformBody.metadata?.id)
+        }
+        throw new ApiError(httpStatus.BAD_REQUEST, `Only can connect one ${PlatformBody.name} platform`);
+    }
+
+}
+
+
+/**
+ * Attempts to reconnect an existing platform, or adds a new platform to the community if none exists.
+ * Throws an error if a platform with the same metadata ID is connected to another community.
+ * 
+ * @param {Types.ObjectId} communityId - The ID of the community to check within.
+ * @param {IPlatform} PlatformBody - The platform data to use for reconnection or creation.
+ * @returns {Promise<HydratedDocument<IPlatform>>} The updated or newly created platform document.
+ */
+const reconnectOrAddNewPlatform = async (communityId: Types.ObjectId, PlatformBody: IPlatform): Promise<HydratedDocument<IPlatform>> => {
+    let platformDoc = await getPlatformByFilter({
+        community: communityId,
+        disconnectedAt: { $ne: null }, // Check for platforms that are disconnected
+        name: PlatformBody.name
+    });
+
+
+    if (platformDoc) {
+        return await updatePlatform(platformDoc, { disconnectedAt: null });
+    }
+
+    platformDoc = await getPlatformByFilter({ 'metadata.id': PlatformBody.metadata?.id });
+    if (platformDoc) {
+        throw new ApiError(httpStatus.BAD_REQUEST, `This Platform is already connected to another community`);
+    }
+
+    const platform = await createPlatform(PlatformBody);
+    await communityService.addPlatformToCommunityById(platform.community, platform.id);
+    return platform;
+}
+
+
 export default {
     createPlatform,
     getPlatformById,
@@ -140,4 +222,7 @@ export default {
     updatePlatformByFilter,
     deletePlatform,
     deletePlatformByFilter,
+    checkPlatformAlreadyConnected,
+    checkSinglePlatformConnection,
+    reconnectOrAddNewPlatform
 };
