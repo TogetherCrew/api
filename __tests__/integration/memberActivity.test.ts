@@ -474,12 +474,6 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await insertPlatforms([platformOne]);
 
-            const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
-
-            const date = new Date();
-            date.setDate(date.getDate() - 2);
-            const twodaysAgoTimestamp = date.setHours(0, 0, 0, 0);
-
             await Neo4j.write("match (n) detach delete (n);")
             await Neo4j.write(`
                 CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${platformOne.metadata?.id}"})
@@ -492,32 +486,18 @@ describe('member-activity routes', () => {
                 SET c.userId = "1002"
                 SET d.userId = "1003"
                 SET e.userId = "1004"
-                MERGE (a) -[r:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 1}]->(b)
-                MERGE (a) -[r2:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(b)
-                MERGE (a) -[r3:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 3}]->(d)
-                MERGE (c) -[r4:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 2}]->(b)
-                MERGE (c) -[r5:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(b)
-                MERGE (c) -[r6:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 2}]->(d)
-                MERGE (d) -[r7:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 1}]->(b)
-                MERGE (c) -[r8:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(a)
-                MERGE (d) -[r9:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(c)
-                MERGE (b) -[r10:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(d)
-                MERGE (d) -[r11:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(c)
-                MERGE (e) -[r12:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 3}]->(b)
-
-                MERGE (a) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 1.0, status: 2}]-> (g)
-                MERGE (a) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 1.0, status: 0}] -> (g)
-                MERGE (b) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 0.6666666666666666, status: 1}] -> (g)
-                MERGE (b) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.3333333333333333, status: 1}] -> (g)
-                MERGE (c) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 1.0}]->(g)
-                MERGE (c) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.6666666666666666, status: 0}]->(g)
-                MERGE (c) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 1.0, status: 0, status: 2}]->(g)
-                MERGE (c) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.6666666666666666, status: 1}]->(g)
-                MERGE (e) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 0.0, status: 0}]->(g)
-                MERGE (e) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.0 }]->(g)
-                MERGE (g) -[:HAVE_METRICS {date: ${twodaysAgoTimestamp}, decentralizationScore: 133.33333333333334 }]->(g)
-                MERGE (g) -[:HAVE_METRICS {date: ${yesterdayTimestamp}, decentralizationScore: 66.66666666666669 }]->(g)
-
+                MERGE (a) -[r:INTERACTED_WITH {date: 1110, weight: 1}]->(b)
+                MERGE (a) -[r2:INTERACTED_WITH {date: 1111, weight: 2}]->(b)
+                MERGE (a) -[r3:INTERACTED_WITH {date: 1110, weight: 3}]->(d)
+                MERGE (c) -[r4:INTERACTED_WITH {date: 1110, weight: 2}]->(b)
+                MERGE (c) -[r5:INTERACTED_WITH {date: 1111, weight: 1}]->(b)
+                MERGE (c) -[r6:INTERACTED_WITH {date: 1110, weight: 2}]->(d)
+                MERGE (d) -[r7:INTERACTED_WITH {date: 1110, weight: 1}]->(b)
+                MERGE (c) -[r8:INTERACTED_WITH {date: 1111, weight: 2}]->(a)
+                MERGE (d) -[r9:INTERACTED_WITH {date: 1111, weight: 1}]->(c)
+                MERGE (b) -[r10:INTERACTED_WITH {date: 1111, weight: 2}]->(d)
+                MERGE (d) -[r11:INTERACTED_WITH {date: 1111, weight: 1}]->(c)
+                MERGE (e) -[r12:INTERACTED_WITH {date: 1111, weight: 3}]->(b)
                 SET r.guildId = "${platformOne.metadata?.id}"
                 SET r2.guildId = "${platformOne.metadata?.id}"
                 SET r3.guildId = "${platformOne.metadata?.id}"
@@ -529,15 +509,17 @@ describe('member-activity routes', () => {
                 SET r9.guildId = "${platformOne.metadata?.id}"
                 SET r10.guildId = "${platformOne.metadata?.id}"
                 SET r11.guildId = "${platformOne.metadata?.id}"
-                SET r12.guildId = "${platformOne.metadata?.id}"`)
+                SET r12.guildId = "${platformOne.metadata?.id}"
+                MERGE (g) -[:HAVE_METRICS {date: 1110, louvainModularityScore: 0.66666666666 }]->(g)
+                MERGE (g) -[:HAVE_METRICS {date: 1111, louvainModularityScore: 0.33333333333 }]->(g)`)
 
             const res = await request(app)
                 .get(`/api/v1/member-activity/${platformOne._id}/fragmentation-score`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
 
-            expect(res.body.fragmentationScore).toBe(146.66666666666666);
-            expect(res.body.scoreStatus).toBe(1);
+            expect(res.body.fragmentationScore).toBe(66.666666666);
+            expect(res.body.scoreStatus).toBe(-1);
             expect(res.body.fragmentationScoreRange).toHaveProperty("minimumFragmentationScore", 0);
             expect(res.body.fragmentationScoreRange).toHaveProperty("maximumFragmentationScore", 200);
         })

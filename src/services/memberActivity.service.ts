@@ -1011,9 +1011,10 @@ async function getFragmentationScore(guildId: string): Promise<fragmentationScor
     const fragmentationScale = 200
     const fragmentationScoreRange = { minimumFragmentationScore: 0, maximumFragmentationScore: fragmentationScale }
     const fragmentationScoreQuery = `
-        MATCH ()-[r:INTERACTED_IN]->(g:Guild {guildId: "${guildId}" })
-        WITH avg(r.localClusteringCoefficient) * ${fragmentationScale}  AS fragmentation_score, r.date as date
-        RETURN fragmentation_score ORDER BY date DESC LIMIT 1
+        MATCH ()-[r:INTERACTED_WITH {guildId: "${guildId}"}]-()
+        WITH max(r.date) as latest_date
+        MATCH (g:Guild {guildId: "${guildId}"})-[r:HAVE_METRICS {date: latest_date}]->(g)
+        RETURN r.louvainModularityScore * 200 as fragmentation_score
     `
 
     const neo4jData = await Neo4j.read(fragmentationScoreQuery)
