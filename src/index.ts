@@ -26,7 +26,6 @@ const connectToMB = async () => {
     }
 };
 
-console.log('user token type')
 // Connect to MongoDB
 const connectToMongoDB = async () => {
     try {
