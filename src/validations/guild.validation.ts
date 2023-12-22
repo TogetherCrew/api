@@ -3,7 +3,6 @@ import Joi from "joi";
 const getGuilds = {
     query: Joi.object().keys({
         isDisconnected: Joi.boolean(),
-        isInProgress: Joi.boolean(),
         sortBy: Joi.string(),
         limit: Joi.number().integer(),
         page: Joi.number().integer(),
@@ -48,7 +47,13 @@ const getGuildFromDiscordAPI = {
 const getRoles = {
     params: Joi.object().required().keys({
         guildId: Joi.string().required()
-    })
+    }),
+    query: Joi.object().required().keys({
+        name: Joi.string(),
+        sortBy: Joi.string(),
+        limit: Joi.number().integer(),
+        page: Joi.number().integer(),
+    }),
 };
 
 

@@ -2,34 +2,44 @@ import request from 'supertest';
 import httpStatus from 'http-status';
 import app from '../../src/app';
 import setupTestDB from '../utils/setupTestDB';
-import dateUtils from '../../src/utils/date';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
-import { memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour, insertMemberActivities } from '../fixtures/memberActivity.fixture';
-import { guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour, guildMemberFive, insertGuildMembers } from '../fixtures/guildMember.fixture';
-import { guildOne, guildTwo, insertGuilds } from '../fixtures/guilds.fixture';
-import { databaseService } from '@togethercrew.dev/db';
-import { role1, role2, role3, insertRoles } from '../fixtures/discord.roles.fixture';
-import config from '../../src/config';
+import { memberActivity1, memberActivity2, memberActivity3, memberActivity4, insertMemberActivities } from '../fixtures/memberActivity.fixture';
+import { discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4, discordGuildMember5, insertGuildMembers } from '../fixtures/discord//guildMember.fixture';
+import { platformOne, platformTwo, platformFour, insertPlatforms } from '../fixtures/platform.fixture';
+import { DatabaseManager } from '@togethercrew.dev/db';
+import { communityOne, insertCommunities } from '../fixtures/community.fixture';
+import { discordRole1, discordRole2, discordRole3, insertRoles } from '../fixtures/discord/roles.fixture';
 import * as Neo4j from '../../src/neo4j';
+import dateUtils from '../../src/utils/date';
 
 
 
 setupTestDB();
 
 describe('member-activity routes', () => {
-    const connection = databaseService.connectionFactory(guildOne.guildId, config.mongoose.botURL);
-    describe('POST /api/v1/member-activity/:guildId/active-members-composition-line-graph', () => {
+    beforeEach(() => {
+        userOne.communities = [communityOne._id];
+        communityOne.users = [userOne._id];
+        communityOne.platforms = [platformOne._id, platformTwo._id, platformFour._id]
+        platformOne.community = communityOne._id
+        platformTwo.community = communityOne._id
+        platformFour.community = communityOne._id
+
+    });
+    const connection = DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+
+    describe('POST /api/v1/member-activity/:platformId/active-members-composition-line-graph', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
         });
         test('should return 200 and active members composition line graph data if req data is ok', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
             const res = await request(app)
-                .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-line-graph`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send({ startDate: new Date("2023-04-01"), endDate: new Date("2023-04-07") })
                 .expect(httpStatus.OK);
@@ -63,11 +73,11 @@ describe('member-activity routes', () => {
         })
 
         test('should return 200 and active members composition line graph data (testing for empty data) if req data is ok', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-
+            await insertPlatforms([platformOne]);
             const res = await request(app)
-                .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-line-graph`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send({ startDate: new Date("2021-02-21"), endDate: new Date("2022-02-24") })
                 .expect(httpStatus.OK);
@@ -86,9 +96,20 @@ describe('member-activity routes', () => {
             });
         })
 
+        test('should return 400 if given platform is not discord', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformFour]);
+            await request(app)
+                .post(`/api/v1/member-activity/${platformFour._id}/active-members-composition-line-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.BAD_REQUEST);
+        })
+
         test('should return 401 if access token is missing', async () => {
             await request(app)
-                .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-line-graph`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-line-graph`)
                 .send({ startDate: new Date(), endDate: new Date() })
                 .expect(httpStatus.UNAUTHORIZED);
         })
@@ -96,24 +117,25 @@ describe('member-activity routes', () => {
         test('should return 404 if guild not found', async () => {
             await insertUsers([userOne]);
             await request(app)
-                .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-line-graph`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send({ startDate: new Date(), endDate: new Date() })
                 .expect(httpStatus.NOT_FOUND);
         })
     })
 
-    describe('POST /api/v1/member-activity/:guildId/disengaged-members-composition-line-graph', () => {
+    describe('POST /api/v1/member-activity/:platformId/disengaged-members-composition-line-graph', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
         });
         test('should return 200 and disengaged members composition line graph data if req data is ok', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
 
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
             const res = await request(app)
-                .post(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-line-graph`)
+                .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send({ startDate: new Date("2023-04-01"), endDate: new Date("2023-04-07") })
                 .expect(httpStatus.OK);
@@ -144,10 +166,12 @@ describe('member-activity routes', () => {
         })
 
         test('should return 200 and disengaged members composition line graph data (testing for empty data) if req data is ok', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
+            await insertPlatforms([platformOne]);
+
             const res = await request(app)
-                .post(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-line-graph`)
+                .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send({ startDate: new Date("2023-04-01"), endDate: new Date("2023-04-07") })
                 .expect(httpStatus.OK);
@@ -167,32 +191,43 @@ describe('member-activity routes', () => {
 
         test('should return 401 if access token is missing', async () => {
             await request(app)
-                .post(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-line-graph`)
+                .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-line-graph`)
                 .send({ startDate: new Date(), endDate: new Date() })
                 .expect(httpStatus.UNAUTHORIZED);
+        })
+
+        test('should return 400 if given platform is not discord', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformFour]);
+            await request(app)
+                .post(`/api/v1/member-activity/${platformFour._id}/disengaged-members-composition-line-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.BAD_REQUEST);
         })
 
         test('should return 404 if guild not found', async () => {
             await insertUsers([userOne]);
             await request(app)
-                .post(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-line-graph`)
+                .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send({ startDate: new Date(), endDate: new Date() })
                 .expect(httpStatus.NOT_FOUND);
         })
     })
 
-    describe('POST /api/v1/member-activity/:guildId/active-members-onboarding-line-graph', () => {
+    describe('POST /api/v1/member-activity/:platformId/active-members-onboarding-line-graph', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
         });
         test('should return 200 and active members onboarding line graph data if req data is ok', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
             const res = await request(app)
-                .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-line-graph`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send({ startDate: new Date("2023-04-01"), endDate: new Date("2023-04-07") })
                 .expect(httpStatus.OK);
@@ -221,10 +256,11 @@ describe('member-activity routes', () => {
         })
 
         test('should return 200 and ctive members onboarding line graph data (testing for empty data) if req data is ok', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
+            await insertPlatforms([platformOne]);
             const res = await request(app)
-                .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-line-graph`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send({ startDate: new Date("2023-04-01"), endDate: new Date("2023-04-07") })
                 .expect(httpStatus.OK);
@@ -244,33 +280,43 @@ describe('member-activity routes', () => {
 
         test('should return 401 if access token is missing', async () => {
             await request(app)
-                .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-line-graph`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-line-graph`)
                 .send({ startDate: new Date(), endDate: new Date() })
                 .expect(httpStatus.UNAUTHORIZED);
+        })
+
+        test('should return 400 if given platform is not discord', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformFour]);
+            await request(app)
+                .post(`/api/v1/member-activity/${platformFour._id}/active-members-onboarding-line-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.BAD_REQUEST);
         })
 
         test('should return 404 if guild not found', async () => {
             await insertUsers([userOne]);
             await request(app)
-                .post(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-line-graph`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send({ startDate: new Date(), endDate: new Date() })
                 .expect(httpStatus.NOT_FOUND);
         })
     })
 
-    describe('POST /api/v1/member-activity/:guildId/inactive-members-line-graph', () => {
+    describe('POST /api/v1/member-activity/:platformId/inactive-members-line-graph', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
         });
         test('should return 200 and inactive members line graph data if req data is ok', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertRoles([role1, role2, role3], connection);
-
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
             const res = await request(app)
-                .post(`/api/v1/member-activity/${guildOne.guildId}/inactive-members-line-graph`)
+                .post(`/api/v1/member-activity/${platformOne._id}/inactive-members-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send({ startDate: new Date("2023-04-01"), endDate: new Date("2023-04-07") })
                 .expect(httpStatus.OK);
@@ -287,11 +333,12 @@ describe('member-activity routes', () => {
         })
 
         test('should return 200 and inactive members line graph data (testing for empty data) if req data is ok', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
+            await insertPlatforms([platformOne]);
 
             const res = await request(app)
-                .post(`/api/v1/member-activity/${guildOne.guildId}/inactive-members-line-graph`)
+                .post(`/api/v1/member-activity/${platformOne._id}/inactive-members-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send({ startDate: new Date("2021-02-21"), endDate: new Date("2022-02-24") })
                 .expect(httpStatus.OK);
@@ -304,30 +351,42 @@ describe('member-activity routes', () => {
 
         test('should return 401 if access token is missing', async () => {
             await request(app)
-                .post(`/api/v1/member-activity/${guildOne.guildId}/inactive-members-line-graph`)
+                .post(`/api/v1/member-activity/${platformOne._id}/inactive-members-line-graph`)
                 .send({ startDate: new Date(), endDate: new Date() })
                 .expect(httpStatus.UNAUTHORIZED);
+        })
+
+        test('should return 400 if given platform is not discord', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformFour]);
+            await request(app)
+                .post(`/api/v1/member-activity/${platformFour._id}/inactive-members-line-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.BAD_REQUEST);
         })
 
         test('should return 404 if guild not found', async () => {
             await insertUsers([userOne]);
             await request(app)
-                .post(`/api/v1/member-activity/${guildOne.guildId}/inactive-members-line-graph`)
+                .post(`/api/v1/member-activity/${platformOne._id}/inactive-members-line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send({ startDate: new Date(), endDate: new Date() })
                 .expect(httpStatus.NOT_FOUND);
         })
     })
 
-    describe('POST /api/v1/member-activity/:guildId/members-interactions-network-graph', () => {
+    describe('POST /api/v1/member-activity/:platformId/members-interactions-network-graph', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
         });
 
         test('should return 200 and member interaction graph data if req data is ok', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertPlatforms([platformOne]);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4, discordGuildMember5], connection);
 
             const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
 
@@ -336,21 +395,21 @@ describe('member-activity routes', () => {
             const twodaysAgoTimestamp = date.setHours(10, 0, 0, 0);
 
             await Neo4j.write("match (n) detach delete (n);")
-            await Neo4j.write(`CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${guildOne.guildId}"})
+            await Neo4j.write(`CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${platformOne.metadata?.id}"})
                 CREATE (b:DiscordAccount) -[:IS_MEMBER]->(g)
                 CREATE (c:DiscordAccount) -[:IS_MEMBER]->(g)
                 CREATE (d:DiscordAccount) -[:IS_MEMBER]->(g)
                 CREATE (e:DiscordAccount) -[:IS_MEMBER]->(g)
-                SET a.userId = '${guildMemberOne.discordId}'
-                SET b.userId = '${guildMemberTwo.discordId}'
+                SET a.userId = '${discordGuildMember1.discordId}'
+                SET b.userId = '${discordGuildMember2.discordId}'
                 MERGE (a) -[r:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(b)
                 MERGE (b) -[r2:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 2}]->(a)
                 MERGE (b) -[r3:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(a)
-                
-                SET r.guildId = "${guildOne.guildId}"
-                SET r2.guildId = "${guildOne.guildId}"
-                SET r3.guildId = "${guildOne.guildId}"
-                
+
+                SET r.guildId = "${platformOne.metadata?.id}"
+                SET r2.guildId = "${platformOne.metadata?.id}"
+                SET r3.guildId = "${platformOne.metadata?.id}"
+
                 MERGE (a) -[:INTERACTED_IN {localclusteringcoefficient: 1, date: ${yesterdayTimestamp}, status: 0}]->(g)
                 MERGE (a) -[:INTERACTED_IN {localclusteringcoefficient: 1, date: ${twodaysAgoTimestamp}, status: 2}]->(g)
                 MERGE (b) -[:INTERACTED_IN {localclusteringcoefficient: 1, date: ${yesterdayTimestamp}, status: 1}]->(g)
@@ -358,7 +417,7 @@ describe('member-activity routes', () => {
                 `)
 
             const res = await request(app)
-                .post(`/api/v1/member-activity/${guildOne.guildId}/members-interactions-network-graph`)
+                .post(`/api/v1/member-activity/${platformOne._id}/members-interactions-network-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
 
@@ -366,13 +425,13 @@ describe('member-activity routes', () => {
             expect(res.body).toHaveLength(2)
             expect(res.body).toEqual(expect.arrayContaining([({
                 from: { avatar: null, id: "123456789", discordId: "123456789", joinedAt: "2023-03-07T00:00:00.000Z", ngu: "Behzad", radius: 3, roles: [], stats: "SENDER", username: "behzad_rabiei" },
-                to: { avatar: "AvatarLink", id: "987654321", discordId: '987654321', joinedAt: "2023-03-31T00:00:00.000Z", ngu: "Daniel", radius: 3, roles: [], stats: "RECEIVER", username: "mrjackalop"},
+                to: { avatar: "AvatarLink", id: "987654321", discordId: '987654321', joinedAt: "2023-03-31T00:00:00.000Z", ngu: "Daniel", radius: 3, roles: [], stats: "RECEIVER", username: "mrjackalop" },
                 width: 1
             })
             ]))
             expect(res.body).toEqual(expect.arrayContaining([({
-                from: { avatar: "AvatarLink", id: "987654321", discordId: "987654321", joinedAt: "2023-03-31T00:00:00.000Z", ngu: "Daniel", radius: 3, roles: [], stats: "RECEIVER", username: "mrjackalop"},
-                to: { avatar: null, id: "123456789", discordId: '123456789', joinedAt: "2023-03-07T00:00:00.000Z", ngu: "Behzad", radius: 3, roles: [], stats: "SENDER", username: "behzad_rabiei"},
+                from: { avatar: "AvatarLink", id: "987654321", discordId: "987654321", joinedAt: "2023-03-31T00:00:00.000Z", ngu: "Daniel", radius: 3, roles: [], stats: "RECEIVER", username: "mrjackalop" },
+                to: { avatar: null, id: "123456789", discordId: '123456789', joinedAt: "2023-03-07T00:00:00.000Z", ngu: "Behzad", radius: 3, roles: [], stats: "SENDER", username: "behzad_rabiei" },
                 width: 2
             })
             ]))
@@ -380,7 +439,7 @@ describe('member-activity routes', () => {
         })
         test('should return 401 if access token is missing', async () => {
             await request(app)
-                .post(`/api/v1/member-activity/${guildOne.guildId}/members-interactions-network-graph`)
+                .post(`/api/v1/member-activity/${platformOne._id}/members-interactions-network-graph`)
                 .send({ startDate: new Date(), endDate: new Date() })
                 .expect(httpStatus.UNAUTHORIZED);
         })
@@ -388,31 +447,36 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await request(app)
 
-                .post(`/api/v1/member-activity/${guildOne.guildId}/members-interactions-network-graph`)
+                .post(`/api/v1/member-activity/${platformOne._id}/members-interactions-network-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.NOT_FOUND);
         })
+
+        test('should return 400 if given platform is not discord', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformFour]);
+            await request(app)
+                .post(`/api/v1/member-activity/${platformFour._id}/members-interactions-network-graph`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.BAD_REQUEST);
+        })
     })
 
-    describe('GET /api/v1/member-activity/:guildId/fragmentation-score', () => {
+    describe('GET /api/v1/member-activity/:platformId/fragmentation-score', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
         });
 
         test('should return 200 and fragmentation score if req data is ok', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-
-            const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
-
-            const date = new Date();
-            date.setDate(date.getDate() - 2);
-            const twodaysAgoTimestamp = date.setHours(0, 0, 0, 0);
+            await insertPlatforms([platformOne]);
 
             await Neo4j.write("match (n) detach delete (n);")
             await Neo4j.write(`
-                CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${guildOne.guildId}"})
+                CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${platformOne.metadata?.id}"})
                 CREATE (b:DiscordAccount) -[:IS_MEMBER]->(g)
                 CREATE (c:DiscordAccount) -[:IS_MEMBER]->(g)
                 CREATE (d:DiscordAccount) -[:IS_MEMBER]->(g)
@@ -422,61 +486,48 @@ describe('member-activity routes', () => {
                 SET c.userId = "1002"
                 SET d.userId = "1003"
                 SET e.userId = "1004"
-                MERGE (a) -[r:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 1}]->(b)
-                MERGE (a) -[r2:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(b)
-                MERGE (a) -[r3:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 3}]->(d)
-                MERGE (c) -[r4:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 2}]->(b)
-                MERGE (c) -[r5:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(b)
-                MERGE (c) -[r6:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 2}]->(d)
-                MERGE (d) -[r7:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 1}]->(b)
-                MERGE (c) -[r8:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(a)
-                MERGE (d) -[r9:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(c)
-                MERGE (b) -[r10:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(d)
-                MERGE (d) -[r11:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(c)
-                MERGE (e) -[r12:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 3}]->(b)
-
-                MERGE (a) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 1.0, status: 2}]-> (g)
-                MERGE (a) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 1.0, status: 0}] -> (g)
-                MERGE (b) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 0.6666666666666666, status: 1}] -> (g)
-                MERGE (b) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.3333333333333333, status: 1}] -> (g)
-                MERGE (c) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 1.0}]->(g)
-                MERGE (c) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.6666666666666666, status: 0}]->(g)
-                MERGE (c) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 1.0, status: 0, status: 2}]->(g)
-                MERGE (c) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.6666666666666666, status: 1}]->(g)
-                MERGE (e) -[: INTERACTED_IN {date: ${yesterdayTimestamp}, localClusteringCoefficient: 0.0, status: 0}]->(g)
-                MERGE (e) -[: INTERACTED_IN {date: ${twodaysAgoTimestamp}, localClusteringCoefficient: 0.0 }]->(g)
-                MERGE (g) -[:HAVE_METRICS {date: ${twodaysAgoTimestamp}, decentralizationScore: 133.33333333333334 }]->(g)
-                MERGE (g) -[:HAVE_METRICS {date: ${yesterdayTimestamp}, decentralizationScore: 66.66666666666669 }]->(g)
-
-                SET r.guildId = "${guildOne.guildId}"
-                SET r2.guildId = "${guildOne.guildId}"
-                SET r3.guildId = "${guildOne.guildId}"
-                SET r4.guildId = "${guildOne.guildId}"
-                SET r5.guildId = "${guildOne.guildId}"
-                SET r6.guildId = "${guildOne.guildId}"
-                SET r7.guildId = "${guildOne.guildId}"
-                SET r8.guildId = "${guildOne.guildId}"
-                SET r9.guildId = "${guildOne.guildId}"
-                SET r10.guildId = "${guildOne.guildId}"
-                SET r11.guildId = "${guildOne.guildId}"
-                SET r12.guildId = "${guildOne.guildId}"`)
+                MERGE (a) -[r:INTERACTED_WITH {date: 1110, weight: 1}]->(b)
+                MERGE (a) -[r2:INTERACTED_WITH {date: 1111, weight: 2}]->(b)
+                MERGE (a) -[r3:INTERACTED_WITH {date: 1110, weight: 3}]->(d)
+                MERGE (c) -[r4:INTERACTED_WITH {date: 1110, weight: 2}]->(b)
+                MERGE (c) -[r5:INTERACTED_WITH {date: 1111, weight: 1}]->(b)
+                MERGE (c) -[r6:INTERACTED_WITH {date: 1110, weight: 2}]->(d)
+                MERGE (d) -[r7:INTERACTED_WITH {date: 1110, weight: 1}]->(b)
+                MERGE (c) -[r8:INTERACTED_WITH {date: 1111, weight: 2}]->(a)
+                MERGE (d) -[r9:INTERACTED_WITH {date: 1111, weight: 1}]->(c)
+                MERGE (b) -[r10:INTERACTED_WITH {date: 1111, weight: 2}]->(d)
+                MERGE (d) -[r11:INTERACTED_WITH {date: 1111, weight: 1}]->(c)
+                MERGE (e) -[r12:INTERACTED_WITH {date: 1111, weight: 3}]->(b)
+                SET r.guildId = "${platformOne.metadata?.id}"
+                SET r2.guildId = "${platformOne.metadata?.id}"
+                SET r3.guildId = "${platformOne.metadata?.id}"
+                SET r4.guildId = "${platformOne.metadata?.id}"
+                SET r5.guildId = "${platformOne.metadata?.id}"
+                SET r6.guildId = "${platformOne.metadata?.id}"
+                SET r7.guildId = "${platformOne.metadata?.id}"
+                SET r8.guildId = "${platformOne.metadata?.id}"
+                SET r9.guildId = "${platformOne.metadata?.id}"
+                SET r10.guildId = "${platformOne.metadata?.id}"
+                SET r11.guildId = "${platformOne.metadata?.id}"
+                SET r12.guildId = "${platformOne.metadata?.id}"
+                MERGE (g) -[:HAVE_METRICS {date: 1110, louvainModularityScore: 0.66666666666 }]->(g)
+                MERGE (g) -[:HAVE_METRICS {date: 1111, louvainModularityScore: 0.33333333333 }]->(g)`)
 
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/fragmentation-score`)
+                .get(`/api/v1/member-activity/${platformOne._id}/fragmentation-score`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
 
-            expect(res.body.fragmentationScore).toBe(146.66666666666666);
-            expect(res.body.scoreStatus).toBe(1);
+            expect(res.body.fragmentationScore).toBe(66.666666666);
+            expect(res.body.scoreStatus).toBe(-1);
             expect(res.body.fragmentationScoreRange).toHaveProperty("minimumFragmentationScore", 0);
             expect(res.body.fragmentationScoreRange).toHaveProperty("maximumFragmentationScore", 200);
         })
 
         test('should return 200 with "null" fragmentation score if there is not interaction or data', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertGuilds([guildTwo]);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertPlatforms([platformOne, platformTwo]);
 
             const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
 
@@ -486,7 +537,7 @@ describe('member-activity routes', () => {
 
             await Neo4j.write("match (n) detach delete (n);")
             await Neo4j.write(`
-                CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${guildOne.guildId}"})
+                CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${platformOne.metadata?.id}"})
                 CREATE (b:DiscordAccount) -[:IS_MEMBER]->(g)
                 CREATE (c:DiscordAccount) -[:IS_MEMBER]->(g)
                 CREATE (d:DiscordAccount) -[:IS_MEMBER]->(g)
@@ -522,21 +573,21 @@ describe('member-activity routes', () => {
                 MERGE (g) -[:HAVE_METRICS {date: ${twodaysAgoTimestamp}, decentralizationScore: 133.33333333333334 }]->(g)
                 MERGE (g) -[:HAVE_METRICS {date: ${yesterdayTimestamp}, decentralizationScore: 66.66666666666669 }]->(g)
 
-                SET r.guildId = "${guildOne.guildId}"
-                SET r2.guildId = "${guildOne.guildId}"
-                SET r3.guildId = "${guildOne.guildId}"
-                SET r4.guildId = "${guildOne.guildId}"
-                SET r5.guildId = "${guildOne.guildId}"
-                SET r6.guildId = "${guildOne.guildId}"
-                SET r7.guildId = "${guildOne.guildId}"
-                SET r8.guildId = "${guildOne.guildId}"
-                SET r9.guildId = "${guildOne.guildId}"
-                SET r10.guildId = "${guildOne.guildId}"
-                SET r11.guildId = "${guildOne.guildId}"
-                SET r12.guildId = "${guildOne.guildId}"`)
+                SET r.guildId = "${platformOne.metadata?.id}"
+                SET r2.guildId = "${platformOne.metadata?.id}"
+                SET r3.guildId = "${platformOne.metadata?.id}"
+                SET r4.guildId = "${platformOne.metadata?.id}"
+                SET r5.guildId = "${platformOne.metadata?.id}"
+                SET r6.guildId = "${platformOne.metadata?.id}"
+                SET r7.guildId = "${platformOne.metadata?.id}"
+                SET r8.guildId = "${platformOne.metadata?.id}"
+                SET r9.guildId = "${platformOne.metadata?.id}"
+                SET r10.guildId = "${platformOne.metadata?.id}"
+                SET r11.guildId = "${platformOne.metadata?.id}"
+                SET r12.guildId = "${platformOne.metadata?.id}"`)
 
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildTwo.guildId}/fragmentation-score`)
+                .get(`/api/v1/member-activity/${platformTwo._id}/fragmentation-score`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
 
@@ -545,7 +596,7 @@ describe('member-activity routes', () => {
 
         test('should return 401 if access token is missing', async () => {
             await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/fragmentation-score`)
+                .get(`/api/v1/member-activity/${platformOne._id}/fragmentation-score`)
                 .send({ startDate: new Date(), endDate: new Date() })
                 .expect(httpStatus.UNAUTHORIZED);
         })
@@ -554,21 +605,32 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await request(app)
 
-                .get(`/api/v1/member-activity/${guildOne.guildId}/fragmentation-score`)
+                .get(`/api/v1/member-activity/${platformOne._id}/fragmentation-score`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.NOT_FOUND);
         })
+
+        test('should return 400 if given platform is not discord', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformFour]);
+            await request(app)
+                .get(`/api/v1/member-activity/${platformFour._id}/fragmentation-score`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.BAD_REQUEST);
+        })
     })
 
-    describe('GET /api/v1/member-activity/:guildId/decentralisation-score', () => {
+    describe('GET /api/v1/member-activity/:platformId/decentralisation-score', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
         });
 
         test('should return 200 and decentralisation score if req data is ok', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertPlatforms([platformOne, platformTwo]);
 
             const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
 
@@ -579,7 +641,7 @@ describe('member-activity routes', () => {
             // TODO: write neo4j queries in other file
             await Neo4j.write("match (n) detach delete (n);")
             await Neo4j.write(`
-                CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${guildOne.guildId}"})
+                CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${platformOne.metadata?.id}"})
                 CREATE (b:DiscordAccount) -[:IS_MEMBER]->(g)
                 CREATE (c:DiscordAccount) -[:IS_MEMBER]->(g)
                 CREATE (d:DiscordAccount) -[:IS_MEMBER]->(g)
@@ -615,21 +677,21 @@ describe('member-activity routes', () => {
                 MERGE (g) -[:HAVE_METRICS {date: ${twodaysAgoTimestamp}, decentralizationScore: 133.33333333333334 }]->(g)
                 MERGE (g) -[:HAVE_METRICS {date: ${yesterdayTimestamp}, decentralizationScore: 66.66666666666669 }]->(g)
 
-                SET r.guildId = "${guildOne.guildId}"
-                SET r2.guildId = "${guildOne.guildId}"
-                SET r3.guildId = "${guildOne.guildId}"
-                SET r4.guildId = "${guildOne.guildId}"
-                SET r5.guildId = "${guildOne.guildId}"
-                SET r6.guildId = "${guildOne.guildId}"
-                SET r7.guildId = "${guildOne.guildId}"
-                SET r8.guildId = "${guildOne.guildId}"
-                SET r9.guildId = "${guildOne.guildId}"
-                SET r10.guildId = "${guildOne.guildId}"
-                SET r11.guildId = "${guildOne.guildId}"
-                SET r12.guildId = "${guildOne.guildId}"`)
+                SET r.guildId = "${platformOne.metadata?.id}"
+                SET r2.guildId = "${platformOne.metadata?.id}"
+                SET r3.guildId = "${platformOne.metadata?.id}"
+                SET r4.guildId = "${platformOne.metadata?.id}"
+                SET r5.guildId = "${platformOne.metadata?.id}"
+                SET r6.guildId = "${platformOne.metadata?.id}"
+                SET r7.guildId = "${platformOne.metadata?.id}"
+                SET r8.guildId = "${platformOne.metadata?.id}"
+                SET r9.guildId = "${platformOne.metadata?.id}"
+                SET r10.guildId = "${platformOne.metadata?.id}"
+                SET r11.guildId = "${platformOne.metadata?.id}"
+                SET r12.guildId = "${platformOne.metadata?.id}"`)
 
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/decentralisation-score`)
+                .get(`/api/v1/member-activity/${platformOne._id}/decentralisation-score`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
 
@@ -641,10 +703,9 @@ describe('member-activity routes', () => {
         })
 
         test('should return 200 with "null" decentralisation score if there is not interaction or data', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertGuilds([guildTwo]);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
+            await insertPlatforms([platformOne, platformTwo]);
 
             const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
 
@@ -655,7 +716,7 @@ describe('member-activity routes', () => {
             // TODO: write neo4j queries in other file
             await Neo4j.write("match (n) detach delete (n);")
             await Neo4j.write(`
-                CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${guildOne.guildId}"})
+                CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${platformOne.metadata?.id}"})
                 CREATE (b:DiscordAccount) -[:IS_MEMBER]->(g)
                 CREATE (c:DiscordAccount) -[:IS_MEMBER]->(g)
                 CREATE (d:DiscordAccount) -[:IS_MEMBER]->(g)
@@ -691,21 +752,21 @@ describe('member-activity routes', () => {
                 MERGE (g) -[:HAVE_METRICS {date: ${twodaysAgoTimestamp}, decentralizationScore: 133.33333333333334 }]->(g)
                 MERGE (g) -[:HAVE_METRICS {date: ${yesterdayTimestamp}, decentralizationScore: 66.66666666666669 }]->(g)
 
-                SET r.guildId = "${guildOne.guildId}"
-                SET r2.guildId = "${guildOne.guildId}"
-                SET r3.guildId = "${guildOne.guildId}"
-                SET r4.guildId = "${guildOne.guildId}"
-                SET r5.guildId = "${guildOne.guildId}"
-                SET r6.guildId = "${guildOne.guildId}"
-                SET r7.guildId = "${guildOne.guildId}"
-                SET r8.guildId = "${guildOne.guildId}"
-                SET r9.guildId = "${guildOne.guildId}"
-                SET r10.guildId = "${guildOne.guildId}"
-                SET r11.guildId = "${guildOne.guildId}"
-                SET r12.guildId = "${guildOne.guildId}"`)
+                SET r.guildId = "${platformOne.metadata?.id}"
+                SET r2.guildId = "${platformOne.metadata?.id}"
+                SET r3.guildId = "${platformOne.metadata?.id}"
+                SET r4.guildId = "${platformOne.metadata?.id}"
+                SET r5.guildId = "${platformOne.metadata?.id}"
+                SET r6.guildId = "${platformOne.metadata?.id}"
+                SET r7.guildId = "${platformOne.metadata?.id}"
+                SET r8.guildId = "${platformOne.metadata?.id}"
+                SET r9.guildId = "${platformOne.metadata?.id}"
+                SET r10.guildId = "${platformOne.metadata?.id}"
+                SET r11.guildId = "${platformOne.metadata?.id}"
+                SET r12.guildId = "${platformOne.metadata?.id}"`)
 
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildTwo.guildId}/decentralisation-score`)
+                .get(`/api/v1/member-activity/${platformTwo._id}/decentralisation-score`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
 
@@ -714,7 +775,7 @@ describe('member-activity routes', () => {
 
         test('should return 401 if access token is missing', async () => {
             await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/decentralisation-score`)
+                .get(`/api/v1/member-activity/${platformOne.metadata?.id}/decentralisation-score`)
                 .send({ startDate: new Date(), endDate: new Date() })
                 .expect(httpStatus.UNAUTHORIZED);
         })
@@ -723,24 +784,36 @@ describe('member-activity routes', () => {
             await insertUsers([userOne]);
             await request(app)
 
-                .get(`/api/v1/member-activity/${guildOne.guildId}/decentralisation-score`)
+                .get(`/api/v1/member-activity/${platformOne._id}/decentralisation-score`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.NOT_FOUND);
         })
+
+        test('should return 400 if given platform is not discord', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformFour]);
+            await request(app)
+                .get(`/api/v1/member-activity/${platformFour._id}/decentralisation-score`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.BAD_REQUEST);
+        })
     })
 
-    describe('GET /api/v1/member-activity/:guildId/active-members-composition-table', () => {
+    describe('POST /api/v1/member-activity/:platformId/active-members-composition-table', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
         });
         test('should return 200 and apply the default query options', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour, guildMemberFive], connection);
-            await insertRoles([role1, role2, role3], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4, discordGuildMember5], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(httpStatus.OK);
@@ -755,71 +828,71 @@ describe('member-activity routes', () => {
 
             expect(res.body.results).toHaveLength(4);
             expect(res.body.results[0]).toEqual({
-                discordId: guildMemberThree.discordId,
-                username: guildMemberThree.username,
-                ngu: guildMemberThree.username,
-                avatar: guildMemberThree.avatar,
+                discordId: discordGuildMember3.discordId,
+                username: discordGuildMember3.username,
+                ngu: discordGuildMember3.username,
+                avatar: discordGuildMember3.avatar,
                 roles: [
-                    { roleId: role2.roleId, name: role2.name, color: role2.color }
+                    { roleId: discordRole2.roleId, name: discordRole2.name, color: discordRole2.color }
                 ],
-                joinedAt: guildMemberThree.joinedAt.toISOString(),
-                discriminator: guildMemberThree.discriminator,
+                joinedAt: discordGuildMember3.joinedAt.toISOString(),
+                discriminator: discordGuildMember3.discriminator,
                 activityComposition: ['Newly active'],
-                nickname: guildMemberThree.nickname,
-                globalName: guildMemberThree.globalName
+                nickname: discordGuildMember3.nickname,
+                globalName: discordGuildMember3.globalName
             });
 
             expect(res.body.results[1]).toEqual({
-                discordId: guildMemberOne.discordId,
-                username: guildMemberOne.username,
-                ngu: guildMemberOne.globalName,
-                avatar: guildMemberOne.avatar,
+                discordId: discordGuildMember1.discordId,
+                username: discordGuildMember1.username,
+                ngu: discordGuildMember1.globalName,
+                avatar: discordGuildMember1.avatar,
                 roles: [
-                    { roleId: role2.roleId, name: role2.name, color: role2.color },
-                    { roleId: role3.roleId, name: role3.name, color: role3.color }
+                    { roleId: discordRole2.roleId, name: discordRole2.name, color: discordRole2.color },
+                    { roleId: discordRole3.roleId, name: discordRole3.name, color: discordRole3.color }
 
                 ],
-                joinedAt: guildMemberOne.joinedAt.toISOString(),
-                discriminator: guildMemberOne.discriminator,
+                joinedAt: discordGuildMember1.joinedAt.toISOString(),
+                discriminator: discordGuildMember1.discriminator,
                 activityComposition: ['Newly active', 'Became disengaged'],
-                nickname: guildMemberOne.nickname,
-                globalName: guildMemberOne.globalName
+                nickname: discordGuildMember1.nickname,
+                globalName: discordGuildMember1.globalName
             });
 
             expect(res.body.results[2]).toEqual({
-                discordId: guildMemberTwo.discordId,
-                username: guildMemberTwo.username,
-                ngu: guildMemberTwo.nickname,
-                avatar: guildMemberTwo.avatar,
+                discordId: discordGuildMember2.discordId,
+                username: discordGuildMember2.username,
+                ngu: discordGuildMember2.nickname,
+                avatar: discordGuildMember2.avatar,
                 roles: [
-                    { roleId: role1.roleId, name: role1.name, color: role1.color },
-                    { roleId: role3.roleId, name: role3.name, color: role3.color }
+                    { roleId: discordRole1.roleId, name: discordRole1.name, color: discordRole1.color },
+                    { roleId: discordRole3.roleId, name: discordRole3.name, color: discordRole3.color }
                 ],
-                joinedAt: guildMemberTwo.joinedAt.toISOString(),
-                discriminator: guildMemberTwo.discriminator,
+                joinedAt: discordGuildMember2.joinedAt.toISOString(),
+                discriminator: discordGuildMember2.discriminator,
                 activityComposition: ['Newly active'],
-                nickname: guildMemberTwo.nickname,
-                globalName: guildMemberTwo.globalName
+                nickname: discordGuildMember2.nickname,
+                globalName: discordGuildMember2.globalName
             });
 
             expect(res.body.results[3]).toEqual({
-                discordId: guildMemberFour.discordId,
-                username: guildMemberFour.username + "#" + guildMemberFour.discriminator,
-                ngu: guildMemberFour.username + "#" + guildMemberFour.discriminator,
-                avatar: guildMemberFour.avatar,
+                discordId: discordGuildMember4.discordId,
+                username: discordGuildMember4.username + "#" + discordGuildMember4.discriminator,
+                ngu: discordGuildMember4.username + "#" + discordGuildMember4.discriminator,
+                avatar: discordGuildMember4.avatar,
                 roles: [
-                    { roleId: role1.roleId, name: role1.name, color: role1.color }],
-                joinedAt: guildMemberFour.joinedAt.toISOString(),
-                discriminator: guildMemberFour.discriminator,
+                    { roleId: discordRole1.roleId, name: discordRole1.name, color: discordRole1.color }],
+                joinedAt: discordGuildMember4.joinedAt.toISOString(),
+                discriminator: discordGuildMember4.discriminator,
                 activityComposition: ['Others'],
-                nickname: guildMemberFour.nickname,
-                globalName: guildMemberFour.globalName
+                nickname: discordGuildMember4.nickname,
+                globalName: discordGuildMember4.globalName
             });
         })
 
         test('should return 401 if access token is missing', async () => {
             await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
                 .send()
                 .expect(httpStatus.UNAUTHORIZED);
         })
@@ -827,21 +900,22 @@ describe('member-activity routes', () => {
         test('should return 404 if guild not found', async () => {
             await insertUsers([userOne]);
             await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(httpStatus.NOT_FOUND);
         })
 
         test('should correctly apply filter on activityComposition field', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            await insertRoles([role1, role2, role3], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
 
             let res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ activityComposition: ["all_active"] })
                 .send()
@@ -857,7 +931,7 @@ describe('member-activity routes', () => {
             expect(res.body.results).toHaveLength(0);
 
             res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ activityComposition: ["all_active", "others"] })
                 .send()
@@ -871,11 +945,11 @@ describe('member-activity routes', () => {
                 totalResults: 1,
             });
             expect(res.body.results).toHaveLength(1);
-            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember4.discordId);
             expect(res.body.results[0].activityComposition).toEqual(['Others']);
 
             res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ activityComposition: ["others"] })
                 .send()
@@ -890,11 +964,11 @@ describe('member-activity routes', () => {
             });
 
             expect(res.body.results).toHaveLength(1);
-            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember4.discordId);
             expect(res.body.results[0].activityComposition).toEqual(['Others']);
 
             res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ activityComposition: ["all_new_active", "all_new_disengaged"] })
                 .send()
@@ -910,28 +984,26 @@ describe('member-activity routes', () => {
 
             expect(res.body.results).toHaveLength(3);
 
-            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember3.discordId);
             expect(res.body.results[0].activityComposition).toEqual(['Newly active']);
-            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember1.discordId);
             expect(res.body.results[1].activityComposition).toEqual(['Newly active', 'Became disengaged']);
-            expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[2].discordId).toBe(discordGuildMember2.discordId);
             expect(res.body.results[2].activityComposition).toEqual(['Newly active']);
 
 
         })
 
-        test('should correctly apply filter on roles field', async () => {
+        test('should correctly apply filter on roles field if include provided', async () => {
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            await insertRoles([role1, role2, role3], connection);
-
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .query({ roles: ["987654321123456789"] })
-                .send()
+                .send({ allRoles: false, include: ["987654321123456789"] })
                 .expect(httpStatus.OK);
 
             expect(res.body).toEqual({
@@ -942,19 +1014,42 @@ describe('member-activity routes', () => {
                 totalResults: 2,
             });
             expect(res.body.results).toHaveLength(2);
-            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember3.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember1.discordId);
+        })
+
+        test('should correctly apply filter on roles field if exclude provided', async () => {
+            await insertUsers([userOne]);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+            const res = await request(app)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ allRoles: false, exclude: ["123456789987654321"] })
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 2,
+            });
+            expect(res.body.results).toHaveLength(2);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember3.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember4.discordId);
         })
 
         test('should correctly apply filter on username field', async () => {
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            await insertRoles([role1, role2, role3], connection);
-
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ ngu: "behzad" })
                 .send()
@@ -968,19 +1063,18 @@ describe('member-activity routes', () => {
                 totalResults: 2,
             });
             expect(res.body.results).toHaveLength(2);
-            expect(res.body.results[0].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember1.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember4.discordId);
 
         })
         test('should correctly sort the returned array if descending sort param is specified', async () => {
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            await insertRoles([role1, role2, role3], connection);
-
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ sortBy: 'joinedAt:desc' })
                 .send()
@@ -994,21 +1088,21 @@ describe('member-activity routes', () => {
                 totalResults: 4,
             });
             expect(res.body.results).toHaveLength(4);
-            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberTwo.discordId);
-            expect(res.body.results[2].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[3].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember4.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember2.discordId);
+            expect(res.body.results[2].discordId).toBe(discordGuildMember1.discordId);
+            expect(res.body.results[3].discordId).toBe(discordGuildMember3.discordId);
         })
 
         test('should correctly sort the returned array if ascending  sort param is specified', async () => {
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            await insertRoles([role1, role2, role3], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
 
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ sortBy: 'joinedAt:asc' })
                 .send()
@@ -1022,21 +1116,21 @@ describe('member-activity routes', () => {
                 totalResults: 4,
             });
             expect(res.body.results).toHaveLength(4);
-            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
-            expect(res.body.results[3].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember3.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember1.discordId);
+            expect(res.body.results[2].discordId).toBe(discordGuildMember2.discordId);
+            expect(res.body.results[3].discordId).toBe(discordGuildMember4.discordId);
         })
 
         test('should correctly sort the returned array if multiple sorting criteria are specified', async () => {
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            await insertRoles([role1, role2, role3], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
 
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ sortBy: 'joinedAt:desc,username:asc' })
                 .send()
@@ -1050,7 +1144,7 @@ describe('member-activity routes', () => {
                 totalResults: 4,
             });
 
-            const expectedOrder = [guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour].sort((a, b) => {
+            const expectedOrder = [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4].sort((a, b) => {
                 if (a.joinedAt < b.joinedAt) {
                     return 1;
                 }
@@ -1067,13 +1161,13 @@ describe('member-activity routes', () => {
 
         test('should limit returned array if limit param is specified', async () => {
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            await insertRoles([role1, role2, role3], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
 
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ limit: 2 })
                 .send()
@@ -1088,19 +1182,19 @@ describe('member-activity routes', () => {
             });
 
             expect(res.body.results).toHaveLength(2);
-            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember3.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember1.discordId);
         })
 
         test('should correctly sort the returned array if page and limit are  specified', async () => {
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            await insertRoles([role1, role2, role3], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
 
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ page: 2, limit: 2 })
                 .send()
@@ -1115,23 +1209,35 @@ describe('member-activity routes', () => {
             });
 
             expect(res.body.results).toHaveLength(2);
-            expect(res.body.results[0].discordId).toBe(guildMemberTwo.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember2.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember4.discordId);
+        })
+
+        test('should return 400 if given platform is not discord', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformFour]);
+            await request(app)
+                .post(`/api/v1/member-activity/${platformFour._id}/active-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.BAD_REQUEST);
         })
     })
 
-    describe('GET /api/v1/member-activity/:guildId/active-members-onboarding-table', () => {
+    describe('POST /api/v1/member-activity/:platformId/active-members-onboarding-table', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
         });
         test('should return 200 and apply the default query options', async () => {
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour, guildMemberFive], connection);
-            await insertRoles([role1, role2, role3], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(httpStatus.OK);
@@ -1146,72 +1252,72 @@ describe('member-activity routes', () => {
 
             expect(res.body.results).toHaveLength(4);
             expect(res.body.results[0]).toEqual({
-                discordId: guildMemberThree.discordId,
-                username: guildMemberThree.username,
-                ngu: guildMemberThree.username,
-                avatar: guildMemberThree.avatar,
+                discordId: discordGuildMember3.discordId,
+                username: discordGuildMember3.username,
+                ngu: discordGuildMember3.username,
+                avatar: discordGuildMember3.avatar,
                 roles: [
-                    { roleId: role2.roleId, name: role2.name, color: role2.color }
+                    { roleId: discordRole2.roleId, name: discordRole2.name, color: discordRole2.color }
                 ],
-                joinedAt: guildMemberThree.joinedAt.toISOString(),
-                discriminator: guildMemberThree.discriminator,
+                joinedAt: discordGuildMember3.joinedAt.toISOString(),
+                discriminator: discordGuildMember3.discriminator,
                 activityComposition: ['Newly active', 'Dropped'],
-                nickname: guildMemberThree.nickname,
-                globalName: guildMemberThree.globalName
+                nickname: discordGuildMember3.nickname,
+                globalName: discordGuildMember3.globalName
             });
 
             expect(res.body.results[1]).toEqual({
-                discordId: guildMemberOne.discordId,
-                username: guildMemberOne.username,
-                ngu: guildMemberOne.globalName,
-                avatar: guildMemberOne.avatar,
+                discordId: discordGuildMember1.discordId,
+                username: discordGuildMember1.username,
+                ngu: discordGuildMember1.globalName,
+                avatar: discordGuildMember1.avatar,
                 roles: [
-                    { roleId: role2.roleId, name: role2.name, color: role2.color },
-                    { roleId: role3.roleId, name: role3.name, color: role3.color }
+                    { roleId: discordRole2.roleId, name: discordRole2.name, color: discordRole2.color },
+                    { roleId: discordRole3.roleId, name: discordRole3.name, color: discordRole3.color }
 
                 ],
-                joinedAt: guildMemberOne.joinedAt.toISOString(),
-                discriminator: guildMemberOne.discriminator,
+                joinedAt: discordGuildMember1.joinedAt.toISOString(),
+                discriminator: discordGuildMember1.discriminator,
                 activityComposition: ['Newly active', 'Joined', 'Dropped'],
-                nickname: guildMemberOne.nickname,
-                globalName: guildMemberOne.globalName
+                nickname: discordGuildMember1.nickname,
+                globalName: discordGuildMember1.globalName
             });
 
             expect(res.body.results[2]).toEqual({
-                discordId: guildMemberTwo.discordId,
-                username: guildMemberTwo.username,
-                ngu: guildMemberTwo.nickname,
-                avatar: guildMemberTwo.avatar,
+                discordId: discordGuildMember2.discordId,
+                username: discordGuildMember2.username,
+                ngu: discordGuildMember2.nickname,
+                avatar: discordGuildMember2.avatar,
                 roles: [
-                    { roleId: role1.roleId, name: role1.name, color: role1.color },
-                    { roleId: role3.roleId, name: role3.name, color: role3.color }
+                    { roleId: discordRole1.roleId, name: discordRole1.name, color: discordRole1.color },
+                    { roleId: discordRole3.roleId, name: discordRole3.name, color: discordRole3.color }
                 ],
-                joinedAt: guildMemberTwo.joinedAt.toISOString(),
-                discriminator: guildMemberTwo.discriminator,
+                joinedAt: discordGuildMember2.joinedAt.toISOString(),
+                discriminator: discordGuildMember2.discriminator,
                 activityComposition: ['Newly active', 'Dropped'],
-                nickname: guildMemberTwo.nickname,
-                globalName: guildMemberTwo.globalName
+                nickname: discordGuildMember2.nickname,
+                globalName: discordGuildMember2.globalName
             });
 
             expect(res.body.results[3]).toEqual({
-                discordId: guildMemberFour.discordId,
-                username: guildMemberFour.username + "#" + guildMemberFour.discriminator,
-                ngu: guildMemberFour.username + "#" + guildMemberFour.discriminator,
-                avatar: guildMemberFour.avatar,
+                discordId: discordGuildMember4.discordId,
+                username: discordGuildMember4.username + "#" + discordGuildMember4.discriminator,
+                ngu: discordGuildMember4.username + "#" + discordGuildMember4.discriminator,
+                avatar: discordGuildMember4.avatar,
                 roles: [
-                    { roleId: role1.roleId, name: role1.name, color: role1.color },
+                    { roleId: discordRole1.roleId, name: discordRole1.name, color: discordRole1.color },
                 ],
-                joinedAt: guildMemberFour.joinedAt.toISOString(),
-                discriminator: guildMemberFour.discriminator,
+                joinedAt: discordGuildMember4.joinedAt.toISOString(),
+                discriminator: discordGuildMember4.discriminator,
                 activityComposition: ['Others'],
-                nickname: guildMemberFour.nickname,
-                globalName: guildMemberFour.globalName
+                nickname: discordGuildMember4.nickname,
+                globalName: discordGuildMember4.globalName
             });
         })
 
         test('should return 401 if access token is missing', async () => {
             await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
                 .send()
                 .expect(httpStatus.UNAUTHORIZED);
         })
@@ -1219,7 +1325,7 @@ describe('member-activity routes', () => {
         test('should return 404 if guild not found', async () => {
             await insertUsers([userOne]);
             await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(httpStatus.NOT_FOUND);
@@ -1227,13 +1333,13 @@ describe('member-activity routes', () => {
 
         test('should correctly apply filter on activityComposition field', async () => {
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            await insertRoles([role1, role2, role3], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
 
             let res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ activityComposition: ["all_still_active"] })
                 .send()
@@ -1249,7 +1355,7 @@ describe('member-activity routes', () => {
             expect(res.body.results).toHaveLength(0);
 
             res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ activityComposition: ["others", "all_still_active"] })
                 .send()
@@ -1264,11 +1370,11 @@ describe('member-activity routes', () => {
             });
 
             expect(res.body.results).toHaveLength(1);
-            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember4.discordId);
             expect(res.body.results[0].activityComposition).toEqual(['Others']);
 
             res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ activityComposition: ["others"] })
                 .send()
@@ -1283,12 +1389,12 @@ describe('member-activity routes', () => {
             });
 
             expect(res.body.results).toHaveLength(1);
-            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember4.discordId);
             expect(res.body.results[0].activityComposition).toEqual(['Others']);
 
 
             res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ activityComposition: ["all_dropped", "all_joined"] })
                 .send()
@@ -1304,26 +1410,25 @@ describe('member-activity routes', () => {
 
 
             expect(res.body.results).toHaveLength(3);
-            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember3.discordId);
             expect(res.body.results[0].activityComposition).toEqual(['Dropped']);
-            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember1.discordId);
             expect(res.body.results[1].activityComposition).toEqual(['Joined', 'Dropped']);
-            expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[2].discordId).toBe(discordGuildMember2.discordId);
             expect(res.body.results[2].activityComposition).toEqual(['Dropped']);
         })
 
-        test('should correctly apply filter on roles field', async () => {
+        test('should correctly apply filter on roles field if include provided', async () => {
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            await insertRoles([role1, role2, role3], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
 
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .query({ roles: ["987654321123456789"] })
-                .send()
+                .send({ allRoles: false, include: ["987654321123456789"] })
                 .expect(httpStatus.OK);
 
             expect(res.body).toEqual({
@@ -1334,19 +1439,44 @@ describe('member-activity routes', () => {
                 totalResults: 2,
             });
             expect(res.body.results).toHaveLength(2);
-            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember3.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember1.discordId);
+        })
+
+        test('should correctly apply filter on roles field if exclude provided', async () => {
+            await insertUsers([userOne]);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+
+            const res = await request(app)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ allRoles: false, exclude: ["123456789987654321"] })
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 2,
+            });
+            expect(res.body.results).toHaveLength(2);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember3.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember4.discordId);
         })
 
         test('should correctly apply filter on username field', async () => {
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            await insertRoles([role1, role2, role3], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
 
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ ngu: "behzad" })
                 .send()
@@ -1360,19 +1490,19 @@ describe('member-activity routes', () => {
                 totalResults: 2,
             });
             expect(res.body.results).toHaveLength(2);
-            expect(res.body.results[0].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember1.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember4.discordId);
 
         })
         test('should correctly sort the returned array if descending sort param is specified', async () => {
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            await insertRoles([role1, role2, role3], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
 
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ sortBy: 'joinedAt:desc' })
                 .send()
@@ -1386,21 +1516,21 @@ describe('member-activity routes', () => {
                 totalResults: 4,
             });
             expect(res.body.results).toHaveLength(4);
-            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberTwo.discordId);
-            expect(res.body.results[2].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[3].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember4.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember2.discordId);
+            expect(res.body.results[2].discordId).toBe(discordGuildMember1.discordId);
+            expect(res.body.results[3].discordId).toBe(discordGuildMember3.discordId);
         })
 
         test('should correctly sort the returned array if ascending  sort param is specified', async () => {
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            await insertRoles([role1, role2, role3], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
 
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ sortBy: 'joinedAt:asc' })
                 .send()
@@ -1414,21 +1544,21 @@ describe('member-activity routes', () => {
                 totalResults: 4,
             });
             expect(res.body.results).toHaveLength(4);
-            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
-            expect(res.body.results[3].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember3.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember1.discordId);
+            expect(res.body.results[2].discordId).toBe(discordGuildMember2.discordId);
+            expect(res.body.results[3].discordId).toBe(discordGuildMember4.discordId);
         })
 
         test('should correctly sort the returned array if multiple sorting criteria are specified', async () => {
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            await insertRoles([role1, role2, role3], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
 
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ sortBy: 'joinedAt:desc,username:asc' })
                 .send()
@@ -1442,7 +1572,7 @@ describe('member-activity routes', () => {
                 totalResults: 4,
             });
 
-            const expectedOrder = [guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour].sort((a, b) => {
+            const expectedOrder = [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4].sort((a, b) => {
                 if (a.joinedAt < b.joinedAt) {
                     return 1;
                 }
@@ -1459,13 +1589,13 @@ describe('member-activity routes', () => {
 
         test('should limit returned array if limit param is specified', async () => {
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            await insertRoles([role1, role2, role3], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
 
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ limit: 2 })
                 .send()
@@ -1480,19 +1610,19 @@ describe('member-activity routes', () => {
             });
 
             expect(res.body.results).toHaveLength(2);
-            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember3.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember1.discordId);
         })
 
         test('should correctly sort the returned array if page and limit are specified', async () => {
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            await insertRoles([role1, role2, role3], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
 
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/active-members-onboarding-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ page: 2, limit: 2 })
                 .send()
@@ -1507,23 +1637,35 @@ describe('member-activity routes', () => {
             });
 
             expect(res.body.results).toHaveLength(2);
-            expect(res.body.results[0].discordId).toBe(guildMemberTwo.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember2.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember4.discordId);
+        })
+
+
+        test('should return 400 if given platform is not discord', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformFour]);
+            await request(app)
+                .post(`/api/v1/member-activity/${platformFour._id}/active-members-onboarding-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.BAD_REQUEST);
         })
     })
 
-    describe('GET /api/v1/member-activity/:guildId/disengaged-members-composition-table', () => {
+    describe('POST /api/v1/member-activity/:platformId/disengaged-members-composition-table', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
         });
         test('should return 200 and apply the default query options', async () => {
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour, guildMemberFive], connection);
-            await insertRoles([role1, role2, role3], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(httpStatus.OK);
@@ -1538,72 +1680,72 @@ describe('member-activity routes', () => {
 
             expect(res.body.results).toHaveLength(4);
             expect(res.body.results[0]).toEqual({
-                discordId: guildMemberThree.discordId,
-                username: guildMemberThree.username,
-                ngu: guildMemberThree.username,
-                avatar: guildMemberThree.avatar,
+                discordId: discordGuildMember3.discordId,
+                username: discordGuildMember3.username,
+                ngu: discordGuildMember3.username,
+                avatar: discordGuildMember3.avatar,
                 roles: [
-                    { roleId: role2.roleId, name: role2.name, color: role2.color }
+                    { roleId: discordRole2.roleId, name: discordRole2.name, color: discordRole2.color }
                 ],
-                joinedAt: guildMemberThree.joinedAt.toISOString(),
-                discriminator: guildMemberThree.discriminator,
+                joinedAt: discordGuildMember3.joinedAt.toISOString(),
+                discriminator: discordGuildMember3.discriminator,
                 activityComposition: ['Were newly active'],
-                nickname: guildMemberThree.nickname,
-                globalName: guildMemberThree.globalName
+                nickname: discordGuildMember3.nickname,
+                globalName: discordGuildMember3.globalName
             });
 
             expect(res.body.results[1]).toEqual({
-                discordId: guildMemberOne.discordId,
-                username: guildMemberOne.username,
-                ngu: guildMemberOne.globalName,
-                avatar: guildMemberOne.avatar,
+                discordId: discordGuildMember1.discordId,
+                username: discordGuildMember1.username,
+                ngu: discordGuildMember1.globalName,
+                avatar: discordGuildMember1.avatar,
                 roles: [
-                    { roleId: role2.roleId, name: role2.name, color: role2.color },
-                    { roleId: role3.roleId, name: role3.name, color: role3.color }
+                    { roleId: discordRole2.roleId, name: discordRole2.name, color: discordRole2.color },
+                    { roleId: discordRole3.roleId, name: discordRole3.name, color: discordRole3.color }
 
                 ],
-                joinedAt: guildMemberOne.joinedAt.toISOString(),
-                discriminator: guildMemberOne.discriminator,
+                joinedAt: discordGuildMember1.joinedAt.toISOString(),
+                discriminator: discordGuildMember1.discriminator,
                 activityComposition: ['Became disengaged', 'Were newly active', 'Were consistenly active'],
-                nickname: guildMemberOne.nickname,
-                globalName: guildMemberOne.globalName
+                nickname: discordGuildMember1.nickname,
+                globalName: discordGuildMember1.globalName
             });
 
             expect(res.body.results[2]).toEqual({
-                discordId: guildMemberTwo.discordId,
-                username: guildMemberTwo.username,
-                ngu: guildMemberTwo.nickname,
-                avatar: guildMemberTwo.avatar,
+                discordId: discordGuildMember2.discordId,
+                username: discordGuildMember2.username,
+                ngu: discordGuildMember2.nickname,
+                avatar: discordGuildMember2.avatar,
                 roles: [
-                    { roleId: role1.roleId, name: role1.name, color: role1.color },
-                    { roleId: role3.roleId, name: role3.name, color: role3.color }
+                    { roleId: discordRole1.roleId, name: discordRole1.name, color: discordRole1.color },
+                    { roleId: discordRole3.roleId, name: discordRole3.name, color: discordRole3.color }
                 ],
-                joinedAt: guildMemberTwo.joinedAt.toISOString(),
-                discriminator: guildMemberTwo.discriminator,
+                joinedAt: discordGuildMember2.joinedAt.toISOString(),
+                discriminator: discordGuildMember2.discriminator,
                 activityComposition: ['Were newly active'],
-                nickname: guildMemberTwo.nickname,
-                globalName: guildMemberTwo.globalName
+                nickname: discordGuildMember2.nickname,
+                globalName: discordGuildMember2.globalName
             });
 
             expect(res.body.results[3]).toEqual({
-                discordId: guildMemberFour.discordId,
-                username: guildMemberFour.username + "#" + guildMemberFour.discriminator,
-                ngu: guildMemberFour.username + "#" + guildMemberFour.discriminator,
-                avatar: guildMemberFour.avatar,
+                discordId: discordGuildMember4.discordId,
+                username: discordGuildMember4.username + "#" + discordGuildMember4.discriminator,
+                ngu: discordGuildMember4.username + "#" + discordGuildMember4.discriminator,
+                avatar: discordGuildMember4.avatar,
                 roles: [
-                    { roleId: role1.roleId, name: role1.name, color: role1.color },
+                    { roleId: discordRole1.roleId, name: discordRole1.name, color: discordRole1.color },
                 ],
-                joinedAt: guildMemberFour.joinedAt.toISOString(),
-                discriminator: guildMemberFour.discriminator,
+                joinedAt: discordGuildMember4.joinedAt.toISOString(),
+                discriminator: discordGuildMember4.discriminator,
                 activityComposition: ['Others'],
-                nickname: guildMemberFour.nickname,
-                globalName: guildMemberFour.globalName
+                nickname: discordGuildMember4.nickname,
+                globalName: discordGuildMember4.globalName
             });
         })
 
         test('should return 401 if access token is missing', async () => {
             await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)
                 .send()
                 .expect(httpStatus.UNAUTHORIZED);
         })
@@ -1611,21 +1753,23 @@ describe('member-activity routes', () => {
         test('should return 404 if guild not found', async () => {
             await insertUsers([userOne]);
             await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(httpStatus.NOT_FOUND);
         })
 
         test('should correctly apply filter on activityComposition field', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            await insertRoles([role1, role2, role3], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+
 
             let res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ activityComposition: ["all_disengaged_were_vital"] })
                 .send()
@@ -1641,7 +1785,7 @@ describe('member-activity routes', () => {
             expect(res.body.results).toHaveLength(0);
 
             res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ activityComposition: ["others", "all_disengaged_were_vital"] })
                 .send()
@@ -1656,11 +1800,11 @@ describe('member-activity routes', () => {
             });
 
             expect(res.body.results).toHaveLength(1);
-            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember4.discordId);
             expect(res.body.results[0].activityComposition).toEqual(['Others']);
 
             res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ activityComposition: ["others"] })
                 .send()
@@ -1675,11 +1819,11 @@ describe('member-activity routes', () => {
             });
 
             expect(res.body.results).toHaveLength(1);
-            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember4.discordId);
             expect(res.body.results[0].activityComposition).toEqual(['Others']);
 
             res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ activityComposition: ["all_disengaged_were_newly_active", "all_disengaged_were_consistently_active"] })
                 .send()
@@ -1694,26 +1838,27 @@ describe('member-activity routes', () => {
             });
 
             expect(res.body.results).toHaveLength(3);
-            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember3.discordId);
             expect(res.body.results[0].activityComposition).toEqual(['Were newly active']);
-            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember1.discordId);
             expect(res.body.results[1].activityComposition).toEqual(['Were newly active', 'Were consistenly active']);
-            expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
+            expect(res.body.results[2].discordId).toBe(discordGuildMember2.discordId);
             expect(res.body.results[2].activityComposition).toEqual(['Were newly active']);
         })
 
-        test('should correctly apply filter on roles field', async () => {
+        test('should correctly apply filter on roles field if include provided', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            await insertRoles([role1, role2, role3], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+
 
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .query({ roles: ["987654321123456789"] })
-                .send()
+                .send({ allRoles: false, include: ["987654321123456789"] })
                 .expect(httpStatus.OK);
 
             expect(res.body).toEqual({
@@ -1724,19 +1869,47 @@ describe('member-activity routes', () => {
                 totalResults: 2,
             });
             expect(res.body.results).toHaveLength(2);
-            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember3.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember1.discordId);
         })
 
-        test('should correctly apply filter on username field', async () => {
+        test('should correctly apply filter on roles field if exclude provided', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            await insertRoles([role1, role2, role3], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+
 
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ allRoles: false, exclude: ["123456789987654321"] })
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 2,
+            });
+            expect(res.body.results).toHaveLength(2);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember3.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember4.discordId);
+        })
+        test('should correctly apply filter on username field', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+
+
+            const res = await request(app)
+                .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ ngu: "behzad" })
                 .send()
@@ -1750,19 +1923,21 @@ describe('member-activity routes', () => {
                 totalResults: 2,
             });
             expect(res.body.results).toHaveLength(2);
-            expect(res.body.results[0].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember1.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember4.discordId);
 
         })
         test('should correctly sort the returned array if descending sort param is specified', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            await insertRoles([role1, role2, role3], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+
 
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ sortBy: 'joinedAt:desc' })
                 .send()
@@ -1776,21 +1951,22 @@ describe('member-activity routes', () => {
                 totalResults: 4,
             });
             expect(res.body.results).toHaveLength(4);
-            expect(res.body.results[0].discordId).toBe(guildMemberFour.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberTwo.discordId);
-            expect(res.body.results[2].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[3].discordId).toBe(guildMemberThree.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember4.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember2.discordId);
+            expect(res.body.results[2].discordId).toBe(discordGuildMember1.discordId);
+            expect(res.body.results[3].discordId).toBe(discordGuildMember3.discordId);
         })
 
         test('should correctly sort the returned array if ascending  sort param is specified', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            await insertRoles([role1, role2, role3], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
 
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ sortBy: 'joinedAt:asc' })
                 .send()
@@ -1804,21 +1980,23 @@ describe('member-activity routes', () => {
                 totalResults: 4,
             });
             expect(res.body.results).toHaveLength(4);
-            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
-            expect(res.body.results[2].discordId).toBe(guildMemberTwo.discordId);
-            expect(res.body.results[3].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember3.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember1.discordId);
+            expect(res.body.results[2].discordId).toBe(discordGuildMember2.discordId);
+            expect(res.body.results[3].discordId).toBe(discordGuildMember4.discordId);
         })
 
         test('should correctly sort the returned array if multiple sorting criteria are specified', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            await insertRoles([role1, role2, role3], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+
 
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ sortBy: 'joinedAt:desc,username:asc' })
                 .send()
@@ -1832,7 +2010,7 @@ describe('member-activity routes', () => {
                 totalResults: 4,
             });
 
-            const expectedOrder = [guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour].sort((a, b) => {
+            const expectedOrder = [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4].sort((a, b) => {
                 if (a.joinedAt < b.joinedAt) {
                     return 1;
                 }
@@ -1848,14 +2026,15 @@ describe('member-activity routes', () => {
         })
 
         test('should limit returned array if limit param is specified', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            await insertRoles([role1, role2, role3], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
 
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ limit: 2 })
                 .send()
@@ -1870,19 +2049,20 @@ describe('member-activity routes', () => {
             });
 
             expect(res.body.results).toHaveLength(2);
-            expect(res.body.results[0].discordId).toBe(guildMemberThree.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberOne.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember3.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember1.discordId);
         })
 
         test('should correctly sort the returned array if page and limit are specified', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertMemberActivities([memberActivityOne, memberActivityTwo, memberActivityThree, memberActivityFour], connection);
-            await insertGuildMembers([guildMemberOne, guildMemberTwo, guildMemberThree, guildMemberFour], connection);
-            await insertRoles([role1, role2, role3], connection);
+            await insertPlatforms([platformOne]);
+            await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection);
+            await insertRoles([discordRole1, discordRole2, discordRole3], connection);
 
             const res = await request(app)
-                .get(`/api/v1/member-activity/${guildOne.guildId}/disengaged-members-composition-table`)
+                .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .query({ page: 2, limit: 2 })
                 .send()
@@ -1897,8 +2077,21 @@ describe('member-activity routes', () => {
             });
 
             expect(res.body.results).toHaveLength(2);
-            expect(res.body.results[0].discordId).toBe(guildMemberTwo.discordId);
-            expect(res.body.results[1].discordId).toBe(guildMemberFour.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember2.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember4.discordId);
+        })
+
+
+
+        test('should return 400 if given platform is not discord', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformFour]);
+            await request(app)
+                .post(`/api/v1/member-activity/${platformFour._id}/disengaged-members-composition-table`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ startDate: new Date(), endDate: new Date() })
+                .expect(httpStatus.BAD_REQUEST);
         })
     })
 

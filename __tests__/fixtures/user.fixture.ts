@@ -1,25 +1,31 @@
-import { Types } from "mongoose"
+import { Types } from 'mongoose';
 import { User } from '@togethercrew.dev/db';
 
+interface UserFixture {
+    _id: Types.ObjectId;
+    discordId: string;
+    email?: string;
+    communities?: Types.ObjectId[];
+}
 
-export const userOne = {
+export const userOne: UserFixture = {
     _id: new Types.ObjectId(),
-    discordId: "681946187490000900",
-    email: "some@yahoo.com",
-    verified: false,
-    avatar: '947f3e19e6e36a2679c6fe854b79a615',
+    discordId: "681946187490000902",
+    email: "example@outlook.com",
 };
 
-export const userTwo = {
+export const userTwo: UserFixture = {
     _id: new Types.ObjectId(),
-    discordId: "681946187490000901",
-    email: "some@gmail.com",
-    verified: false,
-    avatar: '947f3e19e6e36a2679c6fe854b79a615',
+    discordId: "681946187490000903",
 };
 
-
+export const userThree: UserFixture = {
+    _id: new Types.ObjectId(),
+    discordId: "681946187490000904",
+};
 
 export const insertUsers = async function <Type>(users: Array<Type>) {
-    await User.insertMany(users.map((user) => (user)));
+    for (const user of users) {
+        await User.create(user);
+    }
 };

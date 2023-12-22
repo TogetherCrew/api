@@ -1,40 +1,34 @@
 paths:
-  /api/v1/auth/try-now:
+  /api/v1/auth/discord/authorize:
     get:
       tags:
-        - [Auth]
-      summary: Try now using discord oauth2 (it will redirect to discord so can not use this api here)
-      description: See [Discord oauth2](https://discord.com/developers/docs/topics/oauth2#oauth2) for more information
+        - Auth
+      summary: Discord OAuth2 Authorization
+      description: Redirects the user to the Discord OAuth2 authorization page.
       responses:
         "302":
-          description: Found
-          $ref: "#/components/responses/Found"
-  /api/v1/auth/login:
-    get:
-      tags:
-        - [Auth]
-      summary: login using discord oauth2 (it will redirect to discord so can not use this api here)
-      description: See [Discord oauth2](https://discord.com/developers/docs/topics/oauth2#oauth2) for more information
-      responses:
-        "302":
-          description: Found
+          description: Found (Redirect to Discord OAuth2 page)
           $ref: "#/components/responses/Found"
 
   /api/v1/auth/refresh-tokens:
     post:
       tags:
-        - [Auth]
-      summary: refresh auth tokens
+        - Auth
+      summary: Refresh the authentication tokens.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required:
+              properties:
                 refreshToken:
+                  type: string
+                  description: The refresh token previously issued to the client.
+              required:
+                - refreshToken
               example:
-                refreshToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWJhYzUzNDk1NGI1NDEzOTgwNmMxMTIiLCJpYXQiOjE1ODkyOTg0ODQsImV4cCI6MTU4OTMwMDI4NH0.m1U63blB0MLej_WfB7yC2FTMnCziif9X8yzwDEfJXAg
+                refreshToken: "eyJhbGci...8yzwDEfJXAg"
       responses:
         "200":
           description: OK
@@ -60,25 +54,29 @@ paths:
   /api/v1/auth/logout:
     post:
       tags:
-        - [Auth]
-      summary: logout user
+        - Auth
+      summary: Logout the user and invalidate the provided refresh token.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required:
+              properties:
                 refreshToken:
+                  type: string
+                  description: The refresh token to be invalidated.
+              required:
+                - refreshToken
               example:
-                refreshToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWJhYzUzNDk1NGI1NDEzOTgwNmMxMTIiLCJpYXQiOjE1ODkyOTg0ODQsImV4cCI6MTU4OTMwMDI4NH0.m1U63blB0MLej_WfB7yC2FTMnCziif9X8yzwDEfJXAg
+                refreshToken: "eyJhbGci...8yzwDEfJXAg"
       responses:
         "204":
-          description: No Content
+          description: No Content (Successfully logged out)
           $ref: "#/components/responses/NoContent"
         "400":
           description: Bad Request
           $ref: "#/components/responses/BadRequest"
         "404":
-          description: Not found
+          description: Not found (Invalid refresh token)
           $ref: "#/components/responses/NotFound"

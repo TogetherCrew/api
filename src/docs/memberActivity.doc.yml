@@ -1,18 +1,18 @@
 paths:
-  /api/v1/member-activity/{guildId}/active-members-composition-line-graph:
+  /api/v1/member-activity/{platformId}/active-members-composition-line-graph:
     post:
       tags:
         - [Member-Activity]
-      summary: Get data for active members composition line graph 
+      summary: Get data for active members composition line graph - discord only 
       security:
         - bearerAuth: []
       parameters:
         - in: path
-          name: guildId
+          name: platformId
           required: true
           schema:
             type: string
-          description: Guild Id
+          description: Platform Id
       requestBody:
         required: true
         content:
@@ -82,20 +82,20 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
-  /api/v1/member-activity/{guildId}/disengaged-members-composition-line-graph:
+  /api/v1/member-activity/{platformId}/disengaged-members-composition-line-graph:
     post:
       tags:
         - [Member-Activity]
-      summary: Get data for disengaged memebres composition line graph 
+      summary: Get data for disengaged memebres composition line graph - discord only 
       security:
         - bearerAuth: []
       parameters:
         - in: path
-          name: guildId
+          name: platformId
           required: true
           schema:
             type: string
-          description: Guild Id
+          description: Platform Id
       requestBody:
         required: true
         content:
@@ -160,20 +160,20 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
-  /api/v1/member-activity/{guildId}/inactive-members-line-graph:
+  /api/v1/member-activity/{platformId}/inactive-members-line-graph:
     post:
       tags:
         - [Member-Activity]
-      summary: Get data for inactive members line graph 
+      summary: Get data for inactive members line graph - discord only 
       security:
         - bearerAuth: []
       parameters:
         - in: path
-          name: guildId
+          name: platformId
           required: true
           schema:
             type: string
-          description: Guild Id
+          description: Platform Id
       requestBody:
         required: true
         content:
@@ -225,20 +225,20 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
-  /api/v1/member-activity/{guildId}/members-interactions-network-graph:
+  /api/v1/member-activity/{platformId}/members-interactions-network-graph:
     post:
       tags:
         - [Member-Activity]
-      summary: Get data for active members interactions graph
+      summary: Get data for active members interactions graph - discord only 
       security:
         - bearerAuth: []
       parameters:
         - in: path
-          name: guildId
+          name: platformId
           required: true
           schema:
             type: string
-          description: Guild ID
+          description: Platform Id
       responses:
         "200":
           description: Successful operation
@@ -333,20 +333,20 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
-  /api/v1/member-activity/{guildId}/fragmentation-score:
+  /api/v1/member-activity/{platformId}/fragmentation-score:
     get:
       tags:
         - [Member-Activity]
-      summary: Get data for fragmentation score
+      summary: Get data for fragmentation score - discord only 
       security:
         - bearerAuth: []
       parameters:
         - in: path
-          name: guildId
+          name: platformId
           required: true
           schema:
             type: string
-          description: Guild Id
+          description: Platform Id
       responses:
         "200":
           description: OK
@@ -382,20 +382,20 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
-  /api/v1/member-activity/{guildId}/decentralisation-score:
+  /api/v1/member-activity/{platformId}/decentralisation-score:
     get:
       tags:
         - [Member-Activity]
-      summary: Get data for decentralisation score
+      summary: Get data for decentralisation score - discord only 
       security:
         - bearerAuth: []
       parameters:
         - in: path
-          name: guildId
+          name: platformId
           required: true
           schema:
             type: string
-          description: Guild Id
+          description: Platform Id
       responses:
         "200":
           description: OK
@@ -431,20 +431,20 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
-  /api/v1/member-activity/{guildId}/active-members-onboarding-line-graph:
+  /api/v1/member-activity/{platformId}/active-members-onboarding-line-graph:
     post:
       tags:
         - [Member-Activity]
-      summary: Get data for active members onboarding line graph 
+      summary: Get data for active members onboarding line graph - discord only 
       security:
         - bearerAuth: []
       parameters:
         - in: path
-          name: guildId
+          name: platformId
           required: true
           schema:
             type: string
-          description: Guild Id
+          description: Platform Id
           
       requestBody:
         required: true
@@ -510,21 +510,21 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
-  /api/v1/member-activity/{guildId}/active-members-composition-table:
-    get:
+  /api/v1/member-activity/{platformId}/active-members-composition-table:
+    post:
       tags:
         - [Member-Activity]
-      summary: Get data for active members composition table
+      summary: Get data for active members composition table - discord only 
       security:
         - bearerAuth: []
       description: for now sortBy just can apply for ngu and joinedAt(DaoMemberSince in UI)
       parameters:
         - in: path
-          name: guildId
+          name: platformId
           required: true
           schema:
             type: string
-          description: Guild Id
+          description: Platform Id
         - in: query
           name: activityComposition
           schema:
@@ -533,17 +533,6 @@ paths:
               type: string
               enum: ['all_active', 'all_new_active', 'all_consistent', 'all_vital', 'all_new_disengaged', 'others']
             example: ["all_active", "all_new_active"]
-        - in: query
-          name: roles
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-            example: ["123456789", "987654321"]
-          description: Discord IDs
-          style: form
-          explode: true
         - in: query
           name: ngu
           required: false
@@ -572,6 +561,28 @@ paths:
             format: int32
             example: 2
             default: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                allRoles:
+                  type: boolean
+                  default: true
+                include:
+                  type: array
+                  items:  
+                    type: string
+                    description: role id   
+                exclude:
+                  type: array
+                  items:  
+                    type: string
+                    description: role id
+              example:
+                allRoles: false
+                exclude: ["123456","654321"]
       responses:
         "200":
           description: OK
@@ -644,21 +655,21 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
-  /api/v1/member-activity/{guildId}/active-members-onboarding-table:
-    get:
+  /api/v1/member-activity/{platformId}/active-members-onboarding-table:
+    post:
       tags:
         - [Member-Activity]
-      summary: Get data for active members onboarding table
+      summary: Get data for active members onboarding table - discord only 
       security:
         - bearerAuth: []
       description: for now sortBy just can apply for ngu and joinedAt(DaoMemberSince in UI)
       parameters:
         - in: path
-          name: guildId
+          name: platformId
           required: true
           schema:
             type: string
-          description: Guild Id
+          description: Platform Id
         - in: query
           name: activityComposition
           schema:
@@ -667,17 +678,6 @@ paths:
               type: string
               enum: ['all_joined', 'all_new_active', 'all_still_active', 'all_dropped', 'others']
             example: ["all_joined", "all_new_active"]
-        - in: query
-          name: roles
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-            example: ["123456789", "987654321"]
-          description: Discord IDs
-          style: form
-          explode: true
         - in: query
           name: ngu
           required: false
@@ -706,6 +706,28 @@ paths:
             format: int32
             example: 2
             default: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                allRoles:
+                  type: boolean
+                  default: true
+                include:
+                  type: array
+                  items:  
+                    type: string
+                    description: role id   
+                exclude:
+                  type: array
+                  items:  
+                    type: string
+                    description: role id
+              example:
+                allRoles: false
+                exclude: ["123456","654321"]
       responses:
         "200":
           description: OK
@@ -778,21 +800,21 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
-  /api/v1/member-activity/{guildId}/disengaged-members-composition-table:
-    get:
+  /api/v1/member-activity/{platformId}/disengaged-members-composition-table:
+    post:
       tags:
         - [Member-Activity]
-      summary: Get data for disengaged members composition table
+      summary: Get data for disengaged members composition table - discord only 
       security:
         - bearerAuth: []
       description: for now sortBy just can apply for ngu and joinedAt(DaoMemberSince in UI)
       parameters:
         - in: path
-          name: guildId
+          name: platformId
           required: true
           schema:
             type: string
-          description: Guild Id
+          description: Platform Id
         - in: query
           name: activityComposition
           schema:
@@ -801,15 +823,6 @@ paths:
               type: string
               enum: ['all_new_disengaged', 'all_disengaged_were_newly_active', 'all_disengaged_were_consistenly_active', 'all_disengaged_were_vital', 'others']
             example: ["all_new_disengaged", "all_disengaged_were_newly_active"]
-        - in: query
-          name: roles
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-            example: ["123456789", "987654321"]
-          description: Discord IDs
           style: form
           explode: true
         - in: query
@@ -840,6 +853,28 @@ paths:
             format: int32
             example: 2
             default: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                allRoles:
+                  type: boolean
+                  default: true
+                include:
+                  type: array
+                  items:  
+                    type: string
+                    description: role id   
+                exclude:
+                  type: array
+                  items:  
+                    type: string
+                    description: role id
+              example:
+                allRoles: false
+                exclude: ["123456","654321"]
       responses:
         "200":
           description: OK
@@ -912,4 +947,3 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
-

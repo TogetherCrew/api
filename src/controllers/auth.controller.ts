@@ -1,106 +1,57 @@
 import httpStatus from 'http-status';
 import { Request, Response } from 'express';
 import config from '../config';
-import { scopes, permissions } from '../config/dicord'
-import { userService, authService, tokenService, guildService } from '../services';
-import { IDiscordUser, IDiscordOathBotCallback } from '@togethercrew.dev/db';
+import { discord } from '../config/oAtuh2';
+import { userService, authService, tokenService, discordServices } from '../services';
 import { catchAsync } from "../utils";
-import { authTokens } from '../interfaces/token.interface'
 import querystring from 'querystring';
+import { generateState } from '../config/oAtuh2';
+import { ISessionRequest } from '../interfaces';
+import logger from '../config/logger';
 
-const tryNow = catchAsync(async function (req: Request, res: Response) {
-    res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.tryNow}&response_type=code&scope=${scopes.tryNow}&permissions=${permissions.ViewChannels | permissions.readMessageHistory}`);
+const discordAuthorize = catchAsync(async function (req: ISessionRequest, res: Response) {
+    const state = generateState();
+    req.session.state = state;
+    res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.authorize}&response_type=code&scope=${discord.scopes.authorize}&state=${state}`);
 });
 
-const tryNowCallback = catchAsync(async function (req: Request, res: Response) {
+const discordAuthorizeCallback = catchAsync(async function (req: ISessionRequest, res: Response) {
+    const STATUS_CODE_SINGIN = 1001;
+    const STATUS_CODE_LOGIN = 1002;
+    const STATUS_CODE_ERROR = 1003;
     const code = req.query.code as string;
-    let statusCode = 501, guildName, guildId, connectedGuild;
+    const returnedState = req.query.state as string;
+    const storedState = req.session.state;
+    let statusCode = STATUS_CODE_LOGIN;
     try {
-        if (!code) {
-            console.log('CODE 20', code)
-            throw new Error();
+        if (!code || !returnedState || (returnedState !== storedState)) {
+            throw new Error("Invalid code or state mismatch");
         }
-        const discordOathCallback: IDiscordOathBotCallback = await authService.exchangeCode(code, config.discord.callbackURI.tryNow);
-        const discordUser: IDiscordUser = await userService.getUserFromDiscordAPI(discordOathCallback.access_token);
-        let user = await userService.getUserByDiscordId(discordUser.id);
-        let guild = await guildService.getGuildByGuildId(discordOathCallback.guild.id);
+        const discordOathCallback = await authService.exchangeCode(code, config.discord.callbackURI.authorize);
+        const discordUser = await discordServices.coreService.getUserFromDiscordAPI(discordOathCallback.access_token);
+        let user = await userService.getUserByFilter({ discordId: discordUser.id });
+
         if (!user) {
-            user = await userService.createUser(discordUser);
+            user = await userService.createUser({ discordId: discordUser.id });
+            statusCode = STATUS_CODE_SINGIN;
         }
-        connectedGuild = await guildService.getGuild({ user: user.discordId, guildId: { $ne: discordOathCallback.guild.id }, isDisconnected: false });
-        if (connectedGuild) {
-            guildName = connectedGuild.name;
-            guildId = connectedGuild.guildId;
-            statusCode = 502;
-        } else {
-            if (!guild) {
-                guild = await guildService.createGuild(discordOathCallback.guild, user.discordId);
-            }
-            else {
-                if (guild.isDisconnected) {
-                    statusCode = 504;
-                    await guildService.updateGuild({ guildId: discordOathCallback.guild.id, user: user.discordId }, { isDisconnected: false });
-                }
-                else {
-                    statusCode = 503;
-                }
-            }
-            guildName = guild.name;
-            guildId = guild.guildId;
-        }
-        tokenService.saveDiscordAuth(user.discordId, discordOathCallback);
-        const tokens: authTokens = await tokenService.generateAuthTokens(user.discordId);
-        const query = querystring.stringify({
-            "statusCode": statusCode, "guildId": guildId, "guildName": guildName,
-            "accessToken": tokens.access.token, "accessExp": tokens.access.expires.toString(), "refreshToken": tokens.refresh.token, "refreshExp": tokens.refresh.expires.toString(),
-        });
+        tokenService.saveDiscordOAuth2Tokens(user.id, discordOathCallback);
+        const tokens = await tokenService.generateAuthTokens(user);
+        const params = {
+            statusCode: statusCode,
+            accessToken: tokens.access.token,
+            accessExp: tokens.access.expires.toString(),
+            refreshToken: tokens.refresh.token,
+            refreshExp: tokens.refresh.expires.toString(),
+        };
+        const query = querystring.stringify(params);
         res.redirect(`${config.frontend.url}/callback?` + query);
     } catch (err) {
-        console.log('TryNow 59', err)
-        const query = querystring.stringify({
-            "statusCode": 490
-        });
-        res.redirect(`${config.frontend.url}/callback?` + query);
-    }
-});
-
-const login = catchAsync(async function (req: Request, res: Response) {
-    res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.login}&response_type=code&scope=${scopes.login}`);
-});
-
-const loginCallback = catchAsync(async function (req: Request, res: Response) {
-    const code = req.query.code as string;
-    let statusCode = 601;
-    try {
-        if (!code) {
-            throw new Error();
-        }
-        const discordOathCallback: IDiscordOathBotCallback = await authService.exchangeCode(code, config.discord.callbackURI.login);
-        const discordUser: IDiscordUser = await userService.getUserFromDiscordAPI(discordOathCallback.access_token);
-        const user = await userService.getUserByDiscordId(discordUser.id);
-        if (!user) {
-            statusCode = 602;
-            const query = querystring.stringify({ "statusCode": statusCode, });
-            res.redirect(`${config.frontend.url}/callback?` + query);
-        }
-        else {
-            const guild = await guildService.getGuild({ user: user.discordId, isDisconnected: false });
-            if (!guild) {
-                statusCode = 603;
-            }
-            tokenService.saveDiscordAuth(user.discordId, discordOathCallback);
-            const tokens: authTokens = await tokenService.generateAuthTokens(user.discordId);
-            const query = querystring.stringify({
-                "statusCode": statusCode, "guildId": guild?.guildId, "guildName": guild?.name,
-                "accessToken": tokens.access.token, "accessExp": tokens.access.expires.toString(), "refreshToken": tokens.refresh.token, "refreshExp": tokens.refresh.expires.toString(),
-            });
-            res.redirect(`${config.frontend.url}/callback?` + query);
-        }
-
-    } catch (err) {
-        const query = querystring.stringify({
-            "statusCode": 490
-        });
+        logger.error({ err }, 'Failed to authorize discord account');
+        const params = {
+            statusCode: STATUS_CODE_ERROR
+        };
+        const query = querystring.stringify(params);
         res.redirect(`${config.frontend.url}/callback?` + query);
     }
 });
@@ -118,10 +69,8 @@ const refreshTokens = catchAsync(async function (req: Request, res: Response) {
 
 
 export default {
-    tryNow,
-    tryNowCallback,
-    login,
-    loginCallback,
+    discordAuthorize,
+    discordAuthorizeCallback,
     refreshTokens,
     logout
 }

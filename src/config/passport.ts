@@ -2,8 +2,7 @@
 import passportJwt from 'passport-jwt'
 import config from './index';
 import { tokenTypes } from './tokens';
-import { User } from '@togethercrew.dev/db';
-
+import { userService } from '../services';
 interface VerifiedCallback {
     (error: any, user?: any, info?: any): void;
 }
@@ -22,7 +21,7 @@ const jwtVerify = async (payload: any, done: VerifiedCallback) => {
         if (payload.type !== tokenTypes.ACCESS) {
             throw new Error('Invalid token type');
         }
-        const user = await User.findOne({ discordId: payload.sub });
+        const user = await userService.getUserById(payload.sub.id);
         if (!user) {
             return done(null, false);
         }

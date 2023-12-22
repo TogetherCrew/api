@@ -4,17 +4,23 @@ import app from '../../src/app';
 import setupTestDB from '../utils/setupTestDB';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
-import { heatmapOne, heatmapTwo, heatmapThree, heatmapFour, heatmapFive, insertHeatmaps, heatmapSix, heatmapSeven, heatmapEight } from '../fixtures/heatmap.fixture';
-import { guildOne, insertGuilds } from '../fixtures/guilds.fixture';
-import { databaseService } from '@togethercrew.dev/db';
-import config from '../../src/config';
+import { heatmap1, heatmap2, heatmap3, heatmap4, heatmap5, heatmap6, heatmap7, heatmap8, insertHeatmaps } from '../fixtures/heatmap.fixture';
+import { communityOne, insertCommunities } from '../fixtures/community.fixture';
+import { platformOne, insertPlatforms } from '../fixtures/platform.fixture';
+import { DatabaseManager } from '@togethercrew.dev/db';
 
 
 setupTestDB();
 
 describe('Heatmap routes', () => {
-    const connection = databaseService.connectionFactory(guildOne.guildId, config.mongoose.botURL);
-    describe('POST /api/v1/heatmaps/:guildId/heatmap-chart', () => {
+    beforeEach(() => {
+        userOne.communities = [communityOne._id];
+        communityOne.users = [userOne._id];
+        communityOne.platforms = [platformOne._id]
+        platformOne.community = communityOne._id
+    });
+    const connection = DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+    describe('POST /api/v1/heatmaps/:platformId/heatmap-chart', () => {
         let requestBody: {
             startDate: Date,
             endDate: Date,
@@ -33,12 +39,12 @@ describe('Heatmap routes', () => {
         });
 
         test('should return 200 and filter heatmap chart base on date (universal timezone offset) if req data is ok', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-
-            await insertHeatmaps([heatmapOne, heatmapTwo, heatmapFive], connection);
+            await insertPlatforms([platformOne]);
+            await insertHeatmaps([heatmap1, heatmap2, heatmap5], connection);
             const res = await request(app)
-                .post(`/api/v1/heatmaps/${guildOne.guildId}/heatmap-chart`)
+                .post(`/api/v1/heatmaps/${platformOne._id}/heatmap-chart`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send(requestBody)
                 .expect(httpStatus.OK);
@@ -53,12 +59,14 @@ describe('Heatmap routes', () => {
         })
 
         test('should return 200 and filter heatmap chart base on date (positive timezone offset) if req data is ok', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
+            await insertPlatforms([platformOne]);
+            await insertHeatmaps([heatmap1, heatmap2, heatmap5], connection);
             requestBody.timeZone = 'Asia/Tehran'; // +3:30
-            await insertHeatmaps([heatmapOne, heatmapTwo, heatmapFive], connection);
+
             const res = await request(app)
-                .post(`/api/v1/heatmaps/${guildOne.guildId}/heatmap-chart`)
+                .post(`/api/v1/heatmaps/${platformOne._id}/heatmap-chart`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send(requestBody)
                 .expect(httpStatus.OK);
@@ -73,12 +81,14 @@ describe('Heatmap routes', () => {
         })
 
         test('should return 200 and filter heatmap chart base on date (negative timezone offset) if req data is ok', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
+            await insertPlatforms([platformOne]);
+            await insertHeatmaps([heatmap1, heatmap2, heatmap5], connection);
             requestBody.timeZone = 'Brazil/East'; // -3:30
-            await insertHeatmaps([heatmapOne, heatmapTwo, heatmapFive], connection);
+
             const res = await request(app)
-                .post(`/api/v1/heatmaps/${guildOne.guildId}/heatmap-chart`)
+                .post(`/api/v1/heatmaps/${platformOne._id}/heatmap-chart`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send(requestBody)
                 .expect(httpStatus.OK);
@@ -94,15 +104,15 @@ describe('Heatmap routes', () => {
         })
 
         test('should return 200 and filter heatmap chart base on date and channelId if req data is ok', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-
-            await insertHeatmaps([heatmapOne, heatmapTwo, heatmapFive], connection);
+            await insertPlatforms([platformOne]);
+            await insertHeatmaps([heatmap1, heatmap2, heatmap5], connection);
             requestBody.startDate = new Date("2023-01-20");
             requestBody.endDate = new Date("2023-01-22");
             requestBody.channelIds = ["1012430565959553148"]
             const res = await request(app)
-                .post(`/api/v1/heatmaps/${guildOne.guildId}/heatmap-chart`)
+                .post(`/api/v1/heatmaps/${platformOne._id}/heatmap-chart`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send(requestBody)
                 .expect(httpStatus.OK);
@@ -117,15 +127,15 @@ describe('Heatmap routes', () => {
         })
 
         test('should return 200 and empty chart data if channelIds is empty req data is ok', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-
-            await insertHeatmaps([heatmapOne, heatmapTwo, heatmapFive], connection);
+            await insertPlatforms([platformOne]);
+            await insertHeatmaps([heatmap1, heatmap2, heatmap5], connection);
             requestBody.startDate = new Date("2023-01-20");
             requestBody.endDate = new Date("2023-01-22");
             requestBody.channelIds = []
             const res = await request(app)
-                .post(`/api/v1/heatmaps/${guildOne.guildId}/heatmap-chart`)
+                .post(`/api/v1/heatmaps/${platformOne._id}/heatmap-chart`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send(requestBody)
                 .expect(httpStatus.OK);
@@ -138,7 +148,7 @@ describe('Heatmap routes', () => {
 
         test('should return 401 if access token is missing', async () => {
             await request(app)
-                .post(`/api/v1/heatmaps/${guildOne.guildId}/heatmap-chart`)
+                .post(`/api/v1/heatmaps/${platformOne._id}/heatmap-chart`)
                 .send(requestBody)
                 .expect(httpStatus.UNAUTHORIZED);
         })
@@ -146,23 +156,25 @@ describe('Heatmap routes', () => {
         test('should return 404 if guild not found', async () => {
             await insertUsers([userOne]);
             await request(app)
-                .post(`/api/v1/heatmaps/${guildOne.guildId}/heatmap-chart`)
+                .post(`/api/v1/heatmaps/${platformOne._id}/heatmap-chart`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send(requestBody)
                 .expect(httpStatus.NOT_FOUND);
         })
     })
 
-    describe('POST /api/v1/heatmaps/:guildId/line-graph', () => {
+    describe('POST /api/v1/heatmaps/:platformId/line-graph', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
         });
         test('should return 200 and line graph data if req data is ok', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
-            await insertHeatmaps([heatmapThree, heatmapFour, heatmapFive, heatmapSix, heatmapSeven, heatmapEight], connection);
+            await insertPlatforms([platformOne]);
+            await insertHeatmaps([heatmap3, heatmap4, heatmap5, heatmap6, heatmap7, heatmap8], connection);
+
             const res = await request(app)
-                .post(`/api/v1/heatmaps/${guildOne.guildId}/line-graph`)
+                .post(`/api/v1/heatmaps/${platformOne._id}/line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send({ startDate: new Date("2023-04-01"), endDate: new Date("2023-04-07") })
                 .expect(httpStatus.OK);
@@ -182,11 +194,12 @@ describe('Heatmap routes', () => {
         })
 
         test('should return 200 and line graph data (testing for empty data) if req data is ok', async () => {
+            await insertCommunities([communityOne]);
             await insertUsers([userOne]);
-            await insertGuilds([guildOne]);
+            await insertPlatforms([platformOne]);
 
             const res = await request(app)
-                .post(`/api/v1/heatmaps/${guildOne.guildId}/line-graph`)
+                .post(`/api/v1/heatmaps/${platformOne._id}/line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send({ startDate: new Date("2021-02-21"), endDate: new Date("2022-02-24") })
                 .expect(httpStatus.OK);
@@ -201,7 +214,7 @@ describe('Heatmap routes', () => {
 
         test('should return 401 if access token is missing', async () => {
             await request(app)
-                .post(`/api/v1/heatmaps/${guildOne.guildId}/line-graph`)
+                .post(`/api/v1/heatmaps/${platformOne._id}/line-graph`)
                 .send({ startDate: new Date(), endDate: new Date() })
                 .expect(httpStatus.UNAUTHORIZED);
         })
@@ -209,7 +222,7 @@ describe('Heatmap routes', () => {
         test('should return 404 if guild not found', async () => {
             await insertUsers([userOne]);
             await request(app)
-                .post(`/api/v1/heatmaps/${guildOne.guildId}/line-graph`)
+                .post(`/api/v1/heatmaps/${platformOne._id}/line-graph`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send({ startDate: new Date(), endDate: new Date() })
                 .expect(httpStatus.NOT_FOUND);

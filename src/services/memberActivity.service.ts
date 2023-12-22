@@ -2,13 +2,14 @@ import { Connection } from 'mongoose';
 import { date, math } from '../utils';
 import ScoreStatus from '../utils/enums/scoreStatus.enum';
 import NodeStats from '../utils/enums/nodeStats.enum';
-import dateUtils from '../utils/date';
 import { IGuildMember, IRole } from '@togethercrew.dev/db';
 import * as Neo4j from '../neo4j';
-import roleService from './role.service';
-import guildMemberService from './guildMember.service';
+import roleService from './discord/role.service';
+import guildMemberService from './discord/guildMember.service';
 import { Snowflake } from 'discord.js';
+import parentLogger from '../config/logger';
 
+const logger = parentLogger.child({ module: 'MemberActivityService' });
 
 /**
  * active members composition line graph 
@@ -203,8 +204,8 @@ async function activeMembersCompositionLineGraph(connection: Connection, startDa
             becameDisengagedPercentageChange: math.calculatePercentageChange(AdjustedMemberActivity[0].becameDisengaged, membersActivities[0].becameDisengaged),
         }
 
-    } catch (err) {
-
+    } catch (error) {
+        logger.error({ database: connection.name, startDate, endDate, error }, 'Failed to get active members composition line graph');
         return {
             categories: [],
             series: [],
@@ -404,8 +405,8 @@ async function activeMembersOnboardingLineGraph(connection: Connection, startDat
             droppedPercentageChange: math.calculatePercentageChange(AdjustedMemberActivity[0].dropped, membersActivities[0].dropped),
         }
 
-    } catch (err) {
-        console.log(err);
+    } catch (error) {
+        logger.error({ database: connection.name, startDate, endDate, error }, 'Failed to get active members onboarding line graph');
         return {
             categories: [],
             series: [],
@@ -600,8 +601,8 @@ async function disengagedMembersCompositionLineGraph(connection: Connection, sta
             wereConsistentlyActivePercentageChange: math.calculatePercentageChange(AdjustedMemberActivity[0].wereConsistentlyActive, membersActivities[0].wereConsistentlyActive),
             wereVitalMembersPercentageChange: math.calculatePercentageChange(AdjustedMemberActivity[0].wereVitalMembers, membersActivities[0].wereVitalMembers),
         }
-    } catch (err) {
-        console.log(err);
+    } catch (error) {
+        logger.error({ database: connection.name, startDate, endDate, error }, 'Failed to get disengaged members composition line graph');
         return {
             categories: [],
             series: [],
@@ -765,8 +766,8 @@ async function inactiveMembersLineGraph(connection: Connection, startDate: Date,
             ...membersActivities[0],
             returnedPercentageChange: math.calculatePercentageChange(AdjustedMemberActivity[0].returned, membersActivities[0].returned)
         }
-    } catch (err) {
-        console.log(err);
+    } catch (error) {
+        logger.error({ database: connection.name, startDate, endDate, error }, 'Failed to get inactive members line graph');
         return {
             categories: [],
             series: [],
@@ -876,16 +877,16 @@ function getActivityComposition(guildMember: IGuildMember, memberActivity: any, 
 }
 
 type networkGraphUserInformationType = { discordId: Snowflake, username: string, avatar: string | null | undefined, joinedAt: Date | null, roles: any, ngu: string }
-function getUserInformationForNetworkGraph(user: IGuildMember, guildRoles: IRole[]): networkGraphUserInformationType{
+function getUserInformationForNetworkGraph(user: IGuildMember, guildRoles: IRole[]): networkGraphUserInformationType {
     const discordId = user?.discordId
-    const fullUsername =  guildMemberService.getUsername(user)
+    const fullUsername = guildMemberService.getUsername(user)
     const avatar = user?.avatar
     const joinedAt = user?.joinedAt
     const roles = roleService.getRolesForGuildMember(user, guildRoles);
     const ngu = guildMemberService.getNgu(user);
 
     return {
-        discordId, 
+        discordId,
         username: fullUsername,
         avatar,
         joinedAt,
@@ -915,7 +916,7 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
         const b = _fields[_fieldLookup['b']]
 
         const aUserId = a?.properties?.userId as string
-        const rWeeklyInteraction = r?.properties?.weight as number 
+        const rWeeklyInteraction = r?.properties?.weight as number
         const bUserId = b?.properties?.userId as string
 
         const interaction = {
@@ -943,7 +944,7 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
         const userId = _fields[_fieldLookup['userId']] as string
         const radius = _fields[_fieldLookup['radius']] as number
 
-        return { userId, radius}
+        return { userId, radius }
     })
 
     // userStatus
@@ -990,7 +991,7 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
         const bInfo = getUserInformationForNetworkGraph(bUser, roles)
 
 
-        if(!aUserStats || !bUserStats) {
+        if (!aUserStats || !bUserStats) {
             return []
         }
 
@@ -1004,15 +1005,16 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
     return response
 }
 
-type fragmentationScoreResponseType = { fragmentationScore: number | null, fragmentationScoreRange: { minimumFragmentationScore: number, maximumFragmentationScore: number }, scoreStatus: ScoreStatus| null }
+type fragmentationScoreResponseType = { fragmentationScore: number | null, fragmentationScoreRange: { minimumFragmentationScore: number, maximumFragmentationScore: number }, scoreStatus: ScoreStatus | null }
 async function getFragmentationScore(guildId: string): Promise<fragmentationScoreResponseType> {
-    
+
     const fragmentationScale = 200
     const fragmentationScoreRange = { minimumFragmentationScore: 0, maximumFragmentationScore: fragmentationScale }
     const fragmentationScoreQuery = `
-        MATCH ()-[r:INTERACTED_IN]->(g:Guild {guildId: "${guildId}" })
-        WITH avg(r.localClusteringCoefficient) * ${fragmentationScale}  AS fragmentation_score, r.date as date
-        RETURN fragmentation_score ORDER BY date DESC LIMIT 1
+        MATCH ()-[r:INTERACTED_WITH {guildId: "${guildId}"}]-()
+        WITH max(r.date) as latest_date
+        MATCH (g:Guild {guildId: "${guildId}"})-[r:HAVE_METRICS {date: latest_date}]->(g)
+        RETURN r.louvainModularityScore * 200 as fragmentation_score
     `
 
     const neo4jData = await Neo4j.read(fragmentationScoreQuery)
@@ -1046,7 +1048,7 @@ function findFragmentationScoreStatus(fragmentationScore?: number) {
     else return null
 }
 
-type decentralisationScoreResponseType = { decentralisationScore: number | null, decentralisationScoreRange: { minimumDecentralisationScore: number, maximumDecentralisationScore: number }, scoreStatus: ScoreStatus| null }
+type decentralisationScoreResponseType = { decentralisationScore: number | null, decentralisationScoreRange: { minimumDecentralisationScore: number, maximumDecentralisationScore: number }, scoreStatus: ScoreStatus | null }
 async function getDecentralisationScore(guildId: string): Promise<decentralisationScoreResponseType> {
 
     const decentralisationScoreRange = { minimumDecentralisationScore: 0, maximumDecentralisationScore: 200 }

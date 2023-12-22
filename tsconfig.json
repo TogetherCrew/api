@@ -1,12 +1,12 @@
 {
     "compilerOptions": {
         "module": "commonjs",
-        "declaration": true,
-        "removeComments": true,
+        "declaration": false,
+        "removeComments": false,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "target": "es6",
-        "sourceMap": true,
+        "sourceMap": false,
         "outDir": "./lib",
         "baseUrl": "./",
         "incremental": true,

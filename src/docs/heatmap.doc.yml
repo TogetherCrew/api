@@ -1,18 +1,18 @@
 paths:
-  /api/v1/heatmaps/{guildId}/heatmap-chart:
+  /api/v1/heatmaps/{platformId}/heatmap-chart:
     post:
       tags:
         - [Heatmap]
-      summary: Get data for heatmap chart
+      summary: Get data for heatmap chart - discord only 
       security:
         - bearerAuth: []
       parameters:
         - in: path
-          name: guildId
+          name: platformId
           required: true
           schema:
             type: string
-          description: Guild Id
+          description: Platform Id
       requestBody:
         required: true
         content:
@@ -58,20 +58,20 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
-  /api/v1/heatmaps/{guildId}/line-graph:
+  /api/v1/heatmaps/{platformId}/line-graph:
     post:
       tags:
         - [Heatmap]
-      summary: Get data for line graph
+      summary: Get data for line graph - discord only 
       security:
         - bearerAuth: []
       parameters:
         - in: path
-          name: guildId
+          name: platformId
           required: true
           schema:
             type: string
-          description: Guild Id
+          description: Platform Id
       requestBody:
         required: true
         content:

@@ -2,39 +2,14 @@ import request from 'supertest';
 import httpStatus from 'http-status';
 import app from '../../src/app';
 import setupTestDB from '../utils/setupTestDB';
-import { userOne, userTwo, insertUsers } from '../fixtures/user.fixture';
+import { userOne, insertUsers } from '../fixtures/user.fixture';
+import { User, IUserUpdateBody } from '@togethercrew.dev/db';
+
+
 import { userOneAccessToken } from '../fixtures/token.fixture';
-import { discordResponseGuildOne, discordResponseGuildTwo, discordResponseGuildThree } from '../fixtures/guilds.fixture';
-import { IUserUpdateBody } from '../../src/interfaces/user.interface';
-import { userService, tokenService } from '../../src/services';
-import { User } from '@togethercrew.dev/db';
 setupTestDB();
 
 describe('User routes', () => {
-    userService.getCurrentUserGuilds = jest.fn().mockReturnValue([discordResponseGuildOne, discordResponseGuildTwo, discordResponseGuildThree]);
-    tokenService.getDiscordAuth = jest.fn().mockReturnValue({ access: { token: "681946187490000900" } });
-
-    describe('GET /api/v1/users/@me/guilds-with-admin-role', () => {
-        test('should return 200 and array of guilds that user has admin role in them', async () => {
-            await insertUsers([userOne]);
-            const res = await request(app)
-                .get('/api/v1/users/@me/guilds-with-admin-role')
-                .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send()
-                .expect(httpStatus.OK);
-
-            expect(res.body).toHaveLength(1);
-            expect(res.body[0].name).toBe(discordResponseGuildOne.name);
-        })
-        test('should return 401 if access token is missing', async () => {
-            await insertUsers([userOne]);
-            await request(app)
-                .get('/api/v1/users/@me/guilds-with-admin-role')
-                .send()
-                .expect(httpStatus.UNAUTHORIZED);
-        })
-    })
-
 
     describe('GET /api/v1/users/@me', () => {
         test('should return 200 and the user object if data is ok', async () => {
@@ -48,8 +23,7 @@ describe('User routes', () => {
                 id: userOne._id.toHexString(),
                 discordId: userOne.discordId,
                 email: userOne.email,
-                verified: userOne.verified,
-                avatar: userOne.avatar,
+                communities: []
             });
         })
         test('should return 401 if access token is missing', async () => {
@@ -64,10 +38,12 @@ describe('User routes', () => {
 
     describe('PATCH /api/v1/users/@me', () => {
         let updateBody: IUserUpdateBody;
+        const currentDate = new Date();
 
         beforeEach(() => {
             updateBody = {
-                email: "email@yahoo.com"
+                email: "email@yahoo.com",
+                tcaAt: currentDate
             };
         });
         test('should return 200 and successfully update user if data is ok', async () => {
@@ -82,13 +58,13 @@ describe('User routes', () => {
                 id: userOne._id.toHexString(),
                 discordId: userOne.discordId,
                 email: updateBody.email,
-                verified: userOne.verified,
-                avatar: userOne.avatar,
+                communities: [],
+                tcaAt: currentDate.toISOString()
             });
 
             const dbUser = await User.findById(userOne._id);
             expect(dbUser).toBeDefined();
-            expect(dbUser).toMatchObject({ email: updateBody.email });
+            expect(dbUser).toMatchObject({ email: updateBody.email, tcaAt: updateBody.tcaAt });
         })
         test('should return 401 if access token is missing', async () => {
             await insertUsers([userOne]);
@@ -109,26 +85,15 @@ describe('User routes', () => {
                 .expect(httpStatus.BAD_REQUEST);
         });
 
-        test('should return 400 if email is already taken', async () => {
-            await insertUsers([userOne, userTwo]);
-            const updateBody = { email: userTwo.email };
+        test('should return 400 error if tcaAt is invalid', async () => {
+            const updateBody = { tcaAt: 'tcaAt' };
 
+            await insertUsers([userOne]);
             await request(app)
                 .patch('/api/v1/users/@me')
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send(updateBody)
                 .expect(httpStatus.BAD_REQUEST);
-        });
-
-        test('should not return 200 if email is my email', async () => {
-            await insertUsers([userOne]);
-            const updateBody = { email: userOne.email };
-
-            await request(app)
-                .patch('/api/v1/users/@me')
-                .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send(updateBody)
-                .expect(httpStatus.OK);
         });
     })
 

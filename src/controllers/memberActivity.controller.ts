@@ -1,159 +1,114 @@
 import { Response } from 'express';
-import { guildService, memberActivityService, guildMemberService, roleService } from '../services';
-import { IAuthRequest } from '../interfaces/request.interface';
-import { catchAsync, ApiError, charts } from "../utils";
-import { databaseService } from '@togethercrew.dev/db'
-import httpStatus from 'http-status';
-import config from '../config';
+import { memberActivityService, discordServices } from '../services';
+import { IAuthAndPlatform } from '../interfaces/Request.interface';
+import { catchAsync, charts } from "../utils";
+import { DatabaseManager } from '@togethercrew.dev/db'
 import { pick } from '../utils';
-import { closeConnection } from '../database/connection';
 import { activityCompostionsTypes } from '../config/memberBreakDownTables';
 
 
-const activeMembersCompositionLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    }
-    const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
+const activeMembersCompositionLineGraph = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
+    const connection = DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
     let activeMembersCompositionLineGraph = await memberActivityService.activeMembersCompositionLineGraph(connection, req.body.startDate, req.body.endDate);
     activeMembersCompositionLineGraph = charts.fillActiveMembersCompositionLineGraph(activeMembersCompositionLineGraph, req.body.startDate, req.body.endDate);
-    await closeConnection(connection)
     res.send(activeMembersCompositionLineGraph);
 });
 
-const activeMembersOnboardingLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    }
-    const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
+const activeMembersOnboardingLineGraph = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
+    const connection = DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
     let activeMembersOnboardingLineGraph = await memberActivityService.activeMembersOnboardingLineGraph(connection, req.body.startDate, req.body.endDate);
     activeMembersOnboardingLineGraph = charts.fillActiveMembersOnboardingLineGraph(activeMembersOnboardingLineGraph, req.body.startDate, req.body.endDate);
-    await closeConnection(connection)
     res.send(activeMembersOnboardingLineGraph);
 });
 
 
-const disengagedMembersCompositionLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    }
-    const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
+const disengagedMembersCompositionLineGraph = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
+    const connection = DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
     let disengagedMembersLineGraph = await memberActivityService.disengagedMembersCompositionLineGraph(connection, req.body.startDate, req.body.endDate);
     disengagedMembersLineGraph = charts.fillDisengagedMembersCompositionLineGraph(disengagedMembersLineGraph, req.body.startDate, req.body.endDate);
-    await closeConnection(connection)
     res.send(disengagedMembersLineGraph);
 });
 
 
-const inactiveMembersLineGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    }
-    const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
+const inactiveMembersLineGraph = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
+    const connection = DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
     let inactiveMembersLineGraph = await memberActivityService.inactiveMembersLineGraph(connection, req.body.startDate, req.body.endDate);
     inactiveMembersLineGraph = charts.fillInactiveMembersLineGraph(inactiveMembersLineGraph, req.body.startDate, req.body.endDate);
-    await closeConnection(connection)
     res.send(inactiveMembersLineGraph);
 });
 
-const membersInteractionsNetworkGraph = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    }
-    const guildId = req.params.guildId
-    const connection = databaseService.connectionFactory(guildId, config.mongoose.botURL);
-
-    const networkGraphData = await memberActivityService.getMembersInteractionsNetworkGraph(guildId, connection)
-    await closeConnection(connection)
+const membersInteractionsNetworkGraph = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
+    const connection = DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
+    const networkGraphData = await memberActivityService.getMembersInteractionsNetworkGraph(req.platform?.metadata?.id, connection)
     res.send(networkGraphData)
 })
 
-const decentralisationScore = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    }
-    const guildId = req.params.guildId
-
-    const decentralizationScoreData = await memberActivityService.getDecentralisationScore(guildId)
+const decentralisationScore = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
+    const decentralizationScoreData = await memberActivityService.getDecentralisationScore(req.platform?.metadata?.id)
     res.send(decentralizationScoreData)
 })
 
-const fragmentationScore = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    }
-    const guildId = req.params.guildId
-
-    const fragmentationScoreData = await memberActivityService.getFragmentationScore(guildId)
+const fragmentationScore = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
+    const fragmentationScoreData = await memberActivityService.getFragmentationScore(req.platform?.metadata?.id)
     res.send(fragmentationScoreData)
 })
 
-const activeMembersCompositionTable = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    }
-    const filter = pick(req.query, ['activityComposition', 'roles', 'ngu']);
+const activeMembersCompositionTable = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
+
+    const filter = pick({ ...req.query, ...req.body }, ['activityComposition', 'ngu', 'allRoles', 'include', 'exclude']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
-    const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
+    const connection = DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
     const activityCompostionFields = memberActivityService.getActivityCompositionOfActiveMembersComposition()
     const memberActivity = await memberActivityService.getLastDocumentForTablesUsage(connection, activityCompostionFields);
-    const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options, memberActivity, activityCompostionsTypes.activeMembersComposition);
-    const roles = await roleService.getRoles(connection, {});
+    const guildMembers = await discordServices.guildMemberService.queryGuildMembers(connection, filter, options, memberActivity, activityCompostionsTypes.activeMembersComposition);
+
+    const roles = await discordServices.roleService.getRoles(connection, {});
     if (guildMembers) {
         guildMembers.results.forEach((guildMember) => {
-            guildMember.roles = roleService.getRolesForGuildMember(guildMember, roles);
-            guildMember.ngu = guildMemberService.getNgu(guildMember);
+            guildMember.roles = discordServices.roleService.getRolesForGuildMember(guildMember, roles);
+            guildMember.ngu = discordServices.guildMemberService.getNgu(guildMember);
             guildMember.activityComposition = memberActivityService.getActivityComposition(guildMember, memberActivity, filter.activityComposition);
-            guildMember.username = guildMemberService.getUsername(guildMember);
+            guildMember.username = discordServices.guildMemberService.getUsername(guildMember);
         });
     }
-    await closeConnection(connection)
     res.send(guildMembers);
 });
 
-const activeMembersOnboardingTable = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    }
-    const filter = pick(req.query, ['activityComposition', 'roles', 'ngu']);
+const activeMembersOnboardingTable = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
+    const filter = pick({ ...req.query, ...req.body }, ['activityComposition', 'ngu', 'allRoles', 'include', 'exclude']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
-    const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
+    const connection = DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
     const activityCompostionFields = memberActivityService.getActivityCompositionOfActiveMembersOnboarding();
     const memberActivity = await memberActivityService.getLastDocumentForTablesUsage(connection, activityCompostionFields);
-    const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options, memberActivity, activityCompostionsTypes.activeMembersOnboarding);
-    const roles = await roleService.getRoles(connection, {});
+    const guildMembers = await discordServices.guildMemberService.queryGuildMembers(connection, filter, options, memberActivity, activityCompostionsTypes.activeMembersOnboarding);
+    const roles = await discordServices.roleService.getRoles(connection, {});
     if (guildMembers) {
         guildMembers.results.forEach((guildMember) => {
-            guildMember.roles = roleService.getRolesForGuildMember(guildMember, roles);
-            guildMember.ngu = guildMemberService.getNgu(guildMember);
+            guildMember.roles = discordServices.roleService.getRolesForGuildMember(guildMember, roles);
+            guildMember.ngu = discordServices.guildMemberService.getNgu(guildMember);
             guildMember.activityComposition = memberActivityService.getActivityComposition(guildMember, memberActivity, filter.activityComposition);
-            guildMember.username = guildMemberService.getUsername(guildMember);
+            guildMember.username = discordServices.guildMemberService.getUsername(guildMember);
         });
     }
-    await closeConnection(connection)
     res.send(guildMembers);
 });
 
-const disengagedMembersCompositionTable = catchAsync(async function (req: IAuthRequest, res: Response) {
-    if (!await guildService.getGuild({ guildId: req.params.guildId, user: req.user.discordId })) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Guild not found');
-    }
-    const filter = pick(req.query, ['activityComposition', 'roles', 'ngu']);
+const disengagedMembersCompositionTable = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
+    const filter = pick({ ...req.query, ...req.body }, ['activityComposition', 'ngu', 'allRoles', 'include', 'exclude']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
-    const connection = databaseService.connectionFactory(req.params.guildId, config.mongoose.botURL);
+    const connection = DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
     const activityCompostionFields = memberActivityService.getActivityCompositionOfDisengagedComposition();
     const memberActivity = await memberActivityService.getLastDocumentForTablesUsage(connection, activityCompostionFields);
-    const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options, memberActivity, activityCompostionsTypes.disengagedMembersCompostion);
-    const roles = await roleService.getRoles(connection, {});
+    const guildMembers = await discordServices.guildMemberService.queryGuildMembers(connection, filter, options, memberActivity, activityCompostionsTypes.disengagedMembersCompostion);
+    const roles = await discordServices.roleService.getRoles(connection, {});
     if (guildMembers) {
         guildMembers.results.forEach((guildMember) => {
-            guildMember.roles = roleService.getRolesForGuildMember(guildMember, roles);
-            guildMember.ngu = guildMemberService.getNgu(guildMember);
+            guildMember.roles = discordServices.roleService.getRolesForGuildMember(guildMember, roles);
+            guildMember.ngu = discordServices.guildMemberService.getNgu(guildMember);
             guildMember.activityComposition = memberActivityService.getActivityComposition(guildMember, memberActivity, filter.activityComposition);
-            guildMember.username = guildMemberService.getUsername(guildMember);
+            guildMember.username = discordServices.guildMemberService.getUsername(guildMember);
         });
     }
-    await closeConnection(connection)
     res.send(guildMembers);
 });
 

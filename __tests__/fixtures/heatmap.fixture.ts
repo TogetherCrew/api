@@ -1,6 +1,6 @@
 import { Connection } from 'mongoose';
 
-export const heatmapOne = {
+export const heatmap1 = {
     date: "2023-01-22",
     channelId: "1012430565959553148",
     thr_messages: [1, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
@@ -17,7 +17,7 @@ export const heatmapOne = {
     account_name: 'acc'
 }
 
-export const heatmapTwo = {
+export const heatmap2 = {
     date: "2023-01-23",
     channelId: "1012430565959553149",
     thr_messages: [0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3],
@@ -34,7 +34,7 @@ export const heatmapTwo = {
     account_name: 'acc'
 }
 
-export const heatmapThree = {
+export const heatmap3 = {
     date: "2023-04-07",
     channelId: "1012430565959553150",
     thr_messages: [100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -51,7 +51,7 @@ export const heatmapThree = {
     account_name: 'acc'
 }
 
-export const heatmapFour = {
+export const heatmap4 = {
     date: "2023-03-31",
     channelId: "1012430565959553150",
     thr_messages: [50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -70,7 +70,7 @@ export const heatmapFour = {
 
 
 
-export const heatmapFive = {
+export const heatmap5 = {
     date: "2023-01-15",
     channelId: "1012430565959553211",
     thr_messages: [5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -87,7 +87,7 @@ export const heatmapFive = {
     account_name: 'acc'
 }
 
-export const heatmapSix = {
+export const heatmap6 = {
     date: "2023-04-07",
     channelId: "1012430565959553150",
     thr_messages: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -104,7 +104,7 @@ export const heatmapSix = {
     account_name: 'acc'
 }
 
-export const heatmapSeven = {
+export const heatmap7 = {
     date: "2023-03-31",
     channelId: "1012430565959553150",
     thr_messages: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -121,7 +121,7 @@ export const heatmapSeven = {
     account_name: 'acc'
 }
 
-export const heatmapEight = {
+export const heatmap8 = {
     date: "2023-04-01",
     channelId: "1012430565959553150",
     thr_messages: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -138,8 +138,8 @@ export const heatmapEight = {
     account_name: 'acc'
 }
 
-
-
 export const insertHeatmaps = async function <Type>(heatmaps: Array<Type>, connection: Connection) {
-    await connection.models.HeatMap.insertMany(heatmaps.map((heatmap) => (heatmap)));
+    for (const heatmap of heatmaps) {
+        await connection.models.HeatMap.create(heatmap);
+    }
 };

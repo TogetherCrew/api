@@ -1,8 +1,9 @@
 import Joi from "joi";
+import { objectId } from './custom.validation';
 
 const heatmapChart = {
     params: Joi.object().required().keys({
-        guildId: Joi.string().required()
+        platformId: Joi.string().custom(objectId).required(),
     }),
     body: Joi.object().required().keys({
         startDate: Joi.date().required(),
@@ -14,7 +15,7 @@ const heatmapChart = {
 
 const lineGraph = {
     params: Joi.object().required().keys({
-        guildId: Joi.string().required()
+        platformId: Joi.string().custom(objectId).required(),
     }),
     body: Joi.object().required().keys({
         startDate: Joi.date().required(),

@@ -1,11 +1,12 @@
 import express from "express"
 import docsRoute from './docs.route';
 import authRoute from './auth.route';
-import guildsRoute from './guilds.route';
-import usersRoute from './users.route'
-import heatmapsRoute from './heatmaps.route';
+import userRoute from './user.route'
+import heatmapRoute from './heatmap.route';
 import notionRoute from './notion.route';
 import memberActivityRoute from './memberActivity.route';
+import communityRoute from './community.route';
+import platformRoute from './platform.route';
 
 const router = express.Router();
 
@@ -18,17 +19,14 @@ const defaultRoutes = [
         path: '/auth',
         route: authRoute,
     },
-    {
-        path: '/guilds',
-        route: guildsRoute,
-    },
+
     {
         path: '/users',
-        route: usersRoute,
+        route: userRoute,
     },
     {
         path: '/heatmaps',
-        route: heatmapsRoute
+        route: heatmapRoute
     },
     {
         path: '/notion',
@@ -37,9 +35,16 @@ const defaultRoutes = [
     {
         path: '/member-activity',
         route: memberActivityRoute
+    },
+    {
+        path: '/communities',
+        route: communityRoute
+    },
+    {
+        path: '/platforms',
+        route: platformRoute
     }
 ];
-
 
 defaultRoutes.forEach((route) => {
     router.use(route.path, route.route);
