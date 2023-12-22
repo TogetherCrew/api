@@ -13,7 +13,7 @@ const envVarsSchema = Joi.object()
         RABBIT_PORT: Joi.string().required().description('RabbitMQ port'),
         RABBIT_USER: Joi.string().required().description('RabbitMQ username'),
         RABBIT_PASSWORD: Joi.string().required().description('RabbitMQ password'),
-        DISCROD_CLIENT_ID: Joi.string().required().description('Discord clinet id'),
+        DISCORD_CLIENT_ID: Joi.string().required().description('Discord clinet id'),
         DISCORD_CLIENT_SECRET: Joi.string().required().description('Discord clinet secret'),
         DISCORD_BOT_TOKEN: Joi.string().required().description('Discord bot token'),
         DISCORD_AUTHORIZE_CALLBACK_URI: Joi.string().required().description('Discord authorize callback uri'),
@@ -66,7 +66,7 @@ export default {
         database: envVars.NEO4J_DB,
     },
     discord: {
-        clientId: envVars.DISCROD_CLIENT_ID,
+        clientId: envVars.DISCORD_CLIENT_ID,
         clientSecret: envVars.DISCORD_CLIENT_SECRET,
         botToken: envVars.DISCORD_BOT_TOKEN,
         callbackURI: {
