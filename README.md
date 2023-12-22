@@ -1,8 +1,8 @@
 # ServerComm
 All communcation between front-end and DB
 
-[![Maintainability](https://api.codeclimate.com/v1/badges/a3f4a30c736bae992234/maintainability)](https://codeclimate.com/github/RnDAO/tc-serverComm/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/a3f4a30c736bae992234/test_coverage)](https://codeclimate.com/github/RnDAO/tc-serverComm/test_coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/ad9db42ef0a42bb21764/maintainability)](https://codeclimate.com/github/TogetherCrew/api/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/ad9db42ef0a42bb21764/test_coverage)](https://codeclimate.com/github/TogetherCrew/api/test_coverage)
 
 ## Installation
 
