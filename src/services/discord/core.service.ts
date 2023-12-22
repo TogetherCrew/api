@@ -16,7 +16,7 @@ const logger = parentLogger.child({ module: 'DiscordService' });
  * @returns {Promise<IDiscordOAuth2EchangeCode>}
  */
 async function getPropertyHandler(req: IAuthAndPlatform) {
-    const connection = DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
+    const connection = await DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
 
     const filter = pick(req.query, ['name']);
     if (filter.name) {
