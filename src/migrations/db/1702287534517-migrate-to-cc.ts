@@ -26,7 +26,7 @@ export const up = async () => {
     // Connect to MongoDB
     await connectToMongoDB();
     // const connection = mongoose.connection.useDb("RnDAO", { useCache: true });
-    const connection = DatabaseManager.getInstance().getTenantDb("RnDAO");
+    const connection = await DatabaseManager.getInstance().getTenantDb("RnDAO");
     connection.model<IOldUser>('User', oldUserSchema);
     connection.model<IGuild>('Guild', guildSchema);
 
