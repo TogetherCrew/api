@@ -38,6 +38,8 @@ const envVarsSchema = Joi.object()
         NEO4J_DB: Joi.string().required().description('NEO4J DB name'),
         LOG_LEVEL: Joi.string().required().description('Min allowed log level'),
         SESSION_SECRET: Joi.string().required().description('Session secret'),
+        REDIS_HOST: Joi.string().required().description('Redis host'),
+        REDIS_PORT: Joi.string().required().description('Redis port'),
 
     })
     .unknown();
@@ -55,6 +57,10 @@ export default {
         serverURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}/${envVars.DB_NAME}`,
         botURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}`,
         dbURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}`
+    },
+    redis: {
+        host: envVars.REDIS_HOST,
+        port: envVars.REDIS_PORT
     },
     rabbitMQ: {
         url: `amqp://${envVars.RABBIT_USER}:${envVars.RABBIT_PASSWORD}@${envVars.RABBIT_HOST}:${envVars.RABBIT_PORT}`,
