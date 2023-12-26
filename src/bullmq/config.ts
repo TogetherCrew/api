@@ -1,7 +1,8 @@
+import config from "../config";
 
 export const REDIS_CONNECTOR = {
-    host: 'localhost',
-    port: 6379,
+    host: config.redis.host,
+    port: config.redis.port,
 } as const;
 
 export const DEFAULT_REMOVE_CONFIG = {
