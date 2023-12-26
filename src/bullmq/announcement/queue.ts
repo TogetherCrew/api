@@ -1,5 +1,5 @@
 import { Queue, Job } from 'bullmq';
-import { DEFAULT_REMOVE_CONFIG, REDIS_CONNECTOR, announcementQueueName } from '../config';
+import { DEFAULT_REMOVE_CONFIG, REDIS_CONNECTOR, announcementQueueName } from '../../config/bullmq';
 import { setUpAnnouncementWorker } from './worker';
 
 export const announcementQueue = new Queue(announcementQueueName, {

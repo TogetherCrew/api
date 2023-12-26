@@ -1,4 +1,4 @@
-import config from "../config";
+import config from ".";
 
 export const REDIS_CONNECTOR = {
     host: config.redis.host,

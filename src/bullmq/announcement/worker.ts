@@ -1,5 +1,5 @@
 import { Worker } from 'bullmq';
-import { REDIS_CONNECTOR, announcementQueueName } from '../config';
+import { REDIS_CONNECTOR, announcementQueueName } from '../../config/bullmq';
 import path from 'path';
 import config from '../../config';
 
