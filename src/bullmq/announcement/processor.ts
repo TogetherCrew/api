@@ -1,9 +1,5 @@
 import { Job } from 'bullmq';
 
-function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 const jobProcessor = async (job: Job) => {
     await job.log(`Started processing job with id ${job.id} and name ${job.name}}`);
   
