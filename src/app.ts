@@ -11,6 +11,7 @@ import routes from "./routes/v1";
 import morgan from "./config/morgan";
 import config from "./config";
 import session from 'express-session';
+import { bullBoardServerAdapter } from "./bullmq";
 
 const app: Application = express();
 
@@ -48,6 +49,9 @@ passport.use('jwt', jwtStrategy);
 
 // v1 api routes
 app.use('/api/v1', routes);
+
+// BullBoard
+app.use('/admin/queues', bullBoardServerAdapter.getRouter());
 
 // send back a 404 error for any unknown api request
 app.use((req, res, next) => {
