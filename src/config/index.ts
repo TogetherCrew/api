@@ -13,7 +13,7 @@ const envVarsSchema = Joi.object()
         RABBIT_PORT: Joi.string().required().description('RabbitMQ port'),
         RABBIT_USER: Joi.string().required().description('RabbitMQ username'),
         RABBIT_PASSWORD: Joi.string().required().description('RabbitMQ password'),
-        DISCROD_CLIENT_ID: Joi.string().required().description('Discord clinet id'),
+        DISCORD_CLIENT_ID: Joi.string().required().description('Discord clinet id'),
         DISCORD_CLIENT_SECRET: Joi.string().required().description('Discord clinet secret'),
         DISCORD_BOT_TOKEN: Joi.string().required().description('Discord bot token'),
         DISCORD_AUTHORIZE_CALLBACK_URI: Joi.string().required().description('Discord authorize callback uri'),
@@ -38,6 +38,8 @@ const envVarsSchema = Joi.object()
         NEO4J_DB: Joi.string().required().description('NEO4J DB name'),
         LOG_LEVEL: Joi.string().required().description('Min allowed log level'),
         SESSION_SECRET: Joi.string().required().description('Session secret'),
+        REDIS_HOST: Joi.string().required().description('Redis host'),
+        REDIS_PORT: Joi.string().required().description('Redis port'),
 
     })
     .unknown();
@@ -56,6 +58,10 @@ export default {
         botURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}`,
         dbURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}`
     },
+    redis: {
+        host: envVars.REDIS_HOST,
+        port: envVars.REDIS_PORT
+    },
     rabbitMQ: {
         url: `amqp://${envVars.RABBIT_USER}:${envVars.RABBIT_PASSWORD}@${envVars.RABBIT_HOST}:${envVars.RABBIT_PORT}`,
     },
@@ -66,7 +72,7 @@ export default {
         database: envVars.NEO4J_DB,
     },
     discord: {
-        clientId: envVars.DISCROD_CLIENT_ID,
+        clientId: envVars.DISCORD_CLIENT_ID,
         clientSecret: envVars.DISCORD_CLIENT_SECRET,
         botToken: envVars.DISCORD_BOT_TOKEN,
         callbackURI: {
