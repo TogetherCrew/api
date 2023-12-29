@@ -4,7 +4,7 @@ import { objectId } from './custom.validation';
 const createAnnouncement = {
     body: Joi.object().keys({
         title: Joi.string().required(),
-        community: Joi.string().custom(objectId).required(),
+        communityId: Joi.string().custom(objectId).required(),
         scheduledAt: Joi.date().greater('now').iso().required(),
         draft: Joi.boolean().required(),
         data: Joi.array().items(
