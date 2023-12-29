@@ -1,6 +1,6 @@
 import { Announcement, IAnnouncement } from "@togethercrew.dev/db";
 import { startSession } from "mongoose";
-import { addJobToAnnouncementQueue } from "src/bullmq";
+import { addJobToAnnouncementQueue } from "../bullmq";
 
 const createDraftAnnouncement = async (announcementData: IAnnouncement) => {
     if(announcementData.draft === false) throw new Error('Cannot create a draft announcement with draft set to false');
