@@ -32,7 +32,20 @@ const createScheduledAnnouncement = async (announcementData: IAnnouncement) => {
     }
 }
 
+/**
+ * Query for announcements
+ * @param {Object} filter - Mongo filter
+ * @param {Object} options - Query options
+ * @param {string} [options.sortBy] - Sort option in the format: sortField:(desc|asc)
+ * @param {number} [options.limit] - Maximum number of results per page (default = 10)
+ * @param {number} [options.page] - Current page (default = 1)
+ */
+const queryAnnouncements = async (filter: object, options: object) => {
+    return Announcement.paginate(filter, options);
+}
+
 export default {
     createDraftAnnouncement,
-    createScheduledAnnouncement
+    createScheduledAnnouncement,
+    queryAnnouncements
 }

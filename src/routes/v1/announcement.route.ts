@@ -7,6 +7,6 @@ import { announcementController } from "../../controllers";
 const router = express.Router();
 
 router.post('', auth(), validate(announcementValidation.createAnnouncement), announcementController.createAnnouncement);
-
+router.get('', auth(), validate(announcementValidation.getAnnouncements), announcementController.getAnnouncements);
 
 export default router;

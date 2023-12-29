@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { IAuthRequest } from '../interfaces/Request.interface';
-import { ApiError, catchAsync } from "../utils";
+import { ApiError, catchAsync, pick } from "../utils";
 import { communityService } from '../services';
 import httpStatus from 'http-status';
 import { IAnnouncement } from '@togethercrew.dev/db';
@@ -43,6 +43,28 @@ const createAnnouncement = catchAsync(async function (req: IAuthRequest, res: Re
     res.status(httpStatus.CREATED).send(announcement);
 })
 
+const getAnnouncements = catchAsync(async function (req: IAuthRequest, res: Response) {
+    const queryFilter = pick(req.query, ['communityId', 'startDate', 'endDate']);
+    const options = pick(req.query, ['sortBy', 'limit', 'page']);
+
+    const community = await communityService.getCommunityByFilter({ _id: queryFilter.communityId, users: req.user.id });
+    if (!community) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Community not found');
+    }
+
+    const dbFilter: Record<string, any> = {};
+    dbFilter.community = queryFilter.communityId;
+    
+    if(queryFilter.startDate && queryFilter.endDate) dbFilter.scheduledAt = { $gte: queryFilter.startDate, $lte: queryFilter.endDate };
+    else if(queryFilter.startDate) dbFilter.scheduledAt = { $gte: queryFilter.startDate };
+    else if(queryFilter.endDate) dbFilter.scheduledAt = { $lte: queryFilter.endDate };
+
+    const paginatedAnnouncement = await announcementService.queryAnnouncements(dbFilter, options);
+    paginatedAnnouncement.results = paginatedAnnouncement.results.map(getAnnouncementFieldsToReturn);
+    res.status(httpStatus.OK).send(paginatedAnnouncement);
+})
+
 export default {
     createAnnouncement,
+    getAnnouncements
 };

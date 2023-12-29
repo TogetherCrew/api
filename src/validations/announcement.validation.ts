@@ -21,6 +21,22 @@ const createAnnouncement = {
     })
 }
 
+const getAnnouncements = {
+    query: Joi.object().keys({
+        communityId: Joi.string().custom(objectId).required(),
+        sortBy: Joi.string(),
+        limit: Joi.number().integer().max(100).default(10),
+        page: Joi.number().integer().min(1).default(1),
+        startDate: Joi.date().iso().description('ISO date string. UTC time zone'),
+        endDate: Joi.date().iso().when('startDate', {
+            is: Joi.exist(),
+            then: Joi.date().greater(Joi.ref('startDate')),
+            otherwise: Joi.optional()
+        }).description('ISO date string. UTC time zone')
+    }),
+}
+
 export default {
-    createAnnouncement
+    createAnnouncement,
+    getAnnouncements
 }
