@@ -78,3 +78,67 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
+
+    get:
+      tags:
+        - Announcement
+      summary: Retrieve a list of announcements.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          description: The ID of the community for which announcements are being fetched.
+          schema:
+            type: string
+            format: objectId
+        - in: query
+          name: sortBy
+          schema:
+            type: string
+            description: Sort the announcements by a specified field (e.g., "scheduledAt").
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            maximum: 100
+            description: Maximum number of announcements to return (up to 100).
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+            description: Page number for pagination.
+        - in: query
+          name: startDate
+          schema:
+            type: string
+            format: date-time
+            description: Start date for filtering announcements, in ISO date string format (UTC time zone).
+        - in: query
+          name: endDate
+          schema:
+            type: string
+            format: date-time
+            description: End date for filtering announcements, in ISO date string format (UTC time zone). Must be greater than startDate.
+      responses:
+        "200":
+          description: List of announcements retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Announcement"
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
