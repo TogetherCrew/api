@@ -4,7 +4,7 @@ import path from 'path';
 import config from '../../config';
 
 let worker: Worker
-const processorPath = path.join(__dirname, config.env == 'development' ? 'processor.ts' : 'processor.js');
+const processorPath = path.join(__dirname, config.env == 'production' ? 'processor.js' : 'processor.ts');
 
 export const setUpAnnouncementWorker = () => {
     worker = new Worker(announcementQueueName, processorPath, {
