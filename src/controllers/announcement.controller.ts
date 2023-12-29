@@ -3,9 +3,8 @@ import { IAuthRequest } from '../interfaces/Request.interface';
 import { ApiError, catchAsync } from "../utils";
 import { communityService } from '../services';
 import httpStatus from 'http-status';
-import { addJobToAnnouncementQueue } from '../bullmq';
-import { Announcement, IAnnouncement } from '@togethercrew.dev/db';
-import { startSession } from 'mongoose';
+import { IAnnouncement } from '@togethercrew.dev/db';
+import { announcementService } from '../services';
 
 function getAnnouncementFieldsToReturn(announcement: IAnnouncement): object {
     return {
@@ -37,43 +36,13 @@ const createAnnouncement = catchAsync(async function (req: IAuthRequest, res: Re
     };
 
     let announcement;
-    if(draft)announcement = await createDraftAnnouncement(announcementData);
-    else announcement = await createScheduledAnnouncement(announcementData);
+    if(draft)announcement = await announcementService.createDraftAnnouncement(announcementData);
+    else announcement = await announcementService.createScheduledAnnouncement(announcementData);
 
     announcement = getAnnouncementFieldsToReturn(announcement);
     res.status(httpStatus.CREATED).send(announcement);
 })
 
-const createDraftAnnouncement = async (announcementData: IAnnouncement) => {
-    if(announcementData.draft === false) throw new ApiError(httpStatus.BAD_REQUEST, 'Cannot create a draft announcement with draft set to false');
-
-    const announcement = await Announcement.create(announcementData);
-    return announcement;
-}
-
-const createScheduledAnnouncement = async (announcementData: IAnnouncement) => {
-    const session = await startSession();
-    session.startTransaction();
-    try {
-        const announcement = new Announcement(announcementData);
-        await announcement.save({ session });
-
-        // create a job and assign it to the announcement
-        const job = await addJobToAnnouncementQueue(announcement.id, { announcementId: announcement.id }, announcementData.scheduledAt);
-        announcement.jobId = job.id as number | undefined;
-
-        await announcement.save({ session });
-
-        await session.commitTransaction();
-        return announcement;
-    } catch (error) {
-        await session.abortTransaction();
-        throw error;
-    } finally {
-        session.endSession();
-    }
-}
-
 export default {
-    createAnnouncement
+    createAnnouncement,
 };
