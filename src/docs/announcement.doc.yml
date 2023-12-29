@@ -1,0 +1,80 @@
+paths:
+  /api/v1/announcements/:
+    post:
+      tags:
+        - Announcement
+      summary: Create a new announcement.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                communityId:
+                  type: string
+                scheduledAt:
+                  type: string
+                  format: date-time
+                  description: The date and time when the announcement is scheduled. The scheduled time of the announcement in UTC timezone.
+                draft:
+                  type: boolean
+                  description: Indicates if the announcement is a draft.
+                data:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      platformId:
+                        type: string
+                      template:
+                        type: string
+                      options:
+                        type: object
+                        properties:
+                          channelIds:
+                            type: array
+                            items:
+                              type: string
+                          userIds:
+                            type: array
+                            items:
+                              type: string
+                          roleIds:
+                            type: array
+                            items:
+                              type: string
+                        oneOf:
+                          - required: [channelIds]
+                          - required: [userIds]
+                          - required: [roleIds]
+              example:
+                title: "New Feature Announcement"
+                communityId: "1234567890abcdef"
+                scheduledAt: "2023-11-15T09:00:00Z"
+                draft: false
+                data:
+                  - platformId: "abcdef1234567890"
+                    template: "Standard"
+                    options:
+                      channelIds: ["channel1", "channel2"]
+      responses:
+        "201":
+          description: Announcement created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Announcement"
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
