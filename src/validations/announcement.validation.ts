@@ -5,7 +5,7 @@ const createAnnouncement = {
     body: Joi.object().keys({
         title: Joi.string().required(),
         communityId: Joi.string().custom(objectId).required(),
-        scheduledAt: Joi.date().greater('now').iso().required(),
+        scheduledAt: Joi.date().greater('now').iso().required().description('ISO date string. UTC time zone'),
         draft: Joi.boolean().required(),
         data: Joi.array().items(
             Joi.object({
