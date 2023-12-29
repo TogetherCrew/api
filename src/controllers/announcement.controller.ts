@@ -31,8 +31,8 @@ const createAnnouncement = catchAsync(async function (req: IAuthRequest, res: Re
         scheduledAt, 
         draft, 
         data: dataToSave,
-        createdBy: "5f9f9b9b9b9b9b9b9b9b9b9b" as any,
-        updatedBy: "5f9f9b9b9b9b9b9b9b9b9b9b" as any
+        createdBy: req.user.id,
+        updatedBy: req.user.id
     };
 
     let announcement;
