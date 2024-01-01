@@ -44,8 +44,13 @@ const queryAnnouncements = async (filter: object, options: object) => {
     return Announcement.paginate(filter, options);
 }
 
+const getAnnouncementById = async (id: string) => {
+    return await Announcement.findById(id);
+}
+
 export default {
     createDraftAnnouncement,
     createScheduledAnnouncement,
-    queryAnnouncements
+    queryAnnouncements,
+    getAnnouncementById
 }

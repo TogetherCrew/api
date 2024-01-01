@@ -64,7 +64,24 @@ const getAnnouncements = catchAsync(async function (req: IAuthRequest, res: Resp
     res.status(httpStatus.OK).send(paginatedAnnouncement);
 })
 
+const getOneAnnouncement = catchAsync(async function (req: IAuthRequest, res: Response) {
+    const { announcementId } = req.params;
+
+    const announcement = await announcementService.getAnnouncementById(announcementId);
+    if (!announcement) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Announcement not found');
+    }
+
+    const community = await communityService.getCommunityByFilter({ _id: announcement.community, users: req.user.id });
+    if (!community) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Announcement not found');
+    }
+
+    res.status(httpStatus.OK).send(getAnnouncementFieldsToReturn(announcement));
+})
+
 export default {
     createAnnouncement,
-    getAnnouncements
+    getAnnouncements,
+    getOneAnnouncement
 };

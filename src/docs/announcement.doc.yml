@@ -142,3 +142,35 @@ paths:
         "404":
           description: NotFound
           $ref: "#/components/responses/NotFound"
+
+  /api/v1/announcements/{AnnouncementID}:
+    get:
+      tags:
+        - Announcement
+      summary: Retrieve details of a specific announcement by its ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: AnnouncementID
+          in: path
+          required: true
+          description: The ID of the announcement to retrieve.
+          schema:
+            type: string
+            format: objectId
+      responses:
+        "200":
+          description: Announcement details retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Announcement'
+        "400":
+          description: Bad Request
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          description: Unauthorized
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          description: NotFound
+          $ref: '#/components/responses/NotFound'
