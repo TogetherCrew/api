@@ -18,7 +18,7 @@ describe('Community routes', () => {
         communityThree.users = [userTwo._id];
         announcementOne.community = communityOne._id;
         announcementTwo.community = communityOne._id;
-        announcementThree.community = communityTwo._id;
+        announcementThree.community = communityThree._id;
     });
 
     describe('POST api/v1/announcements', () => {
@@ -248,4 +248,79 @@ describe('Community routes', () => {
                 .expect(httpStatus.UNAUTHORIZED);
         });
     });
+
+    describe('GET api/v1/announcements/:announcementId', () => {
+        test('should return 200 and successfully get announcement if data is ok', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertAnnouncement([announcementOne, announcementTwo, announcementThree]);
+
+            const res = await request(app)
+                .get(`/api/v1/announcements/${announcementOne._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                id: announcementOne._id.toString(),
+                title: 'Announcement One',
+                scheduledAt: announcementOne.scheduledAt.toISOString(),
+                draft: false,
+                data: announcementOne.data.map((data: any) => ({ ...data, platform: data.platform.toString() })),
+                community: userOne.communities?.[0].toString()
+            });
+        });
+
+        test('should return 400 error if announcementId is not a valid mongo id', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertAnnouncement([announcementOne, announcementTwo, announcementThree]);
+
+            await request(app)
+                .get('/api/v1/announcements/invalidId')
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .expect(httpStatus.BAD_REQUEST);
+        });
+
+        test('should return 404 error if announcement is not found', async () => {
+            await insertCommunities([communityOne, communityTwo]);
+            await insertUsers([userOne, userTwo]);
+
+            await request(app)
+                .get(`/api/v1/announcements/${announcementOne._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .expect(httpStatus.NOT_FOUND);
+        });
+
+        test('Should return 404 error if user is not a member of the requested community', async () => {
+            await insertCommunities([communityOne, communityTwo]);
+            await insertUsers([userOne, userTwo]);
+            await insertAnnouncement([announcementOne, announcementTwo, announcementThree]);
+
+            await request(app)
+                .get(`/api/v1/announcements/${announcementThree._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .expect(httpStatus.NOT_FOUND);
+        });
+
+        test('should return 401 error if access token is missing', async () => {
+            await insertCommunities([communityOne, communityTwo]);
+            await insertUsers([userOne, userTwo]);
+
+            await request(app)
+                .get(`/api/v1/announcements/${announcementOne._id}`)
+                .expect(httpStatus.UNAUTHORIZED);
+        });
+
+        test('should return 401 error if access token is invalid', async () => {
+            await insertCommunities([communityOne, communityTwo]);
+            await insertUsers([userOne, userTwo]);
+
+            await request(app)
+                .get(`/api/v1/announcements/${announcementOne._id}`)
+                .set('Authorization', `Bearer invalidAccessToken`)
+                .expect(httpStatus.UNAUTHORIZED);
+        })
+
+    });
+
 });
