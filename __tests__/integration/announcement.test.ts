@@ -5,6 +5,7 @@ import setupTestDB from '../utils/setupTestDB';
 import { userOne, insertUsers, userTwo } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { communityOne, communityTwo, communityThree, insertCommunities } from '../fixtures/community.fixture';
+import { announcementOne, announcementThree, announcementTwo, insertAnnouncement } from '../fixtures/announcement.fixture';
 
 setupTestDB();
 
@@ -15,6 +16,9 @@ describe('Community routes', () => {
         communityOne.users = [userOne._id];
         communityTwo.users = [userOne._id];
         communityThree.users = [userTwo._id];
+        announcementOne.community = communityOne._id;
+        announcementTwo.community = communityOne._id;
+        announcementThree.community = communityTwo._id;
     });
 
     describe('POST api/v1/announcements', () => {
@@ -159,5 +163,89 @@ describe('Community routes', () => {
                 .expect(httpStatus.NOT_FOUND);
         })
 
+    });
+
+    describe('GET api/v1/announcements', () => {
+        test('should return 200 and successfully get announcements if data is ok', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertAnnouncement([announcementOne, announcementTwo, announcementThree]);
+
+            const res = await request(app)
+                .get('/api/v1/announcements')
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ communityId: userOne.communities?.[0].toString() })
+                .expect(httpStatus.OK);
+
+
+            expect(res.body.results).toHaveLength(2);
+            expect(res.body.results).toEqual([
+                {
+                  id: announcementTwo._id.toString(),
+                  title: 'Announcement Two',
+                  scheduledAt: announcementTwo.scheduledAt.toISOString(),
+                  draft: false,
+                  data: announcementTwo.data.map((data: any) => ({ ...data, platform: data.platform.toString() })),
+                  community: userOne.communities?.[0].toString()
+                },
+                {
+                  id: announcementOne._id.toString(),
+                  title: 'Announcement One',
+                  scheduledAt: announcementOne.scheduledAt.toISOString(),
+                  draft: false,
+                  data: announcementOne.data.map((data: any) => ({ ...data, platform: data.platform.toString() })),
+                  community: userOne.communities?.[0].toString()
+                }
+            ]);
+            expect(res.body.page).toEqual(1);
+            expect(res.body.limit).toEqual(10);
+            expect(res.body.totalPages).toEqual(1);
+            expect(res.body.totalResults).toEqual(2);
+            
+        });
+
+        test('should return 400 error if communityId is not a valid mongo id', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertAnnouncement([announcementOne, announcementTwo, announcementThree]);
+
+            await request(app)
+                .get('/api/v1/announcements')
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ communityId: communityOne._id })
+                .expect(httpStatus.BAD_REQUEST);
+        });
+
+        test('should return 404 error if community is not found', async () => {
+            await insertCommunities([communityOne, communityTwo]);
+            await insertUsers([userOne, userTwo]);
+
+            await request(app)
+                .get('/api/v1/announcements')
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ communityId: communityThree._id.toString() })
+                .expect(httpStatus.NOT_FOUND);
+        });
+
+        test('should return 401 error if access token is missing', async () => {
+            await insertCommunities([communityOne, communityTwo]);
+            await insertUsers([userOne, userTwo]);
+
+            await request(app)
+                .get('/api/v1/announcements')
+                .query({ communityId: communityOne._id.toString() })
+                .expect(httpStatus.UNAUTHORIZED);
+        });
+
+        test('should return 401 error if access token is invalid', async () => {
+            await insertCommunities([communityOne, communityTwo]);
+            await insertUsers([userOne, userTwo]);
+
+            await request(app)
+                .get('/api/v1/announcements')
+                .set('Authorization', 'Bearer invalidtoken')
+                .query({ communityId: communityOne._id.toString() })
+                .expect(httpStatus.UNAUTHORIZED);
+        });
     });
 });
