@@ -21,6 +21,25 @@ const createAnnouncement = {
     })
 }
 
+const updateAnnouncement = {
+    body: Joi.object().keys({
+        title: Joi.string(),
+        scheduledAt: Joi.date().greater('now').iso().description('ISO date string. UTC time zone'),
+        draft: Joi.boolean(),
+        data: Joi.array().items(
+            Joi.object({
+                platformId: Joi.string().custom(objectId).required(),
+                template: Joi.string().required(),
+                options: Joi.object({
+                    channelIds: Joi.array().items(Joi.string()),
+                    userIds: Joi.array().items(Joi.string()),
+                    roleIds: Joi.array().items(Joi.string())
+                  }).xor('channelIds', 'userIds', 'roleIds').required()
+            })
+        )
+    })
+}
+
 const getAnnouncements = {
     query: Joi.object().keys({
         communityId: Joi.string().custom(objectId).required(),
@@ -38,5 +57,6 @@ const getAnnouncements = {
 
 export default {
     createAnnouncement,
+    updateAnnouncement,
     getAnnouncements
 }

@@ -165,6 +165,64 @@ describe('Community routes', () => {
 
     });
 
+    describe('PATCH api/v1/announcements/:announcementId', () => {
+        test('should return 200 and successfully update announcement if data is ok', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertAnnouncement([announcementOne, announcementTwo, announcementThree]);
+
+            const res = await request(app)
+                .patch(`/api/v1/announcements/${announcementOne._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ title: 'Updated Announcement One - 1 is one' })
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                id: announcementOne._id.toString(),
+                title: 'Updated Announcement One - 1 is one',
+                scheduledAt: announcementOne.scheduledAt.toISOString(),
+                draft: false,
+                data: announcementOne.data.map((data: any) => ({ ...data, platform: data.platform.toString() })),
+                community: userOne.communities?.[0].toString()
+            });
+        });
+
+        test('should return 400 error if announcementId is not a valid mongo id', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertAnnouncement([announcementOne, announcementTwo, announcementThree]);
+
+            await request(app)
+                .patch('/api/v1/announcements/invalidId')
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ title: 'Updated Announcement One' })
+                .expect(httpStatus.BAD_REQUEST);
+        });
+
+        test('should return 404 error if announcement is not found', async () => {
+            await insertCommunities([communityOne, communityTwo]);
+            await insertUsers([userOne, userTwo]);
+
+            await request(app)
+                .patch(`/api/v1/announcements/${announcementOne._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ title: 'Updated Announcement One' })
+                .expect(httpStatus.NOT_FOUND);
+        });
+
+        test('Should return 404 error if user is not a member of the requested community', async () => {
+            await insertCommunities([communityOne, communityTwo]);
+            await insertUsers([userOne, userTwo]);
+            await insertAnnouncement([announcementOne, announcementTwo, announcementThree]);
+
+            await request(app)
+                .patch(`/api/v1/announcements/${announcementThree._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ title: 'Updated Announcement One' })
+                .expect(httpStatus.NOT_FOUND);
+        });
+    })
+
     describe('GET api/v1/announcements', () => {
         test('should return 200 and successfully get announcements if data is ok', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);

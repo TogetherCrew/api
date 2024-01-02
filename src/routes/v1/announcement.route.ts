@@ -9,5 +9,6 @@ const router = express.Router();
 router.post('', auth(), validate(announcementValidation.createAnnouncement), announcementController.createAnnouncement);
 router.get('', auth(), validate(announcementValidation.getAnnouncements), announcementController.getAnnouncements);
 router.get('/:announcementId', auth(), announcementController.getOneAnnouncement);
+router.patch('/:announcementId', auth(), validate(announcementValidation.updateAnnouncement), announcementController.updateAnnouncement);
 
 export default router;
