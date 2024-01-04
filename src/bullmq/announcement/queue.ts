@@ -7,7 +7,7 @@ export const announcementQueue = new Queue(announcementQueueName, {
 });
 setUpAnnouncementWorker();
 
-export async function addJobToAnnouncementQueue<T>(jobName: string, data: T, executionTime: Date): Promise<Job<T>> {
+export async function addJobToAnnouncementQueue<T extends { announcementId: string }>(jobName: string, data: T, executionTime: Date): Promise<Job<T>> {
     const now = new Date();
     const delay = executionTime.getTime() - now.getTime();
 

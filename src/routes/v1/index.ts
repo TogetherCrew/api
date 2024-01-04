@@ -7,6 +7,7 @@ import notionRoute from './notion.route';
 import memberActivityRoute from './memberActivity.route';
 import communityRoute from './community.route';
 import platformRoute from './platform.route';
+import announcementRoute from './announcement.route';
 
 const router = express.Router();
 
@@ -43,6 +44,10 @@ const defaultRoutes = [
     {
         path: '/platforms',
         route: platformRoute
+    },
+    {
+        path: '/announcements',
+        route: announcementRoute
     }
 ];
 

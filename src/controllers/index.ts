@@ -5,6 +5,7 @@ import notionController from './notion.controller';
 import memberActivityController from './memberActivity.controller';
 import communityController from './community.controller';
 import platformController from './platform.controller';
+import announcementController from './announcement.controller';
 
 export {
     authController,
@@ -13,5 +14,6 @@ export {
     notionController,
     memberActivityController,
     communityController,
-    platformController
+    platformController,
+    announcementController
 }
