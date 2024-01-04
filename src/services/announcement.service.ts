@@ -120,6 +120,11 @@ const getAnnouncementById = async (id: string) => {
     return await Announcement.findById(id);
 }
 
+const deleteAnnouncementById = async (announcementId: string) => {
+    const deleteResult = Announcement.deleteOne({ _id: announcementId });
+    return deleteResult
+}
+
 
 export default {
     createDraftAnnouncement,
@@ -128,6 +133,7 @@ export default {
     updateAnnouncementAndRemoveJob,
     updateAnnouncementAndAddJob,
     findOneAnnouncementAndUpdate,
+    deleteAnnouncementById,
     queryAnnouncements,
     getAnnouncementById
 }

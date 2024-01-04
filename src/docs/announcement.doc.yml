@@ -174,3 +174,29 @@ paths:
         "404":
           description: NotFound
           $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Announcement
+      summary: Delete a specific announcement by its ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: AnnouncementID
+          in: path
+          required: true
+          description: The ID of the announcement to delete.
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Announcement deleted successfully. No content returned.
+        "400":
+          description: Bad Request
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          description: Unauthorized
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          description: NotFound
+          $ref: '#/components/responses/NotFound'
