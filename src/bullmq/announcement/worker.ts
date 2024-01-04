@@ -4,7 +4,7 @@ import path from 'path';
 import config from '../../config';
 
 let worker: Worker
-const processorPath = path.join(__dirname, config.env == 'production' ? 'processor.js' : 'processor.ts');
+const processorPath = path.join(__dirname, config.env == 'production' ? 'processor.js' : '../../../lib/bullmq/announcement/processor.js');
 
 export const setUpAnnouncementWorker = () => {
     worker = new Worker(announcementQueueName, processorPath, {
