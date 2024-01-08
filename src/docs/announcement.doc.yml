@@ -175,6 +175,86 @@ paths:
           description: NotFound
           $ref: '#/components/responses/NotFound'
 
+    patch:
+      tags:
+        - Announcement
+      summary: Update a specific announcement by its ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: AnnouncementID
+          in: path
+          required: true
+          description: The ID of the announcement to update.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                scheduledAt:
+                  type: string
+                  format: date-time
+                  description: ISO date string. UTC time zone
+                draft:
+                  type: boolean
+                data:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      platformId:
+                        type: string
+                        description: Unique identifier for the platform, validated by custom objectId function.
+                      template:
+                        type: string
+                        description: Template identifier.
+                      options:
+                        type: object
+                        properties:
+                          channelIds:
+                            type: array
+                            items:
+                              type: string
+                          usernames:
+                            type: array
+                            items:
+                              type: string
+                          roleIds:
+                            type: array
+                            items:
+                              type: string
+                        oneOf:
+                          - required: 
+                            - channelIds
+                          - required: 
+                            - usernames
+                          - required: 
+                            - roleIds
+              required:
+                - data
+      responses:
+        "200":
+          description: Announcement updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Announcement'
+        "400":
+          description: Bad Request
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          description: Unauthorized
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          description: NotFound
+          $ref: '#/components/responses/NotFound'
+
     delete:
       tags:
         - Announcement
