@@ -40,7 +40,7 @@ const envVarsSchema = Joi.object()
         SESSION_SECRET: Joi.string().required().description('Session secret'),
         REDIS_HOST: Joi.string().required().description('Redis host'),
         REDIS_PORT: Joi.string().required().description('Redis port'),
-
+        REDIS_PASSWORD: Joi.string().required().description('Redis password'),
     })
     .unknown();
 
@@ -60,7 +60,8 @@ export default {
     },
     redis: {
         host: envVars.REDIS_HOST,
-        port: envVars.REDIS_PORT
+        port: envVars.REDIS_PORT,
+        password: envVars.REDIS_PASSWORD,
     },
     rabbitMQ: {
         url: `amqp://${envVars.RABBIT_USER}:${envVars.RABBIT_PASSWORD}@${envVars.RABBIT_HOST}:${envVars.RABBIT_PORT}`,
