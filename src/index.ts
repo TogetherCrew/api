@@ -3,6 +3,8 @@ import app from './app';
 import config from './config';
 import RabbitMQ, { MBConnection, Queue } from '@togethercrew.dev/tc-messagebroker';
 import logger from './config/logger';
+import { announcementEmitter } from '@togethercrew.dev/db';
+import { announcementService } from "./services";
 
 mongoose.set("strictQuery", false);
 
@@ -36,8 +38,22 @@ const connectToMongoDB = async () => {
     }
 };
 
+const handleAnnouncementRemoval = () => {
+
+    announcementEmitter.on('announcement:remove', (data) => {
+        console.log('[announcement:remove] ', data)
+        announcementService.onDestroyAnnouncement(data?.jobId);
+    })
+
+    announcementEmitter.on('announcement:softDelete', (data) => {
+        console.log('[announcement:softDelete] ',data)
+        announcementService.onDestroyAnnouncement(data?.jobId);
+    })
+}
+
 // Initialize the application
 const initApp = async () => {
+    handleAnnouncementRemoval();
     await connectToMB();
     await connectToRabbitMQ();
     await connectToMongoDB();
