@@ -36,8 +36,32 @@ async function createAndStartRefreshTwitterSaga(twitter_username: string, other:
     return saga
 }
 
+async function createAndStartAnnouncementSendMessageToChannelSaga(channels: string[]) {
+    const saga = await MBConnection.models.Saga.create({
+        status: Status.NOT_STARTED,
+        data: { channels },
+        choreography: ChoreographyDict.ANNOUNCEMENT_SEND_MESSAGE_TO_CHANNEL
+    })
+
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    await saga.start(() => { })
+}
+
+async function createAndStartAnnouncementSendMessageToUserSaga(usersId: string[]) {
+    const saga = await MBConnection.models.Saga.create({
+        status: Status.NOT_STARTED,
+        data: { usersId },
+        choreography: ChoreographyDict.ANNOUNCEMENT_SEND_MESSAGE_TO_USER
+    })
+
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    await saga.start(() => { })
+}
+
 export default {
     createAndStartGuildSaga,
     createAndStartFetchMemberSaga,
-    createAndStartRefreshTwitterSaga
+    createAndStartRefreshTwitterSaga,
+    createAndStartAnnouncementSendMessageToChannelSaga,
+    createAndStartAnnouncementSendMessageToUserSaga
 }
