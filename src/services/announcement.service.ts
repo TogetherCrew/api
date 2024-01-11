@@ -4,6 +4,7 @@ import { addJobToAnnouncementQueue, removeJobFromAnnouncementQueue } from "../bu
 import discordService from './discord';
 import { Job } from "bullmq";
 import config from "../config";
+import sagaService from './saga.service';
 import platformService from "./platform.service";
 
 const createDraftAnnouncement = async (announcementData: IAnnouncement) => {
@@ -175,6 +176,7 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
             console.log("[channelIds] ", channelIds)
 
             // !Fire event for all channels
+            sagaService.createAndStartAnnouncementSendMessageToChannelSaga(channelIds)
         }
 
         const usernames = (options as any)?.usernames
@@ -184,6 +186,9 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
             const userIds = await discordService.guildMemberService.getDiscordIdsFromUsernames(connection, usernames)
 
             // !Fire event for each userID
+            userIds.forEach((userId: string) => {
+                sagaService.createAndStartAnnouncementSendMessageToUserSaga(userId)
+            })
         }
 
         const roleIds = (options as any)?.roleIds
@@ -193,6 +198,9 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
             const userIds = await discordService.roleService.getDiscordIdsFromRoleIds(connection, roleIds)
 
             // !Fire event for each userID
+            userIds.forEach((userId: string) => {
+                sagaService.createAndStartAnnouncementSendMessageToUserSaga(userId)
+            })
         }
     })
 
