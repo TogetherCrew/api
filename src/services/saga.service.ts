@@ -47,10 +47,10 @@ async function createAndStartAnnouncementSendMessageToChannelSaga(channels: stri
     await saga.start(() => { })
 }
 
-async function createAndStartAnnouncementSendMessageToUserSaga(usersId: string[]) {
+async function createAndStartAnnouncementSendMessageToUserSaga(userId: string) {
     const saga = await MBConnection.models.Saga.create({
         status: Status.NOT_STARTED,
-        data: { usersId },
+        data: { userId },
         choreography: ChoreographyDict.ANNOUNCEMENT_SEND_MESSAGE_TO_USER
     })
 
