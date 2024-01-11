@@ -176,7 +176,7 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
             console.log("[channelIds] ", channelIds)
 
             // !Fire event for all channels
-            sagaService.createAndStartAnnouncementSendMessageToChannelSaga(channelIds)
+            sagaService.createAndStartAnnouncementSendMessageToChannelSaga(announcementId, channelIds)
         }
 
         const usernames = (options as any)?.usernames
@@ -187,7 +187,7 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
 
             // !Fire event for each userID
             userIds.forEach((userId: string) => {
-                sagaService.createAndStartAnnouncementSendMessageToUserSaga(userId)
+                sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, userId)
             })
         }
 
@@ -199,7 +199,7 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
 
             // !Fire event for each userID
             userIds.forEach((userId: string) => {
-                sagaService.createAndStartAnnouncementSendMessageToUserSaga(userId)
+                sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, userId)
             })
         }
     })

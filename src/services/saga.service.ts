@@ -36,10 +36,10 @@ async function createAndStartRefreshTwitterSaga(twitter_username: string, other:
     return saga
 }
 
-async function createAndStartAnnouncementSendMessageToChannelSaga(channels: string[]) {
+async function createAndStartAnnouncementSendMessageToChannelSaga(announcementId: string, channels: string[]) {
     const saga = await MBConnection.models.Saga.create({
         status: Status.NOT_STARTED,
-        data: { channels },
+        data: { announcementId, channels },
         choreography: ChoreographyDict.ANNOUNCEMENT_SEND_MESSAGE_TO_CHANNEL
     })
 
@@ -47,10 +47,10 @@ async function createAndStartAnnouncementSendMessageToChannelSaga(channels: stri
     await saga.start(() => { })
 }
 
-async function createAndStartAnnouncementSendMessageToUserSaga(userId: string) {
+async function createAndStartAnnouncementSendMessageToUserSaga(announcementId: string, userId: string) {
     const saga = await MBConnection.models.Saga.create({
         status: Status.NOT_STARTED,
-        data: { userId },
+        data: { announcementId, userId },
         choreography: ChoreographyDict.ANNOUNCEMENT_SEND_MESSAGE_TO_USER
     })
 
