@@ -125,8 +125,15 @@ const getAnnouncementById = async (id: string) => {
 }
 
 const deleteAnnouncementById = async (announcementId: string) => {
-    const deleteResult = Announcement.deleteOne({ _id: announcementId });
-    return deleteResult
+    const announcement = await Announcement.findOne({ _id: announcementId });
+    announcement?.remove() //TODO: change it to `deleteOne` once we have event for `deleteOne`/`deleteMany`
+
+    return announcement
+}
+
+const onDestroyAnnouncement = async (announcementJobId: string) => {
+    if(announcementJobId)
+        await removeJobFromAnnouncementQueue(announcementJobId);
 }
 
 const bullMQTriggeredAnnouncement = async (job: Job) => {
@@ -203,5 +210,6 @@ export default {
     findOneAnnouncementAndUpdate,
     deleteAnnouncementById,
     queryAnnouncements,
-    getAnnouncementById
+    getAnnouncementById,
+    onDestroyAnnouncement
 }
