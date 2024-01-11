@@ -1,13 +1,11 @@
 import { Worker } from 'bullmq';
 import { REDIS_CONNECTOR, announcementQueueName } from '../../config/bullmq';
-import path from 'path';
-import config from '../../config';
+import processor from './processor';
 
 let worker: Worker
-const processorPath = path.join(__dirname, config.env == 'production' ? 'processor.js' : '../../../lib/bullmq/announcement/processor.js');
 
 export const setUpAnnouncementWorker = () => {
-    worker = new Worker(announcementQueueName, processorPath, {
+    worker = new Worker(announcementQueueName, processor, {
       connection: REDIS_CONNECTOR,
       autorun: true,
     });
