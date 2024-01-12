@@ -183,10 +183,10 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
         if(usernames) {
             console.log("[usernames] ", usernames)
             // extract userID from username
-            const userIds = await discordService.guildMemberService.getDiscordIdsFromUsernames(connection, usernames)
+            const discordIds = await discordService.guildMemberService.getDiscordIdsFromUsernames(connection, usernames)
 
             // !Fire event for each userID
-            userIds.forEach((userId: string) => {
+            discordIds.forEach((userId: string) => {
                 sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, userId)
             })
         }
@@ -195,10 +195,10 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
         if(roleIds) {
             console.log("[roleIds] ", roleIds)
             // extract userID from roleID
-            const userIds = await discordService.roleService.getDiscordIdsFromRoleIds(connection, roleIds)
+            const discordIds = await discordService.roleService.getDiscordIdsFromRoleIds(connection, roleIds)
 
             // !Fire event for each userID
-            userIds.forEach((userId: string) => {
+            discordIds.forEach((userId: string) => {
                 sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, userId)
             })
         }
