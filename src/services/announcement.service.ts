@@ -156,6 +156,7 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
 
     announcement?.data.forEach(async (data) => {
         const communityId = announcement?.community
+        const template = data?.template
         const platformId = data?.platform
         const options = data?.options
 
@@ -176,30 +177,30 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
             console.log("[channelIds] ", channelIds)
 
             // !Fire event for all channels
-            sagaService.createAndStartAnnouncementSendMessageToChannelSaga(announcementId, channelIds)
+            sagaService.createAndStartAnnouncementSendMessageToChannelSaga(announcementId, { channels: channelIds, message: template })
         }
 
         const usernames = (options as any)?.usernames
         if(usernames) {
             console.log("[usernames] ", usernames)
-            // extract userID from username
+            // extract discordId from username
             const discordIds = await discordService.guildMemberService.getDiscordIdsFromUsernames(connection, usernames)
 
-            // !Fire event for each userID
-            discordIds.forEach((userId: string) => {
-                sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, userId)
+            // !Fire event for each discordId
+            discordIds.forEach((discordId: string) => {
+                sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { discordId, message: template, useFallback: true })
             })
         }
 
         const roleIds = (options as any)?.roleIds
         if(roleIds) {
             console.log("[roleIds] ", roleIds)
-            // extract userID from roleID
+            // extract discordId from roleID
             const discordIds = await discordService.roleService.getDiscordIdsFromRoleIds(connection, roleIds)
 
-            // !Fire event for each userID
-            discordIds.forEach((userId: string) => {
-                sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, userId)
+            // !Fire event for each discordId
+            discordIds.forEach((discordId: string) => {
+                sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { discordId, message: template, useFallback: true })
             })
         }
     })
