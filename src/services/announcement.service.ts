@@ -6,6 +6,7 @@ import { Job } from "bullmq";
 import config from "../config";
 import sagaService from './saga.service';
 import platformService from "./platform.service";
+import Handlebars from "handlebars";
 
 const createDraftAnnouncement = async (announcementData: IAnnouncement) => {
     if(announcementData.draft === false) throw new Error('Cannot create a draft announcement with draft set to false');
@@ -185,10 +186,13 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
             console.log("[usernames] ", usernames)
             // extract discordId from username
             const discordIds = await discordService.guildMemberService.getDiscordIdsFromUsernames(connection, usernames)
-
+            
             // !Fire event for each discordId
             discordIds.forEach((discordId: string) => {
-                sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { discordId, message: template, useFallback: true })
+                const templateHandlebars = Handlebars.compile(template)
+                const compiledTemplate = templateHandlebars({ username: `<@${discordId}>` })
+
+                sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { discordId, message: compiledTemplate, useFallback: true })
             })
         }
 
@@ -200,7 +204,10 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
 
             // !Fire event for each discordId
             discordIds.forEach((discordId: string) => {
-                sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { discordId, message: template, useFallback: true })
+                const templateHandlebars = Handlebars.compile(template)
+                const compiledTemplate = templateHandlebars({ username: `<@${discordId}>` })
+
+                sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { discordId, message: compiledTemplate, useFallback: true })
             })
         }
     })
