@@ -40,7 +40,7 @@ const envVarsSchema = Joi.object()
         SESSION_SECRET: Joi.string().required().description('Session secret'),
         REDIS_HOST: Joi.string().required().description('Redis host'),
         REDIS_PORT: Joi.string().required().description('Redis port'),
-        REDIS_PASSWORD: Joi.string().required().description('Redis password'),
+        REDIS_PASSWORD: Joi.string().required().description('Reids password').allow(''),
     })
     .unknown();
 

@@ -692,8 +692,10 @@ describe('Platform routes', () => {
 
     describe('POST /:platformId/properties', () => {
         let connection: Connection;
-        beforeEach(async () => {
+        beforeAll(async () => {
             connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+        });
+        beforeEach(async () => {
             await connection.dropDatabase();
         });
         test('should return 200 and apply the default query options if requested property is discord-role', async () => {
@@ -983,33 +985,39 @@ describe('Platform routes', () => {
             expect(res.body.results).toHaveLength(4);
 
 
+
             expect(res.body.results[0]).toMatchObject({
+                discordId: discordGuildMember3.discordId,
+                username: discordGuildMember3.username,
+                ngu: discordGuildMember3.username,
+                discriminator: discordGuildMember3.discriminator,
+                nickname: discordGuildMember3.nickname,
+                globalName: discordGuildMember3.globalName
+            });
+
+            expect(res.body.results[1]).toMatchObject({
                 discordId: discordGuildMember1.discordId,
                 username: discordGuildMember1.username,
                 ngu: discordGuildMember1.globalName,
+                discriminator: discordGuildMember1.discriminator,
                 nickname: discordGuildMember1.nickname,
                 globalName: discordGuildMember1.globalName
             });
-            expect(res.body.results[1]).toMatchObject({
+            expect(res.body.results[2]).toMatchObject({
                 discordId: discordGuildMember2.discordId,
                 username: discordGuildMember2.username,
                 ngu: discordGuildMember2.nickname,
+                discriminator: discordGuildMember2.discriminator,
                 nickname: discordGuildMember2.nickname,
                 globalName: discordGuildMember2.globalName
             });
 
-            expect(res.body.results[2]).toMatchObject({
-                discordId: discordGuildMember3.discordId,
-                username: discordGuildMember3.username,
-                ngu: discordGuildMember3.username,
-                nickname: discordGuildMember3.nickname,
-                globalName: discordGuildMember3.globalName
-            });
 
             expect(res.body.results[3]).toMatchObject({
                 discordId: discordGuildMember4.discordId,
                 username: discordGuildMember4.username + "#" + discordGuildMember4.discriminator,
                 ngu: discordGuildMember4.username + "#" + discordGuildMember4.discriminator,
+                discriminator: discordGuildMember4.discriminator,
                 nickname: discordGuildMember4.nickname,
                 globalName: discordGuildMember4.globalName
             });
@@ -1028,7 +1036,6 @@ describe('Platform routes', () => {
                 .query({ property: 'guildMember', ngu: 'behzad' })
                 .send()
                 .expect(httpStatus.OK);
-
 
             expect(res.body).toEqual({
                 results: expect.any(Array),
@@ -1067,7 +1074,7 @@ describe('Platform routes', () => {
                 totalResults: 4,
             });
             expect(res.body.results).toHaveLength(1);
-            expect(res.body.results[0].discordId).toBe(discordGuildMember1.discordId);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember3.discordId);
 
         });
 

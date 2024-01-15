@@ -63,18 +63,14 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
 
     else if (req.query.property === 'guildMember') {
         const filter = pick(req.query, ['ngu']);
-        if (filter.ngu) {
-            filter.ngu = {
-                $or: [
-                    { "username": { $regex: filter.ngu, $options: 'i' } },
-                    { "globalName": { $regex: filter.ngu, $options: 'i' } },
-                    { "nickname": { $regex: filter.ngu, $options: 'i' } }
-                ]
-            };
-        }
         filter.deletedAt = null;
         const options = pick(req.query, ['sortBy', 'limit', 'page']);
-        return await guildMemberService.queryGuildMembers(connection, filter, options)
+        const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options)
+        guildMembers.results.forEach((guildMember: any) => {
+            guildMember.ngu = guildMemberService.getNgu(guildMember);
+            guildMember.username = guildMemberService.getUsername(guildMember);
+        });
+        return guildMembers
     }
 }
 

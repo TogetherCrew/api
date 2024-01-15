@@ -7,9 +7,10 @@ import config from "../config";
 import sagaService from './saga.service';
 import platformService from "./platform.service";
 import Handlebars from "handlebars";
+import logger from '../config/logger';
 
 const createDraftAnnouncement = async (announcementData: IAnnouncement) => {
-    if(announcementData.draft === false) throw new Error('Cannot create a draft announcement with draft set to false');
+    if (announcementData.draft === false) throw new Error('Cannot create a draft announcement with draft set to false');
 
     const announcement = await Announcement.create(announcementData);
     return announcement;
@@ -38,7 +39,7 @@ const createScheduledAnnouncement = async (announcementData: IAnnouncement) => {
     }
 }
 
-const updateAndRescheduleAnnouncement = async (announcementId: string, oldAnnouncement: IAnnouncement , updatedData: Partial<IAnnouncement>) => {
+const updateAndRescheduleAnnouncement = async (announcementId: string, oldAnnouncement: IAnnouncement, updatedData: Partial<IAnnouncement>) => {
     const session = await startSession();
     session.startTransaction();
     try {
@@ -49,7 +50,7 @@ const updateAndRescheduleAnnouncement = async (announcementId: string, oldAnnoun
 
         const newScheduledAt = updatedData.scheduledAt || oldAnnouncement.scheduledAt;
         const newJob = await addJobToAnnouncementQueue(announcementId, { announcementId }, newScheduledAt);
-        
+
         const newAnnouncement = await Announcement.findOneAndUpdate({ _id: announcementId }, { ...updatedData, jobId: newJob.id }, { session, new: true });
 
         await session.commitTransaction();
@@ -90,7 +91,7 @@ const updateAnnouncementAndAddJob = async (announcementId: string, oldAnnounceme
         if (oldAnnouncement.jobId) {
             throw new Error('Job associated with the announcement already exists');
         }
-        
+
         const newScheduledAt = updatedData.scheduledAt || oldAnnouncement.scheduledAt;
         const newJob = await addJobToAnnouncementQueue(announcementId, { announcementId }, newScheduledAt);
         const newAnnouncement = await Announcement.findOneAndUpdate({ _id: announcementId }, { ...updatedData, jobId: newJob.id }, { session, new: true });
@@ -134,7 +135,7 @@ const deleteAnnouncementById = async (announcementId: string) => {
 }
 
 const onDestroyAnnouncement = async (announcementJobId: string) => {
-    if(announcementJobId)
+    if (announcementJobId)
         await removeJobFromAnnouncementQueue(announcementJobId);
 }
 
@@ -144,29 +145,19 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
     // TODO: use function that main application use to connect to mongodb
     try {
         await mongoose.connect(config.mongoose.serverURL);
-        console.log({ url: config.mongoose.serverURL }, 'Connected to MongoDB!');
+        logger.info({ url: config.mongoose.dbURL }, 'Setuped Message Broker connection!');
     } catch (error) {
-        console.log({ url: config.mongoose.serverURL, error }, 'Failed to connect to MongoDB!')
+        logger.fatal({ url: config.mongoose.dbURL, error }, 'Failed to setup to Message Broker!!');
     }
 
     const announcement = await Announcement.findById(announcementId);
 
-    console.log('$$$$$$$$$$$$$$$$$$')
-    console.log("announcement", announcement)
-    console.log('$$$$$$$$$$$$$$$$$$')
+
 
     announcement?.data.forEach(async (data) => {
-        const communityId = announcement?.community
         const template = data?.template
         const platformId = data?.platform
         const options = data?.options
-
-        console.log('>>>>>>>>>>>>>>>>>>')
-        console.log("[communityId] ", communityId)
-        console.log("[platformId] ", platformId)
-        console.log("[options] ", options)
-        console.log('<<<<<<<<<<<<<<<<<<')
-
         const platform = await platformService.getPlatformByFilter({
             _id: platformId,
             disconnectedAt: null
@@ -174,17 +165,15 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
         const connection = await DatabaseManager.getInstance().getTenantDb(platform?.metadata?.id);
 
         const channelIds = (options as any)?.channelIds
-        if(channelIds) {
-            console.log("[channelIds] ", channelIds)
+        if (channelIds) {
 
             // !Fire event for all channels
             sagaService.createAndStartAnnouncementSendMessageToChannelSaga(announcementId, { channels: channelIds, message: template })
         }
 
         const userIds = (options as any)?.userIds
-        if(userIds) {
-            console.log("[userIds] ", userIds)
-            
+        if (userIds) {
+
             // !Fire event for each discordId
             //!? our userIds are discordIds
             userIds.forEach((discordId: string) => {
@@ -196,8 +185,7 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
         }
 
         const roleIds = (options as any)?.roleIds
-        if(roleIds) {
-            console.log("[roleIds] ", roleIds)
+        if (roleIds) {
             // extract discordId from roleID
             const discordIds = await discordService.roleService.getDiscordIdsFromRoleIds(connection, roleIds)
 

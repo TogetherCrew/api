@@ -24,19 +24,19 @@ const createAnnouncement = catchAsync(async function (req: IAuthRequest, res: Re
         throw new ApiError(httpStatus.NOT_FOUND, 'Community not found');
     }
 
-    const dataToSave = data.map((data: any) => ({...data, platform: data.platformId }))
-    const announcementData = { 
-        title, 
-        community: communityId, 
-        scheduledAt, 
-        draft, 
+    const dataToSave = data.map((data: any) => ({ ...data, platform: data.platformId }))
+    const announcementData = {
+        title,
+        community: communityId,
+        scheduledAt,
+        draft,
         data: dataToSave,
         createdBy: req.user.id,
         updatedBy: req.user.id
     };
 
     let announcement;
-    if(draft)announcement = await announcementService.createDraftAnnouncement(announcementData);
+    if (draft) announcement = await announcementService.createDraftAnnouncement(announcementData);
     else announcement = await announcementService.createScheduledAnnouncement(announcementData);
 
     announcement = getAnnouncementFieldsToReturn(announcement);
@@ -57,7 +57,7 @@ const updateAnnouncement = catchAsync(async function (req: IAuthRequest, res: Re
         throw new ApiError(httpStatus.NOT_FOUND, 'Announcement not found');
     }
 
-    const dataToSave = data?.map((data: any) => ({...data, platform: data.platformId }))
+    const dataToSave = data?.map((data: any) => ({ ...data, platform: data.platformId }))
     const announcementData = {
         title,
         scheduledAt,
@@ -68,30 +68,25 @@ const updateAnnouncement = catchAsync(async function (req: IAuthRequest, res: Re
 
     // TODO: we can also refactor below condition into two functions, but It's good for now
     let newAnnouncement;
-    if( announcement.draft == true ){
-        if( draft == true || draft == undefined ){
-            console.log("LastDraft: TRUE, NewDraft: TRUE|undefined")
+    if (announcement.draft == true) {
+        if (draft == true || draft == undefined) {
             newAnnouncement = await announcementService.findOneAnnouncementAndUpdate({ _id: announcementId }, announcementData);
         }
-        if( draft == false ){
-            console.log("LastDraft: TRUE, NewDraft: FALSE")
+        if (draft == false) {
             newAnnouncement = await announcementService.updateAnnouncementAndAddJob(announcementId, announcement, announcementData)
         }
     }
 
-    if( announcement.draft == false ){
-        if( draft == false || draft == undefined ){
-            if( scheduledAt == undefined || announcement.scheduledAt.toISOString() == scheduledAt.toISOString()){
-                console.log("LastDraft: FALSE, NewDraft: FALSE|undefined, LastScheduledAt == NewScheduledAt")
+    if (announcement.draft == false) {
+        if (draft == false || draft == undefined) {
+            if (scheduledAt == undefined || announcement.scheduledAt.toISOString() == scheduledAt.toISOString()) {
                 newAnnouncement = await announcementService.findOneAnnouncementAndUpdate({ _id: announcementId }, announcementData);
             }
-            else{
-                console.log("LastDraft: FALSE, NewDraft: FALSE|undefined, LastScheduledAt != NewScheduledAt")
+            else {
                 newAnnouncement = await announcementService.updateAndRescheduleAnnouncement(announcementId, announcement, announcementData)
             }
         }
-        if( draft == true ){
-            console.log("LastDraft: FALSE, NewDraft: TRUE")
+        if (draft == true) {
             newAnnouncement = await announcementService.updateAnnouncementAndRemoveJob(announcementId, announcement, announcementData)
         }
     }
@@ -110,10 +105,10 @@ const getAnnouncements = catchAsync(async function (req: IAuthRequest, res: Resp
 
     const dbFilter: Record<string, any> = {};
     dbFilter.community = queryFilter.communityId;
-    
-    if(queryFilter.startDate && queryFilter.endDate) dbFilter.scheduledAt = { $gte: queryFilter.startDate, $lte: queryFilter.endDate };
-    else if(queryFilter.startDate) dbFilter.scheduledAt = { $gte: queryFilter.startDate };
-    else if(queryFilter.endDate) dbFilter.scheduledAt = { $lte: queryFilter.endDate };
+
+    if (queryFilter.startDate && queryFilter.endDate) dbFilter.scheduledAt = { $gte: queryFilter.startDate, $lte: queryFilter.endDate };
+    else if (queryFilter.startDate) dbFilter.scheduledAt = { $gte: queryFilter.startDate };
+    else if (queryFilter.endDate) dbFilter.scheduledAt = { $lte: queryFilter.endDate };
 
     const paginatedAnnouncement = await announcementService.queryAnnouncements(dbFilter, options);
     paginatedAnnouncement.results = paginatedAnnouncement.results.map(getAnnouncementFieldsToReturn);
@@ -139,7 +134,7 @@ const getOneAnnouncement = catchAsync(async function (req: IAuthRequest, res: Re
 const deleteAnnouncement = catchAsync(async function (req: IAuthRequest, res: Response) {
     const { announcementId } = req.params;
     // TODO: check with Cryil we should either hard delete or soft delete the announcement
-    
+
     const announcement = await announcementService.getAnnouncementById(announcementId);
     if (!announcement) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Announcement not found');

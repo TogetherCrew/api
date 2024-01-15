@@ -39,14 +39,10 @@ const connectToMongoDB = async () => {
 };
 
 const handleAnnouncementRemoval = () => {
-
     announcementEmitter.on('announcement:remove', (data) => {
-        console.log('[announcement:remove] ', data)
         announcementService.onDestroyAnnouncement(data?.jobId);
     })
-
     announcementEmitter.on('announcement:softDelete', (data) => {
-        console.log('[announcement:softDelete] ',data)
         announcementService.onDestroyAnnouncement(data?.jobId);
     })
 }
