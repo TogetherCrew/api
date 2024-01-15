@@ -116,6 +116,20 @@ const dynamicPlatformProperty = (req: Request) => {
             })
         };
     }
+    else if (platform?.name === 'discord' && property === 'guildMember') {
+        return {
+            params: Joi.object().keys({
+                platformId: Joi.required().custom(objectId),
+            }),
+            query: Joi.object().required().keys({
+                property: Joi.string().valid('guildMember'),
+                ngu: Joi.string(),
+                sortBy: Joi.string(),
+                limit: Joi.number().integer(),
+                page: Joi.number().integer(),
+            })
+        };
+    }
     else {
         return {
             query: Joi.object().required().keys({}),
