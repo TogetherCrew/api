@@ -221,7 +221,7 @@ paths:
                             type: array
                             items:
                               type: string
-                          usernames:
+                          userIds:
                             type: array
                             items:
                               type: string
@@ -233,7 +233,7 @@ paths:
                           - required: 
                             - channelIds
                           - required: 
-                            - usernames
+                            - userIds
                           - required: 
                             - roleIds
               required:
