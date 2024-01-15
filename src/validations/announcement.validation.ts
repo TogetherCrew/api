@@ -3,7 +3,7 @@ import { objectId } from './custom.validation';
 
 const createAnnouncement = {
     body: Joi.object().keys({
-        title: Joi.string().required(),
+        title: Joi.string(),
         communityId: Joi.string().custom(objectId).required(),
         scheduledAt: Joi.date().greater('now').iso().required().description('ISO date string. UTC time zone'),
         draft: Joi.boolean().required(),
@@ -15,9 +15,9 @@ const createAnnouncement = {
                     channelIds: Joi.array().items(Joi.string()),
                     usernames: Joi.array().items(Joi.string()),
                     roleIds: Joi.array().items(Joi.string())
-                  }).xor('channelIds', 'usernames', 'roleIds').required()
+                  }).xor('channelIds', 'roleIds', 'userIds').required()
             })
-        ).required().min(1)       
+        ).required().min(1)
     })
 }
 
@@ -34,7 +34,7 @@ const updateAnnouncement = {
                     channelIds: Joi.array().items(Joi.string()),
                     usernames: Joi.array().items(Joi.string()),
                     roleIds: Joi.array().items(Joi.string())
-                  }).xor('channelIds', 'usernames', 'roleIds').required()
+                  }).xor('channelIds', 'roleIds', 'userIds').required()
             })
         )
     })
