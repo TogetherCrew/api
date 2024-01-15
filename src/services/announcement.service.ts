@@ -181,14 +181,13 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
             sagaService.createAndStartAnnouncementSendMessageToChannelSaga(announcementId, { channels: channelIds, message: template })
         }
 
-        const usernames = (options as any)?.usernames
-        if(usernames) {
-            console.log("[usernames] ", usernames)
-            // extract discordId from username
-            const discordIds = await discordService.guildMemberService.getDiscordIdsFromUsernames(connection, usernames)
+        const userIds = (options as any)?.userIds
+        if(userIds) {
+            console.log("[userIds] ", userIds)
             
             // !Fire event for each discordId
-            discordIds.forEach((discordId: string) => {
+            //!? our userIds are discordIds
+            userIds.forEach((discordId: string) => {
                 const templateHandlebars = Handlebars.compile(template)
                 const compiledTemplate = templateHandlebars({ username: `<@${discordId}>` })
 
