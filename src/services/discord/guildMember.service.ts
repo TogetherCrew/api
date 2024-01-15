@@ -29,7 +29,7 @@ type Options = {
  * @returns {Promise<QueryResult>} - An object with the query results and other information like 'limit', 'page', 'totalPages', 'totalResults'.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function queryGuildMembers(connection: Connection, filter: Filter, options: Options, memberActivity: any, activityCompostionsTypes: Array<string>) {
+async function queryGuildMembersForTables(connection: Connection, filter: Filter, options: Options, memberActivity: any, activityCompostionsTypes: Array<string>) {
     try {
         const { allRoles, include, exclude, ngu, activityComposition } = filter;
         const { sortBy } = options;
@@ -196,11 +196,24 @@ async function getGuildMember(connection: Connection, filter: object): Promise<I
     return await connection.models.GuildMember.findOne(filter);
 }
 
+/**
+ * Query for guild members
+ * @param {Object} filter - Mongo filter
+ * @param {Object} options - Query options
+ * @param {string} [options.sortBy] - Sort option in the format: sortField:(desc|asc)
+ * @param {number} [options.limit] - Maximum number of results per page (default = 10)
+ * @param {number} [options.page] - Current page (default = 1)
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const queryGuildMembers = async (connection: any, filter: object, options: object) => {
+    return await connection.models.GuildMember.paginate(filter, options);
+};
 
 export default {
     getDiscordIdsFromUsernames,
-    queryGuildMembers,
+    queryGuildMembersForTables,
     getGuildMember,
     getNgu,
-    getUsername
+    getUsername,
+    queryGuildMembers
 }

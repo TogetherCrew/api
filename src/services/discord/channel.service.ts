@@ -98,7 +98,7 @@ async function checkBotChannelAccess(guildId: Snowflake, channel: IChannel): Pro
 
 
 /**
- * Query for platforms
+ * Query for channels
  * @param {Object} filter - Mongo filter
  * @param {Object} options - Query options
  * @param {string} [options.sortBy] - Sort option in the format: sortField:(desc|asc)

@@ -7,6 +7,8 @@ import parentLogger from '../../config/logger';
 import { IAuthAndPlatform, IDiscordOAuth2EchangeCode, IDiscordUser } from '../../interfaces';
 import channelService from './channel.service';
 import roleService from './role.service';
+import guildMemberService from './guildMember.service';
+
 const logger = parentLogger.child({ module: 'DiscordService' });
 
 /**
@@ -18,22 +20,30 @@ const logger = parentLogger.child({ module: 'DiscordService' });
 async function getPropertyHandler(req: IAuthAndPlatform) {
     const connection = await DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
 
-    const filter = pick(req.query, ['name']);
-    if (filter.name) {
-        filter.name = {
-            $regex: filter.name,
-            $options: 'i'
-        };
-    }
-    filter.deletedAt = null;
+
 
     if (req.query.property === 'role') {
+        const filter = pick(req.query, ['name']);
+        if (filter.name) {
+            filter.name = {
+                $regex: filter.name,
+                $options: 'i'
+            };
+        }
+        filter.deletedAt = null;
         const options = pick(req.query, ['sortBy', 'limit', 'page']);
 
         return await roleService.queryRoles(connection, filter, options)
     }
     else if (req.query.property === 'channel') {
-
+        const filter = pick(req.query, ['name']);
+        if (filter.name) {
+            filter.name = {
+                $regex: filter.name,
+                $options: 'i'
+            };
+        }
+        filter.deletedAt = null;
         if (req.body.channelIds) {
             filter.channelId = { $in: req.body.channelIds };
         }
@@ -49,9 +59,23 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
             }
         }
         return await sort.sortChannels(channels);
-
     }
 
+    else if (req.query.property === 'guildMember') {
+        const filter = pick(req.query, ['ngu']);
+        if (filter.ngu) {
+            filter.ngu = {
+                $or: [
+                    { "username": { $regex: filter.ngu, $options: 'i' } },
+                    { "globalName": { $regex: filter.ngu, $options: 'i' } },
+                    { "nickname": { $regex: filter.ngu, $options: 'i' } }
+                ]
+            };
+        }
+        filter.deletedAt = null;
+        const options = pick(req.query, ['sortBy', 'limit', 'page']);
+        return await guildMemberService.queryGuildMembers(connection, filter, options)
+    }
 }
 
 /**

@@ -34,7 +34,7 @@ async function getRoles(connection: Connection, filter: object): Promise<IRole[]
  */
 async function getDiscordIdsFromRoleIds(connection: Connection, roleIds: string[]): Promise<string[]> {
     const guildMembers = await connection.models.GuildMember.find({ roles: { $in: roleIds } });
-   
+
     return guildMembers.map((guildMember: IGuildMember) => guildMember.discordId);
 }
 
@@ -56,7 +56,7 @@ function getRolesForGuildMember(guildMember: IGuildMember, roles: Array<IRole>) 
 }
 
 /**
- * Query for platforms
+ * Query for roles
  * @param {Object} filter - Mongo filter
  * @param {Object} options - Query options
  * @param {string} [options.sortBy] - Sort option in the format: sortField:(desc|asc)
@@ -66,7 +66,6 @@ function getRolesForGuildMember(guildMember: IGuildMember, roles: Array<IRole>) 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const queryRoles = async (connection: any, filter: object, options: object) => {
     return await connection.models.Role.paginate(filter, options);
-
 };
 
 export default {
