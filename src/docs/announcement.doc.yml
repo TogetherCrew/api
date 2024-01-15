@@ -124,6 +124,11 @@ paths:
             type: string
             format: date-time
             description: End date for filtering announcements, in ISO date string format (UTC time zone). Must be greater than startDate.
+        - in: query
+          name: timeZone
+          schema:
+            type: string
+            description: Timezone for filtering announcements. Must be a valid timezone string.
       responses:
         "200":
           description: List of announcements retrieved successfully.
