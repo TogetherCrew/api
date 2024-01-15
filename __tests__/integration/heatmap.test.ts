@@ -8,6 +8,7 @@ import { heatmap1, heatmap2, heatmap3, heatmap4, heatmap5, heatmap6, heatmap7, h
 import { communityOne, insertCommunities } from '../fixtures/community.fixture';
 import { platformOne, insertPlatforms } from '../fixtures/platform.fixture';
 import { DatabaseManager } from '@togethercrew.dev/db';
+import { Connection } from 'mongoose';
 
 
 setupTestDB();
@@ -19,7 +20,6 @@ describe('Heatmap routes', () => {
         communityOne.platforms = [platformOne._id]
         platformOne.community = communityOne._id
     });
-    const connection = DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
     describe('POST /api/v1/heatmaps/:platformId/heatmap-chart', () => {
         let requestBody: {
             startDate: Date,
@@ -27,7 +27,10 @@ describe('Heatmap routes', () => {
             timeZone: string,
             channelIds: Array<string>
         };
+        let connection: Connection;
         beforeEach(async () => {
+            connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+
             await connection.dropDatabase();
             requestBody = {
                 startDate: new Date("2023-01-01"),
@@ -164,7 +167,9 @@ describe('Heatmap routes', () => {
     })
 
     describe('POST /api/v1/heatmaps/:platformId/line-graph', () => {
+        let connection: Connection;
         beforeEach(async () => {
+            connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
             await connection.dropDatabase();
         });
         test('should return 200 and line graph data if req data is ok', async () => {

@@ -11,6 +11,7 @@ import { discordRole1, discordRole2, discordRole3, discordRole4, insertRoles } f
 import { discordChannel1, discordChannel2, discordChannel3, discordChannel4, discordChannel5, insertChannels } from '../fixtures/discord/channels.fixture';
 import { discordServices } from '../../src/services';
 import { analyzerAction, analyzerWindow } from '../../src/config/analyzer.statics';
+import { Connection } from 'mongoose';
 setupTestDB();
 
 describe('Platform routes', () => {
@@ -689,8 +690,9 @@ describe('Platform routes', () => {
     });
 
     describe('POST /:platformId/properties', () => {
-        const connection = DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+        let connection: Connection;
         beforeEach(async () => {
+            connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
             await connection.dropDatabase();
         });
         test('should return 200 and apply the default query options if requested property is discord-role', async () => {
