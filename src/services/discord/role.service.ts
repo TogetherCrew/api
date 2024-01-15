@@ -25,6 +25,18 @@ async function getRoles(connection: Connection, filter: object): Promise<IRole[]
     }
 }
 
+/**
+ * Get an array of Discord IDs based on the role IDs present in the guild member's data.
+ *
+ * @param {Connection} connection - Mongoose connection object for the database.
+ * @param {string[]} roleIds - An array of role IDs to match against the guild member's role IDs.
+ * @returns {Promise<string[]>} - A promise that resolves to an array of Discord IDs.
+ */
+async function getDiscordIdsFromRoleIds(connection: Connection, roleIds: string[]): Promise<string[]> {
+    const guildMembers = await connection.models.GuildMember.find({ roles: { $in: roleIds } });
+   
+    return guildMembers.map((guildMember: IGuildMember) => guildMember.discordId);
+}
 
 /**
  * Retrieves an array of roles based on the role IDs present in the guild member's data.
@@ -60,6 +72,7 @@ const queryRoles = async (connection: any, filter: object, options: object) => {
 export default {
     getRole,
     queryRoles,
+    getDiscordIdsFromRoleIds,
     getRolesForGuildMember,
     getRoles
 };

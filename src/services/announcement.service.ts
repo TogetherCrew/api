@@ -1,6 +1,12 @@
-import { Announcement, IAnnouncement } from "@togethercrew.dev/db";
-import { startSession } from "mongoose";
+import { Announcement, DatabaseManager, IAnnouncement } from "@togethercrew.dev/db";
+import mongoose, { startSession } from "mongoose";
 import { addJobToAnnouncementQueue, removeJobFromAnnouncementQueue } from "../bullmq";
+import discordService from './discord';
+import { Job } from "bullmq";
+import config from "../config";
+import sagaService from './saga.service';
+import platformService from "./platform.service";
+import Handlebars from "handlebars";
 
 const createDraftAnnouncement = async (announcementData: IAnnouncement) => {
     if(announcementData.draft === false) throw new Error('Cannot create a draft announcement with draft set to false');
@@ -132,9 +138,87 @@ const onDestroyAnnouncement = async (announcementJobId: string) => {
         await removeJobFromAnnouncementQueue(announcementJobId);
 }
 
+const bullMQTriggeredAnnouncement = async (job: Job) => {
+    const announcementId = job.data.announcementId;
+
+    // TODO: use function that main application use to connect to mongodb
+    try {
+        await mongoose.connect(config.mongoose.serverURL);
+        console.log({ url: config.mongoose.serverURL }, 'Connected to MongoDB!');
+    } catch (error) {
+        console.log({ url: config.mongoose.serverURL, error }, 'Failed to connect to MongoDB!')
+    }
+
+    const announcement = await Announcement.findById(announcementId);
+
+    console.log('$$$$$$$$$$$$$$$$$$')
+    console.log("announcement", announcement)
+    console.log('$$$$$$$$$$$$$$$$$$')
+
+    announcement?.data.forEach(async (data) => {
+        const communityId = announcement?.community
+        const template = data?.template
+        const platformId = data?.platform
+        const options = data?.options
+
+        console.log('>>>>>>>>>>>>>>>>>>')
+        console.log("[communityId] ", communityId)
+        console.log("[platformId] ", platformId)
+        console.log("[options] ", options)
+        console.log('<<<<<<<<<<<<<<<<<<')
+
+        const platform = await platformService.getPlatformByFilter({
+            _id: platformId,
+            disconnectedAt: null
+        });
+        const connection = await DatabaseManager.getInstance().getTenantDb(platform?.metadata?.id);
+
+        const channelIds = (options as any)?.channelIds
+        if(channelIds) {
+            console.log("[channelIds] ", channelIds)
+
+            // !Fire event for all channels
+            sagaService.createAndStartAnnouncementSendMessageToChannelSaga(announcementId, { channels: channelIds, message: template })
+        }
+
+        const usernames = (options as any)?.usernames
+        if(usernames) {
+            console.log("[usernames] ", usernames)
+            // extract discordId from username
+            const discordIds = await discordService.guildMemberService.getDiscordIdsFromUsernames(connection, usernames)
+            
+            // !Fire event for each discordId
+            discordIds.forEach((discordId: string) => {
+                const templateHandlebars = Handlebars.compile(template)
+                const compiledTemplate = templateHandlebars({ username: `<@${discordId}>` })
+
+                sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { discordId, message: compiledTemplate, useFallback: true })
+            })
+        }
+
+        const roleIds = (options as any)?.roleIds
+        if(roleIds) {
+            console.log("[roleIds] ", roleIds)
+            // extract discordId from roleID
+            const discordIds = await discordService.roleService.getDiscordIdsFromRoleIds(connection, roleIds)
+
+            // !Fire event for each discordId
+            discordIds.forEach((discordId: string) => {
+                const templateHandlebars = Handlebars.compile(template)
+                const compiledTemplate = templateHandlebars({ username: `<@${discordId}>` })
+
+                sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { discordId, message: compiledTemplate, useFallback: true })
+            })
+        }
+    })
+
+    return announcement
+}
+
 
 export default {
     createDraftAnnouncement,
+    bullMQTriggeredAnnouncement,
     createScheduledAnnouncement,
     updateAndRescheduleAnnouncement,
     updateAnnouncementAndRemoveJob,
