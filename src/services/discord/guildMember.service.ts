@@ -147,6 +147,19 @@ async function queryGuildMembers(connection: Connection, filter: Filter, options
 
 
 /**
+ * Get an array of Discord IDs based on the usernames present in the guild member's data.
+ * 
+ * @param {Connection} connection - Mongoose connection object for the database.
+ * @param {string[]} usernames - An array of usernames to match against the guild member's usernames.
+ * @returns {Promise<string[]>} - A promise that resolves to an array of Discord IDs.
+ */
+async function getDiscordIdsFromUsernames(connection: Connection, usernames: string[]): Promise<string[]> {
+    const guildMembers = await connection.models.GuildMember.find({ username: { $in: usernames } });
+
+    return guildMembers.map((guildMember: IGuildMember) => guildMember.discordId);
+}
+
+/**
  * Determines the ngu (name to be displayed) for a given guild member.
  * The name priority is as follows: nickname, globalName, username with discriminator.
  * @param {IGuildMember} guildMember - The guild member for which the ngu needs to be determined.
@@ -185,6 +198,7 @@ async function getGuildMember(connection: Connection, filter: object): Promise<I
 
 
 export default {
+    getDiscordIdsFromUsernames,
     queryGuildMembers,
     getGuildMember,
     getNgu,
