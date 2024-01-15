@@ -8,7 +8,7 @@ import { IAuthAndPlatform, IDiscordOAuth2EchangeCode, IDiscordUser } from '../..
 import channelService from './channel.service';
 import roleService from './role.service';
 import guildMemberService from './guildMember.service';
-
+import { discord } from '../../config/oAtuh2';
 const logger = parentLogger.child({ module: 'DiscordService' });
 
 /**
@@ -50,7 +50,7 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const channels: any = await channelService.getChannels(connection, filter);
         for (let i = 0; i < channels.length; i++) {
-            const canReadMessageHistoryAndViewChannel = await channelService.checkBotChannelAccess(req.platform?.metadata?.id, channels[i]);
+            const canReadMessageHistoryAndViewChannel = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [discord.permissions.ViewChannels, discord.permissions.readMessageHistory]);
             channels[i] = {
                 channelId: channels[i].channelId,
                 name: channels[i].name,

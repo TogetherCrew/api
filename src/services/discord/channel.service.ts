@@ -40,12 +40,15 @@ async function getChannels(connection: Connection, filter: object): Promise<ICha
 
 
 /**
- * Get channels from the database based on the filter criteria.
- * @param {Connection} connection - Mongoose connection object for the database.
- * @param {IChannel} channel - channel filed.
- * @returns {Promise<boolean>} - A promise that resolves to an boolean.
+ * Checks if the bot has specific permissions in a given channel.
+ * This function combines all the specified permissions and checks if the bot has these permissions globally as well as any specific overwrites in the channel.
+ * 
+ * @param {Snowflake} guildId - The ID of the guild.
+ * @param {IChannel} channel - The channel to check the permissions for.
+ * @param {number[]} permissionsToCheck - An array of permission numbers (in hexadecimal format) to check.
+ * @returns {Promise<boolean>} - A promise that resolves to a boolean indicating whether the bot has all the specified permissions in the given channel.
  */
-async function checkBotChannelAccess(guildId: Snowflake, channel: IChannel): Promise<boolean> {
+async function checkBotPermissions(guildId: Snowflake, channel: IChannel, permissionsToCheck: number[]): Promise<boolean> {
     try {
         const client = await coreService.DiscordBotManager.getClient();
         const guild = await client.guilds.fetch(guildId);
@@ -55,13 +58,15 @@ async function checkBotChannelAccess(guildId: Snowflake, channel: IChannel): Pro
             return false;
         }
 
-        // Permission constants
-        const readMessageHistoryPermission = BigInt(65536); // 0x10000
-        const viewChannelPermission = BigInt(1024); // 0x400
+        // Combine all permissions to check
+        let combinedPermissions = BigInt(0);
+        permissionsToCheck.forEach(permission => {
+            combinedPermissions |= BigInt(permission);
+        });
 
-        // Check if bot has global permissions
+        // Check if bot has the combined global permissions
         const botGlobalPermissions = BigInt(botMember.permissions.bitfield);
-        if (!(botGlobalPermissions & readMessageHistoryPermission) || !(botGlobalPermissions & viewChannelPermission)) {
+        if (!(botGlobalPermissions & combinedPermissions)) {
             return false;
         }
 
@@ -71,9 +76,9 @@ async function checkBotChannelAccess(guildId: Snowflake, channel: IChannel): Pro
             const allowed = BigInt(overwrite.allow);
             const denied = BigInt(overwrite.deny);
 
-            if ((denied & readMessageHistoryPermission) || (denied & viewChannelPermission)) {
+            if (denied & combinedPermissions) {
                 hasAccess = false;
-            } else if ((allowed & readMessageHistoryPermission) && (allowed & viewChannelPermission)) {
+            } else if (allowed & combinedPermissions) {
                 hasAccess = true;
             }
         };
@@ -89,9 +94,10 @@ async function checkBotChannelAccess(guildId: Snowflake, channel: IChannel): Pro
         if (botSpecificOverwrite) {
             evaluateOverwrites(botSpecificOverwrite);
         }
+
         return hasAccess;
     } catch (error) {
-        logger.error({ error }, 'Failed to check bot channel access');
+        logger.error({ error }, 'Failed to check bot permissions');
         return false;
     }
 }
@@ -114,6 +120,6 @@ export default {
     hasReadMessageHistory,
     getChannel,
     getChannels,
-    checkBotChannelAccess,
+    checkBotPermissions,
     queryChannels
 }

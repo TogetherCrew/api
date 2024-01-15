@@ -9,42 +9,6 @@ import { discord } from '../config/oAtuh2'
 import httpStatus from 'http-status';
 import querystring from 'querystring';
 
-// const createPlatform = catchAsync(async function (req: IAuthRequest, res: Response) {
-//     const communityDoc = await communityService.getCommunityByFilter({ _id: req.body.community, users: req.user.id });
-//     if (!communityDoc) {
-//         throw new ApiError(httpStatus.NOT_FOUND, 'Community not found');
-//     }
-
-//     let platformDoc = await platformService.getPlatformByFilter({ community: communityDoc.id, 'metadata.id': req.body.metadata.id, disconnectedAt: null });
-//     if (platformDoc) {
-//         throw new ApiError(httpStatus.BAD_REQUEST, `${req.body.name} is already connected`);
-//     }
-
-//     platformDoc = await platformService.getPlatformByFilter({ community: communityDoc.id, disconnectedAt: null, name: req.body.name });
-//     if (platformDoc) {
-//         if (req.body.name === 'discord')
-//             await discordServices.coreService.leaveBotFromGuild(req.body.metadata.id)
-//         throw new ApiError(httpStatus.BAD_REQUEST, `Only can connect one ${req.body.name} platform`);
-//     }
-
-//     platformDoc = await platformService.getPlatformByFilter({ community: communityDoc.id, 'metadata.id': req.body.metadata.id, disconnectedAt: { $ne: null } });
-//     if (platformDoc) {
-//         const platform = await platformService.updatePlatform(platformDoc, { disconnectedAt: null });
-//         return res.status(httpStatus.CREATED).send(platform);
-//     }
-
-
-//     platformDoc = await platformService.getPlatformByFilter({ 'metadata.id': req.body.metadata.id });
-//     if (platformDoc) {
-//         throw new ApiError(httpStatus.BAD_REQUEST, `${req.body.name} is already connected to another community`);
-//     }
-
-//     const platform = await platformService.createPlatform(req.body);
-//     await communityService.addPlatformToCommunityById(platform.community, platform.id);
-//     res.status(httpStatus.CREATED).send(platform);
-// });
-
-
 const createPlatform = catchAsync(async function (req: IAuthRequest, res: Response) {
     const community = await communityService.getCommunityByFilter({ _id: req.body.community, users: req.user.id });
     if (!community) {
