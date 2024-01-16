@@ -38,6 +38,12 @@ async function getDiscordIdsFromRoleIds(connection: Connection, roleIds: string[
     return guildMembers.map((guildMember: IGuildMember) => guildMember.discordId);
 }
 
+async function getRoleInfoFromRoleIds(connection: Connection, roleIds: string[]) {
+    const roles = await connection.models.Role.find({ roleId: { $in: roleIds } });
+    const roleInfo = roles.map((role: IRole) => ({ roleId: role.roleId, color: role.color, name: role.name }));
+    return roleInfo;
+}
+
 /**
  * Retrieves an array of roles based on the role IDs present in the guild member's data.
  * The roles are mapped from a provided roles array.
@@ -74,5 +80,6 @@ export default {
     queryRoles,
     getDiscordIdsFromRoleIds,
     getRolesForGuildMember,
+    getRoleInfoFromRoleIds,
     getRoles
 };
