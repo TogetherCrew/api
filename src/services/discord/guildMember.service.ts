@@ -159,6 +159,17 @@ async function getDiscordIdsFromUsernames(connection: Connection, usernames: str
     return guildMembers.map((guildMember: IGuildMember) => guildMember.discordId);
 }
 
+async function getGuildMemberInfoFromDiscordIds(connection: Connection, discordIds: string[]) {
+    const guildMembers = await connection.models.GuildMember.find({ discordId: { $in: discordIds } });
+    
+    const userInfo = guildMembers.map((guildMember: IGuildMember) => ({
+        discordId: guildMember.discordId,
+        ngu: getNgu(guildMember),
+    }));
+
+    return userInfo;
+}
+
 /**
  * Determines the ngu (name to be displayed) for a given guild member.
  * The name priority is as follows: nickname, globalName, username with discriminator.
@@ -277,6 +288,7 @@ const queryGuildMembers = async (connection: any, filter: Filter, options: Optio
 };
 
 export default {
+    getGuildMemberInfoFromDiscordIds,
     getDiscordIdsFromUsernames,
     queryGuildMembersForTables,
     getGuildMember,

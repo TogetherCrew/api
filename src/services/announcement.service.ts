@@ -139,6 +139,36 @@ const onDestroyAnnouncement = async (announcementJobId: string) => {
         await removeJobFromAnnouncementQueue(announcementJobId);
 }
 
+const enhanceAnnouncementDataOption = async (platformId: string, options: Record<string, any>) => {
+    const newOptions: Record<string, any> = {}
+
+    const platform = await platformService.getPlatformByFilter({
+        _id: platformId.toString(),
+        disconnectedAt: null
+    });
+    const connection = await DatabaseManager.getInstance().getTenantDb(platform?.metadata?.id);
+    
+    const channelIds = options?.channelIds
+    if(channelIds) {
+        const channelInfo = await discordService.channelService.getChannelInfoFromChannelIds(connection, channelIds)
+        newOptions['channels'] = channelInfo
+    }
+
+    const userIds = options?.userIds
+    if(userIds) {
+        const userInfo = await discordService.guildMemberService.getGuildMemberInfoFromDiscordIds(connection, userIds)
+        newOptions['users'] = userInfo
+    }
+
+    const roleIds = options?.roleIds
+    if(roleIds) {
+        const roleInfo = await discordService.roleService.getRoleInfoFromRoleIds(connection, roleIds)
+        newOptions['roles'] = roleInfo
+    }
+
+    return newOptions
+}
+
 const bullMQTriggeredAnnouncement = async (job: Job) => {
     const announcementId = job.data.announcementId;
 
@@ -204,6 +234,7 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
 
 
 export default {
+    enhanceAnnouncementDataOption,
     createDraftAnnouncement,
     bullMQTriggeredAnnouncement,
     createScheduledAnnouncement,

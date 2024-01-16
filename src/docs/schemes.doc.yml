@@ -185,7 +185,7 @@ components:
       properties:
         id:
           type: string
-          format: objectId # assuming MongoDB ObjectId format
+          format: objectId
         title:
           type: string
         scheduledAt:
@@ -200,16 +200,19 @@ components:
             properties:
               platform:
                 type: string
-                format: objectId # assuming MongoDB ObjectId format
+                format: objectId
               template:
                 type: string
               options:
                 type: object
                 properties:
-                  userIds:
-                    type: array
-                    items:
-                      type: string
+                  users:
+                    type: object
+                    properties:
+                      discordId: 
+                        type: string
+                      ngu: 
+                        type: string
         community:
           type: string
-          format: objectId # assuming MongoDB ObjectId format
+          format: objectId

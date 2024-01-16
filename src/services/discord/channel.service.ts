@@ -101,6 +101,12 @@ async function checkBotPermissions(guildId: Snowflake, channel: IChannel, permis
     }
 }
 
+async function getChannelInfoFromChannelIds(connection: Connection, channelIds: string[]) {
+    const channels = await connection.models.Channel.find({ channelId: { $in: channelIds } });
+    const channelInfo = channels.map((channel: IChannel) => ({ channelId: channel.channelId, name: channel.name }));
+    return channelInfo;
+}
+
 
 /**
  * Query for channels
@@ -117,6 +123,7 @@ const queryChannels = async (connection: any, filter: object, options: object) =
 };
 
 export default {
+    getChannelInfoFromChannelIds,
     hasReadMessageHistory,
     getChannel,
     getChannels,
