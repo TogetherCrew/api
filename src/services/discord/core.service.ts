@@ -7,6 +7,8 @@ import parentLogger from '../../config/logger';
 import { IAuthAndPlatform, IDiscordOAuth2EchangeCode, IDiscordUser } from '../../interfaces';
 import channelService from './channel.service';
 import roleService from './role.service';
+import guildMemberService from './guildMember.service';
+import { discord } from '../../config/oAtuh2';
 const logger = parentLogger.child({ module: 'DiscordService' });
 
 /**
@@ -18,40 +20,62 @@ const logger = parentLogger.child({ module: 'DiscordService' });
 async function getPropertyHandler(req: IAuthAndPlatform) {
     const connection = await DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
 
-    const filter = pick(req.query, ['name']);
-    if (filter.name) {
-        filter.name = {
-            $regex: filter.name,
-            $options: 'i'
-        };
-    }
-    filter.deletedAt = null;
+
 
     if (req.query.property === 'role') {
+        const filter = pick(req.query, ['name']);
+        if (filter.name) {
+            filter.name = {
+                $regex: filter.name,
+                $options: 'i'
+            };
+        }
+        filter.deletedAt = null;
         const options = pick(req.query, ['sortBy', 'limit', 'page']);
 
         return await roleService.queryRoles(connection, filter, options)
     }
     else if (req.query.property === 'channel') {
-
+        const filter = pick(req.query, ['name']);
+        if (filter.name) {
+            filter.name = {
+                $regex: filter.name,
+                $options: 'i'
+            };
+        }
+        filter.deletedAt = null;
         if (req.body.channelIds) {
             filter.channelId = { $in: req.body.channelIds };
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const channels: any = await channelService.getChannels(connection, filter);
         for (let i = 0; i < channels.length; i++) {
-            const canReadMessageHistoryAndViewChannel = await channelService.checkBotChannelAccess(req.platform?.metadata?.id, channels[i]);
+            const canReadMessageHistoryAndViewChannel = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [discord.permissions.ReadData.ViewChannel, discord.permissions.ReadData.ReadMessageHistory]);
+            const announcementAccess = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [discord.permissions.Announcement.ViewChannel, discord.permissions.Announcement.SendMessages, discord.permissions.Announcement.SendMessagesInThreads, discord.permissions.Announcement.CreatePrivateThreads, discord.permissions.Announcement.CreatePublicThreads, discord.permissions.Announcement.EmbedLinks, discord.permissions.Announcement.AttachFiles, discord.permissions.Announcement.MentionEveryone]);
+
             channels[i] = {
                 channelId: channels[i].channelId,
                 name: channels[i].name,
                 parentId: channels[i].parentId,
-                canReadMessageHistoryAndViewChannel
+                canReadMessageHistoryAndViewChannel,
+                announcementAccess
             }
         }
         return await sort.sortChannels(channels);
-
     }
 
+    else if (req.query.property === 'guildMember') {
+        const filter = pick(req.query, ['ngu']);
+        filter.deletedAt = null;
+        const options = pick(req.query, ['sortBy', 'limit', 'page']);
+        const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        guildMembers.results.forEach((guildMember: any) => {
+            guildMember.ngu = guildMemberService.getNgu(guildMember);
+            guildMember.username = guildMemberService.getUsername(guildMember);
+        });
+        return guildMembers
+    }
 }
 
 /**
@@ -163,6 +187,68 @@ async function getBotFromDiscordAPI(): Promise<IDiscordUser> {
     }
 }
 
+
+/**
+ * get list of permissions that bot has in a specific guild
+ * @param {Snowflake} guildId
+ * @returns {Promise<IDiscordUser>}
+ */
+async function getBotPermissions(guildId: Snowflake): Promise<Array<string>> {
+    try {
+        const client = await DiscordBotManager.getClient();
+        const guild = await client.guilds.fetch(guildId);
+        const member = await guild.members.fetch(config.discord.clientId);
+        return member.permissions.toArray();
+    } catch (error) {
+        logger.error({ bot_token: config.discord.botToken, error }, 'Failed to get list of permissions that bot has in a specific guild');
+        throw new ApiError(590, 'Failed to get list of permissions that bot has in a specific guild');
+    }
+}
+
+/**
+ * get list of permissions that bot needs for a specific module
+ * @param {string} module
+ * @returns {Promise<IDiscordUser>}
+ */
+type module = keyof typeof discord.permissions;
+function getRequirePermissionsForModule(module: module): Array<string> {
+    if (!discord.permissions[module]) {
+        return [];
+    }
+
+    const permissions = discord.permissions[module];
+    const permissionList = [];
+
+    for (const key in permissions) {
+        permissionList.push(key);
+    }
+
+    return permissionList;
+}
+
+/**
+ * get permissions value
+ * @param {Array<string>} permissionsArray
+ * @returns {Promise<IDiscordUser>}
+ */
+
+function getCombinedPermissionsValue(permissionsArray: Array<string>) {
+    let combinedValue = BigInt(0);
+    for (const moduleName in discord.permissions) {
+        if (Object.prototype.hasOwnProperty.call(discord.permissions, moduleName)) {
+            const modulePermissions = discord.permissions[moduleName as keyof typeof discord.permissions];
+            for (const permission of permissionsArray) {
+                if (Object.prototype.hasOwnProperty.call(modulePermissions, permission)) {
+                    combinedValue |= BigInt(modulePermissions[permission as keyof typeof modulePermissions]);
+                }
+            }
+        }
+    }
+
+    return combinedValue;
+}
+
+
 class DiscordBotManager {
     public static client: Client;
     public static async getClient(): Promise<Client> {
@@ -183,13 +269,14 @@ class DiscordBotManager {
     }
 }
 
-
-
 export default {
     exchangeCode,
     getUserFromDiscordAPI,
     getBotFromDiscordAPI,
     getPropertyHandler,
     leaveBotFromGuild,
-    DiscordBotManager
+    DiscordBotManager,
+    getBotPermissions,
+    getRequirePermissionsForModule,
+    getCombinedPermissionsValue
 }

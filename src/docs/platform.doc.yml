@@ -4,6 +4,7 @@ paths:
       tags:
         - Platform
       summary: Connect to a platform.
+      description: Discord-> SUCCESS:1004,ERROR:1005     Twiitter-> SUCCESS:1006,ERROR:1007
       parameters:
         - name: platform
           in: path
@@ -249,29 +250,35 @@ paths:
           description: The type of property to retrieve (e.g., 'channel' or 'role' for Discord platform).
           schema:
             type: string
-            enum: ['channel','role']
+            enum: ['channel','role','guildMember']
         - name: name
           in: query
           required: false
-          description: Name of the role (required if 'property' is 'role').
+          description: Name of the role (supported for 'discord-role' property).
+          schema:
+            type: string
+        - name: ngu
+          in: query
+          required: false
+          description: nickname -> global name -> username(supported for 'discord-guildMember' property).
           schema:
             type: string
         - name: sortBy
           in: query
           required: false
-          description: The parameter to sort by (required if 'property' is 'role').
+          description: The parameter to sort by (supported for 'discord-role' and 'discord-guildMember' properties).
           schema:
             type: string
         - name: limit
           in: query
           required: false
-          description: Limit on the number of results (required if 'property' is 'role').
+          description: Limit on the number of results (supported for 'discord-role' and 'discord-guildMember' properties).
           schema:
             type: integer
         - name: page
           in: query
           required: false
-          description: Page number for pagination (required if 'property' is 'role').
+          description: Page number for pagination (supported for 'discord-role' and 'discord-guildMember' properties).
           schema:
             type: integer
       requestBody:
@@ -332,6 +339,28 @@ paths:
                               type: string
                             parentId: 
                               type: Snowflake
+                            canReadMessageHistoryAndViewChannel: 
+                              type: boolean
+                            announcementAccess: 
+                              type: boolean   
+                - schema:
+                  type: array
+                  items: 
+                    type: object
+                    properties: 
+                      discordId: 
+                        type: string
+                        format: Snowflake
+                      nickname: 
+                        type: string
+                      globalName: 
+                        type: string
+                      username: 
+                        type: string
+                      ngu: 
+                        type: string
+                      discriminator: 
+                        type: integer                    
         "400":
           description: Bad Request
           $ref: "#/components/responses/BadRequest"
@@ -341,3 +370,37 @@ paths:
         "404":
           description: Not Found
           $ref: "#/components/responses/NotFound"
+  /api/v1/platforms/request-access/{platform}/{module}/{id}:
+    get:
+      tags:
+        - Platform
+      summary: request require access for a module. 
+      description: Discord-> SUCCESS:1008,ERROR:1009
+      parameters:
+        - name: platform
+          in: path
+          required: true
+          description: The name of the platform to connect.
+          schema:
+            type: string
+            enum:
+              - discord
+        - name: module
+          in: path
+          required: true
+          description: The name of the platform to connect.
+          schema:
+            type: string
+            description: Announcement (supported for 'discord' platform)
+            enum:
+              - Announcement
+        - name: id
+          in: path
+          required: true
+          description: the id of the platform (Example discord-> guildId).
+          schema:
+            type: string
+      responses:
+        "302":
+          description: Found (Redirect to Discord Or Twitter OAuth2 page)
+          $ref: "#/components/responses/Found"

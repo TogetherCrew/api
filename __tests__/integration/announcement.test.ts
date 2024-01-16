@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import request from 'supertest';
 import httpStatus from 'http-status';
 import app from '../../src/app';
@@ -39,13 +40,13 @@ describe('Community routes', () => {
                 "scheduledAt": nextMonthDate.toISOString(),
                 "draft": true,
                 "data": [
-                  { 
-                    "platformId": "658d530d84267a217f988c73",
-                    "template": "sample template wo wo wo",
-                    "options": {
-                       "userIds": ["23", "23"] 
+                    {
+                        "platformId": "658d530d84267a217f988c73",
+                        "template": "sample template wo wo wo",
+                        "options": {
+                            "userIds": ["23", "23"]
+                        }
                     }
-                  }  
                 ]
             };
 
@@ -78,13 +79,13 @@ describe('Community routes', () => {
                 "scheduledAt": nextMonthDate.toISOString(),
                 "draft": true, // TODO: change this to false when we found a solution for managing jobs after tests
                 "data": [
-                  { 
-                    "platformId": "658d530d84267a217f988c73",
-                    "template": "sample template wo wo wo",
-                    "options": {
-                       "userIds": ["23", "23"] 
+                    {
+                        "platformId": "658d530d84267a217f988c73",
+                        "template": "sample template wo wo wo",
+                        "options": {
+                            "userIds": ["23", "23"]
+                        }
                     }
-                  }  
                 ]
             };
 
@@ -119,13 +120,13 @@ describe('Community routes', () => {
                 "scheduledAt": lastMonthDate.toISOString(),
                 "draft": true,
                 "data": [
-                  { 
-                    "platformId": "658d530d84267a217f988c73",
-                    "template": "sample template wo wo wo",
-                    "options": {
-                       "userIds": ["23", "23"] 
+                    {
+                        "platformId": "658d530d84267a217f988c73",
+                        "template": "sample template wo wo wo",
+                        "options": {
+                            "userIds": ["23", "23"]
+                        }
                     }
-                  }  
                 ]
             };
 
@@ -146,13 +147,13 @@ describe('Community routes', () => {
                 "scheduledAt": nextMonthDate.toISOString(),
                 "draft": true,
                 "data": [
-                  { 
-                    "platformId": "658d530d84267a217f988c73",
-                    "template": "sample template wo wo wo",
-                    "options": {
-                       "userIds": ["23", "23"] 
+                    {
+                        "platformId": "658d530d84267a217f988c73",
+                        "template": "sample template wo wo wo",
+                        "options": {
+                            "userIds": ["23", "23"]
+                        }
                     }
-                  }  
                 ]
             };
 
@@ -239,27 +240,27 @@ describe('Community routes', () => {
             expect(res.body.results).toHaveLength(2);
             expect(res.body.results).toEqual([
                 {
-                  id: announcementTwo._id.toString(),
-                  title: 'Announcement Two',
-                  scheduledAt: announcementTwo.scheduledAt.toISOString(),
-                  draft: false,
-                  data: announcementTwo.data.map((data: any) => ({ ...data, platform: data.platform.toString() })),
-                  community: userOne.communities?.[0].toString()
+                    id: announcementTwo._id.toString(),
+                    title: 'Announcement Two',
+                    scheduledAt: announcementTwo.scheduledAt.toISOString(),
+                    draft: false,
+                    data: announcementTwo.data.map((data: any) => ({ ...data, platform: data.platform.toString() })),
+                    community: userOne.communities?.[0].toString()
                 },
                 {
-                  id: announcementOne._id.toString(),
-                  title: 'Announcement One',
-                  scheduledAt: announcementOne.scheduledAt.toISOString(),
-                  draft: false,
-                  data: announcementOne.data.map((data: any) => ({ ...data, platform: data.platform.toString() })),
-                  community: userOne.communities?.[0].toString()
+                    id: announcementOne._id.toString(),
+                    title: 'Announcement One',
+                    scheduledAt: announcementOne.scheduledAt.toISOString(),
+                    draft: false,
+                    data: announcementOne.data.map((data: any) => ({ ...data, platform: data.platform.toString() })),
+                    community: userOne.communities?.[0].toString()
                 }
             ]);
             expect(res.body.page).toEqual(1);
             expect(res.body.limit).toEqual(10);
             expect(res.body.totalPages).toEqual(1);
             expect(res.body.totalResults).toEqual(2);
-            
+
         });
 
         test('should return 400 error if communityId is not a valid mongo id', async () => {

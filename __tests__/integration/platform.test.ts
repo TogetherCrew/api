@@ -9,8 +9,10 @@ import { communityOne, communityTwo, communityThree, insertCommunities } from '.
 import { platformOne, platformTwo, platformThree, platformFour, platformFive, insertPlatforms, } from '../fixtures/platform.fixture';
 import { discordRole1, discordRole2, discordRole3, discordRole4, insertRoles } from '../fixtures/discord/roles.fixture';
 import { discordChannel1, discordChannel2, discordChannel3, discordChannel4, discordChannel5, insertChannels } from '../fixtures/discord/channels.fixture';
+import { discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4, insertGuildMembers } from '../fixtures/discord/guildMember.fixture';
 import { discordServices } from '../../src/services';
 import { analyzerAction, analyzerWindow } from '../../src/config/analyzer.statics';
+import { Connection } from 'mongoose';
 setupTestDB();
 
 describe('Platform routes', () => {
@@ -214,7 +216,6 @@ describe('Platform routes', () => {
 
         });
     });
-
     describe('GET /api/v1/platforms', () => {
         test('should return 200 and apply the default query options', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
@@ -379,9 +380,6 @@ describe('Platform routes', () => {
             expect(res.body.results[0].id).toBe(platformOne._id.toHexString());
         });
     });
-
-
-
     describe('GET /api/v1/platforms/:platformId', () => {
         test('should return 200 and the community object if data is ok', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
@@ -444,9 +442,6 @@ describe('Platform routes', () => {
                 .expect(httpStatus.NOT_FOUND);
         });
     });
-
-
-
     describe('PATCH /api/v1/platforms/:platformId', () => {
         let updateBody: IPlatformUpdateBody;
 
@@ -687,9 +682,11 @@ describe('Platform routes', () => {
                 .expect(httpStatus.NOT_FOUND);
         });
     });
-
     describe('POST /:platformId/properties', () => {
-        const connection = DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+        let connection: Connection;
+        beforeAll(async () => {
+            connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+        });
         beforeEach(async () => {
             await connection.dropDatabase();
         });
@@ -898,13 +895,15 @@ describe('Platform routes', () => {
                     channelId: "234567890123456789",
                     name: "Channel 2",
                     parentId: "987654321098765432",
-                    canReadMessageHistoryAndViewChannel: false
+                    canReadMessageHistoryAndViewChannel: false,
+                    announcementAccess: false
                 },
                 {
                     channelId: "345678901234567890",
                     name: "Channel 3",
                     parentId: "987654321098765432",
-                    canReadMessageHistoryAndViewChannel: false
+                    canReadMessageHistoryAndViewChannel: false,
+                    announcementAccess: false
                 }]
             });
             expect(res.body[1]).toMatchObject({
@@ -914,7 +913,8 @@ describe('Platform routes', () => {
                     channelId: "345678901234567000",
                     name: "Channel 4",
                     parentId: "345678901234567000",
-                    canReadMessageHistoryAndViewChannel: false
+                    canReadMessageHistoryAndViewChannel: false,
+                    announcementAccess: false
                 }]
             });
         });
@@ -953,6 +953,124 @@ describe('Platform routes', () => {
                     canReadMessageHistoryAndViewChannel: false
                 }]
             });
+        });
+
+        test('should return 200 and apply the default query options if requested property is discord-guildMember', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformOne]);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection)
+
+
+            const res = await request(app)
+                .post(`/api/v1/platforms/${platformOne._id}/properties`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ property: 'guildMember' })
+                .send()
+                .expect(httpStatus.OK);
+
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 4,
+            });
+            expect(res.body.results).toHaveLength(4);
+
+
+
+            expect(res.body.results[0]).toMatchObject({
+                discordId: discordGuildMember3.discordId,
+                username: discordGuildMember3.username,
+                ngu: discordGuildMember3.username,
+                discriminator: discordGuildMember3.discriminator,
+                nickname: discordGuildMember3.nickname,
+                globalName: discordGuildMember3.globalName
+            });
+
+            expect(res.body.results[1]).toMatchObject({
+                discordId: discordGuildMember1.discordId,
+                username: discordGuildMember1.username,
+                ngu: discordGuildMember1.globalName,
+                discriminator: discordGuildMember1.discriminator,
+                nickname: discordGuildMember1.nickname,
+                globalName: discordGuildMember1.globalName
+            });
+            expect(res.body.results[2]).toMatchObject({
+                discordId: discordGuildMember2.discordId,
+                username: discordGuildMember2.username,
+                ngu: discordGuildMember2.nickname,
+                discriminator: discordGuildMember2.discriminator,
+                nickname: discordGuildMember2.nickname,
+                globalName: discordGuildMember2.globalName
+            });
+
+
+            expect(res.body.results[3]).toMatchObject({
+                discordId: discordGuildMember4.discordId,
+                username: discordGuildMember4.username + "#" + discordGuildMember4.discriminator,
+                ngu: discordGuildMember4.username + "#" + discordGuildMember4.discriminator,
+                discriminator: discordGuildMember4.discriminator,
+                nickname: discordGuildMember4.nickname,
+                globalName: discordGuildMember4.globalName
+            });
+        });
+
+        test('should correctly apply filter on ngu if requested property is discord-guildMember', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformOne]);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection)
+
+
+            const res = await request(app)
+                .post(`/api/v1/platforms/${platformOne._id}/properties`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ property: 'guildMember', ngu: 'behzad' })
+                .send()
+                .expect(httpStatus.OK);
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 2,
+            });
+            expect(res.body.results).toHaveLength(2);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember1.discordId);
+            expect(res.body.results[1].discordId).toBe(discordGuildMember4.discordId);
+
+        });
+
+
+        test('should limit returned array if limit param is specified and requested property is discord-guildMember', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await insertPlatforms([platformOne]);
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection)
+
+
+            const res = await request(app)
+                .post(`/api/v1/platforms/${platformOne._id}/properties`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ property: 'guildMember', limit: 1 })
+                .send()
+                .expect(httpStatus.OK);
+
+
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 1,
+                totalPages: 4,
+                totalResults: 4,
+            });
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].discordId).toBe(discordGuildMember3.discordId);
+
         });
 
         test('should return 401 error if access token is missing', async () => {
@@ -1010,4 +1128,6 @@ describe('Platform routes', () => {
 
         });
     });
+
+    // TODO: add tests for connect platform and request access APIs
 });

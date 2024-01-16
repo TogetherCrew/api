@@ -29,7 +29,7 @@ type Options = {
  * @returns {Promise<QueryResult>} - An object with the query results and other information like 'limit', 'page', 'totalPages', 'totalResults'.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function queryGuildMembers(connection: Connection, filter: Filter, options: Options, memberActivity: any, activityCompostionsTypes: Array<string>) {
+async function queryGuildMembersForTables(connection: Connection, filter: Filter, options: Options, memberActivity: any, activityCompostionsTypes: Array<string>) {
     try {
         const { allRoles, include, exclude, ngu, activityComposition } = filter;
         const { sortBy } = options;
@@ -196,11 +196,91 @@ async function getGuildMember(connection: Connection, filter: object): Promise<I
     return await connection.models.GuildMember.findOne(filter);
 }
 
+/**
+ * Query for guild members
+ * @param {Object} filter - Mongo filter
+ * @param {Object} options - Query options
+ * @param {string} [options.sortBy] - Sort option in the format: sortField:(desc|asc)
+ * @param {number} [options.limit] - Maximum number of results per page (default = 10)
+ * @param {number} [options.page] - Current page (default = 1)
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const queryGuildMembers = async (connection: any, filter: Filter, options: Options) => {
+    try {
+        const { ngu } = filter;
+        const { sortBy } = options;
+        const limit = options.limit && parseInt(options.limit, 10) > 0 ? parseInt(options.limit, 10) : 10;
+        const page = options.page && parseInt(options.page, 10) > 0 ? parseInt(options.page, 10) : 1;
+        const sortParams: Record<string, 1 | -1> = sortBy ? sort.sortByHandler(sortBy) : { username: 1 };
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const matchStage: any = {};
+
+        if (ngu) {
+            matchStage.$or = [
+                { "username": { $regex: ngu, $options: 'i' } },
+                { "globalName": { $regex: ngu, $options: 'i' } },
+                { "nickname": { $regex: ngu, $options: 'i' } }
+            ];
+        }
+
+        const totalResults = await connection.models.GuildMember.countDocuments(matchStage);
+
+        const results = await connection.models.GuildMember.aggregate([
+            {
+                $match: matchStage
+            },
+            {
+                $sort: sortParams
+            },
+            {
+                $skip: limit * (page - 1)
+            },
+            {
+                $limit: limit
+            },
+            {
+                $project: {
+                    discordId: 1,
+                    username: 1,
+                    discriminator: 1,
+                    nickname: 1,
+                    globalName: 1,
+                    _id: 0,
+                }
+            }
+        ]);
+
+        const totalPages = Math.ceil(totalResults / limit);
+
+        return {
+            results,
+            limit,
+            page,
+            totalPages,
+            totalResults,
+        }
+    } catch (error) {
+        logger.error({ database: connection.name, filter, options, error }, 'Failed to query guild members');
+        return {
+            results: [],
+            limit: 10,
+            page: 1,
+            totalPages: 0,
+            totalResults: 0,
+        }
+    }
+
+
+
+
+};
 
 export default {
     getDiscordIdsFromUsernames,
-    queryGuildMembers,
+    queryGuildMembersForTables,
     getGuildMember,
     getNgu,
-    getUsername
+    getUsername,
+    queryGuildMembers
 }

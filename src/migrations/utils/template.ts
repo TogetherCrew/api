@@ -15,7 +15,6 @@ const connectToMongoDB = async () => {
 
 export const up = async () => {
     // Connect to MongoDB
-    console.log
     await connectToMongoDB();
     const connection = await DatabaseManager.getInstance().getTenantDb("database");
     await connection.createCollection('my_collection');

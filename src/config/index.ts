@@ -18,6 +18,7 @@ const envVarsSchema = Joi.object()
         DISCORD_BOT_TOKEN: Joi.string().required().description('Discord bot token'),
         DISCORD_AUTHORIZE_CALLBACK_URI: Joi.string().required().description('Discord authorize callback uri'),
         DISCORD_CONNECT_CALLBACK_URI: Joi.string().required().description('Discord connect callback uri'),
+        DISCORD_REQUEST_ACCESS_CALLBACK_URI: Joi.string().required().description('Discord request access callback uri'),
         TWITTER_CONNECT_CALLBACK_URI: Joi.string().required().description('Twitter connect callback uri'),
         TWITTER_CLIENT_ID: Joi.string().required().description('Twitter clinet id'),
         TWITTER_CLIENT_SECRET: Joi.string().required().description('Twitter clinet secret'),
@@ -40,7 +41,7 @@ const envVarsSchema = Joi.object()
         SESSION_SECRET: Joi.string().required().description('Session secret'),
         REDIS_HOST: Joi.string().required().description('Redis host'),
         REDIS_PORT: Joi.string().required().description('Redis port'),
-        REDIS_PASSWORD: Joi.string().required().description('Redis password'),
+        REDIS_PASSWORD: Joi.string().required().description('Reids password').allow(''),
     })
     .unknown();
 
@@ -78,7 +79,8 @@ export default {
         botToken: envVars.DISCORD_BOT_TOKEN,
         callbackURI: {
             authorize: envVars.DISCORD_AUTHORIZE_CALLBACK_URI,
-            connect: envVars.DISCORD_CONNECT_CALLBACK_URI
+            connect: envVars.DISCORD_CONNECT_CALLBACK_URI,
+            requestAccess: envVars.DISCORD_REQUEST_ACCESS_CALLBACK_URI
         },
     },
     twitter: {

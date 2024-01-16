@@ -60,7 +60,7 @@ const activeMembersCompositionTable = catchAsync(async function (req: IAuthAndPl
     const connection = await DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
     const activityCompostionFields = memberActivityService.getActivityCompositionOfActiveMembersComposition()
     const memberActivity = await memberActivityService.getLastDocumentForTablesUsage(connection, activityCompostionFields);
-    const guildMembers = await discordServices.guildMemberService.queryGuildMembers(connection, filter, options, memberActivity, activityCompostionsTypes.activeMembersComposition);
+    const guildMembers = await discordServices.guildMemberService.queryGuildMembersForTables(connection, filter, options, memberActivity, activityCompostionsTypes.activeMembersComposition);
 
     const roles = await discordServices.roleService.getRoles(connection, {});
     if (guildMembers) {
@@ -80,7 +80,7 @@ const activeMembersOnboardingTable = catchAsync(async function (req: IAuthAndPla
     const connection = await DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
     const activityCompostionFields = memberActivityService.getActivityCompositionOfActiveMembersOnboarding();
     const memberActivity = await memberActivityService.getLastDocumentForTablesUsage(connection, activityCompostionFields);
-    const guildMembers = await discordServices.guildMemberService.queryGuildMembers(connection, filter, options, memberActivity, activityCompostionsTypes.activeMembersOnboarding);
+    const guildMembers = await discordServices.guildMemberService.queryGuildMembersForTables(connection, filter, options, memberActivity, activityCompostionsTypes.activeMembersOnboarding);
     const roles = await discordServices.roleService.getRoles(connection, {});
     if (guildMembers) {
         guildMembers.results.forEach((guildMember) => {
@@ -99,7 +99,7 @@ const disengagedMembersCompositionTable = catchAsync(async function (req: IAuthA
     const connection = await DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
     const activityCompostionFields = memberActivityService.getActivityCompositionOfDisengagedComposition();
     const memberActivity = await memberActivityService.getLastDocumentForTablesUsage(connection, activityCompostionFields);
-    const guildMembers = await discordServices.guildMemberService.queryGuildMembers(connection, filter, options, memberActivity, activityCompostionsTypes.disengagedMembersCompostion);
+    const guildMembers = await discordServices.guildMemberService.queryGuildMembersForTables(connection, filter, options, memberActivity, activityCompostionsTypes.disengagedMembersCompostion);
     const roles = await discordServices.roleService.getRoles(connection, {});
     if (guildMembers) {
         guildMembers.results.forEach((guildMember) => {
