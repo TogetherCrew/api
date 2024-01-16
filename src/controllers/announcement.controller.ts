@@ -7,13 +7,24 @@ import { IAnnouncement } from '@togethercrew.dev/db';
 import { announcementService } from '../services';
 import moment from 'moment';
 
-function getAnnouncementFieldsToReturn(announcement: IAnnouncement): object {
+async function enhanceAnnouncementData(announcementData: Array<any>) {
+    const enhancedData = [];
+    for (const announcementD of announcementData) {
+        const enhancedOptions = await announcementService.enhanceAnnouncementDataOption(announcementD.platform, announcementD.options);
+        enhancedData.push({ platform: announcementD.platform, template: announcementD.template, options: enhancedOptions });
+    }
+    return enhancedData;
+}
+
+async function getAnnouncementFieldsToReturn(announcement: IAnnouncement) {
+    const newData = await enhanceAnnouncementData(announcement.data)
+    
     return {
         id: (announcement as any).id,
         title: announcement.title,
         scheduledAt: announcement.scheduledAt,
         draft: announcement.draft,
-        data: announcement.data,
+        data: newData,
         community: announcement.community,
     };
 }
@@ -40,7 +51,7 @@ const createAnnouncement = catchAsync(async function (req: IAuthRequest, res: Re
     if(draft)announcement = await announcementService.createDraftAnnouncement(announcementData);
     else announcement = await announcementService.createScheduledAnnouncement(announcementData);
 
-    announcement = getAnnouncementFieldsToReturn(announcement);
+    announcement = await getAnnouncementFieldsToReturn(announcement);
     res.status(httpStatus.CREATED).send(announcement);
 })
 
@@ -97,7 +108,7 @@ const updateAnnouncement = catchAsync(async function (req: IAuthRequest, res: Re
         }
     }
 
-    res.status(httpStatus.OK).send(getAnnouncementFieldsToReturn(newAnnouncement as IAnnouncement))
+    res.status(httpStatus.OK).send(await getAnnouncementFieldsToReturn(newAnnouncement as IAnnouncement))
 })
 
 const getAnnouncements = catchAsync(async function (req: IAuthRequest, res: Response) {
@@ -119,7 +130,7 @@ const getAnnouncements = catchAsync(async function (req: IAuthRequest, res: Resp
     else if(utcEndDate) dbFilter.scheduledAt = { $lte: utcEndDate };
 
     const paginatedAnnouncement = await announcementService.queryAnnouncements(dbFilter, options);
-    paginatedAnnouncement.results = paginatedAnnouncement.results.map(getAnnouncementFieldsToReturn);
+    paginatedAnnouncement.results = await Promise.all( paginatedAnnouncement.results.map(async (announcement: any) => await getAnnouncementFieldsToReturn(announcement as IAnnouncement)))
     res.status(httpStatus.OK).send(paginatedAnnouncement);
 })
 
@@ -136,7 +147,7 @@ const getOneAnnouncement = catchAsync(async function (req: IAuthRequest, res: Re
         throw new ApiError(httpStatus.NOT_FOUND, 'Announcement not found');
     }
 
-    res.status(httpStatus.OK).send(getAnnouncementFieldsToReturn(announcement));
+    res.status(httpStatus.OK).send(await getAnnouncementFieldsToReturn(announcement));
 })
 
 const deleteAnnouncement = catchAsync(async function (req: IAuthRequest, res: Response) {
