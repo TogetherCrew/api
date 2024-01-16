@@ -50,8 +50,8 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const channels: any = await channelService.getChannels(connection, filter);
         for (let i = 0; i < channels.length; i++) {
-            const canReadMessageHistoryAndViewChannel = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [discord.permissions.ViewChannels, discord.permissions.readMessageHistory]);
-            const announcementAccess = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [discord.permissions.sendMessages, discord.permissions.sendMessagesInThreads, discord.permissions.createPublicThread, discord.permissions.createPrivateThread, discord.permissions.embedLinks, discord.permissions.attachFiles, discord.permissions.mentionEveryOneHereAllRoles]);
+            const canReadMessageHistoryAndViewChannel = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [discord.permissions.ViewChannel, discord.permissions.ReadMessageHistory]);
+            const announcementAccess = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [discord.permissions.SendMessages, discord.permissions.SendMessagesInThreads, discord.permissions.CreatePrivateThreads, discord.permissions.CreatePublicThreads, discord.permissions.EmbedLinks, discord.permissions.AttachFiles, discord.permissions.MentionEveryone]);
 
             channels[i] = {
                 channelId: channels[i].channelId,

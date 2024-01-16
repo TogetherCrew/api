@@ -26,7 +26,7 @@ const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Re
     const state = generateState();
     req.session.state = state;
     if (platform === 'discord') {
-        res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.connect}&response_type=code&scope=${discord.scopes.connectGuild}&permissions=${discord.permissions.ViewChannels | discord.permissions.readMessageHistory}&state=${state}`);
+        res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.connect}&response_type=code&scope=${discord.scopes.connectGuild}&permissions=${discord.permissions.ViewChannel | discord.permissions.ReadMessageHistory}&state=${state}`);
     } else if (platform === 'twitter') {
         const codeVerifier = generateCodeVerifier();
         const codeChallenge = generateCodeChallenge(codeVerifier);

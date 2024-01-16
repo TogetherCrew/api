@@ -29,16 +29,15 @@ export const discord = {
         connectGuild: "bot",
     },
     permissions: {
-        ViewChannels: 0x400,
-        manageServer: 0x20,
-        readMessageHistory: 0x10000,
-        sendMessages: 0x800,
-        sendMessagesInThreads: 0x4000000000,
-        createPublicThread: 0x800000000,
-        createPrivateThread: 0x1000000000,
-        embedLinks: 0x4000,
-        attachFiles: 0x8000,
-        mentionEveryOneHereAllRoles: 0x20000
+        ViewChannel: 0x400,
+        ReadMessageHistory: 0x10000,
+        SendMessages: 0x800,
+        SendMessagesInThreads: 0x4000000000,
+        CreatePublicThreads: 0x800000000,
+        CreatePrivateThreads: 0x1000000000,
+        EmbedLinks: 0x4000,
+        AttachFiles: 0x8000,
+        MentionEveryone: 0x20000
     },
     getDiscordClient: async function () {
         const client = new Client({
