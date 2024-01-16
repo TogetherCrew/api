@@ -9,7 +9,7 @@ import { communityOne, communityTwo, communityThree, insertCommunities } from '.
 import { platformOne, platformTwo, platformThree, platformFour, platformFive, insertPlatforms, } from '../fixtures/platform.fixture';
 import { discordRole1, discordRole2, discordRole3, discordRole4, insertRoles } from '../fixtures/discord/roles.fixture';
 import { discordChannel1, discordChannel2, discordChannel3, discordChannel4, discordChannel5, insertChannels } from '../fixtures/discord/channels.fixture';
-import { discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4, discordGuildMember5, insertGuildMembers } from '../fixtures/discord/guildMember.fixture';
+import { discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4, insertGuildMembers } from '../fixtures/discord/guildMember.fixture';
 import { discordServices } from '../../src/services';
 import { analyzerAction, analyzerWindow } from '../../src/config/analyzer.statics';
 import { Connection } from 'mongoose';

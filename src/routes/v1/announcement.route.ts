@@ -12,4 +12,6 @@ router.get('/:announcementId', auth(), announcementController.getOneAnnouncement
 router.patch('/:announcementId', auth(), validate(announcementValidation.updateAnnouncement), announcementController.updateAnnouncement);
 router.delete('/:announcementId', auth(), announcementController.deleteAnnouncement);
 
+router.post('', auth(), validate(announcementValidation.createAnnouncement), announcementController.createAnnouncement);
+
 export default router;

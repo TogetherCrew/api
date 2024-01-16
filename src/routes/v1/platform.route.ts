@@ -7,6 +7,8 @@ const router = express.Router();
 
 // Routes
 router.get('/connect/:platform', validate(platformValidation.connectPlatform), platformController.connectPlatform);
+router.get('/connect/:platform', validate(platformValidation.connectPlatform), platformController.connectPlatform);
+
 router.get('/twitter/callback', platformController.connectTwitterCallback);
 router.get('/discord/callback', platformController.connectDiscordCallback);
 
