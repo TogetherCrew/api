@@ -903,13 +903,15 @@ describe('Platform routes', () => {
                     channelId: "234567890123456789",
                     name: "Channel 2",
                     parentId: "987654321098765432",
-                    canReadMessageHistoryAndViewChannel: false
+                    canReadMessageHistoryAndViewChannel: false,
+                    announcementAccess: false
                 },
                 {
                     channelId: "345678901234567890",
                     name: "Channel 3",
                     parentId: "987654321098765432",
-                    canReadMessageHistoryAndViewChannel: false
+                    canReadMessageHistoryAndViewChannel: false,
+                    announcementAccess: false
                 }]
             });
             expect(res.body[1]).toMatchObject({
@@ -919,7 +921,8 @@ describe('Platform routes', () => {
                     channelId: "345678901234567000",
                     name: "Channel 4",
                     parentId: "345678901234567000",
-                    canReadMessageHistoryAndViewChannel: false
+                    canReadMessageHistoryAndViewChannel: false,
+                    announcementAccess: false
                 }]
             });
         });
