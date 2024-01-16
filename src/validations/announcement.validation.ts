@@ -51,7 +51,8 @@ const getAnnouncements = {
             is: Joi.exist(),
             then: Joi.date().greater(Joi.ref('startDate')),
             otherwise: Joi.optional()
-        }).description('ISO date string. UTC time zone')
+        }).description('ISO date string. UTC time zone'),
+        timeZone: Joi.string().default('UTC'),
     }),
 }
 

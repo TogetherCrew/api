@@ -5,6 +5,7 @@ import { communityService } from '../services';
 import httpStatus from 'http-status';
 import { IAnnouncement } from '@togethercrew.dev/db';
 import { announcementService } from '../services';
+import moment from 'moment';
 
 function getAnnouncementFieldsToReturn(announcement: IAnnouncement): object {
     return {
@@ -95,7 +96,7 @@ const updateAnnouncement = catchAsync(async function (req: IAuthRequest, res: Re
 })
 
 const getAnnouncements = catchAsync(async function (req: IAuthRequest, res: Response) {
-    const queryFilter = pick(req.query, ['communityId', 'startDate', 'endDate']);
+    const queryFilter = pick(req.query, ['communityId', 'startDate', 'endDate', 'timeZone']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
 
     const community = await communityService.getCommunityByFilter({ _id: queryFilter.communityId, users: req.user.id });
@@ -103,12 +104,15 @@ const getAnnouncements = catchAsync(async function (req: IAuthRequest, res: Resp
         throw new ApiError(httpStatus.NOT_FOUND, 'Community not found');
     }
 
+    const utcStartDate = queryFilter.startDate && moment.tz(queryFilter.startDate, queryFilter.timeZone);
+    const utcEndDate = queryFilter.endDate && moment.tz(queryFilter.endDate, queryFilter.timeZone);
     const dbFilter: Record<string, any> = {};
     dbFilter.community = queryFilter.communityId;
 
-    if (queryFilter.startDate && queryFilter.endDate) dbFilter.scheduledAt = { $gte: queryFilter.startDate, $lte: queryFilter.endDate };
-    else if (queryFilter.startDate) dbFilter.scheduledAt = { $gte: queryFilter.startDate };
-    else if (queryFilter.endDate) dbFilter.scheduledAt = { $lte: queryFilter.endDate };
+
+    if(utcStartDate && utcEndDate) dbFilter.scheduledAt = { $gte: utcStartDate, $lte: utcEndDate };
+    else if(utcStartDate) dbFilter.scheduledAt = { $gte: utcStartDate };
+    else if(utcEndDate) dbFilter.scheduledAt = { $lte: utcEndDate };
 
     const paginatedAnnouncement = await announcementService.queryAnnouncements(dbFilter, options);
     paginatedAnnouncement.results = paginatedAnnouncement.results.map(getAnnouncementFieldsToReturn);
