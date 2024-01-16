@@ -18,7 +18,7 @@ function sortChannels(channels: any[]) {
                     subChannels,
                 });
             } else {
-                unCategorized.subChannels.push({ canReadMessageHistoryAndViewChannel: channel.canReadMessageHistoryAndViewChannel, channelId: channel.channelId, parentId: channel.channelId, name: channel.name });
+                unCategorized.subChannels.push({ announcementAccess: channel.announcementAccess, canReadMessageHistoryAndViewChannel: channel.canReadMessageHistoryAndViewChannel, channelId: channel.channelId, parentId: channel.channelId, name: channel.name });
             }
         }
     }

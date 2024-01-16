@@ -51,11 +51,14 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
         const channels: any = await channelService.getChannels(connection, filter);
         for (let i = 0; i < channels.length; i++) {
             const canReadMessageHistoryAndViewChannel = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [discord.permissions.ViewChannels, discord.permissions.readMessageHistory]);
+            const announcementAccess = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [discord.permissions.sendMessages, discord.permissions.sendMessagesInThreads, discord.permissions.createPublicThread, discord.permissions.createPrivateThread, discord.permissions.embedLinks, discord.permissions.attachFiles, discord.permissions.mentionEveryOneHereAllRoles]);
+
             channels[i] = {
                 channelId: channels[i].channelId,
                 name: channels[i].name,
                 parentId: channels[i].parentId,
-                canReadMessageHistoryAndViewChannel
+                canReadMessageHistoryAndViewChannel,
+                announcementAccess
             }
         }
         return await sort.sortChannels(channels);
