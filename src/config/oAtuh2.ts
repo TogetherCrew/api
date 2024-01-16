@@ -26,18 +26,23 @@ export function base64UrlEncode(buffer: Buffer) {
 export const discord = {
     scopes: {
         authorize: "identify",
-        connectGuild: "bot",
+        connectGuild: "bot"
     },
     permissions: {
-        ViewChannel: 0x400,
-        ReadMessageHistory: 0x10000,
-        SendMessages: 0x800,
-        SendMessagesInThreads: 0x4000000000,
-        CreatePublicThreads: 0x800000000,
-        CreatePrivateThreads: 0x1000000000,
-        EmbedLinks: 0x4000,
-        AttachFiles: 0x8000,
-        MentionEveryone: 0x20000
+        ReadData: {
+            ViewChannel: 0x400,
+            ReadMessageHistory: 0x10000,
+        },
+        Announcement: {
+            ViewChannel: 0x400,
+            SendMessages: 0x800,
+            SendMessagesInThreads: 0x4000000000,
+            CreatePublicThreads: 0x800000000,
+            CreatePrivateThreads: 0x1000000000,
+            EmbedLinks: 0x4000,
+            AttachFiles: 0x8000,
+            MentionEveryone: 0x20000
+        }
     },
     getDiscordClient: async function () {
         const client = new Client({

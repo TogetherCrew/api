@@ -216,7 +216,6 @@ describe('Platform routes', () => {
 
         });
     });
-
     describe('GET /api/v1/platforms', () => {
         test('should return 200 and apply the default query options', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
@@ -381,9 +380,6 @@ describe('Platform routes', () => {
             expect(res.body.results[0].id).toBe(platformOne._id.toHexString());
         });
     });
-
-
-
     describe('GET /api/v1/platforms/:platformId', () => {
         test('should return 200 and the community object if data is ok', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
@@ -446,9 +442,6 @@ describe('Platform routes', () => {
                 .expect(httpStatus.NOT_FOUND);
         });
     });
-
-
-
     describe('PATCH /api/v1/platforms/:platformId', () => {
         let updateBody: IPlatformUpdateBody;
 
@@ -689,7 +682,6 @@ describe('Platform routes', () => {
                 .expect(httpStatus.NOT_FOUND);
         });
     });
-
     describe('POST /:platformId/properties', () => {
         let connection: Connection;
         beforeAll(async () => {
@@ -1136,4 +1128,6 @@ describe('Platform routes', () => {
 
         });
     });
+
+    // TODO: add tests for connect platform and request access APIs
 });

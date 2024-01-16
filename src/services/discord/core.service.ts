@@ -50,8 +50,8 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const channels: any = await channelService.getChannels(connection, filter);
         for (let i = 0; i < channels.length; i++) {
-            const canReadMessageHistoryAndViewChannel = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [discord.permissions.ViewChannel, discord.permissions.ReadMessageHistory]);
-            const announcementAccess = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [discord.permissions.SendMessages, discord.permissions.SendMessagesInThreads, discord.permissions.CreatePrivateThreads, discord.permissions.CreatePublicThreads, discord.permissions.EmbedLinks, discord.permissions.AttachFiles, discord.permissions.MentionEveryone]);
+            const canReadMessageHistoryAndViewChannel = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [discord.permissions.ReadData.ViewChannel, discord.permissions.ReadData.ReadMessageHistory]);
+            const announcementAccess = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [discord.permissions.Announcement.ViewChannel, discord.permissions.Announcement.SendMessages, discord.permissions.Announcement.SendMessagesInThreads, discord.permissions.Announcement.CreatePrivateThreads, discord.permissions.Announcement.CreatePublicThreads, discord.permissions.Announcement.EmbedLinks, discord.permissions.Announcement.AttachFiles, discord.permissions.Announcement.MentionEveryone]);
 
             channels[i] = {
                 channelId: channels[i].channelId,
@@ -193,16 +193,59 @@ async function getBotFromDiscordAPI(): Promise<IDiscordUser> {
  * @param {Snowflake} guildId
  * @returns {Promise<IDiscordUser>}
  */
-async function getBotpermissions(guildId: Snowflake): Promise<Array<string>> {
+async function getBotPermissions(guildId: Snowflake): Promise<Array<string>> {
     try {
         const client = await DiscordBotManager.getClient();
-        const guild = await client.guilds.fetch(config.discord.clientId);
-        const member = await guild.members.fetch(guildId);
+        const guild = await client.guilds.fetch(guildId);
+        const member = await guild.members.fetch(config.discord.clientId);
         return member.permissions.toArray();
     } catch (error) {
         logger.error({ bot_token: config.discord.botToken, error }, 'Failed to get list of permissions that bot has in a specific guild');
         throw new ApiError(590, 'Failed to get list of permissions that bot has in a specific guild');
     }
+}
+
+/**
+ * get list of permissions that bot needs for a specific module
+ * @param {string} module
+ * @returns {Promise<IDiscordUser>}
+ */
+type module = keyof typeof discord.permissions;
+function getRequirePermissionsForModule(module: module): Array<string> {
+    if (!discord.permissions[module]) {
+        return [];
+    }
+
+    const permissions = discord.permissions[module];
+    const permissionList = [];
+
+    for (const key in permissions) {
+        permissionList.push(key);
+    }
+
+    return permissionList;
+}
+
+/**
+ * get permissions value
+ * @param {Array<string>} permissionsArray
+ * @returns {Promise<IDiscordUser>}
+ */
+
+function getCombinedPermissionsValue(permissionsArray: Array<string>) {
+    let combinedValue = BigInt(0);
+    for (const moduleName in discord.permissions) {
+        if (Object.prototype.hasOwnProperty.call(discord.permissions, moduleName)) {
+            const modulePermissions = discord.permissions[moduleName as keyof typeof discord.permissions];
+            for (const permission of permissionsArray) {
+                if (Object.prototype.hasOwnProperty.call(modulePermissions, permission)) {
+                    combinedValue |= BigInt(modulePermissions[permission as keyof typeof modulePermissions]);
+                }
+            }
+        }
+    }
+
+    return combinedValue;
 }
 
 
@@ -233,5 +276,7 @@ export default {
     getPropertyHandler,
     leaveBotFromGuild,
     DiscordBotManager,
-    getBotpermissions
+    getBotPermissions,
+    getRequirePermissionsForModule,
+    getCombinedPermissionsValue
 }

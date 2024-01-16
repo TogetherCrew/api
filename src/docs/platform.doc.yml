@@ -4,6 +4,7 @@ paths:
       tags:
         - Platform
       summary: Connect to a platform.
+      description: Discord-> SUCCESS:1004,ERROR:1005     Twiitter-> SUCCESS:1006,ERROR:1007
       parameters:
         - name: platform
           in: path
@@ -369,3 +370,37 @@ paths:
         "404":
           description: Not Found
           $ref: "#/components/responses/NotFound"
+  /api/v1/platforms/request-access/{platform}/{module}/{id}:
+    get:
+      tags:
+        - Platform
+      summary: request require access for a module. 
+      description: Discord-> SUCCESS:1008,ERROR:1009
+      parameters:
+        - name: platform
+          in: path
+          required: true
+          description: The name of the platform to connect.
+          schema:
+            type: string
+            enum:
+              - discord
+        - name: module
+          in: path
+          required: true
+          description: The name of the platform to connect.
+          schema:
+            type: string
+            description: Announcement (supported for 'discord' platform)
+            enum:
+              - Announcement
+        - name: id
+          in: path
+          required: true
+          description: the id of the platform (Example discord-> guildId).
+          schema:
+            type: string
+      responses:
+        "302":
+          description: Found (Redirect to Discord Or Twitter OAuth2 page)
+          $ref: "#/components/responses/Found"

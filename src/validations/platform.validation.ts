@@ -140,6 +140,27 @@ const dynamicPlatformProperty = (req: Request) => {
     }
 };
 
+const dynamicRequestAccess = (req: Request) => {
+    const platform = req.params.platform;
+    if (platform === 'discord') {
+        return {
+            params: Joi.object().keys({
+                platform: Joi.string().valid('discord').required(),
+                module: Joi.string().valid('Announcement').required(),
+                id: Joi.string().required()
+            }),
+        };
+    }
+    else {
+        return {
+            query: Joi.object().required().keys({}),
+            params: Joi.object().required().keys({}),
+            body: Joi.object().required().keys({}),
+
+        };
+    }
+};
+
 export default {
     createPlatform,
     getPlatforms,
@@ -147,5 +168,6 @@ export default {
     deletePlatform,
     connectPlatform,
     dynamicUpdatePlatform,
-    dynamicPlatformProperty
+    dynamicPlatformProperty,
+    dynamicRequestAccess
 }

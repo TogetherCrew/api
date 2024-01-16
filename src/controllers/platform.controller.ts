@@ -26,7 +26,7 @@ const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Re
     const state = generateState();
     req.session.state = state;
     if (platform === 'discord') {
-        res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.connect}&response_type=code&scope=${discord.scopes.connectGuild}&permissions=${discord.permissions.ViewChannel | discord.permissions.ReadMessageHistory}&state=${state}`);
+        res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.connect}&response_type=code&scope=${discord.scopes.connectGuild}&permissions=${discord.permissions.ReadData.ViewChannel | discord.permissions.ReadData.ReadMessageHistory}&state=${state}`);
     } else if (platform === 'twitter') {
         const codeVerifier = generateCodeVerifier();
         const codeChallenge = generateCodeChallenge(codeVerifier);
@@ -98,6 +98,32 @@ const connectTwitterCallback = catchAsync(async function (req: ISessionRequest, 
     }
 });
 
+const requestAccessCallback = catchAsync(async function (req: ISessionRequest, res: Response) {
+    const STATUS_CODE_SUCCESS = 1008;
+    const STATUS_CODE_ERROR = 1009;
+    const code = req.query.code as string;
+    const returnedState = req.query.state as string;
+    const storedState = req.session.state;
+    try {
+        if (!code || !returnedState || (returnedState !== storedState)) {
+            throw new Error("Invalid code or state mismatch");
+        }
+        const params = {
+            statusCode: STATUS_CODE_SUCCESS,
+        };
+        const query = querystring.stringify(params);
+        res.redirect(`${config.frontend.url}/callback?` + query);
+
+    } catch (err) {
+        const params = {
+            statusCode: STATUS_CODE_ERROR
+        };
+        const query = querystring.stringify(params);
+        res.redirect(`${config.frontend.url}/callback?` + query);
+    }
+});
+
+
 const getPlatforms = catchAsync(async function (req: IAuthRequest, res: Response) {
     const filter = pick(req.query, ['name', 'community']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
@@ -154,6 +180,21 @@ const getProperties = catchAsync(async function (req: IAuthAndPlatform, res: Res
     res.status(httpStatus.OK).send(result);
 });
 
+type module = keyof typeof discord.permissions;
+const requestAccess = catchAsync(async function (req: ISessionRequest, res: Response) {
+    const { platform, id } = req.params;
+    const module = req.params.module as module;
+    const state = generateState();
+    req.session.state = state;
+    if (platform === 'discord') {
+        const currentBotPermissions = await discordServices.coreService.getBotPermissions(id);
+        const requireBotPermissions = discordServices.coreService.getRequirePermissionsForModule(module);
+        const combinedArray = currentBotPermissions.concat(requireBotPermissions);
+        const permissionsValue = discordServices.coreService.getCombinedPermissionsValue(combinedArray);
+        res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&response_type=code&redirect_uri=${config.discord.callbackURI.requestAccess}&scope=${discord.scopes.connectGuild}&permissions=${permissionsValue}&guild_id=${id}&disable_guild_select=true&state=${state}`);
+    }
+});
+
 export default {
     createPlatform,
     connectPlatform,
@@ -163,6 +204,8 @@ export default {
     getPlatform,
     updatePlatform,
     deletePlatform,
-    getProperties
+    getProperties,
+    requestAccess,
+    requestAccessCallback
 }
 
