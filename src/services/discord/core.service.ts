@@ -69,6 +69,7 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
         filter.deletedAt = null;
         const options = pick(req.query, ['sortBy', 'limit', 'page']);
         const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         guildMembers.results.forEach((guildMember: any) => {
             guildMember.ngu = guildMemberService.getNgu(guildMember);
             guildMember.username = guildMemberService.getUsername(guildMember);
@@ -186,6 +187,25 @@ async function getBotFromDiscordAPI(): Promise<IDiscordUser> {
     }
 }
 
+
+/**
+ * get list of permissions that bot has in a specific guild
+ * @param {Snowflake} guildId
+ * @returns {Promise<IDiscordUser>}
+ */
+async function getBotpermissions(guildId: Snowflake): Promise<Array<string>> {
+    try {
+        const client = await DiscordBotManager.getClient();
+        const guild = await client.guilds.fetch(config.discord.clientId);
+        const member = await guild.members.fetch(guildId);
+        return member.permissions.toArray();
+    } catch (error) {
+        logger.error({ bot_token: config.discord.botToken, error }, 'Failed to get list of permissions that bot has in a specific guild');
+        throw new ApiError(590, 'Failed to get list of permissions that bot has in a specific guild');
+    }
+}
+
+
 class DiscordBotManager {
     public static client: Client;
     public static async getClient(): Promise<Client> {
@@ -206,13 +226,12 @@ class DiscordBotManager {
     }
 }
 
-
-
 export default {
     exchangeCode,
     getUserFromDiscordAPI,
     getBotFromDiscordAPI,
     getPropertyHandler,
     leaveBotFromGuild,
-    DiscordBotManager
+    DiscordBotManager,
+    getBotpermissions
 }

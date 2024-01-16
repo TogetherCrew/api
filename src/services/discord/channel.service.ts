@@ -1,8 +1,6 @@
 import { Connection } from 'mongoose';
 import { IChannel } from '@togethercrew.dev/db';
 import config from '../../config';
-import { discord } from '../../config/oAtuh2';
-import guildMemberService from './guildMember.service';
 import parentLogger from '../../config/logger';
 import coreService from '../discord/core.service';
 import { Snowflake } from 'discord.js';
@@ -72,6 +70,7 @@ async function checkBotPermissions(guildId: Snowflake, channel: IChannel, permis
 
         // Check permission overwrites
         let hasAccess = true;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const evaluateOverwrites = (overwrite: any) => {
             const allowed = BigInt(overwrite.allow);
             const denied = BigInt(overwrite.deny);
@@ -111,6 +110,7 @@ async function checkBotPermissions(guildId: Snowflake, channel: IChannel, permis
  * @param {number} [options.limit] - Maximum number of results per page (default = 10)
  * @param {number} [options.page] - Current page (default = 1)
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const queryChannels = async (connection: any, filter: object, options: object) => {
     return await connection.models.Channel.paginate(filter, options);
 
