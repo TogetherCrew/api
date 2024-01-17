@@ -381,7 +381,8 @@ describe('Platform routes', () => {
         });
     });
     describe('GET /api/v1/platforms/:platformId', () => {
-        test('should return 200 and the community object if data is ok', async () => {
+        discordServices.coreService.getBotPermissions = jest.fn().mockReturnValue(["ViewChannel", "ReadMessageHistory"]);
+        test('should return 200 and the platform object if data is ok', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
             await insertUsers([userOne, userTwo]);
             await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
@@ -394,7 +395,25 @@ describe('Platform routes', () => {
             expect(res.body).toEqual({
                 id: expect.anything(),
                 name: platformOne.name,
-                metadata: platformOne.metadata,
+                metadata: {
+                    ...platformOne.metadata,
+                    "permissions": {
+                        "ReadData": {
+                            "ViewChannel": true,
+                            "ReadMessageHistory": true
+                        },
+                        "Announcement": {
+                            "ViewChannel": true,
+                            "SendMessages": false,
+                            "SendMessagesInThreads": false,
+                            "CreatePublicThreads": false,
+                            "CreatePrivateThreads": false,
+                            "EmbedLinks": false,
+                            "AttachFiles": false,
+                            "MentionEveryone": false
+                        }
+                    }
+                },
                 community: communityOne._id.toHexString(),
                 disconnectedAt: null,
                 connectedAt: expect.anything()
@@ -683,6 +702,7 @@ describe('Platform routes', () => {
         });
     });
     describe('POST /:platformId/properties', () => {
+        discordServices.coreService.getBotPermissions = jest.fn().mockReturnValue(["ViewChannel", "ReadMessageHistory"]);
         let connection: Connection;
         beforeAll(async () => {
             connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
@@ -690,6 +710,7 @@ describe('Platform routes', () => {
         beforeEach(async () => {
             await connection.dropDatabase();
         });
+
         test('should return 200 and apply the default query options if requested property is discord-role', async () => {
             await insertCommunities([communityOne]);
             await insertUsers([userOne]);

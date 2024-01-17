@@ -150,6 +150,11 @@ const getPlatform = catchAsync(async function (req: IAuthRequest, res: Response)
     if (!community) {
         throw new ApiError(httpStatus.FORBIDDEN, 'Access denied');
     }
+
+    if (platform.metadata && platform.name === 'discord') {
+        const BotPermissions = await discordServices.coreService.getBotPermissions(platform.metadata?.id)
+        platform.metadata.permissions = discordServices.coreService.getPermissionsStatus(BotPermissions);
+    }
     res.send(platform);
 });
 const updatePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Response) {

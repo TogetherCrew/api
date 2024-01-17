@@ -231,7 +231,6 @@ function getRequirePermissionsForModule(module: module): Array<string> {
  * @param {Array<string>} permissionsArray
  * @returns {Promise<IDiscordUser>}
  */
-
 function getCombinedPermissionsValue(permissionsArray: Array<string>) {
     let combinedValue = BigInt(0);
     for (const moduleName in discord.permissions) {
@@ -248,6 +247,31 @@ function getCombinedPermissionsValue(permissionsArray: Array<string>) {
     return combinedValue;
 }
 
+/**
+ * Retrieves the status of specified permissions within the Discord permissions structure.
+ * The function iterates through each category of permissions (like ReadData, Announcement) in the
+ * discord object and checks if the given permissions are present in each category.
+ * If a permission is present, it is marked as true, otherwise false.
+ * 
+ * @param {string[]} permissionsToCheck - An array of permission names to check against the discord permissions.
+ * @returns {any} An object with each category of permissions containing key-value pairs of permission names and their boolean status (true if present in the array, false otherwise).
+ */
+type PermissionCategory = keyof typeof discord.permissions;
+export function getPermissionsStatus(permissionsToCheck: string[]): any {
+    const result: any = {};
+
+    for (const category in discord.permissions) {
+        if (category as PermissionCategory) {
+            result[category] = {};
+            const permissions = discord.permissions[category as PermissionCategory];
+            for (const permission in permissions) {
+                result[category][permission] = permissionsToCheck.includes(permission);
+            }
+        }
+    }
+
+    return result;
+}
 
 class DiscordBotManager {
     public static client: Client;
@@ -278,5 +302,6 @@ export default {
     DiscordBotManager,
     getBotPermissions,
     getRequirePermissionsForModule,
-    getCombinedPermissionsValue
+    getCombinedPermissionsValue,
+    getPermissionsStatus
 }
