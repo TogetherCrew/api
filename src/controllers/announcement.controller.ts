@@ -11,7 +11,8 @@ async function enhanceAnnouncementData(announcementData: Array<any>) {
     const enhancedData = [];
     for (const announcementD of announcementData) {
         const enhancedOptions = await announcementService.enhanceAnnouncementDataOption(announcementD.platform, announcementD.options);
-        enhancedData.push({ platform: announcementD.platform, template: announcementD.template, options: enhancedOptions });
+        const type = announcementService.generateAnnouncementType(announcementD)
+        enhancedData.push({ platform: announcementD.platform, template: announcementD.template, options: enhancedOptions, type });
     }
     return enhancedData;
 }
