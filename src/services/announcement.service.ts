@@ -169,6 +169,23 @@ const enhanceAnnouncementDataOption = async (platformId: string, options: Record
     return newOptions
 }
 
+const generateAnnouncementType = (data: Record<string, any>) => {
+    const options = data?.options
+    const channelIds = options?.channelIds
+    const userIds = options?.userIds
+    const roleIds = options?.roleIds
+
+    if (channelIds) {
+        return 'discord_public'
+    }
+
+    if (userIds || roleIds) {
+        return 'discord_private'
+    }
+
+    return 'unknown'
+}
+
 const bullMQTriggeredAnnouncement = async (job: Job) => {
     const announcementId = job.data.announcementId;
 
@@ -242,6 +259,7 @@ export default {
     updateAnnouncementAndRemoveJob,
     updateAnnouncementAndAddJob,
     findOneAnnouncementAndUpdate,
+    generateAnnouncementType,
     deleteAnnouncementById,
     queryAnnouncements,
     getAnnouncementById,
