@@ -529,8 +529,8 @@ describe('member-activity routes', () => {
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .expect(httpStatus.OK);
 
-            expect(res.body.fragmentationScore).toBe(66.666666666);
-            expect(res.body.scoreStatus).toBe(-1);
+            expect(res.body.fragmentationScore).toBe(133.33333333299998);
+            expect(res.body.scoreStatus).toBe(1);
             expect(res.body.fragmentationScoreRange).toHaveProperty("minimumFragmentationScore", 0);
             expect(res.body.fragmentationScoreRange).toHaveProperty("maximumFragmentationScore", 200);
         })
