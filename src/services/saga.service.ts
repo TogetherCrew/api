@@ -47,7 +47,7 @@ async function createAndStartAnnouncementSendMessageToChannelSaga(announcementId
     await saga.start(() => { })
 }
 
-async function createAndStartAnnouncementSendMessageToUserSaga(announcementId: string, info: { discordId: Snowflake, message: string, useFallback: boolean }) {
+async function createAndStartAnnouncementSendMessageToUserSaga(announcementId: string, info: { platformId: string, discordId: Snowflake, message: string, useFallback: boolean }) {
     const saga = await MBConnection.models.Saga.create({
         status: Status.NOT_STARTED,
         data: { announcementId, ...info },

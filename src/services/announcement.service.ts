@@ -227,7 +227,7 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
                 const templateHandlebars = Handlebars.compile(template)
                 const compiledTemplate = templateHandlebars({ username: `<@${discordId}>` })
 
-                sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { discordId, message: compiledTemplate, useFallback: true })
+                sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { platformId, discordId, message: compiledTemplate, useFallback: true })
             })
         }
 
@@ -241,7 +241,7 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
                 const templateHandlebars = Handlebars.compile(template)
                 const compiledTemplate = templateHandlebars({ username: `<@${discordId}>` })
 
-                sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { discordId, message: compiledTemplate, useFallback: true })
+                sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { platformId, discordId, message: compiledTemplate, useFallback: true })
             })
         }
     })
