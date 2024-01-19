@@ -219,29 +219,25 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
         }
 
         const userIds = (options as any)?.userIds
-        if (userIds) {
-
-            // !Fire event for each discordId
-            //!? our userIds are discordIds
-            userIds.forEach((discordId: string) => {
-                const templateHandlebars = Handlebars.compile(template)
-                const compiledTemplate = templateHandlebars({ username: `<@${discordId}>` })
-
-                sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { platformId, discordId, message: compiledTemplate, useFallback: true })
-            })
-        }
-
         const roleIds = (options as any)?.roleIds
-        if (roleIds) {
-            // extract discordId from roleID
-            const discordIds = await discordService.roleService.getDiscordIdsFromRoleIds(connection, roleIds)
+        if(userIds || roleIds) {
+            const allDiscordIds = new Set<string>();
+
+            if(userIds) {
+                userIds.forEach((discordId: string) => {
+                    allDiscordIds.add(discordId)
+                })
+            }
+            if(roleIds) {
+                const discordIds = await discordService.roleService.getDiscordIdsFromRoleIds(connection, roleIds)
+                discordIds.forEach((discordId: string) => {
+                    allDiscordIds.add(discordId)
+                })
+            }
 
             // !Fire event for each discordId
-            discordIds.forEach((discordId: string) => {
-                const templateHandlebars = Handlebars.compile(template)
-                const compiledTemplate = templateHandlebars({ username: `<@${discordId}>` })
-
-                sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { platformId, discordId, message: compiledTemplate, useFallback: true })
+            allDiscordIds.forEach((discordId: string) => {
+                sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { platformId, discordId, message: template, useFallback: false })
             })
         }
     })
