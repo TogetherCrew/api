@@ -31,7 +31,7 @@ const updateAnnouncement = {
                 platformId: Joi.string().custom(objectId).required(),
                 template: Joi.string().required(),
                 options: Joi.object({
-                    channelIds: Joi.array().items(Joi.string()),
+                    channelIds: Joi.array().items(Joi.string()).min(1),
                     userIds: Joi.array().items(Joi.string()),
                     roleIds: Joi.array().items(Joi.string())
                 }).xor('channelIds', 'roleIds', 'userIds').required()
