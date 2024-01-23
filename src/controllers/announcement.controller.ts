@@ -6,6 +6,7 @@ import httpStatus from 'http-status';
 import { IAnnouncement } from '@togethercrew.dev/db';
 import { announcementService } from '../services';
 import moment from 'moment';
+import { Types } from 'mongoose';
 
 async function enhanceAnnouncementData(announcementData: Array<any>) {
     const enhancedData = [];
@@ -35,6 +36,12 @@ const createAnnouncement = catchAsync(async function (req: IAuthRequest, res: Re
     const community = await communityService.getCommunityByFilter({ _id: req.body.communityId, users: req.user.id });
     if (!community) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Community not found');
+    }
+
+    const requestedPlatformIds = data.map((data: object & { platformId: Types.ObjectId }) => data.platformId);
+    const isPlatformIdsValid = requestedPlatformIds.every((platformId: Types.ObjectId) => community.platforms?.includes(platformId));
+    if (!isPlatformIdsValid) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid platformId');
     }
 
     const dataToSave = data.map((data: any) => ({ ...data, platform: data.platformId }))
@@ -68,6 +75,14 @@ const updateAnnouncement = catchAsync(async function (req: IAuthRequest, res: Re
     const community = await communityService.getCommunityByFilter({ _id: announcement.community, users: req.user.id });
     if (!community) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Announcement not found');
+    }
+
+    if(data) {
+        const requestedPlatformIds = data.map((data: object & { platformId: Types.ObjectId }) => data.platformId);
+        const isPlatformIdsValid = requestedPlatformIds.every((platformId: Types.ObjectId) => community.platforms?.includes(platformId));
+        if (!isPlatformIdsValid) {
+            throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid platformId');
+        }
     }
 
     const dataToSave = data?.map((data: any) => ({ ...data, platform: data.platformId }))
