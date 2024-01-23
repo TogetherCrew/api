@@ -1,58 +1,62 @@
 import { Announcement, IAnnouncement } from '@togethercrew.dev/db';
 import { Types } from 'mongoose';
 
-type AnnouncementFixture = Pick<IAnnouncement, 'title' | 'scheduledAt' | 'draft' | 'community' | 'data' | 'createdBy' | 'updatedBy'> & { _id: Types.ObjectId };
+type AnnouncementDataFixture = Array<IAnnouncement['data'][0] & { type: string }>
+type AnnouncementFixture = Pick<IAnnouncement, 'title' | 'scheduledAt' | 'draft' | 'community' | 'createdBy' | 'updatedBy'> & { _id: Types.ObjectId, data: AnnouncementDataFixture };
 
-export const announcementOne: AnnouncementFixture = {
+export const generatePublicDiscordAnnouncement = (communityId: Types.ObjectId, platformId: Types.ObjectId, channelIds: string[]): AnnouncementFixture => ({
     _id: new Types.ObjectId(),
     title: "Announcement One",
     scheduledAt: new Date(),
     draft: false,
-    community: new Types.ObjectId(),
+    community: communityId,
     data: [{
-        platform: new Types.ObjectId(),
+        platform: platformId,
+        type: "discord_public",
         template: "Hello World",
         options: {
-            channelIds: ["123456789"],
+            channelIds: channelIds,
         },
     }],
     createdBy: new Types.ObjectId(),
     updatedBy: new Types.ObjectId(),
-};
+});
 
-export const announcementTwo: AnnouncementFixture = {
+export const generatePrivateUserDiscordAnnouncement = (communityId: Types.ObjectId, platformId: Types.ObjectId, userIds: any[]): AnnouncementFixture => ({
     _id: new Types.ObjectId(),
     title: "Announcement Two",
     scheduledAt: new Date(),
     draft: false,
-    community: new Types.ObjectId(),
+    community: communityId,
     data: [{
-        platform: new Types.ObjectId(),
+        platform: platformId,
+        type: "discord_private",
         template: "Hello api world",
         options: {
-            userIds: ["1345345226789"],
+            userIds: userIds,
         },
     }],
     createdBy: new Types.ObjectId(),
     updatedBy: new Types.ObjectId(),
-};
+})
 
-export const announcementThree: AnnouncementFixture = {
+export const generatePrivateRoleDiscordAnnouncement = (communityId: Types.ObjectId, platformId: Types.ObjectId, roleIds: any[]): AnnouncementFixture => ({
     _id: new Types.ObjectId(),
     title: "Announcement Three",
     scheduledAt: new Date(),
     draft: false,
-    community: new Types.ObjectId(),
+    community: communityId,
     data: [{
-        platform: new Types.ObjectId(),
+        platform: platformId,
+        type: "discord_private",
         template: "Sample Template",
         options: {
-            userIds: ["2094844"],
+            roleIds: roleIds,
         },
     }],
     createdBy: new Types.ObjectId(),
     updatedBy: new Types.ObjectId(),
-};
+})
 
 export const insertAnnouncement = async (announcements: AnnouncementFixture[]) => {
     for (const announcement of announcements) {
