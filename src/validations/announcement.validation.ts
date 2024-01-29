@@ -15,7 +15,7 @@ const createAnnouncement = {
                     channelIds: Joi.array().items(Joi.string()).min(1),
                     userIds: Joi.array().items(Joi.string()),
                     roleIds: Joi.array().items(Joi.string())
-                }).xor('channelIds', 'roleIds', 'userIds').required()
+                }).required()
             })
         ).required().min(1)
     })
@@ -34,7 +34,7 @@ const updateAnnouncement = {
                     channelIds: Joi.array().items(Joi.string()).min(1),
                     userIds: Joi.array().items(Joi.string()),
                     roleIds: Joi.array().items(Joi.string())
-                }).xor('channelIds', 'roleIds', 'userIds').required()
+                }).required()
             })
         )
     })
