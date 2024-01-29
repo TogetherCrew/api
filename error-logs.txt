@@ -1,0 +1,664 @@
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_ANSIBLE variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_ANSIBLE variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_ARM variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_ARM variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_BASH variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_BASH variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_BASH_EXEC variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_BASH_EXEC variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_CLANG_FORMAT variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_CLANG_FORMAT variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_CLOUDFORMATION variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_CLOUDFORMATION variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_CLOJURE variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_CLOJURE variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_COFFEESCRIPT variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_COFFEESCRIPT variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_CPP variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_CPP variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_CSHARP variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_CSHARP variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_CSS variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_CSS variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_DART variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_DART variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_DOCKERFILE_HADOLINT variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_DOCKERFILE_HADOLINT variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_EDITORCONFIG variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_EDITORCONFIG variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_ENV variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_ENV variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_GITHUB_ACTIONS variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_GITHUB_ACTIONS variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_GITLEAKS variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_GITLEAKS variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_GHERKIN variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_GHERKIN variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_GO variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_GO variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_GOOGLE_JAVA_FORMAT variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_GOOGLE_JAVA_FORMAT variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_GROOVY variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_GROOVY variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_HTML variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_HTML variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_JAVA variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_JAVA variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_JAVASCRIPT_ES variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_JAVASCRIPT_ES variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_JAVASCRIPT_STANDARD variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_JAVASCRIPT_STANDARD variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_JSCPD variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_JSCPD variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_JSON variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_JSON variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_JSONC variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_JSONC variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_JSX variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_JSX variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_KUBERNETES_KUBECONFORM variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_KUBERNETES_KUBECONFORM variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_KOTLIN variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_KOTLIN variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_KOTLIN_ANDROID variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_KOTLIN_ANDROID variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_LATEX variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_LATEX variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_LUA variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_LUA variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_MARKDOWN variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_MARKDOWN variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_NATURAL_LANGUAGE variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_NATURAL_LANGUAGE variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_OPENAPI variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_OPENAPI variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_PERL variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_PERL variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_PHP_BUILTIN variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_PHP_BUILTIN variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_PHP_PHPCS variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_PHP_PHPCS variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_PHP_PHPSTAN variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_PHP_PHPSTAN variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_PHP_PSALM variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_PHP_PSALM variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_POWERSHELL variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_POWERSHELL variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_PROTOBUF variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_PROTOBUF variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_PYTHON_BLACK variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_PYTHON_BLACK variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_PYTHON_PYLINT variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_PYTHON_PYLINT variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_PYTHON_FLAKE8 variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_PYTHON_FLAKE8 variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_PYTHON_ISORT variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_PYTHON_ISORT variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_PYTHON_MYPY variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_PYTHON_MYPY variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_R variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_R variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_RAKU variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_RAKU variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_RUBY variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_RUBY variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_RUST_2015 variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_RUST_2015 variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_RUST_2018 variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_RUST_2018 variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_RUST_2021 variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_RUST_2021 variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_RUST_CLIPPY variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_RUST_CLIPPY variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_SCALAFMT variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_SCALAFMT variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_SHELL_SHFMT variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_SHELL_SHFMT variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_SNAKEMAKE_LINT variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_SNAKEMAKE_LINT variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_SNAKEMAKE_SNAKEFMT variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_SNAKEMAKE_SNAKEFMT variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_STATES variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_STATES variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_SQL variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_SQL variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_SQLFLUFF variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_SQLFLUFF variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_TEKTON variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_TEKTON variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_TERRAFORM_FMT variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_TERRAFORM_FMT variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_TERRAFORM_TFLINT variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_TERRAFORM_TFLINT variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_TERRAFORM_TERRASCAN variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_TERRAFORM_TERRASCAN variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_TERRAGRUNT variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_TERRAGRUNT variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_TSX variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_TSX variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_TYPESCRIPT_ES variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_TYPESCRIPT_ES variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_TYPESCRIPT_STANDARD variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_TYPESCRIPT_STANDARD variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_XML variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_XML variable...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Setting ERRORS_FOUND_YAML variable value to 0...[0m
+[0m2023-12-20 20:54:08 [0;34m[DEBUG][0m   Exporting ERRORS_FOUND_YAML variable...[0m
+DEFAULT_DISABLE_ERRORS=false
+ERRORS_FOUND_ANSIBLE=0
+ERRORS_FOUND_ARM=0
+ERRORS_FOUND_BASH=0
+ERRORS_FOUND_BASH_EXEC=0
+ERRORS_FOUND_CLANG_FORMAT=0
+ERRORS_FOUND_CLOJURE=0
+ERRORS_FOUND_CLOUDFORMATION=0
+ERRORS_FOUND_COFFEESCRIPT=0
+ERRORS_FOUND_CPP=0
+ERRORS_FOUND_CSHARP=0
+ERRORS_FOUND_CSS=0
+ERRORS_FOUND_DART=0
+ERRORS_FOUND_DOCKERFILE_HADOLINT=0
+ERRORS_FOUND_EDITORCONFIG=0
+ERRORS_FOUND_ENV=0
+ERRORS_FOUND_GHERKIN=0
+ERRORS_FOUND_GITHUB_ACTIONS=0
+ERRORS_FOUND_GITLEAKS=0
+ERRORS_FOUND_GO=0
+ERRORS_FOUND_GOOGLE_JAVA_FORMAT=0
+ERRORS_FOUND_GROOVY=0
+ERRORS_FOUND_HTML=0
+ERRORS_FOUND_JAVA=0
+ERRORS_FOUND_JAVASCRIPT_ES=0
+ERRORS_FOUND_JAVASCRIPT_STANDARD=0
+ERRORS_FOUND_JSCPD=0
+ERRORS_FOUND_JSON=0
+ERRORS_FOUND_JSONC=0
+ERRORS_FOUND_JSX=0
+ERRORS_FOUND_KOTLIN=0
+ERRORS_FOUND_KOTLIN_ANDROID=0
+ERRORS_FOUND_KUBERNETES_KUBECONFORM=0
+ERRORS_FOUND_LATEX=0
+ERRORS_FOUND_LUA=0
+ERRORS_FOUND_MARKDOWN=0
+ERRORS_FOUND_NATURAL_LANGUAGE=0
+ERRORS_FOUND_OPENAPI=0
+ERRORS_FOUND_PERL=0
+ERRORS_FOUND_PHP_BUILTIN=0
+ERRORS_FOUND_PHP_PHPCS=0
+ERRORS_FOUND_PHP_PHPSTAN=0
+ERRORS_FOUND_PHP_PSALM=0
+ERRORS_FOUND_POWERSHELL=0
+ERRORS_FOUND_PROTOBUF=0
+ERRORS_FOUND_PYTHON_BLACK=0
+ERRORS_FOUND_PYTHON_FLAKE8=0
+ERRORS_FOUND_PYTHON_ISORT=0
+ERRORS_FOUND_PYTHON_MYPY=0
+ERRORS_FOUND_PYTHON_PYLINT=0
+ERRORS_FOUND_R=0
+ERRORS_FOUND_RAKU=0
+ERRORS_FOUND_RUBY=0
+ERRORS_FOUND_RUST_2015=0
+ERRORS_FOUND_RUST_2018=0
+ERRORS_FOUND_RUST_2021=0
+ERRORS_FOUND_RUST_CLIPPY=0
+ERRORS_FOUND_SCALAFMT=0
+ERRORS_FOUND_SHELL_SHFMT=0
+ERRORS_FOUND_SNAKEMAKE_LINT=0
+ERRORS_FOUND_SNAKEMAKE_SNAKEFMT=0
+ERRORS_FOUND_SQL=0
+ERRORS_FOUND_SQLFLUFF=0
+ERRORS_FOUND_STATES=0
+ERRORS_FOUND_TEKTON=0
+ERRORS_FOUND_TERRAFORM_FMT=0
+ERRORS_FOUND_TERRAFORM_TERRASCAN=0
+ERRORS_FOUND_TERRAFORM_TFLINT=0
+ERRORS_FOUND_TERRAGRUNT=0
+ERRORS_FOUND_TSX=0
+ERRORS_FOUND_TYPESCRIPT_ES=0
+ERRORS_FOUND_TYPESCRIPT_STANDARD=0
+ERRORS_FOUND_XML=0
+ERRORS_FOUND_YAML=0
+ERROR_ON_MISSING_EXEC_BIT=false
+LOG_ERROR=true
+DEFAULT_DISABLE_ERRORS=false
+ERRORS_FOUND_ANSIBLE=0
+ERRORS_FOUND_ARM=0
+ERRORS_FOUND_BASH=0
+ERRORS_FOUND_BASH_EXEC=0
+ERRORS_FOUND_CLANG_FORMAT=0
+ERRORS_FOUND_CLOJURE=0
+ERRORS_FOUND_CLOUDFORMATION=0
+ERRORS_FOUND_COFFEESCRIPT=0
+ERRORS_FOUND_CPP=0
+ERRORS_FOUND_CSHARP=0
+ERRORS_FOUND_CSS=0
+ERRORS_FOUND_DART=0
+ERRORS_FOUND_DOCKERFILE_HADOLINT=0
+ERRORS_FOUND_EDITORCONFIG=0
+ERRORS_FOUND_ENV=0
+ERRORS_FOUND_GHERKIN=0
+ERRORS_FOUND_GITHUB_ACTIONS=0
+ERRORS_FOUND_GITLEAKS=0
+ERRORS_FOUND_GO=0
+ERRORS_FOUND_GOOGLE_JAVA_FORMAT=0
+ERRORS_FOUND_GROOVY=0
+ERRORS_FOUND_HTML=0
+ERRORS_FOUND_JAVA=0
+ERRORS_FOUND_JAVASCRIPT_ES=0
+ERRORS_FOUND_JAVASCRIPT_STANDARD=0
+ERRORS_FOUND_JSCPD=0
+ERRORS_FOUND_JSON=0
+ERRORS_FOUND_JSONC=0
+ERRORS_FOUND_JSX=0
+ERRORS_FOUND_KOTLIN=0
+ERRORS_FOUND_KOTLIN_ANDROID=0
+ERRORS_FOUND_KUBERNETES_KUBECONFORM=0
+ERRORS_FOUND_LATEX=0
+ERRORS_FOUND_LUA=0
+ERRORS_FOUND_MARKDOWN=0
+ERRORS_FOUND_NATURAL_LANGUAGE=0
+ERRORS_FOUND_OPENAPI=0
+ERRORS_FOUND_PERL=0
+ERRORS_FOUND_PHP_BUILTIN=0
+ERRORS_FOUND_PHP_PHPCS=0
+ERRORS_FOUND_PHP_PHPSTAN=0
+ERRORS_FOUND_PHP_PSALM=0
+ERRORS_FOUND_POWERSHELL=0
+ERRORS_FOUND_PROTOBUF=0
+ERRORS_FOUND_PYTHON_BLACK=0
+ERRORS_FOUND_PYTHON_FLAKE8=0
+ERRORS_FOUND_PYTHON_ISORT=0
+ERRORS_FOUND_PYTHON_MYPY=0
+ERRORS_FOUND_PYTHON_PYLINT=0
+ERRORS_FOUND_R=0
+ERRORS_FOUND_RAKU=0
+ERRORS_FOUND_RUBY=0
+ERRORS_FOUND_RUST_2015=0
+ERRORS_FOUND_RUST_2018=0
+ERRORS_FOUND_RUST_2021=0
+ERRORS_FOUND_RUST_CLIPPY=0
+ERRORS_FOUND_SCALAFMT=0
+ERRORS_FOUND_SHELL_SHFMT=0
+ERRORS_FOUND_SNAKEMAKE_LINT=0
+ERRORS_FOUND_SNAKEMAKE_SNAKEFMT=0
+ERRORS_FOUND_SQL=0
+ERRORS_FOUND_SQLFLUFF=0
+ERRORS_FOUND_STATES=0
+ERRORS_FOUND_TEKTON=0
+ERRORS_FOUND_TERRAFORM_FMT=0
+ERRORS_FOUND_TERRAFORM_TERRASCAN=0
+ERRORS_FOUND_TERRAFORM_TFLINT=0
+ERRORS_FOUND_TERRAGRUNT=0
+ERRORS_FOUND_TSX=0
+ERRORS_FOUND_TYPESCRIPT_ES=0
+ERRORS_FOUND_TYPESCRIPT_STANDARD=0
+ERRORS_FOUND_XML=0
+ERRORS_FOUND_YAML=0
+ERROR_ON_MISSING_EXEC_BIT=false
+LOG_ERROR=true
+[0m2023-12-20 20:54:16 [0;31m[ERROR][0m   Found errors in [gitleaks] linter![0m
+[0m2023-12-20 20:54:16 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:54:17 [0;31m[ERROR][0m   Found errors in [gitleaks] linter![0m
+[0m2023-12-20 20:54:17 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:54:18 [0;31m[ERROR][0m   Found errors in [gitleaks] linter![0m
+[0m2023-12-20 20:54:18 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:54:18 [0;31m[ERROR][0m   Found errors in [gitleaks] linter![0m
+[0m2023-12-20 20:54:18 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:54:26 [0;31m[ERROR][0m   Found errors in [standard] linter![0m
+[0m2023-12-20 20:54:26 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:54:27 [0;31m[ERROR][0m   Found errors in [standard] linter![0m
+[0m2023-12-20 20:54:27 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:54:32 [0;31m[ERROR][0m   Found errors in [jscpd] linter![0m
+[0m2023-12-20 20:54:32 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+ERROR: jscpd found too many duplicates (38.73%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (38.73%) over threshold (0%)
+ERROR: jscpd found too many duplicates (38.73%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (38.73%) over threshold (0%)
+[0m2023-12-20 20:54:34 [0;31m[ERROR][0m   Found errors in [jscpd] linter![0m
+[0m2023-12-20 20:54:34 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+ERROR: jscpd found too many duplicates (23.81%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (23.81%) over threshold (0%)
+ERROR: jscpd found too many duplicates (23.81%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (23.81%) over threshold (0%)
+[0m2023-12-20 20:54:35 [0;31m[ERROR][0m   Found errors in [jscpd] linter![0m
+[0m2023-12-20 20:54:35 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+ERROR: jscpd found too many duplicates (19.33%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (19.33%) over threshold (0%)
+ERROR: jscpd found too many duplicates (19.33%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (19.33%) over threshold (0%)
+[0m2023-12-20 20:54:35 [0;31m[ERROR][0m   Found errors in [jscpd] linter![0m
+[0m2023-12-20 20:54:35 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+ERROR: jscpd found too many duplicates (16.03%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (16.03%) over threshold (0%)
+ERROR: jscpd found too many duplicates (16.03%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (16.03%) over threshold (0%)
+[0m2023-12-20 20:54:36 [0;31m[ERROR][0m   Found errors in [jscpd] linter![0m
+[0m2023-12-20 20:54:36 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+ERROR: jscpd found too many duplicates (28.72%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (28.72%) over threshold (0%)
+ERROR: jscpd found too many duplicates (28.72%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (28.72%) over threshold (0%)
+[0m2023-12-20 20:54:37 [0;31m[ERROR][0m   Found errors in [jscpd] linter![0m
+[0m2023-12-20 20:54:37 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+ 96 │ 30 │           statusCode: httpStatus.INTERNAL_SERVER_ERROR,                                       
+ERROR: jscpd found too many duplicates (32.56%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (32.56%) over threshold (0%)
+ 96 │ 30 │           statusCode: httpStatus.INTERNAL_SERVER_ERROR,                                       
+ERROR: jscpd found too many duplicates (32.56%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (32.56%) over threshold (0%)
+[0m2023-12-20 20:54:44 [0;31m[ERROR][0m   Found errors in [jscpd] linter![0m
+[0m2023-12-20 20:54:44 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+ERROR: jscpd found too many duplicates (18.46%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (18.46%) over threshold (0%)
+ERROR: jscpd found too many duplicates (18.46%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (18.46%) over threshold (0%)
+[0m2023-12-20 20:54:46 [0;31m[ERROR][0m   Found errors in [jscpd] linter![0m
+[0m2023-12-20 20:54:46 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+ERROR: jscpd found too many duplicates (17.83%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (17.83%) over threshold (0%)
+ERROR: jscpd found too many duplicates (17.83%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (17.83%) over threshold (0%)
+[0m2023-12-20 20:54:47 [0;31m[ERROR][0m   Found errors in [jscpd] linter![0m
+[0m2023-12-20 20:54:47 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+ERROR: jscpd found too many duplicates (53.38%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (53.38%) over threshold (0%)
+ERROR: jscpd found too many duplicates (53.38%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (53.38%) over threshold (0%)
+[0m2023-12-20 20:54:58 [0;31m[ERROR][0m   Found errors in [jscpd] linter![0m
+[0m2023-12-20 20:54:58 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+ERROR: jscpd found too many duplicates (6.04%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (6.04%) over threshold (0%)
+ERROR: jscpd found too many duplicates (6.04%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (6.04%) over threshold (0%)
+[0m2023-12-20 20:54:59 [0;31m[ERROR][0m   Found errors in [jscpd] linter![0m
+[0m2023-12-20 20:54:59 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+ERROR: jscpd found too many duplicates (10.31%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (10.31%) over threshold (0%)
+ERROR: jscpd found too many duplicates (10.31%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (10.31%) over threshold (0%)
+[0m2023-12-20 20:55:01 [0;31m[ERROR][0m   Found errors in [jscpd] linter![0m
+[0m2023-12-20 20:55:01 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+ERROR: jscpd found too many duplicates (13.06%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (13.06%) over threshold (0%)
+ERROR: jscpd found too many duplicates (13.06%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (13.06%) over threshold (0%)
+[0m2023-12-20 20:55:04 [0;31m[ERROR][0m   Found errors in [jscpd] linter![0m
+[0m2023-12-20 20:55:04 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+ERROR: jscpd found too many duplicates (48.1%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (48.1%) over threshold (0%)
+ERROR: jscpd found too many duplicates (48.1%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (48.1%) over threshold (0%)
+[0m2023-12-20 20:55:04 [0;31m[ERROR][0m   Found errors in [jscpd] linter![0m
+[0m2023-12-20 20:55:04 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+ERROR: jscpd found too many duplicates (13.64%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (13.64%) over threshold (0%)
+ERROR: jscpd found too many duplicates (13.64%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (13.64%) over threshold (0%)
+[0m2023-12-20 20:55:08 [0;31m[ERROR][0m   Found errors in [jscpd] linter![0m
+[0m2023-12-20 20:55:08 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+ERROR: jscpd found too many duplicates (26.47%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (26.47%) over threshold (0%)
+ERROR: jscpd found too many duplicates (26.47%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (26.47%) over threshold (0%)
+[0m2023-12-20 20:55:08 [0;31m[ERROR][0m   Found errors in [jscpd] linter![0m
+[0m2023-12-20 20:55:08 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+ERROR: jscpd found too many duplicates (49.46%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (49.46%) over threshold (0%)
+ERROR: jscpd found too many duplicates (49.46%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (49.46%) over threshold (0%)
+[0m2023-12-20 20:55:09 [0;31m[ERROR][0m   Found errors in [jscpd] linter![0m
+[0m2023-12-20 20:55:09 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+ERROR: jscpd found too many duplicates (13.7%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (13.7%) over threshold (0%)
+ERROR: jscpd found too many duplicates (13.7%) over threshold (0%)
+Error: ERROR: jscpd found too many duplicates (13.7%) over threshold (0%)
+[0m2023-12-20 20:55:15 [0;31m[ERROR][0m   Found errors in [eslint] linter![0m
+[0m2023-12-20 20:55:15 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:55:15 [0;31m[ERROR][0m   Found errors in [markdownlint] linter![0m
+[0m2023-12-20 20:55:15 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:55:15 [0;31m[ERROR][0m   Found errors in [markdownlint] linter![0m
+[0m2023-12-20 20:55:15 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:55:18 [0;31m[ERROR][0m   Found errors in [textlint] linter![0m
+[0m2023-12-20 20:55:18 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:55:18 [0;31m[ERROR][0m   Found errors in [textlint] linter![0m
+[0m2023-12-20 20:55:18 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:57:23 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:57:23 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:57:28 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:57:28 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:57:33 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:57:33 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:57:38 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:57:38 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:57:43 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:57:43 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:57:47 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:57:47 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:57:52 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:57:52 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:57:57 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:57:57 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:58:02 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:58:02 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:58:07 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:58:07 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:58:12 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:58:12 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:58:17 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:58:17 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:58:21 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:58:21 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:58:28 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:58:28 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:58:33 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:58:33 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:58:39 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:58:39 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:58:44 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:58:44 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:58:48 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:58:48 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:58:53 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:58:53 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:58:58 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:58:58 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:59:03 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:59:03 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:59:08 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:59:08 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:59:12 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:59:12 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:59:17 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:59:17 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:59:22 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:59:22 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:59:27 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:59:27 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:59:32 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:59:32 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:59:37 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:59:37 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:59:42 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:59:42 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:59:47 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:59:47 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:59:52 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:59:52 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 20:59:57 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 20:59:57 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:00:02 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:00:02 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:00:07 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:00:07 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:00:12 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:00:12 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:00:18 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:00:18 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:00:23 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:00:23 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:00:28 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:00:28 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:00:33 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:00:33 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:00:38 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:00:38 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:00:43 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:00:43 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:00:48 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:00:48 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:00:54 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:00:54 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:00:59 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:00:59 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:01:03 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:01:03 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:01:08 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:01:08 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:01:13 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:01:13 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:01:18 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:01:18 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:01:23 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:01:23 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:01:28 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:01:28 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:01:33 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:01:33 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:01:38 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:01:38 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:01:43 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:01:43 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:01:48 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:01:48 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:01:52 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:01:52 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:01:58 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:01:58 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:02:04 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:02:04 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:02:09 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:02:09 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:02:14 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:02:14 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:02:19 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:02:19 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:02:24 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:02:24 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:02:29 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:02:29 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:02:34 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:02:34 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:02:39 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:02:39 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:02:44 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:02:44 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:02:49 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:02:49 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:02:54 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:02:54 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:02:59 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:02:59 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:03:04 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:03:04 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:03:09 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:03:09 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:03:14 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:03:14 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:03:19 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:03:19 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:03:24 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:03:24 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:03:30 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:03:30 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:03:35 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:03:35 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:03:40 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:03:40 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:03:44 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:03:44 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:03:49 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:03:49 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:03:54 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:03:54 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:03:59 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:03:59 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:04:04 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:04:04 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:04:09 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:04:09 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:04:14 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:04:14 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:04:19 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:04:19 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:04:25 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:04:25 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:04:30 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:04:30 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:04:35 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:04:35 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:04:40 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:04:40 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:04:45 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:04:45 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:04:50 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:04:50 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:04:55 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:04:55 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:00 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:05:00 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:05 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:05:05 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:10 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:05:10 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:15 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:05:15 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:20 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:05:20 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:25 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:05:25 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:30 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:05:30 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:36 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:05:36 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:41 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:05:41 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:47 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:05:47 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:52 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:05:52 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:57 [0;31m[ERROR][0m   Found errors in [ts-standard] linter![0m
+[0m2023-12-20 21:05:57 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:57 [0;31m[ERROR][0m   Found errors in [yamllint] linter![0m
+[0m2023-12-20 21:05:57 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:57 [0;31m[ERROR][0m   Found errors in [yamllint] linter![0m
+[0m2023-12-20 21:05:57 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:57 [0;31m[ERROR][0m   Found errors in [yamllint] linter![0m
+[0m2023-12-20 21:05:57 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:57 [0;31m[ERROR][0m   Found errors in [yamllint] linter![0m
+[0m2023-12-20 21:05:57 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:57 [0;31m[ERROR][0m   Found errors in [yamllint] linter![0m
+[0m2023-12-20 21:05:57 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:57 [0;31m[ERROR][0m   Found errors in [yamllint] linter![0m
+[0m2023-12-20 21:05:57 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:57 [0;31m[ERROR][0m   Found errors in [yamllint] linter![0m
+[0m2023-12-20 21:05:57 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:58 [0;31m[ERROR][0m   Found errors in [yamllint] linter![0m
+[0m2023-12-20 21:05:58 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:58 [0;31m[ERROR][0m   Found errors in [yamllint] linter![0m
+[0m2023-12-20 21:05:58 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:58 [0;31m[ERROR][0m   Found errors in [yamllint] linter![0m
+[0m2023-12-20 21:05:58 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:58 [0;31m[ERROR][0m   Found errors in [yamllint] linter![0m
+[0m2023-12-20 21:05:58 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:58 [0;31m[ERROR][0m   Found errors in [yamllint] linter![0m
+[0m2023-12-20 21:05:58 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:58 [0;31m[ERROR][0m   Found errors in [yamllint] linter![0m
+[0m2023-12-20 21:05:58 [0;31m[ERROR][0m   Error code: 1. Command output:[0m
+[0m2023-12-20 21:05:58 [0;31m[ERROR][0m   ERRORS FOUND[0m in GITLEAKS:[4][0m
+[0m2023-12-20 21:05:58 [0;31m[ERROR][0m   ERRORS FOUND[0m in JAVASCRIPT_STANDARD:[2][0m
+[0m2023-12-20 21:05:58 [0;31m[ERROR][0m   ERRORS FOUND[0m in JSCPD:[17][0m
+[0m2023-12-20 21:05:58 [0;31m[ERROR][0m   ERRORS FOUND[0m in JSON:[1][0m
+[0m2023-12-20 21:05:58 [0;31m[ERROR][0m   ERRORS FOUND[0m in MARKDOWN:[2][0m
+[0m2023-12-20 21:05:58 [0;31m[ERROR][0m   ERRORS FOUND[0m in NATURAL_LANGUAGE:[2][0m
+[0m2023-12-20 21:05:58 [0;31m[ERROR][0m   ERRORS FOUND[0m in TYPESCRIPT_STANDARD:[103][0m
+[0m2023-12-20 21:05:58 [0;31m[ERROR][0m   ERRORS FOUND[0m in YAML:[13][0m

@@ -1008,7 +1008,8 @@ describe('Platform routes', () => {
                 ngu: discordGuildMember3.username,
                 discriminator: discordGuildMember3.discriminator,
                 nickname: discordGuildMember3.nickname,
-                globalName: discordGuildMember3.globalName
+                globalName: discordGuildMember3.globalName,
+                avatar: discordGuildMember3.avatar
             });
 
             expect(res.body.results[1]).toMatchObject({
@@ -1017,7 +1018,9 @@ describe('Platform routes', () => {
                 ngu: discordGuildMember1.globalName,
                 discriminator: discordGuildMember1.discriminator,
                 nickname: discordGuildMember1.nickname,
-                globalName: discordGuildMember1.globalName
+                globalName: discordGuildMember1.globalName,
+                avatar: discordGuildMember1.avatar
+
             });
             expect(res.body.results[2]).toMatchObject({
                 discordId: discordGuildMember2.discordId,
@@ -1025,7 +1028,9 @@ describe('Platform routes', () => {
                 ngu: discordGuildMember2.nickname,
                 discriminator: discordGuildMember2.discriminator,
                 nickname: discordGuildMember2.nickname,
-                globalName: discordGuildMember2.globalName
+                globalName: discordGuildMember2.globalName,
+                avatar: discordGuildMember2.avatar
+
             });
 
 
@@ -1035,7 +1040,9 @@ describe('Platform routes', () => {
                 ngu: discordGuildMember4.username + "#" + discordGuildMember4.discriminator,
                 discriminator: discordGuildMember4.discriminator,
                 nickname: discordGuildMember4.nickname,
-                globalName: discordGuildMember4.globalName
+                globalName: discordGuildMember4.globalName,
+                avatar: discordGuildMember4.avatar
+
             });
         });
 

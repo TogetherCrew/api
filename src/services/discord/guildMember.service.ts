@@ -161,7 +161,7 @@ async function getDiscordIdsFromUsernames(connection: Connection, usernames: str
 
 async function getGuildMemberInfoFromDiscordIds(connection: Connection, discordIds: string[]) {
     const guildMembers = await connection.models.GuildMember.find({ discordId: { $in: discordIds } });
-    
+
     const userInfo = guildMembers.map((guildMember: IGuildMember) => ({
         discordId: guildMember.discordId,
         ngu: getNgu(guildMember),
@@ -252,6 +252,7 @@ const queryGuildMembers = async (connection: any, filter: Filter, options: Optio
             },
             {
                 $project: {
+                    avatar: 1,
                     discordId: 1,
                     username: 1,
                     discriminator: 1,
