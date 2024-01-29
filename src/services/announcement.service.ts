@@ -237,7 +237,10 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
 
             // !Fire event for each discordId
             allDiscordIds.forEach((discordId: string) => {
-                sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { platformId, discordId, message: template, useFallback: false })
+                const templateHandlebars = Handlebars.compile(template)
+                const compiledTemplate = templateHandlebars({ username: `<@${discordId}>` })
+
+                sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { platformId, discordId, message: compiledTemplate, useFallback: false })
             })
         }
     })
