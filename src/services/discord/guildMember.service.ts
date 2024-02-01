@@ -165,6 +165,8 @@ async function getGuildMemberInfoFromDiscordIds(connection: Connection, discordI
     const userInfo = guildMembers.map((guildMember: IGuildMember) => ({
         discordId: guildMember.discordId,
         ngu: getNgu(guildMember),
+        avatar: guildMember.avatar,
+        username: getUsername(guildMember),
     }));
 
     return userInfo;
