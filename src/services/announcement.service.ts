@@ -212,6 +212,7 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
         const connection = await DatabaseManager.getInstance().getTenantDb(platform?.metadata?.id);
 
         const channelIds = (options as any)?.channelIds
+        job.log(`[announcement] channelIds: ${channelIds}`)
         if (channelIds) {
 
             // !Fire event for all channels
@@ -220,6 +221,8 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
 
         const userIds = (options as any)?.userIds
         const roleIds = (options as any)?.roleIds
+        job.log(`[announcement] userIds: ${userIds}`)
+        job.log(`[announcement] roleIds: ${roleIds}`)
         if(userIds || roleIds) {
             const allDiscordIds = new Set<string>();
 
@@ -230,6 +233,7 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
             }
             if(roleIds) {
                 const discordIds = await discordService.roleService.getDiscordIdsFromRoleIds(connection, roleIds)
+                job.log(`[announcement] discordIds associated with roles: ${discordIds}`)
                 discordIds.forEach((discordId: string) => {
                     allDiscordIds.add(discordId)
                 })
@@ -240,6 +244,7 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
                 const templateHandlebars = Handlebars.compile(template)
                 const compiledTemplate = templateHandlebars({ username: `<@${discordId}>` })
 
+                job.log(`[announcement] fire an event that USER with ID: "${discordId}" will get MESSAGE: "${compiledTemplate}"`)
                 sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { platformId, discordId, message: compiledTemplate, useFallback: false })
             })
         }
