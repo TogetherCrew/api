@@ -7,12 +7,8 @@ export const REDIS_CONNECTOR = {
 } as const;
 
 export const DEFAULT_REMOVE_CONFIG = {
-	removeOnComplete: {
-		age: 3600,
-	},
-	removeOnFail: {
-		age: 24 * 3600,
-	},
+	removeOnComplete: false,
+	removeOnFail: false,
 } as const;
 
 export const announcementQueueName = 'announcement-queue' as const;
