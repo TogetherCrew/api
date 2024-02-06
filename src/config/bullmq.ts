@@ -8,7 +8,7 @@ export const REDIS_CONNECTOR = {
 
 export const DEFAULT_REMOVE_CONFIG = {
 	removeOnComplete: {
-		age: 3600 * 24 * 4, // 5 days
+		age: 3600 * 24 * 4, // 4 days
 	},
 	removeOnFail: {
 		age: 3600 * 24 * 7, // 7 days
