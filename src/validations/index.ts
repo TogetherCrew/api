@@ -5,6 +5,7 @@ import heatmapValidation from './heatmap.validation';
 import memberActivityValidation from './memberActivity.validation';
 import communityValidation from './community.validation';
 import platformValidation from './platform.validation';
+import announcementValidation from "./announcement.validation";
 
 export {
     authValidation,
@@ -13,5 +14,6 @@ export {
     heatmapValidation,
     memberActivityValidation,
     communityValidation,
-    platformValidation
+    platformValidation,
+    announcementValidation
 }

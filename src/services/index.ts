@@ -8,6 +8,7 @@ import communityService from './community.service';
 import platformService from './platform.service';
 import twitterService from './twitter.service';
 import discordServices from './discord';
+import announcementService from './announcement.service'; 
 
 export {
     userService,
@@ -19,5 +20,6 @@ export {
     sagaService,
     communityService,
     platformService,
-    twitterService
+    twitterService,
+    announcementService
 }

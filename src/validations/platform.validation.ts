@@ -116,6 +116,41 @@ const dynamicPlatformProperty = (req: Request) => {
             })
         };
     }
+    else if (platform?.name === 'discord' && property === 'guildMember') {
+        return {
+            params: Joi.object().keys({
+                platformId: Joi.required().custom(objectId),
+            }),
+            query: Joi.object().required().keys({
+                property: Joi.string().valid('guildMember'),
+                ngu: Joi.string(),
+                sortBy: Joi.string(),
+                limit: Joi.number().integer(),
+                page: Joi.number().integer(),
+            })
+        };
+    }
+    else {
+        return {
+            query: Joi.object().required().keys({}),
+            params: Joi.object().required().keys({}),
+            body: Joi.object().required().keys({}),
+
+        };
+    }
+};
+
+const dynamicRequestAccess = (req: Request) => {
+    const platform = req.params.platform;
+    if (platform === 'discord') {
+        return {
+            params: Joi.object().keys({
+                platform: Joi.string().valid('discord').required(),
+                module: Joi.string().valid('Announcement').required(),
+                id: Joi.string().required()
+            }),
+        };
+    }
     else {
         return {
             query: Joi.object().required().keys({}),
@@ -133,5 +168,6 @@ export default {
     deletePlatform,
     connectPlatform,
     dynamicUpdatePlatform,
-    dynamicPlatformProperty
+    dynamicPlatformProperty,
+    dynamicRequestAccess
 }

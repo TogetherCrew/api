@@ -1,0 +1,287 @@
+paths:
+  /api/v1/announcements/:
+    post:
+      tags:
+        - Announcement
+      summary: Create a new announcement.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                communityId:
+                  type: string
+                scheduledAt:
+                  type: string
+                  format: date-time
+                  description: The date and time when the announcement is scheduled. The scheduled time of the announcement in UTC timezone.
+                draft:
+                  type: boolean
+                  description: Indicates if the announcement is a draft.
+                data:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      platformId:
+                        type: string
+                      template:
+                        type: string
+                      options:
+                        type: object
+                        properties:
+                          channelIds:
+                            type: array
+                            items:
+                              type: string
+                          userIds:
+                            type: array
+                            items:
+                              type: string
+                          roleIds:
+                            type: array
+                            items:
+                              type: string
+                        oneOf:
+                          - required: [channelIds]
+                          - required: [userIds]
+                          - required: [roleIds]
+              example:
+                title: "New Feature Announcement"
+                communityId: "1234567890abcdef"
+                scheduledAt: "2023-11-15T09:00:00Z"
+                draft: false
+                data:
+                  - platformId: "abcdef1234567890"
+                    template: "Standard"
+                    options:
+                      channelIds: ["channel1", "channel2"]
+      responses:
+        "201":
+          description: Announcement created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Announcement"
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
+
+    get:
+      tags:
+        - Announcement
+      summary: Retrieve a list of announcements.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          description: The ID of the community for which announcements are being fetched.
+          schema:
+            type: string
+            format: objectId
+        - in: query
+          name: sortBy
+          schema:
+            type: string
+            description: Sort the announcements by a specified field (e.g., "scheduledAt").
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            maximum: 100
+            description: Maximum number of announcements to return (up to 100).
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+            description: Page number for pagination.
+        - in: query
+          name: startDate
+          schema:
+            type: string
+            format: date-time
+            description: Start date for filtering announcements, in ISO date string format (UTC time zone).
+        - in: query
+          name: endDate
+          schema:
+            type: string
+            format: date-time
+            description: End date for filtering announcements, in ISO date string format (UTC time zone). Must be greater than startDate.
+        - in: query
+          name: timeZone
+          schema:
+            type: string
+            description: Timezone for filtering announcements. Must be a valid timezone string.
+      responses:
+        "200":
+          description: List of announcements retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Announcement"
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
+
+  /api/v1/announcements/{AnnouncementID}:
+    get:
+      tags:
+        - Announcement
+      summary: Retrieve details of a specific announcement by its ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: AnnouncementID
+          in: path
+          required: true
+          description: The ID of the announcement to retrieve.
+          schema:
+            type: string
+            format: objectId
+      responses:
+        "200":
+          description: Announcement details retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Announcement'
+        "400":
+          description: Bad Request
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          description: Unauthorized
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          description: NotFound
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags:
+        - Announcement
+      summary: Update a specific announcement by its ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: AnnouncementID
+          in: path
+          required: true
+          description: The ID of the announcement to update.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                scheduledAt:
+                  type: string
+                  format: date-time
+                  description: ISO date string. UTC time zone
+                draft:
+                  type: boolean
+                data:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      platformId:
+                        type: string
+                        description: Unique identifier for the platform, validated by custom objectId function.
+                      template:
+                        type: string
+                        description: Template identifier.
+                      options:
+                        type: object
+                        properties:
+                          channelIds:
+                            type: array
+                            items:
+                              type: string
+                          userIds:
+                            type: array
+                            items:
+                              type: string
+                          roleIds:
+                            type: array
+                            items:
+                              type: string
+                        oneOf:
+                          - required: 
+                            - channelIds
+                          - required: 
+                            - userIds
+                          - required: 
+                            - roleIds
+              required:
+                - data
+      responses:
+        "200":
+          description: Announcement updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Announcement'
+        "400":
+          description: Bad Request
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          description: Unauthorized
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          description: NotFound
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Announcement
+      summary: Delete a specific announcement by its ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: AnnouncementID
+          in: path
+          required: true
+          description: The ID of the announcement to delete.
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Announcement deleted successfully. No content returned.
+        "400":
+          description: Bad Request
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          description: Unauthorized
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          description: NotFound
+          $ref: '#/components/responses/NotFound'

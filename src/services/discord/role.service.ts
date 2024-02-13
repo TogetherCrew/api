@@ -25,6 +25,24 @@ async function getRoles(connection: Connection, filter: object): Promise<IRole[]
     }
 }
 
+/**
+ * Get an array of Discord IDs based on the role IDs present in the guild member's data.
+ *
+ * @param {Connection} connection - Mongoose connection object for the database.
+ * @param {string[]} roleIds - An array of role IDs to match against the guild member's role IDs.
+ * @returns {Promise<string[]>} - A promise that resolves to an array of Discord IDs.
+ */
+async function getDiscordIdsFromRoleIds(connection: Connection, roleIds: string[]): Promise<string[]> {
+    const guildMembers = await connection.models.GuildMember.find({ roles: { $in: roleIds } });
+
+    return guildMembers.map((guildMember: IGuildMember) => guildMember.discordId);
+}
+
+async function getRoleInfoFromRoleIds(connection: Connection, roleIds: string[]) {
+    const roles = await connection.models.Role.find({ roleId: { $in: roleIds } });
+    const roleInfo = roles.map((role: IRole) => ({ roleId: role.roleId, color: role.color, name: role.name }));
+    return roleInfo;
+}
 
 /**
  * Retrieves an array of roles based on the role IDs present in the guild member's data.
@@ -44,7 +62,7 @@ function getRolesForGuildMember(guildMember: IGuildMember, roles: Array<IRole>) 
 }
 
 /**
- * Query for platforms
+ * Query for roles
  * @param {Object} filter - Mongo filter
  * @param {Object} options - Query options
  * @param {string} [options.sortBy] - Sort option in the format: sortField:(desc|asc)
@@ -54,12 +72,13 @@ function getRolesForGuildMember(guildMember: IGuildMember, roles: Array<IRole>) 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const queryRoles = async (connection: any, filter: object, options: object) => {
     return await connection.models.Role.paginate(filter, options);
-
 };
 
 export default {
     getRole,
     queryRoles,
+    getDiscordIdsFromRoleIds,
     getRolesForGuildMember,
+    getRoleInfoFromRoleIds,
     getRoles
 };

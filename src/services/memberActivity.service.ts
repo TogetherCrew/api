@@ -899,6 +899,7 @@ type memberInteractionType = { id: string, radius: number, stats: NodeStats } & 
 type memberInteractionsGraphResponseType = { width: number, from: memberInteractionType, to: memberInteractionType }[]
 async function getMembersInteractionsNetworkGraph(guildId: string, guildConnection: Connection): Promise<memberInteractionsGraphResponseType> {
     // TODO: refactor function later
+    const usersInNetworkGraph: string[] = []
     // userInteraction
     const usersInteractionsQuery = `
     MATCH () -[r:INTERACTED_WITH {guildId: "${guildId}"}]-()
@@ -919,6 +920,8 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
         const rWeeklyInteraction = r?.properties?.weight as number
         const bUserId = b?.properties?.userId as string
 
+        usersInNetworkGraph.push(aUserId)
+        usersInNetworkGraph.push(bUserId)
         const interaction = {
             aUserId,
             bUserId,
@@ -967,8 +970,9 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
     })
 
     // usersInfo
-    const usersInfo = await guildConnection.models.GuildMember.find()
-    const roles = await roleService.getRoles(guildConnection, {})
+    const usersInfo = await guildConnection.models.GuildMember.find({ discordIds: { $in: usersInNetworkGraph } });
+    const rolesInNetworkGraph = usersInfo.flatMap((user) => user.roles)
+    const roles = await roleService.getRoles(guildConnection, { roleId: { $in: rolesInNetworkGraph } })
 
     // prepare data
     const response = usersInteractions.flatMap((interaction) => {
@@ -1014,7 +1018,7 @@ async function getFragmentationScore(guildId: string): Promise<fragmentationScor
         MATCH ()-[r:INTERACTED_WITH {guildId: "${guildId}"}]-()
         WITH max(r.date) as latest_date
         MATCH (g:Guild {guildId: "${guildId}"})-[r:HAVE_METRICS {date: latest_date}]->(g)
-        RETURN r.louvainModularityScore * 200 as fragmentation_score
+        RETURN ((r.louvainModularityScore - (-1)) / 2) * 200 as fragmentation_score
     `
 
     const neo4jData = await Neo4j.read(fragmentationScoreQuery)

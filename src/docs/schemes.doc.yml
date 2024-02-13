@@ -178,3 +178,41 @@ components:
         _id:
           type: string
           format: objectId # assuming MongoDB ObjectId format
+
+    # ********Announcement********
+    Announcement:
+      type: object
+      properties:
+        id:
+          type: string
+          format: objectId
+        title:
+          type: string
+        scheduledAt:
+          type: string
+          format: date-time
+        draft:
+          type: boolean
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              platform:
+                type: string
+                format: objectId
+              template:
+                type: string
+              options:
+                type: object
+                properties:
+                  users:
+                    type: object
+                    properties:
+                      discordId: 
+                        type: string
+                      ngu: 
+                        type: string
+        community:
+          type: string
+          format: objectId
