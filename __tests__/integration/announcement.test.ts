@@ -79,6 +79,7 @@ describe("Community routes", () => {
 
         test("should return 201 and successfully create a new draft announcement if data is ok", async () => {
             platformOne.community = communityOne._id;
+            communityOne.platforms = [platformOne._id];
             await insertPlatforms([platformOne]);
             await insertCommunities([
                 communityOne,
@@ -134,8 +135,8 @@ describe("Community routes", () => {
                         platform: platformOne._id.toString(),
                         options: {
                             users: [
-                                { discordId: "123456789", ngu: "Behzad" },
-                                { discordId: "987654321", ngu: "Daniel" },
+                                { discordId: "123456789", ngu: "Behzad", username: "behzad_rabiei", avatar: null },
+                                { discordId: "987654321", ngu: "Daniel", avatar: "AvatarLink", username: "mrjackalop" },
                             ],
                         },
                         type: "discord_private",
@@ -146,6 +147,7 @@ describe("Community routes", () => {
 
         test("should return 201 and successfully create a new scheduled announcement if data is ok", async () => {
             platformOne.community = communityOne._id;
+            communityOne.platforms = [platformOne._id];
             await insertPlatforms([platformOne]);
             await insertCommunities([
                 communityOne,
@@ -202,8 +204,8 @@ describe("Community routes", () => {
                         platform: platformOne._id.toString(),
                         options: {
                             users: [
-                                { discordId: "123456789", ngu: "Behzad" },
-                                { discordId: "987654321", ngu: "Daniel" },
+                                { discordId: "123456789", ngu: "Behzad", username: "behzad_rabiei", avatar: null },
+                                { discordId: "987654321", ngu: "Daniel", avatar: "AvatarLink", username: "mrjackalop" },
                             ],
                         },
                         type: "discord_private",
@@ -413,8 +415,8 @@ describe("Community routes", () => {
                             platform: data.platform.toString(),
                             options: {
                                 users: [
-                                    { discordId: "123456789", ngu: "Behzad" },
-                                    { discordId: "987654321", ngu: "Daniel" },
+                                    { discordId: "123456789", ngu: "Behzad", username: "behzad_rabiei", avatar: null },
+                                    { discordId: "987654321", ngu: "Daniel", avatar: "AvatarLink", username: "mrjackalop" },
                                 ],
                             },
                         };
