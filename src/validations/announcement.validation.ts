@@ -12,7 +12,7 @@ const createAnnouncement = {
                 platformId: Joi.string().custom(objectId).required(),
                 template: Joi.string().required(),
                 options: Joi.object({
-                    channelIds: Joi.array().items(Joi.string()).min(1),
+                    channelIds: Joi.array().items(Joi.string()),
                     userIds: Joi.array().items(Joi.string()),
                     roleIds: Joi.array().items(Joi.string())
                 }).required()
@@ -31,7 +31,7 @@ const updateAnnouncement = {
                 platformId: Joi.string().custom(objectId).required(),
                 template: Joi.string().required(),
                 options: Joi.object({
-                    channelIds: Joi.array().items(Joi.string()).min(1),
+                    channelIds: Joi.array().items(Joi.string()),
                     userIds: Joi.array().items(Joi.string()),
                     roleIds: Joi.array().items(Joi.string())
                 }).required()
