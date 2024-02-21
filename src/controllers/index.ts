@@ -6,6 +6,7 @@ import memberActivityController from './memberActivity.controller';
 import communityController from './community.controller';
 import platformController from './platform.controller';
 import announcementController from './announcement.controller';
+import categoryController from './category.controller';
 
 export {
     authController,
@@ -15,5 +16,6 @@ export {
     memberActivityController,
     communityController,
     platformController,
-    announcementController
+    announcementController,
+    categoryController
 }

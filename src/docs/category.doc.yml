@@ -1,0 +1,26 @@
+paths:
+  /api/v1/categories/:
+    get:
+      tags:
+        - Category
+      summary: Retrieve a list of categories.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of Categories retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
