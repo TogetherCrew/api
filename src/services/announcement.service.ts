@@ -148,6 +148,12 @@ const enhanceAnnouncementDataOption = async (platformId: string, options: Record
     });
     const connection = await DatabaseManager.getInstance().getTenantDb(platform?.metadata?.id);
     
+    const safetyMessageChannel = options?.safetyMessageChannelId
+    if(safetyMessageChannel) {
+        const channelInfo = await discordService.channelService.getChannelInfoFromChannelIds(connection, [safetyMessageChannel])
+        newOptions['safetyMessageChannel'] = channelInfo[0]
+    }
+
     const channelIds = options?.channelIds
     if(channelIds) {
         const channelInfo = await discordService.channelService.getChannelInfoFromChannelIds(connection, channelIds)
