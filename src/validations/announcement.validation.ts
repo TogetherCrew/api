@@ -16,7 +16,7 @@ const createAnnouncement = {
                     userIds: Joi.array().items(Joi.string()),
                     roleIds: Joi.array().items(Joi.string()),
                     engagementCategories: Joi.array().items(Joi.string()),
-                    safetyMessageChannelId: Joi.string().required()
+                    safetyMessageChannelId: Joi.string().optional()
                 }).required()
             })
         ).required().min(1)
@@ -37,7 +37,7 @@ const updateAnnouncement = {
                     userIds: Joi.array().items(Joi.string()),
                     roleIds: Joi.array().items(Joi.string()),
                     engagementCategories: Joi.array().items(Joi.string()),
-                    safetyMessageChannelId: Joi.string().required()
+                    safetyMessageChannelId: Joi.string().optional()
                 }).required()
             })
         )
