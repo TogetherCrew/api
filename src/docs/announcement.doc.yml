@@ -48,6 +48,12 @@ paths:
                             type: array
                             items:
                               type: string
+                          engagementCategories:
+                            type: array
+                            items:
+                              type: string
+                          safetyMessageChannelId:
+                            type: string
                         oneOf:
                           - required: [channelIds]
                           - required: [userIds]
@@ -234,6 +240,12 @@ paths:
                             type: array
                             items:
                               type: string
+                        engagementCategories:
+                          type: array
+                          items:
+                            type: string
+                        safetyMessageChannelId:
+                          type: string
                         oneOf:
                           - required: 
                             - channelIds
