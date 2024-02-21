@@ -8,6 +8,7 @@ import memberActivityRoute from './memberActivity.route';
 import communityRoute from './community.route';
 import platformRoute from './platform.route';
 import announcementRoute from './announcement.route';
+import categoryRoute from './category.route';
 
 const router = express.Router();
 
@@ -48,6 +49,10 @@ const defaultRoutes = [
     {
         path: '/announcements',
         route: announcementRoute
+    },
+    {
+        path: '/categories',
+        route: categoryRoute
     }
 ];
 

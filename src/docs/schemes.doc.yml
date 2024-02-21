@@ -216,3 +216,9 @@ components:
         community:
           type: string
           format: objectId
+
+    # ********Category********
+    Category:
+      type: array
+      items:
+        type: string
