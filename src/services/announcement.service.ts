@@ -172,6 +172,11 @@ const enhanceAnnouncementDataOption = async (platformId: string, options: Record
         newOptions['roles'] = roleInfo
     }
 
+    const categories = options?.engagementCategories
+    if(categories) {
+        newOptions['engagementCategories'] = categories
+    }
+
     return newOptions
 }
 
