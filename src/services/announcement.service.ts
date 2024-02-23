@@ -237,6 +237,7 @@ const sendPrivateMessageToUser = async (saga: any) => {
     const announcementId = sagaData.announcementId as string;
     const safetyMessageRefrence = sagaData.safetyMessageReference as { guidId: string, channelId: string, messageId: string };
 
+    console.log("sagaData", sagaData)
     const announcement = await Announcement.findById(announcementId);
     const dataForSendingToDiscordBot: {discordId: string, message: string}[] = []
 
