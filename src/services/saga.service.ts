@@ -50,7 +50,7 @@ async function createAndStartAnnouncementSendMessageToChannelSaga(announcementId
 async function createAndStartAnnouncementSendMessageToUserSaga(announcementId: string, info: { channels: string, message: string }) {
     const saga = await MBConnection.models.Saga.create({
         status: Status.NOT_STARTED,
-        data: { announcementId, ...info },
+        data: { announcementId, ...info, isSafetyMessage: true },
         choreography: ChoreographyDict.ANNOUNCEMENT_SEND_MESSAGE_TO_USER
     })
 
