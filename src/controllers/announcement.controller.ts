@@ -7,6 +7,8 @@ import { IAnnouncement } from '@togethercrew.dev/db';
 import { announcementService } from '../services';
 import moment from 'moment';
 import { Types } from 'mongoose';
+import { Event, MBConnection } from '@togethercrew.dev/tc-messagebroker';
+import logger from '../config/logger';
 
 async function enhanceAnnouncementData(announcementData: Array<any>) {
     const enhancedData = [];
@@ -180,10 +182,23 @@ const deleteAnnouncement = catchAsync(async function (req: IAuthRequest, res: Re
     res.status(httpStatus.NO_CONTENT).send();
 })
 
+const onSafetyMessageEvent = async (msg: any) => {
+
+    logger.info({ msg, event: Event.SERVER_API.ANNOUNCEMENT_SAFETY_MESSAGE, sagaId: msg.content.uuid }, 'is running');
+    if (!msg) return;
+
+    const { content } = msg;
+    const saga = await MBConnection.models.Saga.findOne({ sagaId: content.uuid });
+
+    await announcementService.sendPrivateMessageToUser(saga);
+}
+
 export default {
     createAnnouncement,
     updateAnnouncement,
     deleteAnnouncement,
     getAnnouncements,
-    getOneAnnouncement
+    getOneAnnouncement,
+
+    onSafetyMessageEvent,
 };

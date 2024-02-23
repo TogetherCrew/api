@@ -55,20 +55,20 @@ export default {
     env: envVars.NODE_ENV,
     port: envVars.PORT,
     mongoose: {
-        serverURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}/${envVars.DB_NAME}`,
-        botURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}`,
-        dbURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}`
+        serverURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}/${envVars.DB_NAME}?directConnection=true`,
+        botURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}?directConnection=true`,
+        dbURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}?directConnection=true`
     },
     redis: {
-        host: envVars.REDIS_HOST,
+        host: 'redis',
         port: envVars.REDIS_PORT,
         password: envVars.REDIS_PASSWORD,
     },
     rabbitMQ: {
-        url: `amqp://${envVars.RABBIT_USER}:${envVars.RABBIT_PASSWORD}@${envVars.RABBIT_HOST}:${envVars.RABBIT_PORT}`,
+        url: `amqp://rabbitmq:${envVars.RABBIT_PORT}`,
     },
     neo4j: {
-        url: `${envVars.NEO4J_PROTOCOL}://${envVars.NEO4J_HOST}:${envVars.NEO4J_PORT}`,
+        url: `${envVars.NEO4J_PROTOCOL}://neo4j:${envVars.NEO4J_PORT}`,
         user: envVars.NEO4J_USER,
         password: envVars.NEO4J_PASSWORD,
         database: envVars.NEO4J_DB,
