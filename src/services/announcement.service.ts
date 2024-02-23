@@ -225,7 +225,7 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
         const safetyMessageInChannel = "To verify the authenticity of a message send to you by the community manager(s) via TogetherCrew, verify the bot ID is TogetherCrew Bot#2107"
         if(safetyMessageChannelId) {
             // !Fire event for safety message
-            sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { channels: safetyMessageChannelId, message: safetyMessageInChannel })
+            sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { channels: [safetyMessageChannelId], message: safetyMessageInChannel })
         }
     })
 
