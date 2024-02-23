@@ -172,6 +172,11 @@ const enhanceAnnouncementDataOption = async (platformId: string, options: Record
         newOptions['roles'] = roleInfo
     }
 
+    const categories = options?.engagementCategories
+    if(categories) {
+        newOptions['engagementCategories'] = categories
+    }
+
     return newOptions
 }
 
@@ -205,7 +210,35 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
 
     const announcement = await Announcement.findById(announcementId);
 
+    announcement?.data.forEach(async (data) => {
+        const template = data?.template
+        const options = data?.options
 
+        const channelIds = options?.channelIds
+        job.log(`[announcement] channelIds: ${channelIds}`)
+        if (channelIds) {
+            // !Fire event for all channels
+            sagaService.createAndStartAnnouncementSendMessageToChannelSaga(announcementId, { channels: channelIds, message: template })                        
+        }
+
+        const safetyMessageChannelId = options?.safetyMessageChannelId
+        const safetyMessageInChannel = "To verify the authenticity of a message send to you by the community manager(s) via TogetherCrew, verify the bot ID is TogetherCrew Bot#2107"
+        if(safetyMessageChannelId) {
+            // !Fire event for safety message
+            sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { channels: safetyMessageChannelId, message: safetyMessageInChannel })
+        }
+    })
+
+    return announcement
+}
+
+const sendPrivateMessageToUser = async (saga: any) => {
+    const sagaData = saga.data;
+    const announcementId = sagaData.announcementId as string;
+    const safetyMessageRefrence = sagaData.safetyMessageReference as { guidId: string, channelId: string, messageId: string };
+
+    const announcement = await Announcement.findById(announcementId);
+    const dataForSendingToDiscordBot: {discordId: string, message: string}[] = []
 
     announcement?.data.forEach(async (data) => {
         const template = data?.template
@@ -217,19 +250,11 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
         });
         const connection = await DatabaseManager.getInstance().getTenantDb(platform?.metadata?.id);
 
-        const channelIds = (options as any)?.channelIds
-        job.log(`[announcement] channelIds: ${channelIds}`)
-        if (channelIds) {
+        const userIds = options?.userIds
+        const roleIds = options?.roleIds
+        const categories = options?.engagementCategories
 
-            // !Fire event for all channels
-            sagaService.createAndStartAnnouncementSendMessageToChannelSaga(announcementId, { channels: channelIds, message: template })
-        }
-
-        const userIds = (options as any)?.userIds
-        const roleIds = (options as any)?.roleIds
-        job.log(`[announcement] userIds: ${userIds}`)
-        job.log(`[announcement] roleIds: ${roleIds}`)
-        if(userIds || roleIds) {
+        if(userIds || roleIds || categories) {
             const allDiscordIds = new Set<string>();
 
             if(userIds) {
@@ -239,7 +264,12 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
             }
             if(roleIds) {
                 const discordIds = await discordService.roleService.getDiscordIdsFromRoleIds(connection, roleIds)
-                job.log(`[announcement] discordIds associated with roles: ${discordIds}`)
+                discordIds.forEach((discordId: string) => {
+                    allDiscordIds.add(discordId)
+                })
+            }
+            if(categories){
+                const discordIds = await discordService.guildMemberService.getAllDiscordIdsInLastedMemberActivity(connection, categories)
                 discordIds.forEach((discordId: string) => {
                     allDiscordIds.add(discordId)
                 })
@@ -247,16 +277,27 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
 
             // !Fire event for each discordId
             allDiscordIds.forEach((discordId: string) => {
+                const safetyMessageLink = `https://discord.com/channels/${safetyMessageRefrence.guidId}/${safetyMessageRefrence.channelId}/${safetyMessageRefrence.messageId}`
+                const safetyMessage = `*This message was sent to you because you’re part of [community].
+                To verify the legitimacy of this message, 
+                see the instruction sent to you inside the community's server to verify the bot ID: ${safetyMessageLink}
+                `
+
                 const templateHandlebars = Handlebars.compile(template)
                 const compiledTemplate = templateHandlebars({ username: `<@${discordId}>` })
+                const message = `${compiledTemplate}\n${safetyMessage}`
 
-                job.log(`[announcement] fire an event that USER with ID: "${discordId}" will get MESSAGE: "${compiledTemplate}"`)
-                sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { platformId, discordId, message: compiledTemplate, useFallback: false })
+                dataForSendingToDiscordBot.push({discordId, message})
             })
         }
     })
 
-    return announcement
+    saga.data = {
+        ...saga.data,
+        info: dataForSendingToDiscordBot
+    };
+    await saga.save();
+    saga.next(() => { console.log("GO TO NEXT") })
 }
 
 
@@ -273,5 +314,6 @@ export default {
     deleteAnnouncementById,
     queryAnnouncements,
     getAnnouncementById,
-    onDestroyAnnouncement
+    onDestroyAnnouncement,
+    sendPrivateMessageToUser
 }
