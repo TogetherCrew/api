@@ -255,9 +255,6 @@ const sendPrivateMessageToUser = async (saga: any) => {
         const roleIds = options?.roleIds
         const categories = options?.engagementCategories
 
-        console.log(announcement, platform)
-
-        console.log(userIds, roleIds, categories)
         if (userIds || roleIds || categories) {
             const allDiscordIds = new Set<string>();
 
@@ -279,7 +276,6 @@ const sendPrivateMessageToUser = async (saga: any) => {
                 })
             }
 
-            console.log('HMM', allDiscordIds)
             // !Fire event for each discordId
             allDiscordIds.forEach((discordId: string) => {
                 const safetyMessageLink = `https://discord.com/channels/${safetyMessageRefrence.guidId}/${safetyMessageRefrence.channelId}/${safetyMessageRefrence.messageId}`
@@ -292,7 +288,6 @@ const sendPrivateMessageToUser = async (saga: any) => {
                 const compiledTemplate = templateHandlebars({ username: `<@${discordId}>` })
                 const message = `${compiledTemplate}\n${safetyMessage}`
 
-                console.log(dataForSendingToDiscordBot)
                 dataForSendingToDiscordBot.push({ discordId, message })
             })
         }
@@ -302,7 +297,6 @@ const sendPrivateMessageToUser = async (saga: any) => {
         ...saga.data,
         info: dataForSendingToDiscordBot
     };
-    logger.info({ dataForSendingToDiscordBot }, 'WTF')
     await saga.save();
     saga.next(() => { console.log("GO TO NEXT") })
 }
