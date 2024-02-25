@@ -237,7 +237,9 @@ const sendPrivateMessageToUser = async (saga: any) => {
     const announcementId = sagaData.announcementId as string;
     const safetyMessageRefrence = sagaData.safetyMessageReference as { guidId: string, channelId: string, messageId: string };
 
-    logger.info("sendPrivateMessageToUser", saga)
+    logger.info({ saga }, 'sendPrivateMessageToUser');
+
+    sendPrivateMessageToUser
     const announcement = await Announcement.findById(announcementId);
     const dataForSendingToDiscordBot: { discordId: string, message: string }[] = []
 
@@ -299,7 +301,7 @@ const sendPrivateMessageToUser = async (saga: any) => {
     };
     await saga.save();
     saga.next(() => {
-        logger.info("sendPrivateMessageToUser", saga)
+        logger.info({ saga }, 'sendPrivateMessageToUser');
     })
 }
 

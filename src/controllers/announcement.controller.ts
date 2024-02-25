@@ -22,7 +22,7 @@ async function enhanceAnnouncementData(announcementData: Array<any>) {
 
 async function getAnnouncementFieldsToReturn(announcement: IAnnouncement) {
     const newData = await enhanceAnnouncementData(announcement.data)
-    
+
     return {
         id: (announcement as any).id,
         title: announcement.title,
@@ -79,7 +79,7 @@ const updateAnnouncement = catchAsync(async function (req: IAuthRequest, res: Re
         throw new ApiError(httpStatus.NOT_FOUND, 'Announcement not found');
     }
 
-    if(data) {
+    if (data) {
         const requestedPlatformIds = data.map((data: object & { platformId: Types.ObjectId }) => data.platformId);
         const isPlatformIdsValid = requestedPlatformIds.every((platformId: Types.ObjectId) => community.platforms?.includes(platformId));
         if (!isPlatformIdsValid) {
@@ -139,12 +139,12 @@ const getAnnouncements = catchAsync(async function (req: IAuthRequest, res: Resp
     dbFilter.community = queryFilter.communityId;
 
 
-    if(utcStartDate && utcEndDate) dbFilter.scheduledAt = { $gte: utcStartDate, $lte: utcEndDate };
-    else if(utcStartDate) dbFilter.scheduledAt = { $gte: utcStartDate };
-    else if(utcEndDate) dbFilter.scheduledAt = { $lte: utcEndDate };
+    if (utcStartDate && utcEndDate) dbFilter.scheduledAt = { $gte: utcStartDate, $lte: utcEndDate };
+    else if (utcStartDate) dbFilter.scheduledAt = { $gte: utcStartDate };
+    else if (utcEndDate) dbFilter.scheduledAt = { $lte: utcEndDate };
 
     const paginatedAnnouncement = await announcementService.queryAnnouncements(dbFilter, options);
-    paginatedAnnouncement.results = await Promise.all( paginatedAnnouncement.results.map(async (announcement: any) => await getAnnouncementFieldsToReturn(announcement as IAnnouncement)))
+    paginatedAnnouncement.results = await Promise.all(paginatedAnnouncement.results.map(async (announcement: any) => await getAnnouncementFieldsToReturn(announcement as IAnnouncement)))
     res.status(httpStatus.OK).send(paginatedAnnouncement);
 })
 
@@ -190,7 +190,8 @@ const onSafetyMessageEvent = async (msg: any) => {
     const { content } = msg;
     const saga = await MBConnection.models.Saga.findOne({ sagaId: content.uuid });
 
-    logger.info("onSafetyMessageEvent", saga)
+    logger.info({ saga }, 'onSafetyMessageEvent');
+
     await announcementService.sendPrivateMessageToUser(saga);
 }
 
