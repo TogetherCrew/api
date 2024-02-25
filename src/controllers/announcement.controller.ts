@@ -189,9 +189,8 @@ const onSafetyMessageEvent = async (msg: any) => {
 
     const { content } = msg;
     const saga = await MBConnection.models.Saga.findOne({ sagaId: content.uuid });
-    
-    console.log("SAGA-Mongo-instance =>  ", saga);
 
+    logger.info("onSafetyMessageEvent", saga)
     await announcementService.sendPrivateMessageToUser(saga);
 }
 
