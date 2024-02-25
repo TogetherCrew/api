@@ -298,7 +298,7 @@ const getAllDiscordIdsInLastedMemberActivity = async (connection: Connection, me
         memberActivity[activity].forEach((discordId: string) => allDiscordIds.add(discordId));
     });
 
-    return memberActivity;
+    return allDiscordIds;
 };
 
 export default {
