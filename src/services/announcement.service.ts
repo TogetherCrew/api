@@ -297,8 +297,9 @@ const sendPrivateMessageToUser = async (saga: any) => {
         ...saga.data,
         info: dataForSendingToDiscordBot
     };
-    logger.info({ saga })
-    await saga.next(async () => { await saga.save(); })
+    logger.info({ dataForSendingToDiscordBot }, 'WTF')
+    await saga.save();
+    saga.next(() => { console.log("GO TO NEXT") })
 }
 
 
