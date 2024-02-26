@@ -147,33 +147,33 @@ const enhanceAnnouncementDataOption = async (platformId: string, options: Record
         disconnectedAt: null
     });
     const connection = await DatabaseManager.getInstance().getTenantDb(platform?.metadata?.id);
-    
+
     const safetyMessageChannel = options?.safetyMessageChannelId
-    if(safetyMessageChannel) {
+    if (safetyMessageChannel) {
         const channelInfo = await discordService.channelService.getChannelInfoFromChannelIds(connection, [safetyMessageChannel])
         newOptions['safetyMessageChannel'] = channelInfo[0]
     }
 
     const channelIds = options?.channelIds
-    if(channelIds) {
+    if (channelIds) {
         const channelInfo = await discordService.channelService.getChannelInfoFromChannelIds(connection, channelIds)
         newOptions['channels'] = channelInfo
     }
 
     const userIds = options?.userIds
-    if(userIds) {
+    if (userIds) {
         const userInfo = await discordService.guildMemberService.getGuildMemberInfoFromDiscordIds(connection, userIds)
         newOptions['users'] = userInfo
     }
 
     const roleIds = options?.roleIds
-    if(roleIds) {
+    if (roleIds) {
         const roleInfo = await discordService.roleService.getRoleInfoFromRoleIds(connection, roleIds)
         newOptions['roles'] = roleInfo
     }
 
     const categories = options?.engagementCategories
-    if(categories) {
+    if (categories) {
         newOptions['engagementCategories'] = categories
     }
 
@@ -218,12 +218,12 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
         job.log(`[announcement] channelIds: ${channelIds}`)
         if (channelIds) {
             // !Fire event for all channels
-            sagaService.createAndStartAnnouncementSendMessageToChannelSaga(announcementId, { channels: channelIds, message: template })                        
+            sagaService.createAndStartAnnouncementSendMessageToChannelSaga(announcementId, { channels: channelIds, message: template })
         }
 
         const safetyMessageChannelId = options?.safetyMessageChannelId
         const safetyMessageInChannel = "To verify the authenticity of a message send to you by the community manager(s) via TogetherCrew, verify the bot ID is TogetherCrew Bot#2107"
-        if(safetyMessageChannelId) {
+        if (safetyMessageChannelId) {
             // !Fire event for safety message
             sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { channels: [safetyMessageChannelId], message: safetyMessageInChannel })
         }
@@ -255,21 +255,21 @@ const sendPrivateMessageToUser = async (saga: any) => {
         const roleIds = options?.roleIds
         const categories = options?.engagementCategories
 
-        if(userIds || roleIds || categories) {
+        if (userIds || roleIds || categories) {
             const allDiscordIds = new Set<string>();
 
-            if(userIds) {
+            if (userIds) {
                 userIds.forEach((discordId: string) => {
                     allDiscordIds.add(discordId)
                 })
             }
-            if(roleIds) {
+            if (roleIds) {
                 const discordIds = await discordService.roleService.getDiscordIdsFromRoleIds(connection, roleIds)
                 discordIds.forEach((discordId: string) => {
                     allDiscordIds.add(discordId)
                 })
             }
-            if(categories){
+            if (categories) {
                 const discordIds = await discordService.guildMemberService.getAllDiscordIdsInLastedMemberActivity(connection, categories)
                 discordIds.forEach((discordId: string) => {
                     allDiscordIds.add(discordId)
@@ -287,7 +287,7 @@ const sendPrivateMessageToUser = async (saga: any) => {
                 const compiledTemplate = templateHandlebars({ username: `<@${discordId}>` })
                 const message = `${compiledTemplate}\n${safetyMessage}`
 
-                dataForSendingToDiscordBot.push({discordId, message})
+                dataForSendingToDiscordBot.push({ discordId, message })
             })
         }
     }
@@ -297,7 +297,9 @@ const sendPrivateMessageToUser = async (saga: any) => {
         info: dataForSendingToDiscordBot
     };
     await saga.save();
-    saga.next(() => { console.log("GO TO NEXT") })
+    saga.next(() => {
+        logger.info("sendPrivateMessageToUser", saga)
+    })
 }
 
 
