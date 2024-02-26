@@ -237,11 +237,11 @@ const sendPrivateMessageToUser = async (saga: any) => {
     const announcementId = sagaData.announcementId as string;
     const safetyMessageRefrence = sagaData.safetyMessageReference as { guidId: string, channelId: string, messageId: string };
 
-    console.log("sagaData", sagaData)
     const announcement = await Announcement.findById(announcementId);
+    const announcementData = announcement?.data || []
     const dataForSendingToDiscordBot: {discordId: string, message: string}[] = []
 
-    announcement?.data.forEach(async (data) => {
+    for await (const data of announcementData){
         const template = data?.template
         const platformId = data?.platform
         const options = data?.options
@@ -276,7 +276,6 @@ const sendPrivateMessageToUser = async (saga: any) => {
                 })
             }
 
-            // !Fire event for each discordId
             allDiscordIds.forEach((discordId: string) => {
                 const safetyMessageLink = `https://discord.com/channels/${safetyMessageRefrence.guidId}/${safetyMessageRefrence.channelId}/${safetyMessageRefrence.messageId}`
                 const safetyMessage = `*This message was sent to you because you’re part of [community].
@@ -291,7 +290,7 @@ const sendPrivateMessageToUser = async (saga: any) => {
                 dataForSendingToDiscordBot.push({discordId, message})
             })
         }
-    })
+    }
 
     saga.data = {
         ...saga.data,
