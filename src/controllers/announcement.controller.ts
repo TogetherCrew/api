@@ -189,9 +189,7 @@ const onSafetyMessageEvent = async (msg: any) => {
 
     const { content } = msg;
     const saga = await MBConnection.models.Saga.findOne({ sagaId: content.uuid });
-
-    logger.info({ saga }, 'onSafetyMessageEvent');
-
+    
     await announcementService.sendPrivateMessageToUser(saga);
 }
 
