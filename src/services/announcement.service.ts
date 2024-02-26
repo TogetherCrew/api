@@ -8,6 +8,7 @@ import sagaService from './saga.service';
 import platformService from "./platform.service";
 import Handlebars from "handlebars";
 import logger from '../config/logger';
+import communityService from "./community.service";
 
 const createDraftAnnouncement = async (announcementData: IAnnouncement) => {
     if (announcementData.draft === false) throw new Error('Cannot create a draft announcement with draft set to false');
@@ -213,6 +214,7 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
     announcement?.data.forEach(async (data) => {
         const template = data?.template
         const options = data?.options
+        const platformId = data?.platform
 
         const channelIds = options?.channelIds
         job.log(`[announcement] channelIds: ${channelIds}`)
@@ -222,10 +224,11 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
         }
 
         const safetyMessageChannelId = options?.safetyMessageChannelId
-        const safetyMessageInChannel = "To verify the authenticity of a message send to you by the community manager(s) via TogetherCrew, verify the bot ID is TogetherCrew Bot#2107"
+        const gifAddress = "https://discord.com/channels/915914985140531240/1047205182871707669/1206771168292634664"
+        const safetyMessageInChannel = `To verify the authenticity of a message send to you by the community manager(s) via TogetherCrew, verify the bot ID is TogetherCrew Bot#2107 ${gifAddress}`
         if (safetyMessageChannelId) {
             // !Fire event for safety message
-            sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { channels: [safetyMessageChannelId], message: safetyMessageInChannel })
+            sagaService.createAndStartAnnouncementSendMessageToUserSaga(announcementId, { platformId: platformId, channels: [safetyMessageChannelId], message: safetyMessageInChannel })
         }
     })
 
@@ -235,7 +238,7 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
 const sendPrivateMessageToUser = async (saga: any) => {
     const sagaData = saga.data;
     const announcementId = sagaData.announcementId as string;
-    const safetyMessageRefrence = sagaData.safetyMessageReference as { guidId: string, channelId: string, messageId: string };
+    const safetyMessageRefrence = sagaData.safetyMessageReference as { guildId: string, channelId: string, messageId: string };
 
     const announcement = await Announcement.findById(announcementId);
     const announcementData = announcement?.data || []
@@ -249,6 +252,7 @@ const sendPrivateMessageToUser = async (saga: any) => {
             _id: platformId,
             disconnectedAt: null
         });
+        const community = await communityService.getCommunityByFilter({ _id: platform?.community });
         const connection = await DatabaseManager.getInstance().getTenantDb(platform?.metadata?.id);
 
         const userIds = options?.userIds
@@ -277,11 +281,8 @@ const sendPrivateMessageToUser = async (saga: any) => {
             }
 
             allDiscordIds.forEach((discordId: string) => {
-                const safetyMessageLink = `https://discord.com/channels/${safetyMessageRefrence.guidId}/${safetyMessageRefrence.channelId}/${safetyMessageRefrence.messageId}`
-                const safetyMessage = `*This message was sent to you because you’re part of [community].
-                To verify the legitimacy of this message, 
-                see the instruction sent to you inside the community's server to verify the bot ID: ${safetyMessageLink}
-                `
+                const safetyMessageLink = `https://discord.com/channels/${safetyMessageRefrence.guildId}/${safetyMessageRefrence.channelId}/${safetyMessageRefrence.messageId}`
+                const safetyMessage = `\n*This message was sent to you because you’re part of ${community?.name}.\nTo verify the legitimacy of this message,\nsee the instruction sent to you inside the community's server to verify the bot ID: ${safetyMessageLink}`
 
                 const templateHandlebars = Handlebars.compile(template)
                 const compiledTemplate = templateHandlebars({ username: `<@${discordId}>` })
