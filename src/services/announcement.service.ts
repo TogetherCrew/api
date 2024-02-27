@@ -224,7 +224,7 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
         }
 
         const safetyMessageChannelId = options?.safetyMessageChannelId
-        const gifAddress = "https://discord.com/channels/915914985140531240/1047205182871707669/1206771168292634664"
+        const gifAddress = "https://media.discordapp.net/attachments/1047205182871707669/1206771167927472148/TC_verify_bot_Gif.gif?ex=65e672bb&is=65d3fdbb&hm=db5c5bcc404519359fc558c8925b1057e13a5e7d0ac3e322418db73c4a8f5cb7&=&width=915&height=515"
         const safetyMessageInChannel = `To verify the authenticity of a message send to you by the community manager(s) via TogetherCrew, verify the bot ID is TogetherCrew Bot#2107 ${gifAddress}`
         if (safetyMessageChannelId) {
             // !Fire event for safety message
