@@ -989,9 +989,10 @@ async function getMembersInteractionsNetworkGraph(guildId: string, guildConnecti
         const bUserStats = bUserStatsObj?.stats
         // userInfo
         const aUser = usersInfo.find(user => user.discordId === aUserId)
-        const aInfo = getUserInformationForNetworkGraph(aUser, roles)
-
         const bUser = usersInfo.find(user => user.discordId === bUserId)
+        if(!aUser || !bUser) return []
+
+        const aInfo = getUserInformationForNetworkGraph(aUser, roles)
         const bInfo = getUserInformationForNetworkGraph(bUser, roles)
 
 
