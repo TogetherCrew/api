@@ -1,27 +1,47 @@
 version: "3.9"
 
 services:
-  mongo:
-    image: "mongo:6.0.8"
-    ports:
-      - 27017:27017
+  app:
+    build:
+      context: .
+      target: dev
+      dockerfile: Dockerfile
     environment:
+      - NODE_ENV=test
+      - PORT=3000
+      - DB_HOST=mongo
+      - DB_PORT=27017
+      - DB_USER=root
+      - DB_PASSWORD=pass
+      - DB_NAME=RnDAO
+      - DISCORD_CLIENT_ID=1
+      - DISCORD_CLIENT_SECRET=1
+      - SENTRY_DSN=1
+      - SENTRY_ENV=test
+      - DISCORD_BOT_TOKEN=1
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+      - RABBIT_HOST=localhost
+      - RABBIT_PORT=5672
+      - RABBIT_USER=root
+      - RABBIT_PASSWORD=pass
+      - LOG_LEVEL=info
+      - PYROSCOPE_SERVER_ADDRESS=http://pyroscope:4040
+    volumes:
+      - ./coverage:/project/coverage
+    depends_on:
+      mongo:
+        condition: service_healthy
+  mongo:
+    image: "mongo:5.0.10"
+    environment:
+      - MONGO_INITDB_DATABASE=RnDAO
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=pass
-  rabbitmq:
-    image: "rabbitmq:3-management-alpine"
-    ports:
-      - 5672:5672
-      - 15672:15672
-    environment:
-      - RABBITMQ_DEFAULT_USER=root
-      - RABBITMQ_DEFAULT_PASS=pass
-  neo4j:
-    image: "neo4j:5.9.0"
-    ports:
-      - 7687:7687
-      - 7474:7474
-    environment:
-      - NEO4J_AUTH=neo4j/password
-      - NEO4J_PLUGINS=["apoc", "graph-data-science"]
-      - NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
+    healthcheck:
+      test: echo 'db.stats().ok' | mongosh localhost:27017/test --quiet
+      interval: 60s
+      timeout: 10s
+      retries: 2
+      start_period: 40s
