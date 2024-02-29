@@ -242,9 +242,9 @@ const sendPrivateMessageToUser = async (saga: any) => {
 
     const announcement = await Announcement.findById(announcementId);
     const announcementData = announcement?.data || []
-    const dataForSendingToDiscordBot: {discordId: string, message: string}[] = []
+    const dataForSendingToDiscordBot: { discordId: string, message: string, useFallback: boolean }[] = []
 
-    for await (const data of announcementData){
+    for await (const data of announcementData) {
         const template = data?.template
         const platformId = data?.platform
         const options = data?.options
@@ -288,7 +288,7 @@ const sendPrivateMessageToUser = async (saga: any) => {
                 const compiledTemplate = templateHandlebars({ username: `<@${discordId}>` })
                 const message = `${compiledTemplate}\n${safetyMessage}`
 
-                dataForSendingToDiscordBot.push({ discordId, message })
+                dataForSendingToDiscordBot.push({ discordId, message, useFallback: true })
             })
         }
     }
