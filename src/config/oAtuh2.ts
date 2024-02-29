@@ -41,7 +41,8 @@ export const discord = {
             CreatePrivateThreads: 0x1000000000,
             EmbedLinks: 0x4000,
             AttachFiles: 0x8000,
-            MentionEveryone: 0x20000
+            MentionEveryone: 0x20000,
+            Connect: 0x100000
         }
     },
     getDiscordClient: async function () {
