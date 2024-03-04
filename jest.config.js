@@ -1,4 +1,4 @@
-// eslint-disable-next-line no-undef
+/* eslint-env node */
 module.exports = {
   testPathIgnorePatterns: [
     "/__tests__/fixtures",
@@ -19,7 +19,7 @@ module.exports = {
       branches: 80,
       functions: 80,
       lines: 80,
-      statements: -10,
-    },
+      statements: -10
+    }
   }
-};
+}

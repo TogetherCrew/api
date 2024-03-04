@@ -1,5 +1,6 @@
 import { Types } from 'mongoose';
 import { User } from '@togethercrew.dev/db';
+import crypto from 'crypto';
 
 interface UserFixture {
   _id: Types.ObjectId;
@@ -10,18 +11,18 @@ interface UserFixture {
 
 export const userOne: UserFixture = {
   _id: new Types.ObjectId(),
-  discordId: '681946187490000902',
+  discordId: crypto.randomBytes(20).toString('hex'),
   email: 'example@outlook.com',
 };
 
 export const userTwo: UserFixture = {
   _id: new Types.ObjectId(),
-  discordId: '681946187490000903',
+  discordId: crypto.randomBytes(20).toString('hex'),
 };
 
 export const userThree: UserFixture = {
   _id: new Types.ObjectId(),
-  discordId: '681946187490000904',
+  discordId: crypto.randomBytes(20).toString('hex'),
 };
 
 export const insertUsers = async function <Type>(users: Array<Type>) {

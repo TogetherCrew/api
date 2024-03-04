@@ -23,7 +23,6 @@ paths:
                       example: Frontend Developer
                     avatar:
                       type: string
-                      example: https://s3.us-west-2.amazonaws.com/secure.notion-static.com/c900f077-efd1-44b0-b60c-5e182fb475d3/Nima.webp?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230225%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230225T182236Z&X-Amz-Expires=3600&X-Amz-Signature=0885e374a7b460667cfd6644e859a36a32c57ef2fb55e11dcdf6b7d456b952c5&X-Amz-SignedHeaders=host&x-id=GetObject
         "400":
           description: Bad Request
           $ref: "#/components/responses/BadRequest"
