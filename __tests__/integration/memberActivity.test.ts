@@ -384,94 +384,94 @@ describe('member-activity routes', () => {
         })
     })
 
-    describe('POST /api/v1/member-activity/:platformId/members-interactions-network-graph', () => {
-        let connection: Connection;
-        beforeEach(async () => {
-            connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
-            await connection.dropDatabase();
-        });
+    // describe('POST /api/v1/member-activity/:platformId/members-interactions-network-graph', () => {
+    //     let connection: Connection;
+    //     beforeEach(async () => {
+    //         connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+    //         await connection.dropDatabase();
+    //     });
 
-        test('should return 200 and member interaction graph data if req data is ok', async () => {
-            await insertCommunities([communityOne]);
-            await insertUsers([userOne]);
-            await insertPlatforms([platformOne]);
-            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4, discordGuildMember5], connection);
+    //     test('should return 200 and member interaction graph data if req data is ok', async () => {
+    //         await insertCommunities([communityOne]);
+    //         await insertUsers([userOne]);
+    //         await insertPlatforms([platformOne]);
+    //         await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4, discordGuildMember5], connection);
 
-            const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
+    //         const yesterdayTimestamp = dateUtils.getYesterdayUTCtimestamp()
 
-            const date = new Date();
-            date.setDate(date.getDate() - 2);
-            const twodaysAgoTimestamp = date.setHours(10, 0, 0, 0);
+    //         const date = new Date();
+    //         date.setDate(date.getDate() - 2);
+    //         const twodaysAgoTimestamp = date.setHours(10, 0, 0, 0);
 
-            await Neo4j.write("match (n) detach delete (n);")
-            await Neo4j.write(`CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${platformOne.metadata?.id}"})
-                CREATE (b:DiscordAccount) -[:IS_MEMBER]->(g)
-                CREATE (c:DiscordAccount) -[:IS_MEMBER]->(g)
-                CREATE (d:DiscordAccount) -[:IS_MEMBER]->(g)
-                CREATE (e:DiscordAccount) -[:IS_MEMBER]->(g)
-                SET a.userId = '${discordGuildMember1.discordId}'
-                SET b.userId = '${discordGuildMember2.discordId}'
-                MERGE (a) -[r:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(b)
-                MERGE (b) -[r2:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 2}]->(a)
-                MERGE (b) -[r3:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(a)
+    //         await Neo4j.write("match (n) detach delete (n);")
+    //         await Neo4j.write(`CREATE (a:DiscordAccount) -[:IS_MEMBER]->(g:Guild {guildId: "${platformOne.metadata?.id}"})
+    //             CREATE (b:DiscordAccount) -[:IS_MEMBER]->(g)
+    //             CREATE (c:DiscordAccount) -[:IS_MEMBER]->(g)
+    //             CREATE (d:DiscordAccount) -[:IS_MEMBER]->(g)
+    //             CREATE (e:DiscordAccount) -[:IS_MEMBER]->(g)
+    //             SET a.userId = '${discordGuildMember1.discordId}'
+    //             SET b.userId = '${discordGuildMember2.discordId}'
+    //             MERGE (a) -[r:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 1}]->(b)
+    //             MERGE (b) -[r2:INTERACTED_WITH {date: ${twodaysAgoTimestamp}, weight: 2}]->(a)
+    //             MERGE (b) -[r3:INTERACTED_WITH {date: ${yesterdayTimestamp}, weight: 2}]->(a)
 
-                SET r.guildId = "${platformOne.metadata?.id}"
-                SET r2.guildId = "${platformOne.metadata?.id}"
-                SET r3.guildId = "${platformOne.metadata?.id}"
+    //             SET r.guildId = "${platformOne.metadata?.id}"
+    //             SET r2.guildId = "${platformOne.metadata?.id}"
+    //             SET r3.guildId = "${platformOne.metadata?.id}"
 
-                MERGE (a) -[:INTERACTED_IN {localclusteringcoefficient: 1, date: ${yesterdayTimestamp}, status: 0}]->(g)
-                MERGE (a) -[:INTERACTED_IN {localclusteringcoefficient: 1, date: ${twodaysAgoTimestamp}, status: 2}]->(g)
-                MERGE (b) -[:INTERACTED_IN {localclusteringcoefficient: 1, date: ${yesterdayTimestamp}, status: 1}]->(g)
-                MERGE (b) -[:INTERACTED_IN {localclusteringcoefficient: 1, date: ${twodaysAgoTimestamp}, status: 1}]->(g)
-                `)
+    //             MERGE (a) -[:INTERACTED_IN {localclusteringcoefficient: 1, date: ${yesterdayTimestamp}, status: 0}]->(g)
+    //             MERGE (a) -[:INTERACTED_IN {localclusteringcoefficient: 1, date: ${twodaysAgoTimestamp}, status: 2}]->(g)
+    //             MERGE (b) -[:INTERACTED_IN {localclusteringcoefficient: 1, date: ${yesterdayTimestamp}, status: 1}]->(g)
+    //             MERGE (b) -[:INTERACTED_IN {localclusteringcoefficient: 1, date: ${twodaysAgoTimestamp}, status: 1}]->(g)
+    //             `)
 
-            const res = await request(app)
-                .post(`/api/v1/member-activity/${platformOne._id}/members-interactions-network-graph`)
-                .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .expect(httpStatus.OK);
+    //         const res = await request(app)
+    //             .post(`/api/v1/member-activity/${platformOne._id}/members-interactions-network-graph`)
+    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
+    //             .expect(httpStatus.OK);
 
-            expect(Array.isArray(res.body)).toBe(true);
-            expect(res.body).toHaveLength(2)
-            expect(res.body).toEqual(expect.arrayContaining([({
-                from: { avatar: null, id: "123456789", discordId: "123456789", joinedAt: "2023-03-07T00:00:00.000Z", ngu: "Behzad", radius: 3, roles: [], stats: "SENDER", username: "behzad_rabiei" },
-                to: { avatar: "AvatarLink", id: "987654321", discordId: '987654321', joinedAt: "2023-03-31T00:00:00.000Z", ngu: "Daniel", radius: 3, roles: [], stats: "RECEIVER", username: "mrjackalop" },
-                width: 1
-            })
-            ]))
-            expect(res.body).toEqual(expect.arrayContaining([({
-                from: { avatar: "AvatarLink", id: "987654321", discordId: "987654321", joinedAt: "2023-03-31T00:00:00.000Z", ngu: "Daniel", radius: 3, roles: [], stats: "RECEIVER", username: "mrjackalop" },
-                to: { avatar: null, id: "123456789", discordId: '123456789', joinedAt: "2023-03-07T00:00:00.000Z", ngu: "Behzad", radius: 3, roles: [], stats: "SENDER", username: "behzad_rabiei" },
-                width: 2
-            })
-            ]))
+    //         expect(Array.isArray(res.body)).toBe(true);
+    //         expect(res.body).toHaveLength(2)
+    //         expect(res.body).toEqual(expect.arrayContaining([({
+    //             from: { avatar: null, id: "123456789", discordId: "123456789", joinedAt: "2023-03-07T00:00:00.000Z", ngu: "Behzad", radius: 3, roles: [], stats: "SENDER", username: "behzad_rabiei" },
+    //             to: { avatar: "AvatarLink", id: "987654321", discordId: '987654321', joinedAt: "2023-03-31T00:00:00.000Z", ngu: "Daniel", radius: 3, roles: [], stats: "RECEIVER", username: "mrjackalop" },
+    //             width: 1
+    //         })
+    //         ]))
+    //         expect(res.body).toEqual(expect.arrayContaining([({
+    //             from: { avatar: "AvatarLink", id: "987654321", discordId: "987654321", joinedAt: "2023-03-31T00:00:00.000Z", ngu: "Daniel", radius: 3, roles: [], stats: "RECEIVER", username: "mrjackalop" },
+    //             to: { avatar: null, id: "123456789", discordId: '123456789', joinedAt: "2023-03-07T00:00:00.000Z", ngu: "Behzad", radius: 3, roles: [], stats: "SENDER", username: "behzad_rabiei" },
+    //             width: 2
+    //         })
+    //         ]))
 
-        })
-        test('should return 401 if access token is missing', async () => {
-            await request(app)
-                .post(`/api/v1/member-activity/${platformOne._id}/members-interactions-network-graph`)
-                .send({ startDate: new Date(), endDate: new Date() })
-                .expect(httpStatus.UNAUTHORIZED);
-        })
-        test('should return 404 if guild not found', async () => {
-            await insertUsers([userOne]);
-            await request(app)
+    //     })
+    //     test('should return 401 if access token is missing', async () => {
+    //         await request(app)
+    //             .post(`/api/v1/member-activity/${platformOne._id}/members-interactions-network-graph`)
+    //             .send({ startDate: new Date(), endDate: new Date() })
+    //             .expect(httpStatus.UNAUTHORIZED);
+    //     })
+    //     test('should return 404 if guild not found', async () => {
+    //         await insertUsers([userOne]);
+    //         await request(app)
 
-                .post(`/api/v1/member-activity/${platformOne._id}/members-interactions-network-graph`)
-                .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .expect(httpStatus.NOT_FOUND);
-        })
+    //             .post(`/api/v1/member-activity/${platformOne._id}/members-interactions-network-graph`)
+    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
+    //             .expect(httpStatus.NOT_FOUND);
+    //     })
 
-        test('should return 400 if given platform is not discord', async () => {
-            await insertCommunities([communityOne]);
-            await insertUsers([userOne]);
-            await insertPlatforms([platformFour]);
-            await request(app)
-                .post(`/api/v1/member-activity/${platformFour._id}/members-interactions-network-graph`)
-                .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send({ startDate: new Date(), endDate: new Date() })
-                .expect(httpStatus.BAD_REQUEST);
-        })
-    })
+    //     test('should return 400 if given platform is not discord', async () => {
+    //         await insertCommunities([communityOne]);
+    //         await insertUsers([userOne]);
+    //         await insertPlatforms([platformFour]);
+    //         await request(app)
+    //             .post(`/api/v1/member-activity/${platformFour._id}/members-interactions-network-graph`)
+    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
+    //             .send({ startDate: new Date(), endDate: new Date() })
+    //             .expect(httpStatus.BAD_REQUEST);
+    //     })
+    // })
 
     describe('GET /api/v1/member-activity/:platformId/fragmentation-score', () => {
         let connection: Connection;

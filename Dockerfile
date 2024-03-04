@@ -1,5 +1,4 @@
 FROM node:18-alpine AS base
-
 WORKDIR /project
 COPY . .
 RUN npm ci

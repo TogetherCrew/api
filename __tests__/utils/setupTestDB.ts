@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import config from "../../src/config";
 import RabbitMQ, { MBConnection, Queue } from '@togethercrew.dev/tc-messagebroker';
-
+import Redis from 'ioredis';
 const setupTestDB = () => {
     beforeAll(async () => {
         mongoose.set("strictQuery", false);
@@ -16,6 +16,12 @@ const setupTestDB = () => {
 
     afterAll(async () => {
         await mongoose.disconnect();
+        const redis = new Redis({
+            host: config.redis.host,
+            port: config.redis.port,
+            password: config.redis.password,
+        });
+        await redis.disconnect();
     });
 };
 
