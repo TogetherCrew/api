@@ -33,10 +33,10 @@ Run tests:
 npm run test
 ```
 
-## Neo4j Server 
+## Neo4j Server
 
 Below is a command for starting a Neo4j container in Docker
-```
+```bash
 docker run \
         -d \
         --publish=7474:7474 --publish=7687:7687 \
