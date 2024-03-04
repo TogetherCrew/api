@@ -1,18 +1,18 @@
 /* eslint-env node */
 module.exports = {
   testPathIgnorePatterns: [
-    "/__tests__/fixtures",
-    "/__tests__/utils",
+    '/__tests__/fixtures',
+    '/__tests__/utils'
   ],
   transform: {
     '^.+\\.(ts|tsx)?$': 'ts-jest',
-    "^.+\\.(js|jsx)$": "babel-jest",
+    '^.+\\.(js|jsx)$': 'babel-jest'
   },
   collectCoverage: true,
-  testEnvironment: "node",
-  coverageReporters: ["json", "lcov", "text", "clover", "html"],
+  testEnvironment: 'node',
+  coverageReporters: ['json', 'lcov', 'text', 'clover', 'html'],
   collectCoverageFrom: [
-    "src/**/*.ts*"
+    'src/**/*.ts*'
   ],
   coverageThreshold: {
     global: {
