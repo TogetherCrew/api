@@ -12,5 +12,4 @@ const { addQueue, removeQueue, setQueues, replaceQueues } = createBullBoard({
   serverAdapter: serverAdapter,
 });
 
-
-export { serverAdapter as bullBoardServerAdapter, addQueue, removeQueue, setQueues, replaceQueues}
+export { serverAdapter as bullBoardServerAdapter, addQueue, removeQueue, setQueues, replaceQueues };

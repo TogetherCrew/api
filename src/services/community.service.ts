@@ -12,7 +12,6 @@ const createCommunity = async (communityBody: ICommunity): Promise<HydratedDocum
   return Community.create(communityBody);
 };
 
-
 /**
  * Query for communities
  * @param {Object} filter - Mongo filter
@@ -23,7 +22,6 @@ const createCommunity = async (communityBody: ICommunity): Promise<HydratedDocum
  */
 const queryCommunities = async (filter: object, options: object) => {
   return Community.paginate(filter, options);
-
 };
 
 /**
@@ -34,7 +32,6 @@ const queryCommunities = async (filter: object, options: object) => {
 const getCommunityByFilter = async (filter: object): Promise<HydratedDocument<ICommunity> | null> => {
   return Community.findOne(filter);
 };
-
 
 /**
  * Get community by id
@@ -51,7 +48,10 @@ const getCommunityById = async (id: Types.ObjectId): Promise<HydratedDocument<IC
  * @param {Partial<ICommunity>} updateBody
  * @returns {Promise<HydratedDocument<ICommunity>>}
  */
-const updateCommunityByFilter = async (filter: object, updateBody: Partial<ICommunity>): Promise<HydratedDocument<ICommunity>> => {
+const updateCommunityByFilter = async (
+  filter: object,
+  updateBody: Partial<ICommunity>,
+): Promise<HydratedDocument<ICommunity>> => {
   const community = await getCommunityByFilter(filter);
   if (!community) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Community not found');
@@ -84,13 +84,11 @@ const deleteCommunityByFilter = async (filter: object): Promise<HydratedDocument
 const addPlatformToCommunityById = async (
   communityId: Types.ObjectId,
   platformId: Types.ObjectId,
-
 ): Promise<ICommunity | null> => {
-
   const community = await Community.findByIdAndUpdate(
     communityId,
     { $addToSet: { platforms: platformId } },
-    { new: true }
+    { new: true },
   );
 
   if (!community) {
@@ -107,5 +105,5 @@ export default {
   getCommunityByFilter,
   updateCommunityByFilter,
   deleteCommunityByFilter,
-  addPlatformToCommunityById
+  addPlatformToCommunityById,
 };

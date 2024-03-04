@@ -25,4 +25,3 @@
 // router.get('/discord-api/:guildId', auth(), validate(guildValidation.getGuildFromDiscordAPI), guildController.getGuildFromDiscordAPI);
 
 // export default router;
-

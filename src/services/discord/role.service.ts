@@ -8,7 +8,7 @@ import { IRole, IGuildMember } from '@togethercrew.dev/db';
  * @returns {Promise<IRole | null>} - A promise that resolves to the matching role object or null if not found.
  */
 async function getRole(connection: Connection, filter: object): Promise<IRole | null> {
-    return await connection.models.Role.findOne(filter);
+  return await connection.models.Role.findOne(filter);
 }
 
 /**
@@ -18,11 +18,11 @@ async function getRole(connection: Connection, filter: object): Promise<IRole | 
  * @returns {Promise<IRole[] | []>} - A promise that resolves to an array of the matching role objects.
  */
 async function getRoles(connection: Connection, filter: object): Promise<IRole[] | []> {
-    try {
-        return await connection.models.Role.find(filter);
-    } catch (error) {
-        return [];
-    }
+  try {
+    return await connection.models.Role.find(filter);
+  } catch (error) {
+    return [];
+  }
 }
 
 /**
@@ -33,15 +33,15 @@ async function getRoles(connection: Connection, filter: object): Promise<IRole[]
  * @returns {Promise<string[]>} - A promise that resolves to an array of Discord IDs.
  */
 async function getDiscordIdsFromRoleIds(connection: Connection, roleIds: string[]): Promise<string[]> {
-    const guildMembers = await connection.models.GuildMember.find({ roles: { $in: roleIds } });
+  const guildMembers = await connection.models.GuildMember.find({ roles: { $in: roleIds } });
 
-    return guildMembers.map((guildMember: IGuildMember) => guildMember.discordId);
+  return guildMembers.map((guildMember: IGuildMember) => guildMember.discordId);
 }
 
 async function getRoleInfoFromRoleIds(connection: Connection, roleIds: string[]) {
-    const roles = await connection.models.Role.find({ roleId: { $in: roleIds } });
-    const roleInfo = roles.map((role: IRole) => ({ roleId: role.roleId, color: role.color, name: role.name }));
-    return roleInfo;
+  const roles = await connection.models.Role.find({ roleId: { $in: roleIds } });
+  const roleInfo = roles.map((role: IRole) => ({ roleId: role.roleId, color: role.color, name: role.name }));
+  return roleInfo;
 }
 
 /**
@@ -53,12 +53,14 @@ async function getRoleInfoFromRoleIds(connection: Connection, roleIds: string[])
  * @returns {Array<{ roleId: string; color: string; name: string }>} - An array of roles for the guild member.
  */
 function getRolesForGuildMember(guildMember: IGuildMember, roles: Array<IRole>) {
-    return guildMember.roles.map((roleId: string) => {
-        const role = roles.find((role: IRole) => role.roleId === roleId);
-        if (role) {
-            return { roleId: role.roleId, color: role.color, name: role.name };
-        }
-    }).filter(role => role !== undefined);
+  return guildMember.roles
+    .map((roleId: string) => {
+      const role = roles.find((role: IRole) => role.roleId === roleId);
+      if (role) {
+        return { roleId: role.roleId, color: role.color, name: role.name };
+      }
+    })
+    .filter((role) => role !== undefined);
 }
 
 /**
@@ -71,14 +73,14 @@ function getRolesForGuildMember(guildMember: IGuildMember, roles: Array<IRole>) 
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const queryRoles = async (connection: any, filter: object, options: object) => {
-    return await connection.models.Role.paginate(filter, options);
+  return await connection.models.Role.paginate(filter, options);
 };
 
 export default {
-    getRole,
-    queryRoles,
-    getDiscordIdsFromRoleIds,
-    getRolesForGuildMember,
-    getRoleInfoFromRoleIds,
-    getRoles
+  getRole,
+  queryRoles,
+  getDiscordIdsFromRoleIds,
+  getRolesForGuildMember,
+  getRoleInfoFromRoleIds,
+  getRoles,
 };

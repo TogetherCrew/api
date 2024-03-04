@@ -12,6 +12,4 @@
 // router.get('/metrics/engagement', auth(), twitterController.engagementMetrics);
 // router.get('/metrics/account', auth(),  twitterController.accountMetrics);
 
-
 // export default router;
-
