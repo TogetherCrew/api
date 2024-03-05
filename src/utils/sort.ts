@@ -1,9 +1,9 @@
 function sortChannels(channels: any[]) {
   const sortedChannels: any[] = [];
   const unCategorized: any = {
-    channelId: "0",
-    title: "unCategorized",
-    subChannels: []
+    channelId: '0',
+    title: 'unCategorized',
+    subChannels: [],
   };
 
   for (const channel of channels) {
@@ -17,7 +17,12 @@ function sortChannels(channels: any[]) {
         });
       } else {
         unCategorized.subChannels.push({
-          announcementAccess: channel.announcementAccess, canReadMessageHistoryAndViewChannel: channel.canReadMessageHistoryAndViewChannel, channelId: channel.channelId, parentId: channel.channelId, name: channel.name, type: channel.type
+          announcementAccess: channel.announcementAccess,
+          canReadMessageHistoryAndViewChannel: channel.canReadMessageHistoryAndViewChannel,
+          channelId: channel.channelId,
+          parentId: channel.channelId,
+          name: channel.name,
+          type: channel.type,
         });
       }
     }
@@ -40,10 +45,7 @@ function sortByHandler(sortBy: string): Record<string, 1 | -1> {
   return sortParams;
 }
 
-
-
-
 export default {
   sortChannels,
   sortByHandler,
-}
+};
