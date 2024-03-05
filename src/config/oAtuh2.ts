@@ -56,11 +56,19 @@ export const discord = {
     guildId: string = '',
     disableGuildSelect: boolean = true,
   ): string {
-    const baseDiscordUrl = 'https://discord.com/api/oauth2/authorize';
-    let url = `${baseDiscordUrl}?client_id=${config.discord.clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&permissions=${permissions}&state=${state}`;
-    if (guildId) url += `&guild_id=${guildId}`;
-    if (disableGuildSelect) url += `&disable_guild_select=true`;
-    return url;
+    const queryParams = new URLSearchParams({
+      client_id: config.discord.clientId,
+      redirect_uri: redirectUri,
+      response_type: 'code',
+      scope: scope,
+      permissions: permissions.toString(),
+      state: state,
+    });
+
+    if (guildId) queryParams.append('guild_id', guildId);
+    if (disableGuildSelect) queryParams.append('disable_guild_select', 'true');
+
+    return `https://discord.com/api/oauth2/authorize?${queryParams.toString()}`;
   },
 };
 
@@ -69,7 +77,16 @@ export const twitter = {
     connectAccount: 'tweet.read offline.access users.read',
   },
   generateTwitterAuthUrl(state: string, codeChallenge: string): string {
-    const baseTwitterUrl = 'https://twitter.com/i/oauth2/authorize';
-    return `${baseTwitterUrl}?response_type=code&client_id=${config.twitter.clientId}&redirect_uri=${config.twitter.callbackURI.connect}&scope=${this.scopes.connectAccount}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256`;
+    const queryParams = new URLSearchParams({
+      response_type: 'code',
+      client_id: config.twitter.clientId,
+      redirect_uri: config.twitter.callbackURI.connect,
+      scope: this.scopes.connectAccount,
+      state: state,
+      code_challenge: codeChallenge,
+      code_challenge_method: 'S256',
+    });
+
+    return `https://twitter.com/i/oauth2/authorize?${queryParams.toString()}`;
   },
 };
