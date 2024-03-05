@@ -26,19 +26,16 @@ const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Re
   const state = generateState();
   req.session.state = state;
   if (platform === 'discord') {
-    const permissions = discord.permissions.ReadData.ViewChannel | discord.permissions.ReadData.ReadMessageHistory;
-    const discordUrl = discord.generateDiscordAuthUrl(
-      config.discord.callbackURI.connect,
-      discord.scopes.connectGuild,
-      permissions,
-      state,
+    res.redirect(
+      `https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.connect}&response_type=code&scope=${discord.scopes.connectGuild}&permissions=${discord.permissions.ReadData.ViewChannel | discord.permissions.ReadData.ReadMessageHistory}&state=${state}`,
     );
-    res.redirect(discordUrl);
   } else if (platform === 'twitter') {
     const codeVerifier = generateCodeVerifier();
-    req.session.codeVerifier = codeVerifier; // Store the codeVerifier in the session for later use
-    const twitterUrl = twitter.generateTwitterAuthUrl(state, generateCodeChallenge(codeVerifier));
-    res.redirect(twitterUrl);
+    const codeChallenge = generateCodeChallenge(codeVerifier);
+    req.session.codeVerifier = codeVerifier;
+    res.redirect(
+      `https://twitter.com/i/oauth2/authorize?response_type=code&client_id=${config.twitter.clientId}&redirect_uri=${config.twitter.callbackURI.connect}&scope=${twitter.scopes.connectAccount}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256`,
+    );
   }
 });
 
@@ -210,18 +207,11 @@ const requestAccess = catchAsync(async function (req: ISessionRequest, res: Resp
   if (platform === 'discord') {
     const currentBotPermissions = await discordServices.coreService.getBotPermissions(id);
     const requireBotPermissions = discordServices.coreService.getRequirePermissionsForModule(module);
-    const combinedPermissions = [...currentBotPermissions, ...requireBotPermissions];
-    const permissionsValue = discordServices.coreService.getCombinedPermissionsValue(combinedPermissions);
-    const permissionsValueNumber = Number(permissionsValue);
-    const discordUrl = discord.generateDiscordAuthUrl(
-      config.discord.callbackURI.requestAccess,
-      discord.scopes.connectGuild,
-      permissionsValueNumber,
-      state,
-      id,
-      true,
+    const combinedArray = currentBotPermissions.concat(requireBotPermissions);
+    const permissionsValue = discordServices.coreService.getCombinedPermissionsValue(combinedArray);
+    res.redirect(
+      `https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&response_type=code&redirect_uri=${config.discord.callbackURI.requestAccess}&scope=${discord.scopes.connectGuild}&permissions=${permissionsValue}&guild_id=${id}&disable_guild_select=true&state=${state}`,
     );
-    res.redirect(discordUrl);
   }
 });
 
