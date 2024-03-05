@@ -1,6 +1,3 @@
-// prettier-ignore
-/* eslint-disable */
-/* eslint-disable no-unused-vars */
 import crypto from 'crypto';
 import { Client, GatewayIntentBits } from 'discord.js';
 import config from './index';
@@ -71,7 +68,6 @@ export const twitter = {
   scopes: {
     connectAccount: 'tweet.read offline.access users.read',
   },
-  // 
   generateTwitterAuthUrl(state: string, codeChallenge: string): string {
     const baseTwitterUrl = 'https://twitter.com/i/oauth2/authorize';
     return `${baseTwitterUrl}?response_type=code&client_id=${config.twitter.clientId}&redirect_uri=${encodeURIComponent(config.twitter.callbackURI.connect)}&scope=${encodeURIComponent(this.scopes.connectAccount)}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256`;
