@@ -62,7 +62,8 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
                 name: channels[i].name,
                 parentId: channels[i].parentId,
                 canReadMessageHistoryAndViewChannel,
-                announcementAccess
+                announcementAccess,
+                type: channels[i].type
             }
         }
         return await sort.sortChannels(channels);
