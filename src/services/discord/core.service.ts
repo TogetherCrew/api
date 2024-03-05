@@ -22,100 +22,39 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
 
 
 
-    if (req.query.property === 'role') {
-        const filter = pick(req.query, ['name']);
-        if (filter.name) {
-            filter.name = {
-                $regex: filter.name,
-                $options: 'i'
-            };
-        }
-        filter.deletedAt = null;
-        const options = pick(req.query, ['sortBy', 'limit', 'page']);
-
-        return await roleService.queryRoles(connection, filter, options)
-    }
-    else if (req.query.property === 'channel') {
-        const filter = pick(req.query, ['name']);
-        if (filter.name) {
-            filter.name = {
-                $regex: filter.name,
-                $options: 'i'
-            };
-        }
-        filter.deletedAt = null;
-        if (req.body.channelIds) {
-            filter.channelId = { $in: req.body.channelIds };
-        }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const channels: any = await channelService.getChannels(connection, filter);
-        for (let i = 0; i < channels.length; i++) {
-            const canReadMessageHistoryAndViewChannel = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [discord.permissions.ReadData.ViewChannel, discord.permissions.ReadData.ReadMessageHistory]);
-            let announcementAccess: boolean;
-            if (channels[i].type === 0 || channels[i].type === 4) {
-                announcementAccess = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [discord.permissions.Announcement.ViewChannel, discord.permissions.Announcement.SendMessages, discord.permissions.Announcement.SendMessagesInThreads, discord.permissions.Announcement.CreatePrivateThreads, discord.permissions.Announcement.CreatePublicThreads, discord.permissions.Announcement.EmbedLinks, discord.permissions.Announcement.AttachFiles, discord.permissions.Announcement.MentionEveryone]);
-            } else {
-                announcementAccess = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [discord.permissions.Announcement.ViewChannel, discord.permissions.Announcement.SendMessages, discord.permissions.Announcement.SendMessagesInThreads, discord.permissions.Announcement.CreatePrivateThreads, discord.permissions.Announcement.CreatePublicThreads, discord.permissions.Announcement.EmbedLinks, discord.permissions.Announcement.AttachFiles, discord.permissions.Announcement.MentionEveryone, discord.permissions.Announcement.Connect]);
-            }
-            channels[i] = {
-                channelId: channels[i].channelId,
-                name: channels[i].name,
-                parentId: channels[i].parentId,
-                canReadMessageHistoryAndViewChannel,
-                announcementAccess,
-                type: channels[i].type
-            }
-        }
-        return await sort.sortChannels(channels);
-    }
-    filter.deletedAt = null;
-    const options = pick(req.query, ['sortBy', 'limit', 'page']);
-
-    return await roleService.queryRoles(connection, filter, options);
-  } else if (req.query.property === 'channel') {
+  if (req.query.property === 'role') {
     const filter = pick(req.query, ['name']);
     if (filter.name) {
       filter.name = {
         $regex: filter.name,
-        $options: 'i',
+        $options: 'i'
+      };
+    }
+    filter.deletedAt = null;
+    const options = pick(req.query, ['sortBy', 'limit', 'page']);
+
+    return await roleService.queryRoles(connection, filter, options)
+  }
+  else if (req.query.property === 'channel') {
+    const filter = pick(req.query, ['name']);
+    if (filter.name) {
+      filter.name = {
+        $regex: filter.name,
+        $options: 'i'
       };
     }
     filter.deletedAt = null;
     if (req.body.channelIds) {
       filter.channelId = { $in: req.body.channelIds };
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const channels: any = await channelService.getChannels(connection, filter);
     for (let i = 0; i < channels.length; i++) {
-      const canReadMessageHistoryAndViewChannel = await channelService.checkBotPermissions(
-        req.platform?.metadata?.id,
-        channels[i],
-        [discord.permissions.ReadData.ViewChannel, discord.permissions.ReadData.ReadMessageHistory],
-      );
+      const canReadMessageHistoryAndViewChannel = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [discord.permissions.ReadData.ViewChannel, discord.permissions.ReadData.ReadMessageHistory]);
       let announcementAccess: boolean;
       if (channels[i].type === 0 || channels[i].type === 4) {
-        announcementAccess = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [
-          discord.permissions.Announcement.ViewChannel,
-          discord.permissions.Announcement.SendMessages,
-          discord.permissions.Announcement.SendMessagesInThreads,
-          discord.permissions.Announcement.CreatePrivateThreads,
-          discord.permissions.Announcement.CreatePublicThreads,
-          discord.permissions.Announcement.EmbedLinks,
-          discord.permissions.Announcement.AttachFiles,
-          discord.permissions.Announcement.MentionEveryone,
-        ]);
+        announcementAccess = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [discord.permissions.Announcement.ViewChannel, discord.permissions.Announcement.SendMessages, discord.permissions.Announcement.SendMessagesInThreads, discord.permissions.Announcement.CreatePrivateThreads, discord.permissions.Announcement.CreatePublicThreads, discord.permissions.Announcement.EmbedLinks, discord.permissions.Announcement.AttachFiles, discord.permissions.Announcement.MentionEveryone]);
       } else {
-        announcementAccess = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [
-          discord.permissions.Announcement.ViewChannel,
-          discord.permissions.Announcement.SendMessages,
-          discord.permissions.Announcement.SendMessagesInThreads,
-          discord.permissions.Announcement.CreatePrivateThreads,
-          discord.permissions.Announcement.CreatePublicThreads,
-          discord.permissions.Announcement.EmbedLinks,
-          discord.permissions.Announcement.AttachFiles,
-          discord.permissions.Announcement.MentionEveryone,
-          discord.permissions.Announcement.Connect,
-        ]);
+        announcementAccess = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [discord.permissions.Announcement.ViewChannel, discord.permissions.Announcement.SendMessages, discord.permissions.Announcement.SendMessagesInThreads, discord.permissions.Announcement.CreatePrivateThreads, discord.permissions.Announcement.CreatePublicThreads, discord.permissions.Announcement.EmbedLinks, discord.permissions.Announcement.AttachFiles, discord.permissions.Announcement.MentionEveryone, discord.permissions.Announcement.Connect]);
       }
       channels[i] = {
         channelId: channels[i].channelId,
@@ -123,20 +62,22 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
         parentId: channels[i].parentId,
         canReadMessageHistoryAndViewChannel,
         announcementAccess,
-      };
+        type: channels[i].type
+      }
     }
     return await sort.sortChannels(channels);
-  } else if (req.query.property === 'guildMember') {
+  }
+
+  else if (req.query.property === 'guildMember') {
     const filter = pick(req.query, ['ngu']);
     filter.deletedAt = null;
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
-    const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options)
     guildMembers.results.forEach((guildMember: any) => {
       guildMember.ngu = guildMemberService.getNgu(guildMember);
       guildMember.username = guildMemberService.getUsername(guildMember);
     });
-    return guildMembers;
+    return guildMembers
   }
 }
 
@@ -149,6 +90,7 @@ async function getGuildFromDiscordJS(guildId: Snowflake): Promise<Guild | null> 
   const client = await DiscordBotManager.getClient();
   try {
     return await client.guilds.fetch(guildId);
+
   } catch (error) {
     logger.error({ error }, 'Failed to get guild from discordJS');
     return null;
@@ -156,7 +98,7 @@ async function getGuildFromDiscordJS(guildId: Snowflake): Promise<Guild | null> 
 }
 
 /**
- * leave bot from guild
+ * leave bot from guild 
  * @param {Snowflake} guildId
  * @returns {Promise<IDiscordOAuth2EchangeCode>}
  */
@@ -166,6 +108,8 @@ async function leaveBotFromGuild(guildId: Snowflake) {
     guild.leave();
   }
 }
+
+
 
 /**
  * exchange discord code with access token
@@ -180,17 +124,18 @@ async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscor
       client_secret: config.discord.clientSecret,
       grant_type: 'authorization_code',
       redirect_uri,
-      code,
+      code
     };
 
     const response = await fetch('https://discord.com/api/oauth2/token', {
       method: 'POST',
       body: new URLSearchParams(data),
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    });
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    })
     if (response.ok) {
       return await response.json();
-    } else {
+    }
+    else {
       throw new Error();
     }
   } catch (error) {
@@ -208,11 +153,12 @@ async function getUserFromDiscordAPI(accessToken: string): Promise<IDiscordUser>
   try {
     const response = await fetch('https://discord.com/api/users/@me', {
       method: 'GET',
-      headers: { Authorization: `Bearer ${accessToken}` },
+      headers: { 'Authorization': `Bearer ${accessToken}` }
     });
     if (response.ok) {
       return await response.json();
-    } else {
+    }
+    else {
       throw new Error(await response.json());
     }
   } catch (error) {
@@ -230,11 +176,12 @@ async function getBotFromDiscordAPI(): Promise<IDiscordUser> {
   try {
     const response = await fetch('https://discord.com/api/users/@me', {
       method: 'GET',
-      headers: { Authorization: `Bot ${config.discord.botToken}` },
+      headers: { 'Authorization': `Bot ${config.discord.botToken}` }
     });
     if (response.ok) {
       return await response.json();
-    } else {
+    }
+    else {
       throw new Error(await response.json());
     }
   } catch (error) {
@@ -242,6 +189,7 @@ async function getBotFromDiscordAPI(): Promise<IDiscordUser> {
     throw new ApiError(590, 'Can not fetch from discord API');
   }
 }
+
 
 /**
  * get list of permissions that bot has in a specific guild
@@ -255,10 +203,7 @@ async function getBotPermissions(guildId: Snowflake): Promise<Array<string>> {
     const member = await guild.members.fetch(config.discord.clientId);
     return member.permissions.toArray();
   } catch (error) {
-    logger.error(
-      { bot_token: config.discord.botToken, error },
-      'Failed to get list of permissions that bot has in a specific guild',
-    );
+    logger.error({ bot_token: config.discord.botToken, error }, 'Failed to get list of permissions that bot has in a specific guild');
     throw new ApiError(590, 'Failed to get list of permissions that bot has in a specific guild');
   }
 }
@@ -310,7 +255,7 @@ function getCombinedPermissionsValue(permissionsArray: Array<string>) {
  * The function iterates through each category of permissions (like ReadData, Announcement) in the
  * discord object and checks if the given permissions are present in each category.
  * If a permission is present, it is marked as true, otherwise false.
- *
+ * 
  * @param {string[]} permissionsToCheck - An array of permission names to check against the discord permissions.
  * @returns {any} An object with each category of permissions containing key-value pairs of permission names and their boolean status (true if present in the array, false otherwise).
  */
@@ -345,6 +290,7 @@ class DiscordBotManager {
         ],
       });
       await DiscordBotManager.client.login(config.discord.botToken);
+
     }
     return DiscordBotManager.client;
   }
@@ -360,5 +306,5 @@ export default {
   getBotPermissions,
   getRequirePermissionsForModule,
   getCombinedPermissionsValue,
-  getPermissionsStatus,
-};
+  getPermissionsStatus
+}
