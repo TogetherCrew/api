@@ -1015,25 +1015,26 @@ async function getMembersInteractionsNetworkGraph(
   const rolesInNetworkGraph = usersInfo.flatMap((user) => user.roles);
   const roles = await roleService.getRoles(guildConnection, { roleId: { $in: rolesInNetworkGraph } });
 
-  // prepare data
-  const response = usersInteractions.flatMap((interaction) => {
-    const { aUserId, bUserId, rWeeklyInteraction } = interaction;
-    // Radius
-    const aUserRadiusObj = userRadius.find((userRadius) => userRadius.userId == aUserId);
-    const aUserRadius = aUserRadiusObj?.radius as number;
-    const bUserRadiusObj = userRadius.find((userRadius) => userRadius.userId == bUserId);
-    const bUserRadius = bUserRadiusObj?.radius as number;
-    // Status
-    const aUserStatsObj = userStatus.find((userStatus) => userStatus.userId == aUserId);
-    const aUserStats = aUserStatsObj?.stats;
-    const bUserStatsObj = userStatus.find((userStatus) => userStatus.userId == bUserId);
-    const bUserStats = bUserStatsObj?.stats;
-    // userInfo
-    const aUser = usersInfo.find((user) => user.discordId === aUserId);
-    const aInfo = getUserInformationForNetworkGraph(aUser, roles);
+    // prepare data
+    const response = usersInteractions.flatMap((interaction) => {
+        const { aUserId, bUserId, rWeeklyInteraction } = interaction
+        // Radius
+        const aUserRadiusObj = userRadius.find((userRadius) => userRadius.userId == aUserId)
+        const aUserRadius = aUserRadiusObj?.radius as number
+        const bUserRadiusObj = userRadius.find((userRadius) => userRadius.userId == bUserId)
+        const bUserRadius = bUserRadiusObj?.radius as number
+        // Status
+        const aUserStatsObj = userStatus.find((userStatus) => userStatus.userId == aUserId)
+        const aUserStats = aUserStatsObj?.stats
+        const bUserStatsObj = userStatus.find((userStatus) => userStatus.userId == bUserId)
+        const bUserStats = bUserStatsObj?.stats
+        // userInfo
+        const aUser = usersInfo.find(user => user.discordId === aUserId)
+        const bUser = usersInfo.find(user => user.discordId === bUserId)
+        if(!aUser || !bUser) return []
 
-    const bUser = usersInfo.find((user) => user.discordId === bUserId);
-    const bInfo = getUserInformationForNetworkGraph(bUser, roles);
+        const aInfo = getUserInformationForNetworkGraph(aUser, roles)
+        const bInfo = getUserInformationForNetworkGraph(bUser, roles)
 
     if (!aUserStats || !bUserStats) {
       return [];

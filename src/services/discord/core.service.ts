@@ -20,13 +20,53 @@ const logger = parentLogger.child({ module: 'DiscordService' });
 async function getPropertyHandler(req: IAuthAndPlatform) {
   const connection = await DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
 
-  if (req.query.property === 'role') {
-    const filter = pick(req.query, ['name']);
-    if (filter.name) {
-      filter.name = {
-        $regex: filter.name,
-        $options: 'i',
-      };
+
+
+    if (req.query.property === 'role') {
+        const filter = pick(req.query, ['name']);
+        if (filter.name) {
+            filter.name = {
+                $regex: filter.name,
+                $options: 'i'
+            };
+        }
+        filter.deletedAt = null;
+        const options = pick(req.query, ['sortBy', 'limit', 'page']);
+
+        return await roleService.queryRoles(connection, filter, options)
+    }
+    else if (req.query.property === 'channel') {
+        const filter = pick(req.query, ['name']);
+        if (filter.name) {
+            filter.name = {
+                $regex: filter.name,
+                $options: 'i'
+            };
+        }
+        filter.deletedAt = null;
+        if (req.body.channelIds) {
+            filter.channelId = { $in: req.body.channelIds };
+        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const channels: any = await channelService.getChannels(connection, filter);
+        for (let i = 0; i < channels.length; i++) {
+            const canReadMessageHistoryAndViewChannel = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [discord.permissions.ReadData.ViewChannel, discord.permissions.ReadData.ReadMessageHistory]);
+            let announcementAccess: boolean;
+            if (channels[i].type === 0 || channels[i].type === 4) {
+                announcementAccess = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [discord.permissions.Announcement.ViewChannel, discord.permissions.Announcement.SendMessages, discord.permissions.Announcement.SendMessagesInThreads, discord.permissions.Announcement.CreatePrivateThreads, discord.permissions.Announcement.CreatePublicThreads, discord.permissions.Announcement.EmbedLinks, discord.permissions.Announcement.AttachFiles, discord.permissions.Announcement.MentionEveryone]);
+            } else {
+                announcementAccess = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [discord.permissions.Announcement.ViewChannel, discord.permissions.Announcement.SendMessages, discord.permissions.Announcement.SendMessagesInThreads, discord.permissions.Announcement.CreatePrivateThreads, discord.permissions.Announcement.CreatePublicThreads, discord.permissions.Announcement.EmbedLinks, discord.permissions.Announcement.AttachFiles, discord.permissions.Announcement.MentionEveryone, discord.permissions.Announcement.Connect]);
+            }
+            channels[i] = {
+                channelId: channels[i].channelId,
+                name: channels[i].name,
+                parentId: channels[i].parentId,
+                canReadMessageHistoryAndViewChannel,
+                announcementAccess,
+                type: channels[i].type
+            }
+        }
+        return await sort.sortChannels(channels);
     }
     filter.deletedAt = null;
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
