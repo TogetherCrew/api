@@ -14,6 +14,7 @@ const createPlatform = catchAsync(async function (req: IAuthRequest, res: Respon
   if (!community) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Community not found');
   }
+
   await platformService.checkPlatformAlreadyConnected(community.id, req.body);
   await platformService.checkSinglePlatformConnection(community.id, req.body);
   const platform = await platformService.reconnectOrAddNewPlatform(community.id, req.body);
@@ -25,29 +26,19 @@ const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Re
   const state = generateState();
   req.session.state = state;
   if (platform === 'discord') {
-    const permissionsValue = `${discord.permissions.ReadData.ViewChannel | discord.permissions.ReadData.ReadMessageHistory}`;
-    const discordAuthUrl = new URL('https://discord.com/api/oauth2/authorize');
-    discordAuthUrl.searchParams.append('client_id', config.discord.clientId);
-    discordAuthUrl.searchParams.append('response_type', 'code');
-    discordAuthUrl.searchParams.append('redirect_uri', encodeURIComponent(config.discord.callbackURI.connect));
-    discordAuthUrl.searchParams.append('scope', encodeURIComponent(discord.scopes.connectGuild));
-    discordAuthUrl.searchParams.append('permissions', permissionsValue);
-    discordAuthUrl.searchParams.append('state', state);
-
-    res.redirect(discordAuthUrl.toString());
+    const permissions = discord.permissions.ReadData.ViewChannel | discord.permissions.ReadData.ReadMessageHistory;
+    const discordUrl = discord.generateDiscordAuthUrl(
+      config.discord.callbackURI.connect,
+      discord.scopes.connectGuild,
+      permissions,
+      state,
+    );
+    res.redirect(discordUrl);
   } else if (platform === 'twitter') {
     const codeVerifier = generateCodeVerifier();
-    const codeChallenge = generateCodeChallenge(codeVerifier);
-    req.session.codeVerifier = codeVerifier;
-    const twitterAuthUrl = new URL('https://twitter.com/i/oauth2/authorize');
-    twitterAuthUrl.searchParams.append('response_type', 'code');
-    twitterAuthUrl.searchParams.append('client_id', config.twitter.clientId);
-    twitterAuthUrl.searchParams.append('redirect_uri', encodeURIComponent(config.twitter.callbackURI.connect));
-    twitterAuthUrl.searchParams.append('scope', twitter.scopes.connectAccount);
-    twitterAuthUrl.searchParams.append('state', state);
-    twitterAuthUrl.searchParams.append('code_challenge', codeChallenge);
-    twitterAuthUrl.searchParams.append('code_challenge_method', 'S256');
-    res.redirect(twitterAuthUrl.toString());
+    req.session.codeVerifier = codeVerifier; // Store the codeVerifier in the session for later use
+    const twitterUrl = twitter.generateTwitterAuthUrl(state, generateCodeChallenge(codeVerifier));
+    res.redirect(twitterUrl);
   }
 });
 
@@ -61,6 +52,7 @@ const connectDiscordCallback = catchAsync(async function (req: ISessionRequest, 
     if (!code || !returnedState || returnedState !== storedState) {
       throw new Error('Invalid code or state mismatch');
     }
+
     const discordOathCallback = await authService.exchangeCode(code, config.discord.callbackURI.connect);
     const params = {
       statusCode: STATUS_CODE_SUCCESS,
@@ -209,29 +201,27 @@ const getProperties = catchAsync(async function (req: IAuthAndPlatform, res: Res
   res.status(httpStatus.OK).send(result);
 });
 
+type module = keyof typeof discord.permissions;
 const requestAccess = catchAsync(async function (req: ISessionRequest, res: Response) {
   const { platform, id } = req.params;
-  const moduleParam = req.params.module as keyof typeof discord.permissions;
+  const module = req.params.module as module;
   const state = generateState();
   req.session.state = state;
-
   if (platform === 'discord') {
     const currentBotPermissions = await discordServices.coreService.getBotPermissions(id);
-    const requireBotPermissions = discordServices.coreService.getRequirePermissionsForModule(moduleParam);
-    const combinedPermissions = currentBotPermissions.concat(requireBotPermissions);
+    const requireBotPermissions = discordServices.coreService.getRequirePermissionsForModule(module);
+    const combinedPermissions = [...currentBotPermissions, ...requireBotPermissions];
     const permissionsValue = discordServices.coreService.getCombinedPermissionsValue(combinedPermissions);
-
-    const discordAuthUrl = new URL('https://discord.com/api/oauth2/authorize');
-    discordAuthUrl.searchParams.append('client_id', config.discord.clientId);
-    discordAuthUrl.searchParams.append('response_type', 'code');
-    discordAuthUrl.searchParams.append('redirect_uri', encodeURIComponent(config.discord.callbackURI.requestAccess));
-    discordAuthUrl.searchParams.append('scope', encodeURIComponent(discord.scopes.connectGuild));
-    discordAuthUrl.searchParams.append('permissions', permissionsValue.toString());
-    discordAuthUrl.searchParams.append('guild_id', id);
-    discordAuthUrl.searchParams.append('disable_guild_select', 'true');
-    discordAuthUrl.searchParams.append('state', state);
-
-    res.redirect(discordAuthUrl.toString());
+    const permissionsValueNumber = Number(permissionsValue);
+    const discordUrl = discord.generateDiscordAuthUrl(
+      config.discord.callbackURI.requestAccess,
+      discord.scopes.connectGuild,
+      permissionsValueNumber,
+      state,
+      id, // Pass the Guild ID for which access is requested
+      true, // Assuming you want to disable guild selection
+    );
+    res.redirect(discordUrl);
   }
 });
 
