@@ -7,6 +7,8 @@ import { IAnnouncement } from '@togethercrew.dev/db';
 import { announcementService } from '../services';
 import moment from 'moment';
 import { Types } from 'mongoose';
+import { Event, MBConnection } from '@togethercrew.dev/tc-messagebroker';
+import logger from '../config/logger';
 
 async function enhanceAnnouncementData(announcementData: Array<any>) {
     const enhancedData = [];
@@ -20,7 +22,7 @@ async function enhanceAnnouncementData(announcementData: Array<any>) {
 
 async function getAnnouncementFieldsToReturn(announcement: IAnnouncement) {
     const newData = await enhanceAnnouncementData(announcement.data)
-    
+
     return {
         id: (announcement as any).id,
         title: announcement.title,
@@ -77,7 +79,7 @@ const updateAnnouncement = catchAsync(async function (req: IAuthRequest, res: Re
         throw new ApiError(httpStatus.NOT_FOUND, 'Announcement not found');
     }
 
-    if(data) {
+    if (data) {
         const requestedPlatformIds = data.map((data: object & { platformId: Types.ObjectId }) => data.platformId);
         const isPlatformIdsValid = requestedPlatformIds.every((platformId: Types.ObjectId) => community.platforms?.includes(platformId));
         if (!isPlatformIdsValid) {
@@ -137,12 +139,12 @@ const getAnnouncements = catchAsync(async function (req: IAuthRequest, res: Resp
     dbFilter.community = queryFilter.communityId;
 
 
-    if(utcStartDate && utcEndDate) dbFilter.scheduledAt = { $gte: utcStartDate, $lte: utcEndDate };
-    else if(utcStartDate) dbFilter.scheduledAt = { $gte: utcStartDate };
-    else if(utcEndDate) dbFilter.scheduledAt = { $lte: utcEndDate };
+    if (utcStartDate && utcEndDate) dbFilter.scheduledAt = { $gte: utcStartDate, $lte: utcEndDate };
+    else if (utcStartDate) dbFilter.scheduledAt = { $gte: utcStartDate };
+    else if (utcEndDate) dbFilter.scheduledAt = { $lte: utcEndDate };
 
     const paginatedAnnouncement = await announcementService.queryAnnouncements(dbFilter, options);
-    paginatedAnnouncement.results = await Promise.all( paginatedAnnouncement.results.map(async (announcement: any) => await getAnnouncementFieldsToReturn(announcement as IAnnouncement)))
+    paginatedAnnouncement.results = await Promise.all(paginatedAnnouncement.results.map(async (announcement: any) => await getAnnouncementFieldsToReturn(announcement as IAnnouncement)))
     res.status(httpStatus.OK).send(paginatedAnnouncement);
 })
 
@@ -180,10 +182,23 @@ const deleteAnnouncement = catchAsync(async function (req: IAuthRequest, res: Re
     res.status(httpStatus.NO_CONTENT).send();
 })
 
+const onSafetyMessageEvent = async (msg: any) => {
+
+    logger.info({ msg, event: Event.SERVER_API.ANNOUNCEMENT_SAFETY_MESSAGE, sagaId: msg.content.uuid }, 'is running');
+    if (!msg) return;
+
+    const { content } = msg;
+    const saga = await MBConnection.models.Saga.findOne({ sagaId: content.uuid });
+    
+    await announcementService.sendPrivateMessageToUser(saga);
+}
+
 export default {
     createAnnouncement,
     updateAnnouncement,
     deleteAnnouncement,
     getAnnouncements,
-    getOneAnnouncement
+    getOneAnnouncement,
+
+    onSafetyMessageEvent,
 };

@@ -290,8 +290,20 @@ const queryGuildMembers = async (connection: any, filter: Filter, options: Optio
 
 };
 
+const getAllDiscordIdsInLastedMemberActivity = async (connection: Connection, memberActivities: string[]) => {
+    const memberActivity = await connection.models.MemberActivity.findOne().sort({ date: -1 })
+    const allDiscordIds = new Set<string>();
+
+    memberActivities.forEach(activity => {
+        memberActivity[activity].forEach((discordId: string) => allDiscordIds.add(discordId));
+    });
+
+    return allDiscordIds;
+};
+
 export default {
     getGuildMemberInfoFromDiscordIds,
+    getAllDiscordIdsInLastedMemberActivity,
     getDiscordIdsFromUsernames,
     queryGuildMembersForTables,
     getGuildMember,

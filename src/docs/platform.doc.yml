@@ -343,6 +343,8 @@ paths:
                               type: boolean
                             announcementAccess: 
                               type: boolean   
+                            type:
+                              type: integer
                 - schema:
                   type: array
                   items: 
