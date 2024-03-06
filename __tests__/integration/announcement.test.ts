@@ -2,7 +2,7 @@
 import request from 'supertest';
 import httpStatus from 'http-status';
 import app from '../../src/app';
-import setupTestDB from '../utils/setupTestDB';
+import setupTestDB, { cleanUpTenantDatabases } from '../utils/setupTestDB';
 import { userOne, insertUsers, userTwo } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { communityOne, communityTwo, communityThree, insertCommunities } from '../fixtures/community.fixture';
@@ -36,19 +36,21 @@ describe('Community routes', () => {
   ]);
 
   let connection: Connection;
-
   beforeAll(async () => {
     connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
   });
 
+  afterAll(async () => {
+    await connection.close();
+  });
+
   beforeEach(async () => {
+    cleanUpTenantDatabases();
     userOne.communities = [communityOne._id, communityTwo._id];
     userTwo.communities = [communityThree._id];
     communityOne.users = [userOne._id];
     communityTwo.users = [userOne._id];
     communityThree.users = [userTwo._id];
-
-    await connection.dropDatabase();
   });
 
   describe('POST api/v1/announcements', () => {
@@ -58,7 +60,9 @@ describe('Community routes', () => {
     const nowDate = new Date();
     const nextMonthDate = new Date();
     nextMonthDate.setMonth(nowDate.getMonth() + 1);
-
+    beforeEach(async () => {
+      cleanUpTenantDatabases();
+    });
     test('should return 201 and successfully create a new draft announcement if data is ok', async () => {
       platformOne.community = communityOne._id;
       communityOne.platforms = [platformOne._id];
@@ -228,6 +232,9 @@ describe('Community routes', () => {
   });
 
   describe('PATCH api/v1/announcements/:announcementId', () => {
+    beforeEach(async () => {
+      cleanUpTenantDatabases();
+    });
     test('should return 200 and successfully update announcement if data is ok', async () => {
       platformOne.community = communityOne._id;
       await insertPlatforms([platformOne]);
@@ -305,6 +312,9 @@ describe('Community routes', () => {
   });
 
   describe('GET api/v1/announcements', () => {
+    beforeEach(async () => {
+      cleanUpTenantDatabases();
+    });
     test('should return 200 and successfully get announcements if data is ok', async () => {
       platformOne.community = communityOne._id;
       await insertPlatforms([platformOne]);
@@ -419,6 +429,9 @@ describe('Community routes', () => {
   });
 
   describe('GET api/v1/announcements/:announcementId', () => {
+    beforeEach(async () => {
+      cleanUpTenantDatabases();
+    });
     test('should return 200 and successfully get announcement if data is ok', async () => {
       platformOne.community = communityOne._id;
       await insertPlatforms([platformOne]);
