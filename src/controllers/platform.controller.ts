@@ -218,8 +218,8 @@ const requestAccess = catchAsync(async function (req: ISessionRequest, res: Resp
       discord.scopes.connectGuild,
       permissionsValueNumber,
       state,
-      id, // Pass the Guild ID for which access is requested
-      true, // Assuming you want to disable guild selection
+      id, 
+      true, 
     );
     res.redirect(discordUrl);
   }

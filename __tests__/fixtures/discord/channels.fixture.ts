@@ -14,6 +14,7 @@ export const discordChannel1: IChannel = {
     },
   ],
   deletedAt: null,
+  type: 0
 };
 
 export const discordChannel2: IChannel = {
@@ -35,6 +36,8 @@ export const discordChannel2: IChannel = {
     },
   ],
   deletedAt: null,
+  type: 0
+
 };
 
 export const discordChannel3: IChannel = {
@@ -56,6 +59,7 @@ export const discordChannel3: IChannel = {
     },
   ],
   deletedAt: null,
+  type: 0
 };
 
 export const discordChannel4: IChannel = {
@@ -63,6 +67,7 @@ export const discordChannel4: IChannel = {
   name: 'Channel 4',
   parentId: null,
   deletedAt: null,
+  type: 0
 };
 
 export const discordChannel5: IChannel = {
@@ -70,6 +75,7 @@ export const discordChannel5: IChannel = {
   name: 'Channel 5',
   parentId: '987654321098765432',
   deletedAt: new Date(),
+  type: 0
 };
 
 export const insertChannels = async function <Type>(channels: Array<Type>, connection: Connection) {
