@@ -30,6 +30,13 @@ import { Connection } from 'mongoose';
 setupTestDB();
 
 describe('member-activity routes', () => {
+  let connection: Connection;
+  beforeAll(async () => {
+    connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+  });
+  afterAll(async () => {
+    await connection.close();
+  });
   beforeEach(async () => {
     cleanUpTenantDatabases();
     userOne.communities = [communityOne._id];
@@ -40,9 +47,8 @@ describe('member-activity routes', () => {
     platformFour.community = communityOne._id;
   });
   describe('POST /api/v1/member-activity/:platformId/active-members-composition-line-graph', () => {
-    let connection: Connection;
     beforeEach(async () => {
-      connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+      cleanUpTenantDatabases();
     });
     test('should return 200 and active members composition line graph data if req data is ok', async () => {
       await insertCommunities([communityOne]);
@@ -135,9 +141,8 @@ describe('member-activity routes', () => {
   });
 
   describe('POST /api/v1/member-activity/:platformId/disengaged-members-composition-line-graph', () => {
-    let connection: Connection;
     beforeEach(async () => {
-      connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+      cleanUpTenantDatabases();
     });
     test('should return 200 and disengaged members composition line graph data if req data is ok', async () => {
       await insertCommunities([communityOne]);
@@ -226,9 +231,8 @@ describe('member-activity routes', () => {
   });
 
   describe('POST /api/v1/member-activity/:platformId/active-members-onboarding-line-graph', () => {
-    let connection: Connection;
     beforeEach(async () => {
-      connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+      cleanUpTenantDatabases();
     });
     test('should return 200 and active members onboarding line graph data if req data is ok', async () => {
       await insertCommunities([communityOne]);
@@ -314,9 +318,8 @@ describe('member-activity routes', () => {
   });
 
   describe('POST /api/v1/member-activity/:platformId/inactive-members-line-graph', () => {
-    let connection: Connection;
     beforeEach(async () => {
-      connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+      cleanUpTenantDatabases();
     });
     test('should return 200 and inactive members line graph data if req data is ok', async () => {
       await insertCommunities([communityOne]);
@@ -474,9 +477,8 @@ describe('member-activity routes', () => {
   // })
 
   describe('GET /api/v1/member-activity/:platformId/fragmentation-score', () => {
-    let connection: Connection;
     beforeEach(async () => {
-      connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+      cleanUpTenantDatabases();
     });
     test('should return 200 and fragmentation score if req data is ok', async () => {
       await insertCommunities([communityOne]);
@@ -631,9 +633,8 @@ describe('member-activity routes', () => {
   });
 
   describe('GET /api/v1/member-activity/:platformId/decentralisation-score', () => {
-    let connection: Connection;
     beforeEach(async () => {
-      connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+      cleanUpTenantDatabases();
     });
     test('should return 200 and decentralisation score if req data is ok', async () => {
       await insertCommunities([communityOne]);
@@ -808,9 +809,8 @@ describe('member-activity routes', () => {
   });
 
   describe('POST /api/v1/member-activity/:platformId/active-members-composition-table', () => {
-    let connection: Connection;
     beforeEach(async () => {
-      connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+      cleanUpTenantDatabases();
     });
     test('should return 200 and apply the default query options', async () => {
       await insertCommunities([communityOne]);
@@ -1258,9 +1258,8 @@ describe('member-activity routes', () => {
   });
 
   describe('POST /api/v1/member-activity/:platformId/active-members-onboarding-table', () => {
-    let connection: Connection;
     beforeEach(async () => {
-      connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+      cleanUpTenantDatabases();
     });
     test('should return 200 and apply the default query options', async () => {
       await insertUsers([userOne]);
@@ -1711,9 +1710,8 @@ describe('member-activity routes', () => {
   });
 
   describe('POST /api/v1/member-activity/:platformId/disengaged-members-composition-table', () => {
-    let connection: Connection;
     beforeEach(async () => {
-      connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+      cleanUpTenantDatabases();
     });
     test('should return 200 and apply the default query options', async () => {
       await insertUsers([userOne]);

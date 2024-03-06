@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 import config from '../../src/config';
 import RabbitMQ, { MBConnection, Queue } from '@togethercrew.dev/tc-messagebroker';
-import Redis from 'ioredis';
 import { platformOne, platformTwo, platformThree, platformFour } from '../fixtures/platform.fixture';
 import { DatabaseManager } from '@togethercrew.dev/db';
 
@@ -38,12 +37,6 @@ const setupTestDB = () => {
 
   afterAll(async () => {
     await mongoose.disconnect();
-    const redis = new Redis({
-      host: config.redis.host,
-      port: config.redis.port,
-      password: config.redis.password,
-    });
-    await redis.disconnect();
   });
 };
 
