@@ -26,16 +26,19 @@ const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Re
   const state = generateState();
   req.session.state = state;
   if (platform === 'discord') {
-    res.redirect(
-      `https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.connect}&response_type=code&scope=${discord.scopes.connectGuild}&permissions=${discord.permissions.ReadData.ViewChannel | discord.permissions.ReadData.ReadMessageHistory}&state=${state}`,
+    const permissions = discord.permissions.ReadData.ViewChannel | discord.permissions.ReadData.ReadMessageHistory;
+    const discordUrl = discord.generateDiscordAuthUrl(
+      config.discord.callbackURI.connect,
+      discord.scopes.connectGuild,
+      permissions,
+      state,
     );
+    res.redirect(discordUrl);
   } else if (platform === 'twitter') {
     const codeVerifier = generateCodeVerifier();
-    const codeChallenge = generateCodeChallenge(codeVerifier);
     req.session.codeVerifier = codeVerifier;
-    res.redirect(
-      `https://twitter.com/i/oauth2/authorize?response_type=code&client_id=${config.twitter.clientId}&redirect_uri=${config.twitter.callbackURI.connect}&scope=${twitter.scopes.connectAccount}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256`,
-    );
+    const twitterUrl = twitter.generateTwitterAuthUrl(state, generateCodeChallenge(codeVerifier));
+    res.redirect(twitterUrl);
   }
 });
 
@@ -209,9 +212,16 @@ const requestAccess = catchAsync(async function (req: ISessionRequest, res: Resp
     const requireBotPermissions = discordServices.coreService.getRequirePermissionsForModule(module);
     const combinedArray = currentBotPermissions.concat(requireBotPermissions);
     const permissionsValue = discordServices.coreService.getCombinedPermissionsValue(combinedArray);
-    res.redirect(
-      `https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&response_type=code&redirect_uri=${config.discord.callbackURI.requestAccess}&scope=${discord.scopes.connectGuild}&permissions=${permissionsValue}&guild_id=${id}&disable_guild_select=true&state=${state}`,
+    const permissionsValueNumber = Number(permissionsValue);
+    const discordUrl = discord.generateDiscordAuthUrl(
+      config.discord.callbackURI.requestAccess,
+      discord.scopes.connectGuild,
+      permissionsValueNumber,
+      state,
+      id, // Pass the Guild ID for which access is requested
+      true, // Assuming you want to disable guild selection
     );
+    res.redirect(discordUrl);
   }
 });
 
