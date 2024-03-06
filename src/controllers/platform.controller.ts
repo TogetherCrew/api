@@ -218,8 +218,8 @@ const requestAccess = catchAsync(async function (req: ISessionRequest, res: Resp
       discord.scopes.connectGuild,
       permissionsValueNumber,
       state,
-      id, 
-      true, 
+      id,
+      true,
     );
     res.redirect(discordUrl);
   }

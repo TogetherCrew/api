@@ -31,7 +31,7 @@ setupTestDB();
 
 describe('member-activity routes', () => {
   beforeEach(async () => {
-    cleanUpTenantDatabases()
+    cleanUpTenantDatabases();
     userOne.communities = [communityOne._id];
     communityOne.users = [userOne._id];
     communityOne.platforms = [platformOne._id, platformTwo._id, platformFour._id];

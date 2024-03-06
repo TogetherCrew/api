@@ -6,13 +6,16 @@ import { platformOne, platformTwo, platformThree, platformFour } from '../fixtur
 import { DatabaseManager } from '@togethercrew.dev/db';
 
 export const cleanUpTenantDatabases = async () => {
-  const tenantIds = [platformOne.metadata?.id, platformTwo.metadata?.id, platformThree.metadata?.id, platformFour.metadata?.id];
+  const tenantIds = [
+    platformOne.metadata?.id,
+    platformTwo.metadata?.id,
+    platformThree.metadata?.id,
+    platformFour.metadata?.id,
+  ];
 
   for (const tenantId of tenantIds) {
     const connection = await DatabaseManager.getInstance().getTenantDb(tenantId);
-    await Promise.all(
-      Object.values(connection.collections).map(async (collection) => collection.deleteMany({})),
-    );
+    await Promise.all(Object.values(connection.collections).map(async (collection) => collection.deleteMany({})));
   }
 };
 
