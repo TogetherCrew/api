@@ -1,27 +1,16 @@
 import request from 'supertest';
 import httpStatus from 'http-status';
 import app from '../../src/app';
-import setupTestDB, { cleanUpTenantDatabases } from '../utils/setupTestDB';
+import setupTestDB from '../utils/setupTestDB';
 import { userOne, insertUsers, userTwo } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { User, Community, ICommunityUpdateBody } from '@togethercrew.dev/db';
 import { communityOne, communityTwo, communityThree, insertCommunities } from '../fixtures/community.fixture';
-import { DatabaseManager } from '@togethercrew.dev/db';
-import { platformOne, platformTwo, platformFour, insertPlatforms } from '../fixtures/platform.fixture';
-import { Connection } from 'mongoose';
 
 setupTestDB();
 
 describe('Community routes', () => {
-  let connection: Connection;
-  beforeAll(async () => {
-    connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
-  });
-  afterAll(async () => {
-    await connection.close();
-  });
   beforeEach(() => {
-    cleanUpTenantDatabases();
     userOne.communities = [communityOne._id, communityTwo._id];
     userTwo.communities = [communityThree._id];
     communityOne.users = [userOne._id];
@@ -35,7 +24,6 @@ describe('Community routes', () => {
     const currentDate = new Date();
 
     beforeEach(() => {
-      cleanUpTenantDatabases();
       newCommunity = {
         name: 'Community A',
         avatarURL: 'path',
@@ -108,9 +96,6 @@ describe('Community routes', () => {
   });
 
   describe('GET /api/v1/communities', () => {
-    beforeEach(async () => {
-      cleanUpTenantDatabases();
-    });
     test('should return 200 and apply the default query options', async () => {
       await insertCommunities([communityOne, communityTwo, communityThree]);
       await insertUsers([userOne, userTwo]);
@@ -265,9 +250,6 @@ describe('Community routes', () => {
   });
 
   describe('GET /api/v1/communities/:communityId', () => {
-    beforeEach(async () => {
-      cleanUpTenantDatabases();
-    });
     test('should return 200 and the community object if data is ok', async () => {
       await insertCommunities([communityOne, communityTwo, communityThree]);
       await insertUsers([userOne, userTwo]);
@@ -323,9 +305,6 @@ describe('Community routes', () => {
   });
 
   describe('PATCH /api/v1/communities/:communityId', () => {
-    beforeEach(async () => {
-      cleanUpTenantDatabases();
-    });
     let updateBody: ICommunityUpdateBody;
     const currentDate = new Date();
 
@@ -418,9 +397,6 @@ describe('Community routes', () => {
     });
   });
   describe('DELETE /api/v1/communities/:communityId', () => {
-    beforeEach(async () => {
-      cleanUpTenantDatabases();
-    });
     test('should return 204 if data is ok', async () => {
       await insertCommunities([communityOne, communityTwo, communityThree]);
       await insertUsers([userOne, userTwo]);

@@ -1,7 +1,7 @@
 import request from 'supertest';
 import httpStatus from 'http-status';
 import app from '../../src/app';
-import setupTestDB from '../utils/setupTestDB';
+import setupTestDB, { cleanUpTenantDatabases } from '../utils/setupTestDB';
 import { userOne, insertUsers, userTwo } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { Platform, Community, IPlatformUpdateBody, DatabaseManager } from '@togethercrew.dev/db';
@@ -40,16 +40,13 @@ setupTestDB();
 describe('Platform routes', () => {
   let connection: Connection;
   beforeAll(async () => {
-    connection = await DatabaseManager.getInstance().getTenantDb('connection-platform');
+    connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
   });
   afterAll(async () => {
     await connection.close();
   });
   beforeEach(async () => {
-    await Promise.all(
-      Object.values(mongoose.connection.collections).map(async (collection) => collection.deleteMany({})),
-    );
-    await Promise.all(Object.values(connection.collections).map(async (collection) => collection.deleteMany({})));
+    cleanUpTenantDatabases();
     userOne.communities = [communityOne._id, communityTwo._id];
     userTwo.communities = [communityThree._id];
 
@@ -68,6 +65,9 @@ describe('Platform routes', () => {
     platformFive.community = communityOne._id;
   });
   describe('POST api/v1/platforms', () => {
+    beforeEach(async () => {
+      cleanUpTenantDatabases();
+    });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let newPlatform: any;
 
@@ -245,6 +245,9 @@ describe('Platform routes', () => {
     });
   });
   describe('GET /api/v1/platforms', () => {
+    beforeEach(async () => {
+      cleanUpTenantDatabases();
+    });
     test('should return 200 and apply the default query options', async () => {
       await insertCommunities([communityOne, communityTwo, communityThree]);
       await insertUsers([userOne, userTwo]);
@@ -401,6 +404,9 @@ describe('Platform routes', () => {
     });
   });
   describe('GET /api/v1/platforms/:platformId', () => {
+    beforeEach(async () => {
+      cleanUpTenantDatabases();
+    });
     discordServices.coreService.getBotPermissions = jest.fn().mockReturnValue(['ViewChannel', 'ReadMessageHistory']);
     test('should return 200 and the platform object if data is ok', async () => {
       await insertCommunities([communityOne, communityTwo, communityThree]);
@@ -479,6 +485,9 @@ describe('Platform routes', () => {
     });
   });
   describe('PATCH /api/v1/platforms/:platformId', () => {
+    beforeEach(async () => {
+      cleanUpTenantDatabases();
+    });
     let updateBody: IPlatformUpdateBody;
 
     beforeEach(() => {
@@ -629,6 +638,9 @@ describe('Platform routes', () => {
     });
   });
   describe('DELETE /api/v1/platforms/:platformId', () => {
+    beforeEach(async () => {
+      cleanUpTenantDatabases();
+    });
     discordServices.coreService.leaveBotFromGuild = jest.fn().mockReturnValue(null);
     test('should return 204 and soft delete the platform is deleteType is soft', async () => {
       await insertCommunities([communityOne, communityTwo, communityThree]);
@@ -702,15 +714,10 @@ describe('Platform routes', () => {
     });
   });
   describe('POST /:platformId/properties', () => {
-    discordServices.coreService.getBotPermissions = jest.fn().mockReturnValue(['ViewChannel', 'ReadMessageHistory']);
-    let connection: Connection;
-    beforeAll(async () => {
-      connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
-    });
     beforeEach(async () => {
-      await connection.dropDatabase();
+      cleanUpTenantDatabases();
     });
-
+    discordServices.coreService.getBotPermissions = jest.fn().mockReturnValue(['ViewChannel', 'ReadMessageHistory']);
     test('should return 200 and apply the default query options if requested property is discord-role', async () => {
       await insertCommunities([communityOne]);
       await insertUsers([userOne]);
