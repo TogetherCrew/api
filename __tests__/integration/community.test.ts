@@ -44,7 +44,6 @@ describe('Community routes', () => {
     });
 
     test('should return 201 and successfully create new community if data is ok', async () => {
-
       await insertUsers([userOne]);
 
       const res = await request(app)
