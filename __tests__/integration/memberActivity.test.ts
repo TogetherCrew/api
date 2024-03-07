@@ -34,9 +34,6 @@ describe('member-activity routes', () => {
   beforeAll(async () => {
     connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
   });
-  afterAll(async () => {
-    await connection.close();
-  });
   beforeEach(async () => {
     cleanUpTenantDatabases();
     userOne.communities = [communityOne._id];
