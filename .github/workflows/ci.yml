@@ -1,0 +1,11 @@
+---
+name: CI Pipeline
+
+on:
+  push:
+
+jobs:
+  ci:
+    uses: TogetherCrew/operations/.github/workflows/ci.yml@main
+    secrets:
+      CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}

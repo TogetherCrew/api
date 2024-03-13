@@ -104,9 +104,6 @@
 //     ]
 // }
 
-
 // export const insertGuilds = async function <Type>(guilds: Array<Type>) {
 //     await Guild.insertMany(guilds.map((guild) => (guild)));
 // };
-
-

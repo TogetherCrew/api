@@ -1,2 +1,2 @@
-export * from './announcement'
-export * from './bullBoard'
+export * from './announcement';
+export * from './bullBoard';

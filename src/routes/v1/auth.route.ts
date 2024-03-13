@@ -1,5 +1,5 @@
-import express from "express";
-import { authController } from "../../controllers";
+import express from 'express';
+import { authController } from '../../controllers';
 import { authValidation } from '../../validations';
 import { validate } from '../../middlewares';
 const router = express.Router();

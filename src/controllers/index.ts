@@ -9,13 +9,13 @@ import announcementController from './announcement.controller';
 import categoryController from './category.controller';
 
 export {
-    authController,
-    userController,
-    heatmapController,
-    notionController,
-    memberActivityController,
-    communityController,
-    platformController,
-    announcementController,
-    categoryController
-}
+  authController,
+  userController,
+  heatmapController,
+  notionController,
+  memberActivityController,
+  communityController,
+  platformController,
+  announcementController,
+  categoryController,
+};

@@ -1,12 +1,12 @@
 # ServerComm
-All communcation between front-end and DB
+All communcation between frontend and DB
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/ad9db42ef0a42bb21764/maintainability)](https://codeclimate.com/github/TogetherCrew/api/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/ad9db42ef0a42bb21764/test_coverage)](https://codeclimate.com/github/TogetherCrew/api/test_coverage)
 
 ## Installation
 
-Clone the repo
+Clone the repository
 
 Install the dependencies:
 
@@ -33,10 +33,10 @@ Run tests:
 npm run test
 ```
 
-## Neo4j Server 
+## Neo4j Server
 
 Below is a command for starting a Neo4j container in Docker
-```
+```bash
 docker run \
         -d \
         --publish=7474:7474 --publish=7687:7687 \

@@ -19,30 +19,29 @@ const logger = parentLogger.child({ module: 'AuthService' });
  * @returns {Promise<IDiscordOAuth2EchangeCode>}
  */
 async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscordOAuth2EchangeCode> {
-    try {
-        const data = {
-            client_id: config.discord.clientId,
-            client_secret: config.discord.clientSecret,
-            grant_type: 'authorization_code',
-            redirect_uri,
-            code
-        };
+  try {
+    const data = {
+      client_id: config.discord.clientId,
+      client_secret: config.discord.clientSecret,
+      grant_type: 'authorization_code',
+      redirect_uri,
+      code,
+    };
 
-        const response = await fetch('https://discord.com/api/oauth2/token', {
-            method: 'POST',
-            body: new URLSearchParams(data),
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-        })
-        if (response.ok) {
-            return await response.json();
-        }
-        else {
-            throw new Error(await response.json());
-        }
-    } catch (error) {
-        logger.error({ code, redirect_uri, error }, 'Failed to exchange discord code');
-        throw new ApiError(590, 'Can not fetch from discord API');
+    const response = await fetch('https://discord.com/api/oauth2/token', {
+      method: 'POST',
+      body: new URLSearchParams(data),
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
+    if (response.ok) {
+      return await response.json();
+    } else {
+      throw new Error(await response.json());
     }
+  } catch (error) {
+    logger.error({ code, redirect_uri, error }, 'Failed to exchange discord code');
+    throw new ApiError(590, 'Can not fetch from discord API');
+  }
 }
 
 /**
@@ -51,31 +50,29 @@ async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscor
  * @returns {Promise<IDiscordOAuth2EchangeCode>}
  */
 async function refreshDiscordAuth(refreshToken: string): Promise<IDiscordOAuth2EchangeCode> {
-    try {
-        const data = {
-            client_id: config.discord.clientId,
-            client_secret: config.discord.clientSecret,
-            grant_type: 'refresh_token',
-            refresh_token: refreshToken
-        };
+  try {
+    const data = {
+      client_id: config.discord.clientId,
+      client_secret: config.discord.clientSecret,
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+    };
 
-        const response = await fetch('https://discord.com/api/oauth2/token', {
-            method: 'POST',
-            body: new URLSearchParams(data),
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-        })
-        if (response.ok) {
-            return await response.json();
-        }
-        else {
-            throw new Error();
-        }
-    } catch (error) {
-        logger.error({ refreshToken, error }, 'Failed to refresh discord auth');
-        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Can not fetch from discord API');
+    const response = await fetch('https://discord.com/api/oauth2/token', {
+      method: 'POST',
+      body: new URLSearchParams(data),
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
+    if (response.ok) {
+      return await response.json();
+    } else {
+      throw new Error();
     }
+  } catch (error) {
+    logger.error({ refreshToken, error }, 'Failed to refresh discord auth');
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Can not fetch from discord API');
+  }
 }
-
 
 // /**
 //  * exchange twitter code with access token
@@ -152,13 +149,12 @@ async function refreshDiscordAuth(refreshToken: string): Promise<IDiscordOAuth2E
  */
 
 async function logout(refreshToken: string) {
-    const refreshTokenDoc = await Token.findOne({ token: refreshToken, type: tokenTypes.REFRESH, blacklisted: false });
-    if (!refreshTokenDoc) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Refresh token did not find');
-    }
-    await refreshTokenDoc.remove();
+  const refreshTokenDoc = await Token.findOne({ token: refreshToken, type: tokenTypes.REFRESH, blacklisted: false });
+  if (!refreshTokenDoc) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Refresh token did not find');
+  }
+  await refreshTokenDoc.remove();
 }
-
 
 /**
  * Refresh auth tokens
@@ -166,23 +162,22 @@ async function logout(refreshToken: string) {
  * @returns {Promise<Object>}
  */
 async function refreshAuth(refreshToken: string) {
-    try {
-        const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
-        const user = await userService.getUserById(new Types.ObjectId(refreshTokenDoc.user));
-        if (!user) {
-            throw new Error();
-        }
-        await refreshTokenDoc.remove();
-        return tokenService.generateAuthTokens(user);
-    } catch (error) {
-        throw new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate');
+  try {
+    const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
+    const user = await userService.getUserById(new Types.ObjectId(refreshTokenDoc.user));
+    if (!user) {
+      throw new Error();
     }
+    await refreshTokenDoc.remove();
+    return tokenService.generateAuthTokens(user);
+  } catch (error) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate');
+  }
 }
-
 
 export default {
-    exchangeCode,
-    refreshDiscordAuth,
-    logout,
-    refreshAuth
-}
+  exchangeCode,
+  refreshDiscordAuth,
+  logout,
+  refreshAuth,
+};

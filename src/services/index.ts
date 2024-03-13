@@ -8,18 +8,18 @@ import communityService from './community.service';
 import platformService from './platform.service';
 import twitterService from './twitter.service';
 import discordServices from './discord';
-import announcementService from './announcement.service'; 
+import announcementService from './announcement.service';
 
 export {
-    userService,
-    authService,
-    tokenService,
-    heatmapService,
-    memberActivityService,
-    discordServices,
-    sagaService,
-    communityService,
-    platformService,
-    twitterService,
-    announcementService
-}
+  userService,
+  authService,
+  tokenService,
+  heatmapService,
+  memberActivityService,
+  discordServices,
+  sagaService,
+  communityService,
+  platformService,
+  twitterService,
+  announcementService,
+};

@@ -7,14 +7,16 @@ services:
       target: test
       dockerfile: Dockerfile
     environment:
+      - NODE_ENV=test
       - PORT=3000
       - DB_HOST=mongo
       - DB_PORT=27017
       - DB_USER=root
       - DB_PASSWORD=pass
-      - DB_NAME=RnDAO-test
+      - DB_NAME=RnDAO
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - REDIS_PASSWORD=
       - RABBIT_HOST=rabbitmq
       - RABBIT_PORT=5672
       - RABBIT_USER=root
@@ -25,27 +27,28 @@ services:
       - NEO4J_USER=neo4j
       - NEO4J_PASSWORD=password
       - NEO4J_DB=neo4j
-      - SENTRY_DSN=https://b9a3cf6fc9b849b6a9fdbd19dbb3a0eb@o4505110094282752.ingest.sentry.io/4505110103130112
+      - SENTRY_DSN=https://791ed14c7dc84377a291ba2dd60270bb@o4505110094282752.ingest.sentry.io/4505158976733184
       - SENTRY_ENV=test
-      - DISCORD_TRY_NOW_CALLBACK_URI=http://localhost:3000/api/v1/auth/try-now/callback
-      - DISCORD_LOGIN_CALLBACK_URI=http://localhost:3000/api/v1/auth/login/callback
-      - DISCORD_CONNECT_GUILD_CALLBACK_URI=http://localhost:3000/api/v1/guilds/connect/callback
-      - DISCROD_CLIENT_ID=1062450481529638963
-      - DISCORD_CLIENT_SECRET=hTgn0dndAJz6oYhpxNGp3hc-ekxXp3Nj
-      - DISCORD_BOT_TOKEN=MTA2MjQ1MDQ4MTUyOTYzODk2Mw.GHhWYD.J4DhMWLAPy1lRV7YAB03YbVtjY6DFYk0UoipD8
-      - JWT_SECRET=0%55e*enasdfm@@u7v9+amg-ju_d_ladsfasdf6(v*88h4$#h&o-i7a4%tv*hx
+      - DISCORD_AUTHORIZE_CALLBACK_URI=empty
+      - DISCORD_CONNECT_CALLBACK_URI=empty
+      - DISCORD_REQUEST_ACCESS_CALLBACK_URI=empty
+      - TWITTER_CONNECT_CALLBACK_URI=empty
+      - TWITTER_CLIENT_ID=empty
+      - TWITTER_CLIENT_SECRET=empty
+      - DISCORD_CLIENT_ID=empty
+      - DISCORD_CLIENT_SECRET=empty
+      - DISCORD_BOT_TOKEN=empty
+      - JWT_SECRET=0%55e*enmvbfm@@u7v9+amg-ju_d_safeasdf6(v*88h4$#h&o-i7ste#tv*hx
       - JWT_ACCESS_EXPIRATION_MINUTES=30
       - JWT_REFRESH_EXPIRATION_DAYS=30
       - JWT_DISCORD_REFRESH_EXPIRATION_DAY=30
-      - FRONTEND_URL=https://localhost:3000/login
-      - NOTION_API_KEY=secret_INw8tqjWs80yXTOndXrpfp44HxLAvpMzGNkQ2XxkvqM
-      - NOTION_DATABASE_ID=948a3d77051f4f9b848319819d776709
-      - BRIDGE_API_KEY=fa718429-8ac1-49a3-8715-7786cf9c09be 
-
+      - FRONTEND_URL=empty
+      - NOTION_API_KEY=empty
+      - NOTION_DATABASE_ID=empty
+      - LOG_LEVEL=error
+      - SESSION_SECRET=0%532345*edm@@u7v9+att-sdfed_l6(v*88h4$#h&o-i7awer3tv*yy
     volumes:
       - ./coverage:/project/coverage
-    networks:
-      - api_application_network
     depends_on:
       redis:
         condition: service_healthy
@@ -63,11 +66,10 @@ services:
       timeout: 10s
       retries: 2
       start_period: 40s
-    networks:
-      - api_application_network
   mongo:
-    image: "mongo:6.0.8"
+    image: "mongo:5.0.10"
     environment:
+      - MONGO_INITDB_DATABASE=RnDAO
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=pass
     healthcheck:
@@ -76,8 +78,6 @@ services:
       timeout: 10s
       retries: 2
       start_period: 40s
-    networks:
-      - api_application_network
   rabbitmq:
     image: "rabbitmq:3-management-alpine"
     environment:
@@ -89,8 +89,6 @@ services:
       timeout: 30s
       retries: 2
       start_period: 40s
-    networks:
-      - api_application_network
   neo4j:
     image: "neo4j:5.9.0"
     environment:
@@ -103,9 +101,4 @@ services:
       timeout: 10s
       retries: 2
       start_period: 40s
-    networks:
-      - api_application_network
 
-networks:
-  api_application_network:
-    driver: bridge

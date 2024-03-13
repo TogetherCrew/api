@@ -1,0 +1,12 @@
+---
+name: Publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  ci:
+    uses: TogetherCrew/operations/.github/workflows/publish.ts.yml@main
+    secrets:
+      NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
