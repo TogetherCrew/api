@@ -6,7 +6,14 @@ import { userOne, insertUsers, userTwo } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { User, Community, ICommunityUpdateBody } from '@togethercrew.dev/db';
 import { communityOne, communityTwo, communityThree, insertCommunities } from '../fixtures/community.fixture';
-
+import {
+    platformOne,
+    platformTwo,
+    platformThree,
+    platformFour,
+    platformFive,
+    insertPlatforms,
+} from '../fixtures/platform.fixture';
 setupTestDB();
 
 describe('Community routes', () => {
@@ -16,6 +23,12 @@ describe('Community routes', () => {
         communityOne.users = [userOne._id];
         communityTwo.users = [userOne._id];
         communityThree.users = [userTwo._id];
+
+        platformOne.community = communityOne._id;
+        platformTwo.community = communityOne._id;
+        platformThree.community = communityTwo._id;
+        platformFour.community = communityThree._id;
+        platformFive.community = communityOne._id;
     });
 
     describe('POST api/v1/communities', () => {
@@ -319,6 +332,26 @@ describe('Community routes', () => {
                 name: 'Community A',
                 avatarURL: 'path',
                 tcaAt: currentDate,
+                roles: [
+                    {
+                        roleType: 'admin',
+                        source: {
+                            platform: 'discord',
+                            identifierType: 'member',
+                            identifierValues: [userOne.discordId],
+                            platformId: platformOne._id,
+                        },
+                    },
+                    {
+                        roleType: 'view',
+                        source: {
+                            platform: 'discord',
+                            identifierType: 'member',
+                            identifierValues: [userTwo.discordId],
+                            platformId: platformOne._id,
+                        },
+                    },
+                ]
             };
         });
         test('should return 200 and successfully update community if data is ok', async () => {
@@ -335,6 +368,7 @@ describe('Community routes', () => {
                 name: updateBody.name,
                 avatarURL: updateBody.avatarURL,
                 tcaAt: currentDate.toISOString(),
+                roles: updateBody.roles
             });
 
             const dbCommunity = await Community.findById(communityOne._id);
@@ -343,6 +377,7 @@ describe('Community routes', () => {
                 name: updateBody.name,
                 avatarURL: updateBody.avatarURL,
                 tcaAt: updateBody.tcaAt,
+                roles: updateBody.roles
             });
         });
 
