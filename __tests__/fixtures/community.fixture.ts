@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { Community,ICommunityRoles } from '@togethercrew.dev/db';
+import { Community, ICommunityRoles } from '@togethercrew.dev/db';
 
 interface CommunityFixture {
   _id: Types.ObjectId;
@@ -7,14 +7,14 @@ interface CommunityFixture {
   avatarURL?: string;
   users?: Types.ObjectId[];
   platforms?: Types.ObjectId[];
-  roles?:ICommunityRoles[]
+  roles?: ICommunityRoles[]
 }
 
 export const communityOne: CommunityFixture = {
   _id: new Types.ObjectId(),
   name: 'Community Alpha',
   avatarURL: 'path/to/avatar1.png',
-  roles:[
+  roles: [
     {
       roleType: 'admin',
       source: {
@@ -30,11 +30,14 @@ export const communityOne: CommunityFixture = {
 export const communityTwo: CommunityFixture = {
   _id: new Types.ObjectId(),
   name: 'Community Beta',
+  roles: []
 };
 
 export const communityThree: CommunityFixture = {
   _id: new Types.ObjectId(),
   name: 'Community Teta',
+  roles: []
+
 };
 
 export const insertCommunities = async function <Type>(communities: Array<Type>) {

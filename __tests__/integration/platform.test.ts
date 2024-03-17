@@ -6,6 +6,7 @@ import { userOne, insertUsers, userTwo } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { Platform, Community, IPlatformUpdateBody, DatabaseManager } from '@togethercrew.dev/db';
 import { communityOne, communityTwo, communityThree, insertCommunities } from '../fixtures/community.fixture';
+
 import {
   platformOne,
   platformTwo,

@@ -34,13 +34,13 @@ const updateCommunity = {
       avatarURL: Joi.string(),
       tcaAt: Joi.date(),
       roles: Joi.array().items(Joi.object().keys({
-        roleType:Joi.string().valid('view','admin').required(),
-        source:Joi.object().required().keys({
+        roleType: Joi.string().valid('view', 'admin').required(),
+        source: Joi.object().required().keys({
           platform: Joi.string().valid('discord').required(),
-          identifierType:Joi.string().valid('member','role').required(),
-          identifierValues:  Joi.array().items(Joi.string().required()).required(),
+          identifierType: Joi.string().valid('member', 'role').required(),
+          identifierValues: Joi.array().items(Joi.string().required()).required(),
           platformId: Joi.required().custom(objectId),
-        })
+        }).max(4)
       })),
     })
     .min(1),

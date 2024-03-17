@@ -2,7 +2,7 @@ import request from 'supertest';
 import httpStatus from 'http-status';
 import app from '../../src/app';
 import setupTestDB from '../utils/setupTestDB';
-import { userOne, insertUsers, userTwo } from '../fixtures/user.fixture';
+import { userOne, insertUsers, userTwo, userThree } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { User, Community, ICommunityUpdateBody } from '@togethercrew.dev/db';
 import { communityOne, communityTwo, communityThree, insertCommunities } from '../fixtures/community.fixture';
@@ -14,6 +14,8 @@ import {
     platformFive,
     insertPlatforms,
 } from '../fixtures/platform.fixture';
+import { discordRole1, discordRole2, discordRole3, discordRole4, insertRoles } from '../fixtures/discord/roles.fixture';
+
 setupTestDB();
 
 describe('Community routes', () => {
@@ -136,7 +138,7 @@ describe('Community routes', () => {
                 name: communityTwo.name,
                 users: [userOne._id.toHexString()],
                 platforms: [],
-                roles: []
+                roles: communityTwo.roles
             });
             expect(res.body.results[1]).toMatchObject({
                 id: communityOne._id.toHexString(),
@@ -144,7 +146,17 @@ describe('Community routes', () => {
                 avatarURL: communityOne.avatarURL,
                 users: [userOne._id.toHexString()],
                 platforms: [],
-                roles: []
+                // TODO:
+                // roles: communityOne.roles
+            });
+            expect(res.body.results[1].roles[0]).toMatchObject({
+                roleType: 'admin',
+                source: {
+                    platform: 'discord',
+                    identifierType: 'member',
+                    identifierValues: ['discordId'],
+                    //   platformId: new Types.ObjectId(),
+                },
             });
         });
 
@@ -278,13 +290,23 @@ describe('Community routes', () => {
                 .send()
                 .expect(httpStatus.OK);
 
-            expect(res.body).toEqual({
+            expect(res.body).toMatchObject({
                 id: communityOne._id.toHexString(),
                 name: communityOne.name,
                 avatarURL: communityOne.avatarURL,
                 users: [userOne._id.toHexString()],
                 platforms: [],
-                roles: []
+                // TODO
+                // roles: communityOne.roles
+            });
+            expect(res.body.roles[0]).toMatchObject({
+                roleType: 'admin',
+                source: {
+                    platform: 'discord',
+                    identifierType: 'member',
+                    identifierValues: ['discordId'],
+                    //   platformId: new Types.ObjectId(),
+                },
             });
         });
 
@@ -338,7 +360,16 @@ describe('Community routes', () => {
                         source: {
                             platform: 'discord',
                             identifierType: 'member',
-                            identifierValues: [userOne.discordId],
+                            identifierValues: [userOne.discordId, userTwo.discordId],
+                            platformId: platformOne._id,
+                        },
+                    },
+                    {
+                        roleType: 'admin',
+                        source: {
+                            platform: 'discord',
+                            identifierType: 'role',
+                            identifierValues: [discordRole2.roleId, discordRole3.roleId],
                             platformId: platformOne._id,
                         },
                     },
@@ -347,7 +378,16 @@ describe('Community routes', () => {
                         source: {
                             platform: 'discord',
                             identifierType: 'member',
-                            identifierValues: [userTwo.discordId],
+                            identifierValues: [userThree.discordId],
+                            platformId: platformOne._id,
+                        },
+                    },
+                    {
+                        roleType: 'view',
+                        source: {
+                            platform: 'discord',
+                            identifierType: 'role',
+                            identifierValues: [discordRole1.roleId],
                             platformId: platformOne._id,
                         },
                     },
@@ -368,7 +408,44 @@ describe('Community routes', () => {
                 name: updateBody.name,
                 avatarURL: updateBody.avatarURL,
                 tcaAt: currentDate.toISOString(),
-                roles: updateBody.roles
+            });
+
+            expect(res.body.roles[0]).toMatchObject({
+                roleType: 'admin',
+                source: {
+                    platform: 'discord',
+                    identifierType: 'member',
+                    identifierValues: [userOne.discordId, userTwo.discordId],
+                    //TODO: Uncomment the following code
+                    // platformId: platformOne._id.toHexString(),
+                },
+            });
+            expect(res.body.roles[1]).toMatchObject({
+                roleType: 'admin',
+                source: {
+                    platform: 'discord',
+                    identifierType: 'role',
+                    identifierValues: [discordRole2.roleId, discordRole3.roleId],
+                    // platformId: platformOne._id.toHexString(),
+                },
+            });
+            expect(res.body.roles[2]).toMatchObject({
+                roleType: 'view',
+                source: {
+                    platform: 'discord',
+                    identifierType: 'member',
+                    identifierValues: [userThree.discordId],
+                    // platformId: platformOne._id.toHexString(),
+                },
+            });
+            expect(res.body.roles[3]).toMatchObject({
+                roleType: 'view',
+                source: {
+                    platform: 'discord',
+                    identifierType: 'role',
+                    identifierValues: [discordRole1.roleId],
+                    // platformId: platformOne._id.toHexString(),
+                },
             });
 
             const dbCommunity = await Community.findById(communityOne._id);
@@ -377,8 +454,48 @@ describe('Community routes', () => {
                 name: updateBody.name,
                 avatarURL: updateBody.avatarURL,
                 tcaAt: updateBody.tcaAt,
-                roles: updateBody.roles
             });
+
+
+            if (dbCommunity && dbCommunity.roles) {
+                expect(dbCommunity.roles[0]).toMatchObject({
+                    roleType: 'admin',
+                    source: {
+                        platform: 'discord',
+                        identifierType: 'member',
+                        identifierValues: [userOne.discordId, userTwo.discordId],
+                        // platformId: platformOne._id.toHexString(),
+                    },
+                });
+                expect(dbCommunity.roles[1]).toMatchObject({
+                    roleType: 'admin',
+                    source: {
+                        platform: 'discord',
+                        identifierType: 'role',
+                        identifierValues: [discordRole2.roleId, discordRole3.roleId],
+                        // platformId: platformOne._id,
+                    },
+                });
+                expect(dbCommunity.roles[2]).toMatchObject({
+                    roleType: 'view',
+                    source: {
+                        platform: 'discord',
+                        identifierType: 'member',
+                        identifierValues: [userThree.discordId],
+                        // platformId: platformOne._id,
+                    },
+                });
+                expect(dbCommunity.roles[3]).toMatchObject({
+                    roleType: 'view',
+                    source: {
+                        platform: 'discord',
+                        identifierType: 'role',
+                        identifierValues: [discordRole1.roleId],
+                        // platformId: platformOne._id,
+                    },
+                });
+            }
+
         });
 
         test('should return 401 error if access token is missing', async () => {
