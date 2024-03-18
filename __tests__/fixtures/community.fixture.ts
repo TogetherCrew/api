@@ -20,7 +20,25 @@ export const communityOne: CommunityFixture = {
       source: {
         platform: 'discord',
         identifierType: 'member',
-        identifierValues: ['discordId'],
+        identifierValues: ['987654321'],
+        platformId: new Types.ObjectId(),
+      },
+    },
+    {
+      roleType: 'view',
+      source: {
+        platform: 'discord',
+        identifierType: 'member',
+        identifierValues: ['987654321'],
+        platformId: new Types.ObjectId(),
+      },
+    },
+    {
+      roleType: 'admin',
+      source: {
+        platform: 'discord',
+        identifierType: 'role',
+        identifierValues: ['652345789987654321'],
         platformId: new Types.ObjectId(),
       },
     },

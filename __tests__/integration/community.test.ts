@@ -154,7 +154,25 @@ describe('Community routes', () => {
                 source: {
                     platform: 'discord',
                     identifierType: 'member',
-                    identifierValues: ['discordId'],
+                    identifierValues: ['987654321'],
+                    //   platformId: new Types.ObjectId(),
+                },
+            });
+            expect(res.body.results[1].roles[1]).toMatchObject({
+                roleType: 'view',
+                source: {
+                    platform: 'discord',
+                    identifierType: 'member',
+                    identifierValues: ['987654321'],
+                    //   platformId: new Types.ObjectId(),
+                },
+            });
+            expect(res.body.results[1].roles[2]).toMatchObject({
+                roleType: 'admin',
+                source: {
+                    platform: 'discord',
+                    identifierType: 'role',
+                    identifierValues: ['652345789987654321'],
                     //   platformId: new Types.ObjectId(),
                 },
             });
@@ -304,7 +322,25 @@ describe('Community routes', () => {
                 source: {
                     platform: 'discord',
                     identifierType: 'member',
-                    identifierValues: ['discordId'],
+                    identifierValues: ['987654321'],
+                    //   platformId: new Types.ObjectId(),
+                },
+            });
+            expect(res.body.roles[1]).toMatchObject({
+                roleType: 'view',
+                source: {
+                    platform: 'discord',
+                    identifierType: 'member',
+                    identifierValues: ['987654321'],
+                    //   platformId: new Types.ObjectId(),
+                },
+            });
+            expect(res.body.roles[2]).toMatchObject({
+                roleType: 'admin',
+                source: {
+                    platform: 'discord',
+                    identifierType: 'role',
+                    identifierValues: ['652345789987654321'],
                     //   platformId: new Types.ObjectId(),
                 },
             });
