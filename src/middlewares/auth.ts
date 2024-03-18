@@ -1,11 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import passport from 'passport';
 import httpStatus from 'http-status';
 import { ApiError } from '../utils';
 import { Request, Response, NextFunction } from 'express';
 
 // Verify Callback
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const verifyCallback =
   (req: Request, resolve: any, reject: any, requiredRights: any) => async (err: any, user: any, info: any) => {
     if (err || info || !user) {
