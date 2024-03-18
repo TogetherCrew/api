@@ -45,3 +45,7 @@ async function getUserRolesForCommunity(user: HydratedDocument<IUser>, community
     }
     return userRoles;
 }
+
+export default {
+    getUserRolesForCommunity
+};

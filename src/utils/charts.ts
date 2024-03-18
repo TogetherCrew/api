@@ -15,7 +15,6 @@ function fillHeatmapChart(heatmaps: number[][]) {
   return fullArray;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function fillHeatmapLineGraph(lineGraph: any, startDate: Date, endDate: Date) {
   const chartData = {
     categories: [] as string[],
@@ -49,7 +48,6 @@ function fillHeatmapLineGraph(lineGraph: any, startDate: Date, endDate: Date) {
   return chartData;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function fillActiveMembersCompositionLineGraph(lineGraph: any, startDate: Date, endDate: Date) {
   const chartData = {
     categories: [] as string[],
@@ -92,7 +90,6 @@ function fillActiveMembersCompositionLineGraph(lineGraph: any, startDate: Date, 
   return chartData;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function fillActiveMembersOnboardingLineGraph(lineGraph: any, startDate: Date, endDate: Date) {
   const chartData = {
     categories: [] as string[],
@@ -132,7 +129,6 @@ function fillActiveMembersOnboardingLineGraph(lineGraph: any, startDate: Date, e
   return chartData;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function fillDisengagedMembersCompositionLineGraph(lineGraph: any, startDate: Date, endDate: Date) {
   const chartData = {
     categories: [] as string[],
@@ -172,7 +168,6 @@ function fillDisengagedMembersCompositionLineGraph(lineGraph: any, startDate: Da
   return chartData;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function fillInactiveMembersLineGraph(lineGraph: any, startDate: Date, endDate: Date) {
   const chartData = {
     categories: [] as string[],

@@ -5,4 +5,6 @@ import sort from './sort';
 import date from './date';
 import charts from './charts';
 import math from './math';
-export { ApiError, catchAsync, pick, sort, date, charts, math };
+import roleUtil from './role.util';
+export { ApiError, catchAsync, pick, sort, date, charts, math, roleUtil };
+
