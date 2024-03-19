@@ -1,49 +1,39 @@
 import { HydratedDocument, Types } from 'mongoose';
-import { IPlatform, IUser } from '@togethercrew.dev/db';
+import { ICommunity, IPlatform, IUser } from '@togethercrew.dev/db';
 import { discordServices, platformService, communityService } from '../services';
 import { DatabaseManager } from '@togethercrew.dev/db';
 
 type UserRole = 'admin' | 'view';
 /**
- * Create a platform
+ * Get user roles in a community
  * @param {HydratedDocument<IUser>} user
- * @param {Types.ObjectId} communityId
+ * @param {HydratedDocument<ICommunity>} communityId
  * @returns {Promise<HydratedDocument<IPlatform>>}
  */
-async function getUserRolesForCommunity(user: HydratedDocument<IUser>, communityId: Types.ObjectId) {
+async function getUserRolesForCommunity(user: HydratedDocument<IUser>, community: HydratedDocument<ICommunity>) {
     let userRoles: UserRole[] = [];
-    const communitDoc = await communityService.getCommunityById(communityId)
-    if (communitDoc !== null) {
-        if (communitDoc.users.some(id => id.equals(user.id))) {
-            console.log(1)
+    if (community !== null) {
+        if (community.users.some(id => id.equals(user.id))) {
             userRoles.push('admin');
         }
         const connectedPlatformDoc = await platformService.getPlatformByFilter({
-            community: communityId,
+            community: community.id,
             disconnectedAt: null
         })
         if (connectedPlatformDoc !== null) {
-            console.log(2)
             const connection = await DatabaseManager.getInstance().getTenantDb(connectedPlatformDoc.metadata?.id);
             const guildMemberDoc = await discordServices.guildMemberService.getGuildMember(connection, { discordId: user.discordId });
-            if (communitDoc.roles) {
-                console.log(3)
-                for (let i = 0; i < communitDoc.roles?.length; i++) {
-                    console.log(4, communitDoc.roles[i].source.platformId, connectedPlatformDoc.id)
-                    if (communitDoc.roles[i].source.platform === 'discord' && communitDoc.roles[i].source.platformId.equals(connectedPlatformDoc.id)) {
-                        console.log(44)
-                        if (communitDoc.roles[i].source.identifierType === 'member') {
-                            console.log(5, guildMemberDoc?.discordId, communitDoc.roles[i].source)
-                            if (communitDoc.roles[i].source.identifierValues.some(discordId => discordId === guildMemberDoc?.discordId)) {
-                                console.log(6)
-                                userRoles.push(communitDoc.roles[i].roleType);
+            if (community.roles) {
+                for (let i = 0; i < community.roles?.length; i++) {
+                    if (community.roles[i].source.platform === 'discord' && community.roles[i].source.platformId.equals(connectedPlatformDoc.id)) {
+                        if (community.roles[i].source.identifierType === 'member') {
+                            if (community.roles[i].source.identifierValues.some(discordId => discordId === guildMemberDoc?.discordId)) {
+                                userRoles.push(community.roles[i].roleType);
                             }
                         }
-                        else if (communitDoc.roles[i].source.identifierType === 'role') {
-                            console.log(7, guildMemberDoc, communitDoc.roles[i].source)
-                            if (communitDoc.roles[i].source.identifierValues.some(roleId => guildMemberDoc?.roles.includes(roleId))) {
-                                console.log(8)
-                                userRoles.push(communitDoc.roles[i].roleType);
+                        else if (community.roles[i].source.identifierType === 'role') {
+                            if (community.roles[i].source.identifierValues.some(roleId => guildMemberDoc?.roles.includes(roleId))) {
+                                userRoles.push(community.roles[i].roleType);
                             }
                         }
                     }
@@ -52,11 +42,27 @@ async function getUserRolesForCommunity(user: HydratedDocument<IUser>, community
             }
         }
     }
-    console.log(userRoles)
     userRoles = [...new Set(userRoles)];
     return userRoles;
 }
 
+/**
+ * Get user Communities
+ * @param {HydratedDocument<IUser>} user
+ * @param {Types.ObjectId} communityId
+ * @returns {Promise<HydratedDocument<IPlatform>>}
+ */
+async function getUserCommunities(user: HydratedDocument<IUser>, communities: [HydratedDocument<ICommunity>]) {
+    const communitiesWithRoles = await Promise.all(communities.map(async (community) => {
+        const userRoles = await getUserRolesForCommunity(user, community);
+        console.log(userRoles)
+        return userRoles.length > 0 ? community : null;
+    }));
+
+    return communitiesWithRoles.filter(community => community !== null);
+}
+
 export default {
-    getUserRolesForCommunity
+    getUserRolesForCommunity,
+    getUserCommunities
 };

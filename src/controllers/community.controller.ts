@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { communityService, userService, platformService, discordServices } from '../services';
 import { IAuthRequest } from '../interfaces/Request.interface';
-import { catchAsync, pick, ApiError } from '../utils';
+import { catchAsync, pick, ApiError, roleUtil } from '../utils';
 import httpStatus from 'http-status';
 
 const createCommunity = catchAsync(async function (req: IAuthRequest, res: Response) {
@@ -24,7 +24,8 @@ const getCommunities = catchAsync(async function (req: IAuthRequest, res: Respon
     select: '_id name metadata disconnectedAt',
   };
 
-  const result = await communityService.queryCommunities({ ...filter, users: req.user.id }, options);
+  let result = await communityService.queryCommunities({ ...filter }, options);
+  result.results = await roleUtil.getUserCommunities(req.user, result.results);
   res.send(result);
 });
 const getCommunity = catchAsync(async function (req: IAuthRequest, res: Response) {
