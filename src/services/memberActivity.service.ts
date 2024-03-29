@@ -1011,7 +1011,7 @@ async function getMembersInteractionsNetworkGraph(
   });
 
   // usersInfo
-  const usersInfo = await guildConnection.models.GuildMember.find({ discordIds: { $in: usersInNetworkGraph } });
+  const usersInfo = await guildConnection.models.GuildMember.find({ discordId: { $in: usersInNetworkGraph } });
   const rolesInNetworkGraph = usersInfo.flatMap((user) => user.roles);
   const roles = await roleService.getRoles(guildConnection, { roleId: { $in: rolesInNetworkGraph } });
 
