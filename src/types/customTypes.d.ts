@@ -11,5 +11,6 @@ declare module 'express-serve-static-core' {
         startDate: Date;
         endDate: Date;
         channelIds: Array<string>;
+        allowInput?: boolean
     }
 }

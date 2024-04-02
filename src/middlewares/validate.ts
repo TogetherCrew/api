@@ -14,6 +14,9 @@ const validate = (schema: ValidationSchema | SchemaFunction) => (req: Request, r
   const validationSchema = typeof schema === 'function' ? schema(req) : schema;
   const validSchema = pick(validationSchema, ['params', 'query', 'body']);
   const object = pick(req, Object.keys(validSchema));
+  if (req.allowInput === false && (Object.keys(req.query).length > 0 || Object.keys(req.params).length > 0 || Object.keys(req.body).length > 0)) {
+    return next(new ApiError(httpStatus.BAD_REQUEST, 'Bad Request!!'));
+  }
   const { value, error } = Joi.compile(validSchema)
     .prefs({ errors: { label: 'key' }, abortEarly: false })
     .validate(object);
@@ -22,6 +25,7 @@ const validate = (schema: ValidationSchema | SchemaFunction) => (req: Request, r
     const errorMessage = error.details.map((details) => details.message).join(', ');
     return next(new ApiError(httpStatus.BAD_REQUEST, errorMessage));
   }
+
   Object.assign(req, value);
   return next();
 };

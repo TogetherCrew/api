@@ -1,4 +1,4 @@
-import passport from 'passport';
+import passport, { use } from 'passport';
 import httpStatus from 'http-status';
 import { ApiError, roleUtil, pick } from '../utils';
 import { Request, Response, NextFunction } from 'express';
