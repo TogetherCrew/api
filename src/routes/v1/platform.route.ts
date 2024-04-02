@@ -25,7 +25,7 @@ router
 router.post(
   '/:platformId/properties',
   validate(platformValidation.dynamicPlatformProperty),
-  auth('admin'),
+  auth('admin','view'),
   platformController.getProperties,
 );
 

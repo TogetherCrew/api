@@ -46,6 +46,7 @@ paths:
       tags:
         - Community
       summary: Retrieve all communities.
+      description: Retrieve all communities that user has any role on it
       security:
         - bearerAuth: []
       parameters:
@@ -109,6 +110,8 @@ paths:
     get:
       tags:
         - Community
+        - Admin
+        - View
       summary: Retrieve details of a specific community by its ID.
       security:
         - bearerAuth: []
@@ -141,6 +144,7 @@ paths:
     patch:
       tags:
         - Community
+        - Admin
       summary: Update a specific community by its ID.
       security:
         - bearerAuth: []
@@ -188,6 +192,7 @@ paths:
     delete:
       tags:
         - Community
+        - Admin
       summary: Delete a specific community by its ID.
       security:
         - bearerAuth: []

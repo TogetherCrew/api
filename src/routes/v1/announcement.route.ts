@@ -6,16 +6,16 @@ import RabbitMQ, { Event } from '@togethercrew.dev/tc-messagebroker';
 
 const router = express.Router();
 
-router.post('', validate(announcementValidation.createAnnouncement), auth(), announcementController.createAnnouncement);
-router.get('', validate(announcementValidation.getAnnouncements), auth(), announcementController.getAnnouncements);
-router.get('/:announcementId', auth(), announcementController.getOneAnnouncement);
+router.post('', validate(announcementValidation.createAnnouncement), auth('admin'), announcementController.createAnnouncement);
+router.get('', validate(announcementValidation.getAnnouncements), auth('admin'), announcementController.getAnnouncements);
+router.get('/:announcementId', auth('admin'), announcementController.getOneAnnouncement);
 router.patch(
   '/:announcementId',
   validate(announcementValidation.updateAnnouncement),
-  auth(),
+  auth('admin'),
   announcementController.updateAnnouncement,
 );
-router.delete('/:announcementId', auth(), announcementController.deleteAnnouncement);
+router.delete('/:announcementId', auth('admin'), announcementController.deleteAnnouncement);
 
 RabbitMQ.onEvent(Event.SERVER_API.ANNOUNCEMENT_SAFETY_MESSAGE, announcementController.onSafetyMessageEvent);
 
