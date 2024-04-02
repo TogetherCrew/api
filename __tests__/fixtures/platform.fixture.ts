@@ -33,7 +33,10 @@ export const platformThree: PlatformFixture = {
   name: 'discord',
   metadata: {
     id: '681946187490000802',
+
   },
+  disconnectedAt: null,
+
 };
 
 export const platformFour: PlatformFixture = {

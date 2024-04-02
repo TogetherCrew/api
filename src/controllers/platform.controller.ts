@@ -10,15 +10,13 @@ import httpStatus from 'http-status';
 import querystring from 'querystring';
 
 const createPlatform = catchAsync(async function (req: IAuthRequest, res: Response) {
-  const community = await communityService.getCommunityByFilter({ _id: req.body.community, users: req.user.id });
-  if (!community) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Community not found');
-  }
 
-  await platformService.checkPlatformAlreadyConnected(community.id, req.body);
-  await platformService.checkSinglePlatformConnection(community.id, req.body);
-  const platform = await platformService.reconnectOrAddNewPlatform(community.id, req.body);
+  const community = req.community;
+  await platformService.checkPlatformAlreadyConnected(community?.id, req.body);
+  await platformService.checkSinglePlatformConnection(community?.id, req.body);
+  const platform = await platformService.reconnectOrAddNewPlatform(community?.id, req.body);
   res.status(httpStatus.CREATED).send(platform);
+
 });
 
 const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Response) {
@@ -140,33 +138,22 @@ const getPlatforms = catchAsync(async function (req: IAuthRequest, res: Response
       $options: 'i',
     };
   }
-  if (!filter.community) {
-    filter.community = { $in: req.user.communities };
-  }
+  // if (!filter.community) {
+  //   filter.community = { $in: req.user.communities };
+  // }
   filter.disconnectedAt = null;
   const result = await platformService.queryPlatforms(filter, options);
   res.send(result);
 });
 
 const getPlatform = catchAsync(async function (req: IAuthRequest, res: Response) {
-  const platform = await platformService.getPlatformByFilter({
-    _id: req.params.platformId,
-    community: { $in: req.user.communities },
-    disconnectedAt: null,
-  });
-  if (!platform) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Platform not found');
-  }
-  const community = await communityService.getCommunityByFilter({ _id: platform.community, users: req.user.id });
-  if (!community) {
-    throw new ApiError(httpStatus.FORBIDDEN, 'Access denied');
-  }
-
-  if (platform.metadata && platform.name === 'discord') {
+  const platform = req.platform;
+  if (platform?.metadata && platform.name === 'discord') {
     const BotPermissions = await discordServices.coreService.getBotPermissions(platform.metadata?.id);
     platform.metadata.permissions = discordServices.coreService.getPermissionsStatus(BotPermissions);
   }
   res.send(platform);
+
 });
 const updatePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
   if (
@@ -193,7 +180,7 @@ const deletePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Re
 });
 
 const getProperties = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
-  const { platform } = req;
+  const platform = req.platform;
   let result;
   if (platform?.name === 'discord') {
     result = await discordServices.coreService.getPropertyHandler(req);

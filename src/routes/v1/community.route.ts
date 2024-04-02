@@ -13,8 +13,8 @@ router
 
 router
   .route('/:communityId')
-  .get(auth(), validate(communityValidation.getCommunity), communityController.getCommunity)
-  .patch(auth(), validate(communityValidation.updateCommunity), communityController.updateCommunity)
-  .delete(auth(), validate(communityValidation.deleteCommunity), communityController.deleteCommunity);
+  .get(auth('admin', 'view'), validate(communityValidation.getCommunity), communityController.getCommunity)
+  .patch(auth('admin'), validate(communityValidation.updateCommunity), communityController.updateCommunity)
+  .delete(auth('admin'), validate(communityValidation.deleteCommunity), communityController.deleteCommunity);
 
 export default router;

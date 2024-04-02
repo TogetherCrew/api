@@ -4,7 +4,6 @@ import { Request, Response, NextFunction } from 'express';
 import config from '../config';
 import { ApiError } from '../utils';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const errorConverter = (err: any, req: Request, res: Response, next: NextFunction) => {
   let error = err;
   if (!(error instanceof ApiError)) {
@@ -16,7 +15,6 @@ const errorConverter = (err: any, req: Request, res: Response, next: NextFunctio
   next(error);
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
 const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
   let { statusCode, message } = err;
   if (config.env === 'production' && !err.isOperational) {

@@ -2,8 +2,7 @@ import { HydratedDocument, Types } from 'mongoose';
 import { ICommunity, IPlatform, IUser } from '@togethercrew.dev/db';
 import { discordServices, platformService, communityService } from '../services';
 import { DatabaseManager } from '@togethercrew.dev/db';
-
-type UserRole = 'admin' | 'view';
+import { UserRole } from '../interfaces';
 /**
  * Get user roles in a community
  * @param {HydratedDocument<IUser>} user
@@ -52,10 +51,9 @@ async function getUserRolesForCommunity(user: HydratedDocument<IUser>, community
  * @param {Types.ObjectId} communityId
  * @returns {Promise<HydratedDocument<IPlatform>>}
  */
-async function getUserCommunities(user: HydratedDocument<IUser>, communities: [HydratedDocument<ICommunity>]) {
+async function getUserCommunities(user: HydratedDocument<IUser>, communities: HydratedDocument<ICommunity>[] | []) {
     const communitiesWithRoles = await Promise.all(communities.map(async (community) => {
         const userRoles = await getUserRolesForCommunity(user, community);
-        console.log(userRoles)
         return userRoles.length > 0 ? community : null;
     }));
 

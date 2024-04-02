@@ -8,15 +8,13 @@ const router = express.Router();
 // Routes
 router.post(
   '/:platformId/heatmap-chart',
-  auth(),
-  platform('discord'),
+  auth('admin', 'view'),
   validate(heatmapValidation.heatmapChart),
   heatmapController.heatmapChart,
 );
 router.post(
   '/:platformId/line-graph',
-  auth(),
-  platform('discord'),
+  auth('admin', 'view'),
   validate(heatmapValidation.lineGraph),
   heatmapController.lineGraph,
 );
