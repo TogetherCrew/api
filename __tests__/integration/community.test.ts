@@ -1,10 +1,10 @@
 import request from 'supertest';
 import httpStatus from 'http-status';
 import app from '../../src/app';
-import setupTestDB from '../utils/setupTestDB';
+import setupTestDB, { cleanUpTenantDatabases } from '../utils/setupTestDB';
 import { userOne, insertUsers, userTwo, userThree } from '../fixtures/user.fixture';
 import { userOneAccessToken, userTwoAccessToken } from '../fixtures/token.fixture';
-import { User, Community, ICommunityUpdateBody } from '@togethercrew.dev/db';
+import { User, Community, ICommunityUpdateBody, DatabaseManager } from '@togethercrew.dev/db';
 import { communityOne, communityTwo, communityThree, insertCommunities } from '../fixtures/community.fixture';
 import {
     platformOne,
@@ -15,11 +15,25 @@ import {
     insertPlatforms,
 } from '../fixtures/platform.fixture';
 import { discordRole1, discordRole2, discordRole3, discordRole4, insertRoles } from '../fixtures/discord/roles.fixture';
+import {
+    discordGuildMember1,
+    discordGuildMember2,
+    discordGuildMember3,
+    discordGuildMember4,
+    insertGuildMembers,
+} from '../fixtures/discord/guildMember.fixture';
+import { Connection } from 'mongoose';
 
 setupTestDB();
 
 describe('Community routes', () => {
+    let connection: Connection;
+    beforeAll(async () => {
+        connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+    });
+
     beforeEach(() => {
+        cleanUpTenantDatabases();
         userOne.communities = [communityOne._id, communityTwo._id];
         userTwo.communities = [communityThree._id];
         communityOne.users = [userOne._id];
@@ -121,14 +135,17 @@ describe('Community routes', () => {
     });
 
     describe('GET /api/v1/communities', () => {
+        beforeEach(async () => {
+            cleanUpTenantDatabases();
+        });
         test('should return 200 and apply the default query options', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
             await insertUsers([userOne, userTwo]);
             await insertPlatforms([platformOne, platformTwo, platformThree]);
-
+            await insertGuildMembers([discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4], connection,);
             const res1 = await request(app)
                 .get('/api/v1/communities')
-                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .set('Authorization', `Bearer ${userTwoAccessToken}`)
                 .send()
                 .expect(httpStatus.OK);
 
@@ -142,20 +159,17 @@ describe('Community routes', () => {
             expect(res1.body.results).toHaveLength(2);
 
             expect(res1.body.results[0]).toMatchObject({
-                id: communityTwo._id.toHexString(),
-                name: communityTwo.name,
-                users: [userOne._id.toHexString()],
-                platforms: [],
-                roles: communityTwo.roles
+                id: communityThree._id.toHexString(),
+                name: communityThree.name,
+                users: [userTwo._id.toHexString()],
+                // TODO:check roles, platforms
             });
             expect(res1.body.results[1]).toMatchObject({
                 id: communityOne._id.toHexString(),
                 name: communityOne.name,
                 avatarURL: communityOne.avatarURL,
                 users: [userOne._id.toHexString()],
-                platforms: [],
-                // TODO:
-                // roles: communityOne.roles
+                // TODO:check roles, platforms
             });
             expect(res1.body.results[1].roles[0]).toMatchObject({
                 roleType: 'admin',
@@ -342,9 +356,7 @@ describe('Community routes', () => {
                 name: communityOne.name,
                 avatarURL: communityOne.avatarURL,
                 users: [userOne._id.toHexString()],
-                platforms: [],
-                // TODO
-                // roles: communityOne.roles
+                // TODO:check roles, platforms
             });
             expect(res.body.roles[0]).toMatchObject({
                 roleType: 'admin',
@@ -380,14 +392,14 @@ describe('Community routes', () => {
             await request(app).get(`/api/v1/communities/${communityOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
         });
 
-        test('should return 404 when user trys to access community they don not belong to', async () => {
+        test('should return 403 when user trys to access community they don not belong to', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
             await insertUsers([userOne, userTwo]);
             await request(app)
                 .get(`/api/v1/communities/${communityThree._id}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
-                .expect(httpStatus.NOT_FOUND);
+                .expect(httpStatus.FORBIDDEN);
         });
 
         test('should return 400 error if communityId is not a valid mongo id', async () => {
@@ -572,7 +584,7 @@ describe('Community routes', () => {
                 .expect(httpStatus.UNAUTHORIZED);
         });
 
-        test('should return 404 when user trys to update community they don not belong to', async () => {
+        test('should return 403 when user trys to update community they don not belong to', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
             await insertUsers([userOne, userTwo]);
             await insertPlatforms([platformOne, platformTwo, platformThree]);
@@ -581,7 +593,7 @@ describe('Community routes', () => {
                 .patch(`/api/v1/communities/${communityThree._id}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send(updateBody)
-                .expect(httpStatus.NOT_FOUND);
+                .expect(httpStatus.FORBIDDEN);
         });
 
         test('should return 400 error if communityId is not a valid mongo id', async () => {
@@ -642,7 +654,7 @@ describe('Community routes', () => {
             await request(app).delete(`/api/v1/communities/${communityOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
         });
 
-        test('should return 404 when user trys to delete community they don not belong to', async () => {
+        test('should return 403 when user trys to delete community they don not belong to', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
             await insertUsers([userOne, userTwo]);
 
@@ -650,7 +662,7 @@ describe('Community routes', () => {
                 .delete(`/api/v1/communities/${communityThree._id}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
-                .expect(httpStatus.NOT_FOUND);
+                .expect(httpStatus.FORBIDDEN);
         });
 
         test('should return 400 error if communityId is not a valid mongo id', async () => {

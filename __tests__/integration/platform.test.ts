@@ -288,7 +288,10 @@ describe('Platform routes', () => {
       await insertCommunities([communityOne, communityTwo, communityThree]);
       await insertUsers([userOne, userTwo]);
       await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
-      await request(app).get('/api/v1/platforms').send().expect(httpStatus.UNAUTHORIZED);
+      await request(app)
+        .get('/api/v1/platforms')
+        .query({ community: communityOne._id.toHexString() })
+        .send().expect(httpStatus.UNAUTHORIZED);
     });
 
     test('should correctly apply filter on name field', async () => {
@@ -454,7 +457,7 @@ describe('Platform routes', () => {
       await request(app).get(`/api/v1/platforms/${platformOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
     });
 
-    test('should return 404 when user trys to access platoform they does not belong to', async () => {
+    test('should return 403 when user trys to access platoform they does not belong to', async () => {
       await insertCommunities([communityOne, communityTwo, communityThree]);
       await insertUsers([userOne, userTwo]);
       await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
@@ -463,7 +466,7 @@ describe('Platform routes', () => {
         .get(`/api/v1/platforms/${platformFour._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send()
-        .expect(httpStatus.NOT_FOUND);
+        .expect(httpStatus.FORBIDDEN);
     });
 
     test('should return 400 error if platformId is not a valid mongo id', async () => {
@@ -486,12 +489,10 @@ describe('Platform routes', () => {
     });
   });
   describe('PATCH /api/v1/platforms/:platformId', () => {
-    beforeEach(async () => {
-      cleanUpTenantDatabases();
-    });
     let updateBody: IPlatformUpdateBody;
-
     beforeEach(() => {
+      cleanUpTenantDatabases();
+
       updateBody = {
         metadata: {
           selectedChannels: ['8765', '1234'],
@@ -504,6 +505,7 @@ describe('Platform routes', () => {
       await insertCommunities([communityOne, communityTwo]);
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
+
       const res = await request(app)
         .patch(`/api/v1/platforms/${platformOne._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -542,7 +544,7 @@ describe('Platform routes', () => {
       await request(app).patch(`/api/v1/platforms/${platformOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
     });
 
-    test('should return 404 when user trys to update platform they does not belong to', async () => {
+    test('should return 403 when user trys to update platform they does not belong to', async () => {
       await insertCommunities([communityOne, communityTwo, communityThree]);
       await insertUsers([userOne, userTwo]);
       await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
@@ -550,7 +552,7 @@ describe('Platform routes', () => {
         .patch(`/api/v1/platforms/${platformFour._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send(updateBody)
-        .expect(httpStatus.NOT_FOUND);
+        .expect(httpStatus.FORBIDDEN);
     });
 
     test('should return 400 error if platformId is not a valid mongo id', async () => {
@@ -678,11 +680,13 @@ describe('Platform routes', () => {
 
     test('should return 401 error if access token is missing', async () => {
       await insertUsers([userOne]);
-
-      await request(app).delete(`/api/v1/platforms/${platformOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
+      await request(app)
+        .delete(`/api/v1/platforms/${platformOne._id}`)
+        .send({ deleteType: 'hard' })
+        .expect(httpStatus.UNAUTHORIZED);
     });
 
-    test('should return 404 when user trys to delete platform they does not belong to', async () => {
+    test('should return 403 when user trys to delete platform they does not belong to', async () => {
       await insertCommunities([communityOne, communityTwo, communityThree]);
       await insertUsers([userOne, userTwo]);
       await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
@@ -691,7 +695,7 @@ describe('Platform routes', () => {
         .delete(`/api/v1/platforms/${platformFour._id}`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
         .send({ deleteType: 'hard' })
-        .expect(httpStatus.NOT_FOUND);
+        .expect(httpStatus.FORBIDDEN);
     });
 
     test('should return 400 error if platformId is not a valid mongo id', async () => {
@@ -1087,18 +1091,24 @@ describe('Platform routes', () => {
 
     test('should return 401 error if access token is missing', async () => {
       await insertUsers([userOne]);
-      await request(app).post(`/api/v1/platforms/${platformOne._id}/properties`).send().expect(httpStatus.UNAUTHORIZED);
+
+      await request(app)
+        .post(`/api/v1/platforms/${platformOne._id}/properties`)
+        .query({ property: 'role' })
+        .send()
+        .expect(httpStatus.UNAUTHORIZED);
     });
 
-    test('should return 404 when user trys to delete platform they does not belong to', async () => {
+    test('should return 403 when user trys to delete platform they does not belong to', async () => {
       await insertCommunities([communityOne, communityTwo, communityThree]);
       await insertUsers([userOne, userTwo]);
       await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
       await request(app)
         .post(`/api/v1/platforms/${platformFour._id}/properties`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
+        .query({ property: 'role' })
         .send()
-        .expect(httpStatus.NOT_FOUND);
+        .expect(httpStatus.FORBIDDEN);
     });
 
     test('should return 400 error if platformId is not a valid mongo id', async () => {
@@ -1108,6 +1118,7 @@ describe('Platform routes', () => {
       await request(app)
         .post(`/api/v1/platforms/invalid/properties`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
+        .query({ property: 'role' })
         .send()
         .expect(httpStatus.BAD_REQUEST);
     });
