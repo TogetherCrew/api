@@ -31,7 +31,7 @@ async function verifyRights(req: Request, user: any, requiredRights: UserRole[],
   const hasRequiredRights = requiredRights.some(requiredRight => userRolesInCommunity.includes(requiredRight));
 
   if (!hasRequiredRights) {
-    return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden! :/'));
+    return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden!'));
   }
 }
 
@@ -55,12 +55,12 @@ async function getCommunity(req: Request, user: any, communityId: string, platfo
         req.community = community;
         return community;
       } else {
-        reject(new ApiError(httpStatus.NOT_FOUND, 'Community not found!!!!'));
+        reject(new ApiError(httpStatus.NOT_FOUND, 'Community not found!'));
       }
     } else if (platformId) {
       const platform = await platformService.getPlatformById(new Types.ObjectId(platformId));
       if (!platform) {
-        reject(new ApiError(httpStatus.NOT_FOUND, 'Platform not found!!!'));
+        reject(new ApiError(httpStatus.NOT_FOUND, 'Platform not found!'));
         return null;
       }
 
@@ -70,7 +70,7 @@ async function getCommunity(req: Request, user: any, communityId: string, platfo
         req.community = community;
         return community;
       } else {
-        reject(new ApiError(httpStatus.NOT_FOUND, 'Community not found!!'));
+        reject(new ApiError(httpStatus.NOT_FOUND, 'Community not found!'));
       }
     }
   } catch (error) {

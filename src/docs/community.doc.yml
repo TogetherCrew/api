@@ -170,6 +170,36 @@ paths:
                   type: string
                   format: date-time
                   description: term and condition accepted date 
+                roles: 
+                    type: array
+                    description: Roles associated with the community for update.
+                    items:
+                      type: object
+                      properties:
+                        roleType:
+                          type: string
+                          enum: ['view', 'admin']
+                          description: Type of the role.
+                        source:
+                          type: object
+                          properties:
+                            platform:
+                              type: string
+                              enum: ['discord']
+                              description: Platform of the source.
+                            identifierType:
+                              type: string
+                              enum: ['member', 'role']
+                              description: Type of identifier used in the platform.
+                            identifierValues:
+                              type: array
+                              items:
+                                type: string
+                              description: Values of the identifiers.
+                            platformId:
+                              type: string
+                              format: objectId
+                              description: ObjectId representing the platform ID.
       responses:
         "200":
           description: Community updated successfully.

@@ -25,10 +25,16 @@ const getCommunities = catchAsync(async function (req: IAuthRequest, res: Respon
   };
 
   const communities = await communityService.getCommunities({});
+  console.log(communities)
+  console.log('-------------------')
   const userCommunities = await roleUtil.getUserCommunities(req.user, communities);
+  console.log(userCommunities)
+  console.log('-------------------')
   const communityIds = userCommunities.map(community => community?.id);
   filter._id = { $in: communityIds }
+  console.log(communityIds)
   const result = await communityService.queryCommunities({ ...filter }, options);
+  console.log(result, options)
   res.send(result);
 });
 const getCommunity = catchAsync(async function (req: IAuthRequest, res: Response) {
