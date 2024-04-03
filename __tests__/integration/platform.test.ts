@@ -43,9 +43,6 @@
 //   beforeAll(async () => {
 //     connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
 //   });
-//   // afterAll(async () => {
-//   //   await connection.close();
-//   // });
 //   beforeEach(async () => {
 //     cleanUpTenantDatabases();
 //     userOne.communities = [communityOne._id, communityTwo._id];
@@ -206,6 +203,8 @@
 //     });
 
 //     test('should return 400 error if name is invalid', async () => {
+
+//       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       newPlatform.name = 'invalid';
 //       await request(app)
@@ -216,6 +215,7 @@
 //     });
 
 //     test('should return 400 error if community is invalid', async () => {
+//       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       newPlatform.community = 'invalid';
 //       await request(app)
@@ -226,6 +226,7 @@
 //     });
 
 //     test('should return 400 error if metadata is invalid based on the name field', async () => {
+//       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       newPlatform.metadata = { username: 'str' };
 //       await request(app)
@@ -236,8 +237,9 @@
 //     });
 
 //     test('should return 400 error if community is invalid', async () => {
+//       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
-//       newPlatform.name = 'twitter';
+//       newPlatform.community = 'invalid';
 //       await request(app)
 //         .post(`/api/v1/platforms`)
 //         .set('Authorization', `Bearer ${userOneAccessToken}`)
