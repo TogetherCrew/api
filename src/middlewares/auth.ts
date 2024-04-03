@@ -8,24 +8,22 @@ import { UserRole } from '../interfaces';
 
 const verifyCallback =
   (req: Request, resolve: Function, reject: Function, requiredRights: any) =>
-  async (err: Error | null, user: any, info: any): Promise<void> => {
-    if (err || info || !user) {
-      return reject(new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate'));
-    }
+    async (err: Error | null, user: any, info: any): Promise<void> => {
+      if (err || info || !user) {
+        return reject(new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate'));
+      }
 
-    req.user = user;
+      req.user = user;
 
-    if (requiredRights.length) {
-      await verifyRights(req, user, requiredRights, reject);
-    }
+      if (requiredRights.length) {
+        await verifyRights(req, user, requiredRights, reject);
+      }
 
-    resolve();
-  };
+      resolve();
+    };
 
 async function verifyRights(req: Request, user: any, requiredRights: UserRole[], reject: Function): Promise<void> {
-  const { communityId, platformId } = req.params;
-
-  let community = await getCommunity(req, user, communityId, platformId, reject);
+  let community = await getCommunity(req, reject);
   if (!community) return;
 
   const userRolesInCommunity = await roleUtil.getUserRolesForCommunity(user, community);
@@ -38,15 +36,13 @@ async function verifyRights(req: Request, user: any, requiredRights: UserRole[],
 
 async function getCommunity(
   req: Request,
-  user: any,
-  communityId: string,
-  platformId: string,
   reject: Function,
 ): Promise<any | null> {
   try {
     const ids = pick({ ...req.query, ...req.body, ...req.params }, ['communityId', 'community', 'platformId']);
     let communityId: string | null = null,
       platformId: string | null = null;
+
     if (ids.communityId) {
       communityId = ids.communityId;
     } else if (ids.community) {
@@ -55,6 +51,16 @@ async function getCommunity(
       platformId = ids.platformId;
     }
 
+    // communityId = ids.communityId || ids.community;
+    // platformId = ids.platformId;
+
+    if (communityId !== null && !Types.ObjectId.isValid(communityId)) {
+      reject(new ApiError(httpStatus.BAD_REQUEST, 'Invalid platformId'));
+    }
+
+    if (platformId !== null && !Types.ObjectId.isValid(platformId)) {
+      reject(new ApiError(httpStatus.BAD_REQUEST, 'Invalid platformId'));
+    }
     if (communityId) {
       const community = await communityService.getCommunityById(new Types.ObjectId(communityId));
       if (community) {

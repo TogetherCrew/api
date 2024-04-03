@@ -8,21 +8,21 @@ const router = express.Router();
 
 router.post(
   '',
-  validate(announcementValidation.createAnnouncement),
   auth('admin'),
+  validate(announcementValidation.createAnnouncement),
   announcementController.createAnnouncement,
 );
 router.get(
   '',
-  validate(announcementValidation.getAnnouncements),
   auth('admin'),
+  validate(announcementValidation.getAnnouncements),
   announcementController.getAnnouncements,
 );
 router.get('/:announcementId', auth('admin'), announcementController.getOneAnnouncement);
 router.patch(
   '/:announcementId',
-  validate(announcementValidation.updateAnnouncement),
   auth('admin'),
+  validate(announcementValidation.updateAnnouncement),
   announcementController.updateAnnouncement,
 );
 router.delete('/:announcementId', auth('admin'), announcementController.deleteAnnouncement);
