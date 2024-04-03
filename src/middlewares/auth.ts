@@ -48,9 +48,6 @@ async function getCommunity(req: Request, reject: Function): Promise<any | null>
       platformId = ids.platformId;
     }
 
-    // communityId = ids.communityId || ids.community;
-    // platformId = ids.platformId;
-
     if (communityId !== null && !Types.ObjectId.isValid(communityId)) {
       reject(new ApiError(httpStatus.BAD_REQUEST, 'Invalid platformId'));
     }
