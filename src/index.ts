@@ -54,7 +54,7 @@ const initApp = async () => {
   await connectToRabbitMQ();
   await connectToMongoDB();
   app.listen(config.port, () => {
-    logger.info(`Listening on ${config.port}!`);
+    logger.info(`Listening on ${config.port}`);
   });
 };
 
