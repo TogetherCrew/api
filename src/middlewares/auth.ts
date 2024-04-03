@@ -8,19 +8,19 @@ import { UserRole } from '../interfaces';
 
 const verifyCallback =
   (req: Request, resolve: Function, reject: Function, requiredRights: any) =>
-    async (err: Error | null, user: any, info: any): Promise<void> => {
-      if (err || info || !user) {
-        return reject(new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate'));
-      }
+  async (err: Error | null, user: any, info: any): Promise<void> => {
+    if (err || info || !user) {
+      return reject(new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate'));
+    }
 
-      req.user = user;
+    req.user = user;
 
-      if (requiredRights.length) {
-        await verifyRights(req, user, requiredRights, reject);
-      }
+    if (requiredRights.length) {
+      await verifyRights(req, user, requiredRights, reject);
+    }
 
-      resolve();
-    };
+    resolve();
+  };
 
 async function verifyRights(req: Request, user: any, requiredRights: UserRole[], reject: Function): Promise<void> {
   let community = await getCommunity(req, reject);
@@ -34,10 +34,7 @@ async function verifyRights(req: Request, user: any, requiredRights: UserRole[],
   }
 }
 
-async function getCommunity(
-  req: Request,
-  reject: Function,
-): Promise<any | null> {
+async function getCommunity(req: Request, reject: Function): Promise<any | null> {
   try {
     const ids = pick({ ...req.query, ...req.body, ...req.params }, ['communityId', 'community', 'platformId']);
     let communityId: string | null = null,
