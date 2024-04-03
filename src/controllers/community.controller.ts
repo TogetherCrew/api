@@ -25,16 +25,10 @@ const getCommunities = catchAsync(async function (req: IAuthRequest, res: Respon
   };
 
   const communities = await communityService.getCommunities({});
-  console.log(communities)
-  console.log('-------------------')
   const userCommunities = await roleUtil.getUserCommunities(req.user, communities);
-  console.log(userCommunities)
-  console.log('-------------------')
-  const communityIds = userCommunities.map(community => community?.id);
-  filter._id = { $in: communityIds }
-  console.log(communityIds)
+  const communityIds = userCommunities.map((community) => community?.id);
+  filter._id = { $in: communityIds };
   const result = await communityService.queryCommunities({ ...filter }, options);
-  console.log(result, options)
   res.send(result);
 });
 const getCommunity = catchAsync(async function (req: IAuthRequest, res: Response) {
@@ -42,14 +36,11 @@ const getCommunity = catchAsync(async function (req: IAuthRequest, res: Response
   await community?.populate({
     path: 'platforms',
     select: '_id name metadata disconnectedAt',
-  })
+  });
   res.send(community);
 });
 const updateCommunity = catchAsync(async function (req: IAuthRequest, res: Response) {
-  const community = await communityService.updateCommunityByFilter(
-    { _id: req.params.communityId },
-    req.body,
-  );
+  const community = await communityService.updateCommunityByFilter({ _id: req.params.communityId }, req.body);
   res.send(community);
 });
 const deleteCommunity = catchAsync(async function (req: IAuthRequest, res: Response) {

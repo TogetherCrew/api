@@ -18,12 +18,12 @@ const getUserRolesInCommunity = catchAsync(async function (req: IAuthRequest, re
   if (!community) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Community not found');
   }
-  const userRolesInCommunity = await roleUtil.getUserRolesForCommunity(req.user, community)
+  const userRolesInCommunity = await roleUtil.getUserRolesForCommunity(req.user, community);
   res.send(userRolesInCommunity);
 });
 
 export default {
   getUser,
   updateUser,
-  getUserRolesInCommunity
+  getUserRolesInCommunity,
 };

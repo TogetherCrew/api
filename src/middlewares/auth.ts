@@ -6,7 +6,8 @@ import { communityService, platformService } from '..//services';
 import { Types } from 'mongoose';
 import { UserRole } from '../interfaces';
 
-const verifyCallback = (req: Request, resolve: Function, reject: Function, requiredRights: any) =>
+const verifyCallback =
+  (req: Request, resolve: Function, reject: Function, requiredRights: any) =>
   async (err: Error | null, user: any, info: any): Promise<void> => {
     if (err || info || !user) {
       return reject(new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate'));
@@ -28,24 +29,29 @@ async function verifyRights(req: Request, user: any, requiredRights: UserRole[],
   if (!community) return;
 
   const userRolesInCommunity = await roleUtil.getUserRolesForCommunity(user, community);
-  const hasRequiredRights = requiredRights.some(requiredRight => userRolesInCommunity.includes(requiredRight));
+  const hasRequiredRights = requiredRights.some((requiredRight) => userRolesInCommunity.includes(requiredRight));
 
   if (!hasRequiredRights) {
     return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden!'));
   }
 }
 
-async function getCommunity(req: Request, user: any, communityId: string, platformId: string, reject: Function): Promise<any | null> {
+async function getCommunity(
+  req: Request,
+  user: any,
+  communityId: string,
+  platformId: string,
+  reject: Function,
+): Promise<any | null> {
   try {
     const ids = pick({ ...req.query, ...req.body, ...req.params }, ['communityId', 'community', 'platformId']);
-    let communityId: string | null = null, platformId: string | null = null;
+    let communityId: string | null = null,
+      platformId: string | null = null;
     if (ids.communityId) {
       communityId = ids.communityId;
-    }
-    else if (ids.community) {
+    } else if (ids.community) {
       communityId = ids.community;
-    }
-    else if (ids.platformId) {
+    } else if (ids.platformId) {
       platformId = ids.platformId;
     }
 

@@ -83,8 +83,7 @@ const dynamicUpdatePlatform = (req: Request) => {
             }),
         }),
     };
-  }
-  else {
+  } else {
     req.allowInput = false;
     return {};
   }
@@ -144,14 +143,10 @@ const dynamicPlatformProperty = (req: Request) => {
       req.allowInput = false;
       return {};
     }
-  }
-  else {
+  } else {
     req.allowInput = false;
     return {};
   }
-
-
-
 };
 
 const dynamicRequestAccess = (req: Request) => {
@@ -167,7 +162,6 @@ const dynamicRequestAccess = (req: Request) => {
   } else {
     req.allowInput = false;
     return {};
-
   }
 };
 

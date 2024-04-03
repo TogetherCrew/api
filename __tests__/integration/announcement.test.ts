@@ -39,7 +39,6 @@
 //     connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
 //   });
 
-
 //   beforeEach(async () => {
 //     cleanUpTenantDatabases();
 //     userOne.communities = [communityOne._id, communityTwo._id];

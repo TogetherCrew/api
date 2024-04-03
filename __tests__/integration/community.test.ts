@@ -46,7 +46,6 @@
 //             communityOne.roles[2].source.platformId = platformOne._id;
 //         }
 
-
 //         platformOne.community = communityOne._id;
 //         platformTwo.community = communityOne._id;
 //         platformThree.community = communityTwo._id;
@@ -533,7 +532,6 @@
 //                 tcaAt: updateBody.tcaAt,
 //             });
 
-
 //             if (dbCommunity && dbCommunity.roles) {
 //                 expect(dbCommunity.roles[0]).toMatchObject({
 //                     roleType: 'admin',
@@ -688,9 +686,9 @@
 // });
 
 describe('TEST', () => {
-    describe('TEST', () => {
-        test('TEST', async () => {
-            expect(true).toEqual(true);
-        });
+  describe('TEST', () => {
+    test('TEST', async () => {
+      expect(true).toEqual(true);
     });
+  });
 });

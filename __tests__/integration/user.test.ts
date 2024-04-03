@@ -145,7 +145,6 @@
 //                 .send()
 //                 .expect(httpStatus.OK);
 
-
 //             expect(res1.body).toEqual(['admin']);
 
 //             const res2 = await request(app)
@@ -156,7 +155,6 @@
 
 //             expect(res2.body).toEqual(['admin', 'view']);
 
-
 //             const res3 = await request(app)
 //                 .get(`/api/v1/users/@me/${communityOne._id}/roles`)
 //                 .set('Authorization', `Bearer ${userThreeAccessToken}`)
@@ -164,7 +162,6 @@
 //                 .expect(httpStatus.OK);
 
 //             expect(res3.body).toEqual([]);
-
 
 //         });
 //         test('should return 401 if access token is missing', async () => {
@@ -195,9 +192,9 @@
 // });
 
 describe('TEST', () => {
-    describe('TEST', () => {
-        test('TEST', async () => {
-            expect(true).toEqual(true);
-        });
+  describe('TEST', () => {
+    test('TEST', async () => {
+      expect(true).toEqual(true);
     });
+  });
 });

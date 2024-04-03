@@ -7,7 +7,7 @@ interface CommunityFixture {
   avatarURL?: string;
   users?: Types.ObjectId[];
   platforms?: Types.ObjectId[];
-  roles?: ICommunityRoles[]
+  roles?: ICommunityRoles[];
 }
 
 export const communityOne: CommunityFixture = {
@@ -42,20 +42,19 @@ export const communityOne: CommunityFixture = {
         platformId: new Types.ObjectId(),
       },
     },
-  ]
+  ],
 };
 
 export const communityTwo: CommunityFixture = {
   _id: new Types.ObjectId(),
   name: 'Community Beta',
-  roles: []
+  roles: [],
 };
 
 export const communityThree: CommunityFixture = {
   _id: new Types.ObjectId(),
   name: 'Community Teta',
-  roles: []
-
+  roles: [],
 };
 
 export const insertCommunities = async function <Type>(communities: Array<Type>) {

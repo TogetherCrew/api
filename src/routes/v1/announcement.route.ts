@@ -6,8 +6,18 @@ import RabbitMQ, { Event } from '@togethercrew.dev/tc-messagebroker';
 
 const router = express.Router();
 
-router.post('', validate(announcementValidation.createAnnouncement), auth('admin'), announcementController.createAnnouncement);
-router.get('', validate(announcementValidation.getAnnouncements), auth('admin'), announcementController.getAnnouncements);
+router.post(
+  '',
+  validate(announcementValidation.createAnnouncement),
+  auth('admin'),
+  announcementController.createAnnouncement,
+);
+router.get(
+  '',
+  validate(announcementValidation.getAnnouncements),
+  auth('admin'),
+  announcementController.getAnnouncements,
+);
 router.get('/:announcementId', auth('admin'), announcementController.getOneAnnouncement);
 router.patch(
   '/:announcementId',

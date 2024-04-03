@@ -10,13 +10,11 @@ import httpStatus from 'http-status';
 import querystring from 'querystring';
 
 const createPlatform = catchAsync(async function (req: IAuthRequest, res: Response) {
-
   const community = req.community;
   await platformService.checkPlatformAlreadyConnected(community?.id, req.body);
   await platformService.checkSinglePlatformConnection(community?.id, req.body);
   const platform = await platformService.reconnectOrAddNewPlatform(community?.id, req.body);
   res.status(httpStatus.CREATED).send(platform);
-
 });
 
 const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Response) {
@@ -153,7 +151,6 @@ const getPlatform = catchAsync(async function (req: IAuthRequest, res: Response)
     platform.metadata.permissions = discordServices.coreService.getPermissionsStatus(BotPermissions);
   }
   res.send(platform);
-
 });
 const updatePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
   if (

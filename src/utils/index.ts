@@ -7,4 +7,3 @@ import charts from './charts';
 import math from './math';
 import roleUtil from './role.util';
 export { ApiError, catchAsync, pick, sort, date, charts, math, roleUtil };
-

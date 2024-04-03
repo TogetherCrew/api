@@ -12,5 +12,5 @@ router
 
 router
   .route('/@me/:communityId/roles')
-  .get(auth(), validate(userValidation.getUserRolesInCommunity), userController.getUserRolesInCommunity)
+  .get(auth(), validate(userValidation.getUserRolesInCommunity), userController.getUserRolesInCommunity);
 export default router;

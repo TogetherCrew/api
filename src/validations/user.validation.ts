@@ -18,5 +18,5 @@ const getUserRolesInCommunity = {
 
 export default {
   updateUser,
-  getUserRolesInCommunity
+  getUserRolesInCommunity,
 };

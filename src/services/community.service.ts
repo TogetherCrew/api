@@ -42,7 +42,6 @@ const getCommunityById = async (id: Types.ObjectId): Promise<HydratedDocument<IC
   return Community.findById(id);
 };
 
-
 /**
  * Get communities by filter
  * @param {Object} filter - Mongo filter
@@ -51,7 +50,6 @@ const getCommunityById = async (id: Types.ObjectId): Promise<HydratedDocument<IC
 const getCommunities = async (filter: object): Promise<HydratedDocument<ICommunity>[] | []> => {
   return Community.find(filter);
 };
-
 
 /**
  * Update community by filter
