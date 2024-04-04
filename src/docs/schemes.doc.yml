@@ -25,7 +25,9 @@ components:
           type: string
           format: date-time
           description: term and condition accepted date 
-
+        unverifiedTelegramUsername:
+          type: string
+          description: unverified telegram username
     # ********Community********
     Community:
       type: object

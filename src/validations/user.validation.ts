@@ -6,6 +6,10 @@ const updateUser = {
     .keys({
       email: Joi.string().email(),
       tcaAt: Joi.date(),
+      unverifiedTelegramUsername: Joi.string()
+        .min(5)
+        .max(32)
+        .regex(/^[a-zA-Z0-9_]{5,32}$/),
     })
     .min(1),
 };

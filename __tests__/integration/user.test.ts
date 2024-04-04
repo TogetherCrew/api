@@ -80,6 +80,7 @@
 //       updateBody = {
 //         email: 'email@yahoo.com',
 //         tcaAt: currentDate,
+//         unverifiedTelegramUsername: 'alex_jan'
 //       };
 //     });
 //     test('should return 200 and successfully update user if data is ok', async () => {
@@ -96,6 +97,7 @@
 //         email: updateBody.email,
 //         communities: [communityOne._id.toString(), communityTwo._id.toString()],
 //         tcaAt: currentDate.toISOString(),
+//         unverifiedTelegramUsername: updateBody.unverifiedTelegramUsername
 //       });
 
 //       const dbUser = await User.findById(userOne._id);
@@ -121,6 +123,16 @@
 //     test('should return 400 error if tcaAt is invalid', async () => {
 //       const updateBody = { tcaAt: 'tcaAt' };
 
+//       await insertUsers([userOne]);
+//       await request(app)
+//         .patch('/api/v1/users/@me')
+//         .set('Authorization', `Bearer ${userOneAccessToken}`)
+//         .send(updateBody)
+//         .expect(httpStatus.BAD_REQUEST);
+//     });
+
+//     test('should return 400 error if unverifiedTelegramUsername is invalid', async () => {
+//       const updateBody = { unverifiedTelegramUsername: 100 };
 //       await insertUsers([userOne]);
 //       await request(app)
 //         .patch('/api/v1/users/@me')
