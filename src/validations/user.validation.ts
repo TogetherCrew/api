@@ -6,7 +6,7 @@ const updateUser = {
     .keys({
       email: Joi.string().email(),
       tcaAt: Joi.date(),
-      unverifiedTelegramUsername: Joi.string()
+      unverifiedTelegramUsername: Joi.string(),
     })
     .min(1),
 };
