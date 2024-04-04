@@ -28,6 +28,8 @@ const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Re
       discord.scopes.connectGuild,
       permissions,
       state,
+      '',
+      false,
     );
     res.redirect(discordUrl);
   } else if (platform === 'twitter') {
