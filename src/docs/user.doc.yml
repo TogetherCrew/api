@@ -20,7 +20,7 @@ paths:
     patch:
       tags:
         - User
-      summary: update user (to add user email)
+      summary: update user 
       security:
         - bearerAuth: []
       requestBody:
@@ -37,9 +37,13 @@ paths:
                   type: string
                   format: date-time
                   description: term and condition accepted date 
+                unverifiedTelegramUsername:
+                  type: string
+                  description: unverified telegram username
               example:
                 email: some@yahoo.com
                 tcaAt: 2023-10-31T12:48:55.432Z
+                unverifiedTelegramUsername: alex_jane
 
       responses:
         "200":
