@@ -17,11 +17,10 @@
 // import { DatabaseManager } from '@togethercrew.dev/db';
 // import { insertPlatforms, platformOne } from '../fixtures/platform.fixture';
 // import { discordGuildMember1, discordGuildMember2, insertGuildMembers } from '../fixtures/discord/guildMember.fixture';
-// import platform from '../../src/middlewares/platform';
 
 // setupTestDB();
 
-// describe('Community routes', () => {
+// describe('Announcement routes', () => {
 //   const announcementOne = generatePublicDiscordAnnouncement(communityOne._id, platformOne._id, [
 //     discordChannel4.channelId,
 //     discordChannel3.channelId,
@@ -38,10 +37,6 @@
 //   let connection: Connection;
 //   beforeAll(async () => {
 //     connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
-//   });
-
-//   afterAll(async () => {
-//     await connection.close();
 //   });
 
 //   beforeEach(async () => {

@@ -1,7 +1,9 @@
 import Joi from 'joi';
 import { Request } from 'express';
 import { objectId } from './custom.validation';
-import { IAuthAndPlatform } from 'src/interfaces';
+import { IAuthAndPlatform } from '../interfaces';
+import { platformService } from '../services';
+import { Types } from 'mongoose';
 
 const createPlatform = {
   body: Joi.object().keys({
@@ -64,9 +66,7 @@ const deletePlatform = {
 };
 
 const dynamicUpdatePlatform = (req: Request) => {
-  const authReq = req as IAuthAndPlatform;
-  const { platform } = authReq;
-  if (platform.name === 'discord') {
+  if (Types.ObjectId.isValid(req.params.platformId)) {
     return {
       params: Joi.object().keys({
         platformId: Joi.required().custom(objectId),
@@ -84,70 +84,68 @@ const dynamicUpdatePlatform = (req: Request) => {
         }),
     };
   } else {
-    return {
-      query: Joi.object().required().keys({}),
-      params: Joi.object().required().keys({}),
-      body: Joi.object().required().keys({}),
-    };
+    req.allowInput = false;
+    return {};
   }
 };
 
 const dynamicPlatformProperty = (req: Request) => {
-  const authReq = req as IAuthAndPlatform;
-  const { property } = authReq.query;
-  const { platform } = authReq;
-  if (platform.name === 'discord' && property === 'channel') {
-    return {
-      params: Joi.object().keys({
-        platformId: Joi.required().custom(objectId),
-      }),
-      query: Joi.object()
-        .required()
-        .keys({
-          property: Joi.string().valid('channel'),
+  if (Types.ObjectId.isValid(req.params.platformId)) {
+    const authReq = req as IAuthAndPlatform;
+    const { property } = authReq.query;
+    if (property === 'channel') {
+      return {
+        params: Joi.object().keys({
+          platformId: Joi.required().custom(objectId),
         }),
-      body: Joi.object()
-        .required()
-        .keys({
-          channelIds: Joi.array().items(Joi.string()),
+        query: Joi.object()
+          .required()
+          .keys({
+            property: Joi.string().valid('channel'),
+          }),
+        body: Joi.object()
+          .required()
+          .keys({
+            channelIds: Joi.array().items(Joi.string()),
+          }),
+      };
+    } else if (property === 'role') {
+      return {
+        params: Joi.object().keys({
+          platformId: Joi.required().custom(objectId),
         }),
-    };
-  } else if (platform?.name === 'discord' && property === 'role') {
-    return {
-      params: Joi.object().keys({
-        platformId: Joi.required().custom(objectId),
-      }),
-      query: Joi.object()
-        .required()
-        .keys({
-          property: Joi.string().valid('role'),
-          name: Joi.string(),
-          sortBy: Joi.string(),
-          limit: Joi.number().integer(),
-          page: Joi.number().integer(),
+        query: Joi.object()
+          .required()
+          .keys({
+            property: Joi.string().valid('role'),
+            name: Joi.string(),
+            sortBy: Joi.string(),
+            limit: Joi.number().integer(),
+            page: Joi.number().integer(),
+          }),
+      };
+    } else if (property === 'guildMember') {
+      return {
+        params: Joi.object().keys({
+          platformId: Joi.required().custom(objectId),
         }),
-    };
-  } else if (platform?.name === 'discord' && property === 'guildMember') {
-    return {
-      params: Joi.object().keys({
-        platformId: Joi.required().custom(objectId),
-      }),
-      query: Joi.object()
-        .required()
-        .keys({
-          property: Joi.string().valid('guildMember'),
-          ngu: Joi.string(),
-          sortBy: Joi.string(),
-          limit: Joi.number().integer(),
-          page: Joi.number().integer(),
-        }),
-    };
+        query: Joi.object()
+          .required()
+          .keys({
+            property: Joi.string().valid('guildMember'),
+            ngu: Joi.string(),
+            sortBy: Joi.string(),
+            limit: Joi.number().integer(),
+            page: Joi.number().integer(),
+          }),
+      };
+    } else {
+      req.allowInput = false;
+      return {};
+    }
   } else {
-    return {
-      query: Joi.object().required().keys({}),
-      params: Joi.object().required().keys({}),
-      body: Joi.object().required().keys({}),
-    };
+    req.allowInput = false;
+    return {};
   }
 };
 
@@ -162,11 +160,8 @@ const dynamicRequestAccess = (req: Request) => {
       }),
     };
   } else {
-    return {
-      query: Joi.object().required().keys({}),
-      params: Joi.object().required().keys({}),
-      body: Joi.object().required().keys({}),
-    };
+    req.allowInput = false;
+    return {};
   }
 };
 

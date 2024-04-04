@@ -10,4 +10,7 @@ router
   .get(auth(), userController.getUser)
   .patch(auth(), validate(userValidation.updateUser), userController.updateUser);
 
+router
+  .route('/@me/:communityId/roles')
+  .get(auth(), validate(userValidation.getUserRolesInCommunity), userController.getUserRolesInCommunity);
 export default router;

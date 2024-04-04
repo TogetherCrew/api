@@ -11,18 +11,18 @@ interface UserFixture {
 
 export const userOne: UserFixture = {
   _id: new Types.ObjectId(),
-  discordId: crypto.randomBytes(20).toString('hex'),
+  discordId: '123456789',
   email: 'example@outlook.com',
 };
 
 export const userTwo: UserFixture = {
   _id: new Types.ObjectId(),
-  discordId: crypto.randomBytes(20).toString('hex'),
+  discordId: '987654321',
 };
 
 export const userThree: UserFixture = {
   _id: new Types.ObjectId(),
-  discordId: crypto.randomBytes(20).toString('hex'),
+  discordId: '555555555',
 };
 
 export const insertUsers = async function <Type>(users: Array<Type>) {

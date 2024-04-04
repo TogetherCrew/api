@@ -12,12 +12,10 @@ export interface IAuthAndPlatform extends IAuthRequest {
 }
 
 export interface ISessionRequest extends Request {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   session: Session & Partial<SessionData> & { [key: string]: any };
 }
 
 export interface IAuthAndSessionRequest extends Request {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   session: Session & Partial<SessionData> & { [key: string]: any };
   user: HydratedDocument<IUser>;
 }

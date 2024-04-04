@@ -43,6 +43,15 @@ const getCommunityById = async (id: Types.ObjectId): Promise<HydratedDocument<IC
 };
 
 /**
+ * Get communities by filter
+ * @param {Object} filter - Mongo filter
+ * @returns {Promise<HydratedDocument<ICommunity>[] | []>}
+ */
+const getCommunities = async (filter: object): Promise<HydratedDocument<ICommunity>[] | []> => {
+  return Community.find(filter);
+};
+
+/**
  * Update community by filter
  * @param {Object} filter - Mongo filter
  * @param {Partial<ICommunity>} updateBody
@@ -103,6 +112,7 @@ export default {
   queryCommunities,
   getCommunityById,
   getCommunityByFilter,
+  getCommunities,
   updateCommunityByFilter,
   deleteCommunityByFilter,
   addPlatformToCommunityById,

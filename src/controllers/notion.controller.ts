@@ -10,7 +10,6 @@ const getDatabase = catchAsync(async function (req: Request, res: Response) {
   });
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const databases: any = await client.databases.query({
       database_id: config.notion.databaseId,
       sorts: [{ property: 'Name', direction: 'ascending' }],

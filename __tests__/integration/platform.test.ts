@@ -6,6 +6,7 @@
 // import { userOneAccessToken } from '../fixtures/token.fixture';
 // import { Platform, Community, IPlatformUpdateBody, DatabaseManager } from '@togethercrew.dev/db';
 // import { communityOne, communityTwo, communityThree, insertCommunities } from '../fixtures/community.fixture';
+
 // import {
 //   platformOne,
 //   platformTwo,
@@ -41,9 +42,6 @@
 //   let connection: Connection;
 //   beforeAll(async () => {
 //     connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
-//   });
-//   afterAll(async () => {
-//     await connection.close();
 //   });
 //   beforeEach(async () => {
 //     cleanUpTenantDatabases();
@@ -205,6 +203,7 @@
 //     });
 
 //     test('should return 400 error if name is invalid', async () => {
+//       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       newPlatform.name = 'invalid';
 //       await request(app)
@@ -215,6 +214,7 @@
 //     });
 
 //     test('should return 400 error if community is invalid', async () => {
+//       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       newPlatform.community = 'invalid';
 //       await request(app)
@@ -225,6 +225,7 @@
 //     });
 
 //     test('should return 400 error if metadata is invalid based on the name field', async () => {
+//       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       newPlatform.metadata = { username: 'str' };
 //       await request(app)
@@ -235,8 +236,9 @@
 //     });
 
 //     test('should return 400 error if community is invalid', async () => {
+//       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
-//       newPlatform.name = 'twitter';
+//       newPlatform.community = 'invalid';
 //       await request(app)
 //         .post(`/api/v1/platforms`)
 //         .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -287,7 +289,11 @@
 //       await insertCommunities([communityOne, communityTwo, communityThree]);
 //       await insertUsers([userOne, userTwo]);
 //       await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
-//       await request(app).get('/api/v1/platforms').send().expect(httpStatus.UNAUTHORIZED);
+//       await request(app)
+//         .get('/api/v1/platforms')
+//         .query({ community: communityOne._id.toHexString() })
+//         .send()
+//         .expect(httpStatus.UNAUTHORIZED);
 //     });
 
 //     test('should correctly apply filter on name field', async () => {
@@ -453,7 +459,7 @@
 //       await request(app).get(`/api/v1/platforms/${platformOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
 //     });
 
-//     test('should return 404 when user trys to access platoform they does not belong to', async () => {
+//     test('should return 403 when user trys to access platoform they does not belong to', async () => {
 //       await insertCommunities([communityOne, communityTwo, communityThree]);
 //       await insertUsers([userOne, userTwo]);
 //       await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
@@ -462,7 +468,7 @@
 //         .get(`/api/v1/platforms/${platformFour._id}`)
 //         .set('Authorization', `Bearer ${userOneAccessToken}`)
 //         .send()
-//         .expect(httpStatus.NOT_FOUND);
+//         .expect(httpStatus.FORBIDDEN);
 //     });
 
 //     test('should return 400 error if platformId is not a valid mongo id', async () => {
@@ -485,12 +491,10 @@
 //     });
 //   });
 //   describe('PATCH /api/v1/platforms/:platformId', () => {
-//     beforeEach(async () => {
-//       cleanUpTenantDatabases();
-//     });
 //     let updateBody: IPlatformUpdateBody;
-
 //     beforeEach(() => {
+//       cleanUpTenantDatabases();
+
 //       updateBody = {
 //         metadata: {
 //           selectedChannels: ['8765', '1234'],
@@ -503,6 +507,7 @@
 //       await insertCommunities([communityOne, communityTwo]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
+
 //       const res = await request(app)
 //         .patch(`/api/v1/platforms/${platformOne._id}`)
 //         .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -541,7 +546,7 @@
 //       await request(app).patch(`/api/v1/platforms/${platformOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
 //     });
 
-//     test('should return 404 when user trys to update platform they does not belong to', async () => {
+//     test('should return 403 when user trys to update platform they does not belong to', async () => {
 //       await insertCommunities([communityOne, communityTwo, communityThree]);
 //       await insertUsers([userOne, userTwo]);
 //       await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
@@ -549,7 +554,7 @@
 //         .patch(`/api/v1/platforms/${platformFour._id}`)
 //         .set('Authorization', `Bearer ${userOneAccessToken}`)
 //         .send(updateBody)
-//         .expect(httpStatus.NOT_FOUND);
+//         .expect(httpStatus.FORBIDDEN);
 //     });
 
 //     test('should return 400 error if platformId is not a valid mongo id', async () => {
@@ -677,11 +682,13 @@
 
 //     test('should return 401 error if access token is missing', async () => {
 //       await insertUsers([userOne]);
-
-//       await request(app).delete(`/api/v1/platforms/${platformOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
+//       await request(app)
+//         .delete(`/api/v1/platforms/${platformOne._id}`)
+//         .send({ deleteType: 'hard' })
+//         .expect(httpStatus.UNAUTHORIZED);
 //     });
 
-//     test('should return 404 when user trys to delete platform they does not belong to', async () => {
+//     test('should return 403 when user trys to delete platform they does not belong to', async () => {
 //       await insertCommunities([communityOne, communityTwo, communityThree]);
 //       await insertUsers([userOne, userTwo]);
 //       await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
@@ -690,7 +697,7 @@
 //         .delete(`/api/v1/platforms/${platformFour._id}`)
 //         .set('Authorization', `Bearer ${userOneAccessToken}`)
 //         .send({ deleteType: 'hard' })
-//         .expect(httpStatus.NOT_FOUND);
+//         .expect(httpStatus.FORBIDDEN);
 //     });
 
 //     test('should return 400 error if platformId is not a valid mongo id', async () => {
@@ -1086,18 +1093,24 @@
 
 //     test('should return 401 error if access token is missing', async () => {
 //       await insertUsers([userOne]);
-//       await request(app).post(`/api/v1/platforms/${platformOne._id}/properties`).send().expect(httpStatus.UNAUTHORIZED);
+
+//       await request(app)
+//         .post(`/api/v1/platforms/${platformOne._id}/properties`)
+//         .query({ property: 'role' })
+//         .send()
+//         .expect(httpStatus.UNAUTHORIZED);
 //     });
 
-//     test('should return 404 when user trys to delete platform they does not belong to', async () => {
+//     test('should return 403 when user trys to delete platform they does not belong to', async () => {
 //       await insertCommunities([communityOne, communityTwo, communityThree]);
 //       await insertUsers([userOne, userTwo]);
 //       await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
 //       await request(app)
 //         .post(`/api/v1/platforms/${platformFour._id}/properties`)
 //         .set('Authorization', `Bearer ${userOneAccessToken}`)
+//         .query({ property: 'role' })
 //         .send()
-//         .expect(httpStatus.NOT_FOUND);
+//         .expect(httpStatus.FORBIDDEN);
 //     });
 
 //     test('should return 400 error if platformId is not a valid mongo id', async () => {
@@ -1107,6 +1120,7 @@
 //       await request(app)
 //         .post(`/api/v1/platforms/invalid/properties`)
 //         .set('Authorization', `Bearer ${userOneAccessToken}`)
+//         .query({ property: 'role' })
 //         .send()
 //         .expect(httpStatus.BAD_REQUEST);
 //     });

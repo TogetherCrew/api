@@ -18,7 +18,8 @@
     },
     "include": [
         "src/**/*",
-        "__tests__/**/*"
+        "__tests__/**/*",
+        "src/types/**/*"
     ],
     "ts-node": {
         "transpileOnly": true,

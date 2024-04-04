@@ -212,7 +212,6 @@ const reconnectOrAddNewPlatform = async (
   }
 
   const platform = await createPlatform(PlatformBody);
-  await communityService.addPlatformToCommunityById(platform.community, platform.id);
   return platform;
 };
 

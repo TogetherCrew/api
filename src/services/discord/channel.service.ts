@@ -73,7 +73,6 @@ async function checkBotPermissions(
 
     // Check permission overwrites
     let hasAccess = true;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const evaluateOverwrites = (overwrite: any) => {
       const allowed = BigInt(overwrite.allow);
       const denied = BigInt(overwrite.deny);
@@ -121,7 +120,6 @@ async function getChannelInfoFromChannelIds(connection: Connection, channelIds: 
  * @param {number} [options.limit] - Maximum number of results per page (default = 10)
  * @param {number} [options.page] - Current page (default = 1)
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const queryChannels = async (connection: any, filter: object, options: object) => {
   return await connection.models.Channel.paginate(filter, options);
 };
