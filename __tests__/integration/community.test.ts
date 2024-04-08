@@ -1,30 +1,30 @@
-// import request from 'supertest';
-// import httpStatus from 'http-status';
-// import app from '../../src/app';
-// import setupTestDB, { cleanUpTenantDatabases } from '../utils/setupTestDB';
-// import { userOne, insertUsers, userTwo, userThree } from '../fixtures/user.fixture';
-// import { userOneAccessToken, userTwoAccessToken } from '../fixtures/token.fixture';
-// import { User, Community, ICommunityUpdateBody, DatabaseManager } from '@togethercrew.dev/db';
-// import { communityOne, communityTwo, communityThree, insertCommunities } from '../fixtures/community.fixture';
-// import {
-//   platformOne,
-//   platformTwo,
-//   platformThree,
-//   platformFour,
-//   platformFive,
-//   insertPlatforms,
-// } from '../fixtures/platform.fixture';
-// import { discordRole1, discordRole2, discordRole3, discordRole4, insertRoles } from '../fixtures/discord/roles.fixture';
-// import {
-//   discordGuildMember1,
-//   discordGuildMember2,
-//   discordGuildMember3,
-//   discordGuildMember4,
-//   insertGuildMembers,
-// } from '../fixtures/discord/guildMember.fixture';
-// import { Connection } from 'mongoose';
+import request from 'supertest';
+import httpStatus from 'http-status';
+import app from '../../src/app';
+import setupTestDB, { cleanUpTenantDatabases } from '../utils/setupTestDB';
+import { userOne, insertUsers, userTwo, userThree } from '../fixtures/user.fixture';
+import { userOneAccessToken, userTwoAccessToken } from '../fixtures/token.fixture';
+import { User, Community, ICommunityUpdateBody, DatabaseManager } from '@togethercrew.dev/db';
+import { communityOne, communityTwo, communityThree, insertCommunities } from '../fixtures/community.fixture';
+import {
+  platformOne,
+  platformTwo,
+  platformThree,
+  platformFour,
+  platformFive,
+  insertPlatforms,
+} from '../fixtures/platform.fixture';
+import { discordRole1, discordRole2, discordRole3, discordRole4, insertRoles } from '../fixtures/discord/roles.fixture';
+import {
+  discordGuildMember1,
+  discordGuildMember2,
+  discordGuildMember3,
+  discordGuildMember4,
+  insertGuildMembers,
+} from '../fixtures/discord/guildMember.fixture';
+import { Connection } from 'mongoose';
 
-// setupTestDB();
+setupTestDB();
 
 // describe('Community routes', () => {
 //   let connection: Connection;
@@ -345,6 +345,11 @@
 //       await insertCommunities([communityOne, communityTwo, communityThree]);
 //       await insertUsers([userOne, userTwo]);
 //       await insertPlatforms([platformOne, platformTwo, platformThree]);
+//       await insertGuildMembers(
+//         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
+//         connection,
+//       );
+//       await insertRoles([discordRole1, discordRole2, discordRole3, discordRole4], connection);
 
 //       const res = await request(app)
 //         .get(`/api/v1/communities/${communityOne._id}`)
@@ -364,8 +369,15 @@
 //         source: {
 //           platform: 'discord',
 //           identifierType: 'member',
-//           identifierValues: ['987654321'],
-//           //   platformId: new Types.ObjectId(),
+//           identifierValues: [{
+//             discordId: discordGuildMember2.discordId,
+//             username: discordGuildMember2.username,
+//             ngu: discordGuildMember2.nickname,
+//             discriminator: discordGuildMember2.discriminator,
+//             nickname: discordGuildMember2.nickname,
+//             globalName: discordGuildMember2.globalName,
+//             avatar: discordGuildMember2.avatar,
+//           }],
 //         },
 //       });
 //       expect(res.body.roles[1]).toMatchObject({
@@ -373,7 +385,15 @@
 //         source: {
 //           platform: 'discord',
 //           identifierType: 'member',
-//           identifierValues: ['987654321'],
+//           identifierValues: [{
+//             discordId: discordGuildMember2.discordId,
+//             username: discordGuildMember2.username,
+//             ngu: discordGuildMember2.nickname,
+//             discriminator: discordGuildMember2.discriminator,
+//             nickname: discordGuildMember2.nickname,
+//             globalName: discordGuildMember2.globalName,
+//             avatar: discordGuildMember2.avatar,
+//           }],
 //           //   platformId: new Types.ObjectId(),
 //         },
 //       });
@@ -382,7 +402,11 @@
 //         source: {
 //           platform: 'discord',
 //           identifierType: 'role',
-//           identifierValues: ['652345789987654321'],
+//           identifierValues: [{
+//             roleId: discordRole1.roleId,
+//             name: discordRole1.name,
+//             color: discordRole1.color,
+//           }],
 //           //   platformId: new Types.ObjectId(),
 //         },
 //       });
