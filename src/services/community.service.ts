@@ -1,8 +1,10 @@
 import { HydratedDocument, Types } from 'mongoose';
 import httpStatus from 'http-status';
-import { Community, ICommunity } from '@togethercrew.dev/db';
+import { Community, ICommunity, DatabaseManager, GuildMember, IRole } from '@togethercrew.dev/db';
 import ApiError from '../utils/ApiError';
-
+import guildMemberService from './discord/guildMember.service';
+import roleService from './discord/role.service';
+import platformService from './platform.service';
 /**
  * Create a community
  * @param {ICommunity} communityBody
@@ -107,6 +109,44 @@ const addPlatformToCommunityById = async (
   return community;
 };
 
+/**
+ * Populate roles
+ * @param {HydratedDocument<ICommunity>} community
+ * @returns {Promise<HydratedDocument<ICommunity>>}
+ */
+const populateRoles = async (community: HydratedDocument<ICommunity>): Promise<HydratedDocument<ICommunity>> => {
+  if (community.roles) {
+    for (const role of community.roles) {
+      const platformId = role.source.platformId;
+      const platform = await platformService.getPlatformById(platformId);
+      if (platform) {
+        const connection = await DatabaseManager.getInstance().getTenantDb(platform?.metadata?.id);
+        if (role.source.identifierType === 'member') {
+          const guildMembers = await guildMemberService.getGuildMembers(
+            connection,
+            { discordId: { $in: role.source.identifierValues } },
+            { avatar: 1, discordId: 1, username: 1, discriminator: 1, nickname: 1, globalName: 1 },
+          );
+          guildMembers.forEach((guildMember: any) => {
+            guildMember.ngu = guildMemberService.getNgu(guildMember);
+            guildMember.username = guildMemberService.getUsername(guildMember);
+          });
+          role.source.identifierValues = guildMembers;
+        } else if (role.source.identifierType === 'role') {
+          const roles: IRole[] = await roleService.getRoles(
+            connection,
+            { roleId: { $in: role.source.identifierValues } },
+            { roleId: 1, color: 1, name: 1 },
+          );
+          role.source.identifierValues = roles;
+        }
+      }
+    }
+  }
+
+  return community;
+};
+
 export default {
   createCommunity,
   queryCommunities,
@@ -116,4 +156,5 @@ export default {
   updateCommunityByFilter,
   deleteCommunityByFilter,
   addPlatformToCommunityById,
+  populateRoles,
 };

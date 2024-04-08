@@ -32,11 +32,14 @@ const getCommunities = catchAsync(async function (req: IAuthRequest, res: Respon
   res.send(result);
 });
 const getCommunity = catchAsync(async function (req: IAuthRequest, res: Response) {
-  const community = req.community;
-  await community?.populate({
-    path: 'platforms',
-    select: '_id name metadata disconnectedAt',
-  });
+  let community = req.community;
+  if (community) {
+    await community?.populate({
+      path: 'platforms',
+      select: '_id name metadata disconnectedAt',
+    });
+    community = await communityService.populateRoles(community);
+  }
   res.send(community);
 });
 const updateCommunity = catchAsync(async function (req: IAuthRequest, res: Response) {

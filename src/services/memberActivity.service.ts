@@ -871,7 +871,6 @@ async function getLastDocumentForTablesUsage(connection: Connection, activityCom
   return lastDocument[0];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getActivityComposition(guildMember: IGuildMember, memberActivity: any, activityComposition: Array<string>) {
   const activityTypes = [
     { key: 'all_new_active', message: 'Newly active' },
@@ -949,7 +948,6 @@ async function getMembersInteractionsNetworkGraph(
   const neo4jUsersInteractionsData = await Neo4j.read(usersInteractionsQuery);
   const { records: neo4jUsersInteractions } = neo4jUsersInteractionsData;
   const usersInteractions = neo4jUsersInteractions.map((usersInteraction) => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const { _fieldLookup, _fields } = usersInteraction;
     const a = _fields[_fieldLookup['a']];
@@ -981,7 +979,6 @@ async function getMembersInteractionsNetworkGraph(
   const neo4jUserRadiusData = await Neo4j.read(userRadiusQuery);
   const { records: neo4jUserRadius } = neo4jUserRadiusData;
   const userRadius = neo4jUserRadius.map((userRadius) => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const { _fieldLookup, _fields } = userRadius;
     const userId = _fields[_fieldLookup['userId']] as string;
@@ -999,7 +996,6 @@ async function getMembersInteractionsNetworkGraph(
   const neo4jUserStatusData = await Neo4j.read(userStatusQuery);
   const { records: neo4jUserStatus } = neo4jUserStatusData;
   const userStatus = neo4jUserStatus.map((userStatus) => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const { _fieldLookup, _fields } = userStatus;
     const userId = _fields[_fieldLookup['userId']] as string;
