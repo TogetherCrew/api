@@ -17,10 +17,13 @@ async function getRole(connection: Connection, filter: object): Promise<IRole | 
  * @param {Object} select - Selete fields
  * @returns {Promise<HydratedDocument<IRole>[] | []>}
  */
-const getRoles = async (connection: Connection, filter: object, select?: object): Promise<HydratedDocument<IRole>[] | []> => {
+const getRoles = async (
+  connection: Connection,
+  filter: object,
+  select?: object,
+): Promise<HydratedDocument<IRole>[] | []> => {
   return connection.models.Role.find(filter).select(select);
-
-}
+};
 
 /**
  * Get an array of Discord IDs based on the role IDs present in the guild member's data.
@@ -71,7 +74,6 @@ function getRolesForGuildMember(guildMember: IGuildMember, roles: Array<IRole>) 
 const queryRoles = async (connection: any, filter: object, options: object) => {
   return await connection.models.Role.paginate(filter, options);
 };
-
 
 export default {
   getRole,

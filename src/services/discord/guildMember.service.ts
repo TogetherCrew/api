@@ -12,7 +12,7 @@ type Filter = {
   allRoles: boolean;
   include?: Array<string>;
   exclude?: Array<string>;
-  discordId?: any
+  discordId?: any;
 };
 
 type Options = {
@@ -308,7 +308,11 @@ const getAllDiscordIdsInLastedMemberActivity = async (connection: Connection, me
  * @param {Object} select - Selete fields
  * @returns {Promise<HydratedDocument<IGuildMember>[] | []>}
  */
-const getGuildMembers = async (connection: Connection, filter: object, select?: object): Promise<HydratedDocument<IGuildMember>[] | []> => {
+const getGuildMembers = async (
+  connection: Connection,
+  filter: object,
+  select?: object,
+): Promise<HydratedDocument<IGuildMember>[] | []> => {
   return connection.models.GuildMember.find(filter).select(select);
 };
 
@@ -321,5 +325,5 @@ export default {
   getNgu,
   getUsername,
   queryGuildMembers,
-  getGuildMembers
+  getGuildMembers,
 };
