@@ -1,4 +1,4 @@
-import { Connection } from 'mongoose';
+import { Connection, HydratedDocument } from 'mongoose';
 import { IRole, IGuildMember } from '@togethercrew.dev/db';
 
 /**
@@ -12,17 +12,14 @@ async function getRole(connection: Connection, filter: object): Promise<IRole | 
 }
 
 /**
- * Get roles from the database based on the filter criteria.
  * @param {Connection} connection - Mongoose connection object for the database.
- * @param {object} filter - An object specifying the filter criteria to match the desired role entries.
- * @returns {Promise<IRole[] | []>} - A promise that resolves to an array of the matching role objects.
+ * @param {Object} filter - Mongo filter
+ * @param {Object} select - Selete fields
+ * @returns {Promise<HydratedDocument<IRole>[] | []>}
  */
-async function getRoles(connection: Connection, filter: object): Promise<IRole[] | []> {
-  try {
-    return await connection.models.Role.find(filter);
-  } catch (error) {
-    return [];
-  }
+const getRoles = async (connection: Connection, filter: object, select?: object): Promise<HydratedDocument<IRole>[] | []> => {
+  return connection.models.Role.find(filter).select(select);
+
 }
 
 /**
@@ -71,10 +68,10 @@ function getRolesForGuildMember(guildMember: IGuildMember, roles: Array<IRole>) 
  * @param {number} [options.limit] - Maximum number of results per page (default = 10)
  * @param {number} [options.page] - Current page (default = 1)
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const queryRoles = async (connection: any, filter: object, options: object) => {
   return await connection.models.Role.paginate(filter, options);
 };
+
 
 export default {
   getRole,

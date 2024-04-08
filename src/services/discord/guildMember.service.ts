@@ -1,4 +1,4 @@
-import { Connection } from 'mongoose';
+import { Connection, HydratedDocument } from 'mongoose';
 import { sort } from '../../utils';
 import { IGuildMember } from '@togethercrew.dev/db';
 import parentLogger from '../../config/logger';
@@ -12,6 +12,7 @@ type Filter = {
   allRoles: boolean;
   include?: Array<string>;
   exclude?: Array<string>;
+  discordId?: any
 };
 
 type Options = {
@@ -28,7 +29,6 @@ type Options = {
  * @param {Array<string>} activityCompostionsTypes - An array containing types of activity compositions.
  * @returns {Promise<QueryResult>} - An object with the query results and other information like 'limit', 'page', 'totalPages', 'totalResults'.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function queryGuildMembersForTables(
   connection: Connection,
   filter: Filter,
@@ -43,7 +43,6 @@ async function queryGuildMembersForTables(
     const page = options.page && parseInt(options.page, 10) > 0 ? parseInt(options.page, 10) : 1;
     const sortParams: Record<string, 1 | -1> = sortBy ? sort.sortByHandler(sortBy) : { username: 1 };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let matchStage: any = {};
     let allActivityIds: string[] = [];
 
@@ -224,8 +223,7 @@ async function getGuildMember(connection: Connection, filter: object): Promise<I
  * @param {number} [options.limit] - Maximum number of results per page (default = 10)
  * @param {number} [options.page] - Current page (default = 1)
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const queryGuildMembers = async (connection: any, filter: Filter, options: Options) => {
+const queryGuildMembers = async (connection: any, filter: any, options: Options) => {
   try {
     const { ngu } = filter;
     const { sortBy } = options;
@@ -233,7 +231,6 @@ const queryGuildMembers = async (connection: any, filter: Filter, options: Optio
     const page = options.page && parseInt(options.page, 10) > 0 ? parseInt(options.page, 10) : 1;
     const sortParams: Record<string, 1 | -1> = sortBy ? sort.sortByHandler(sortBy) : { username: 1 };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const matchStage: any = {};
 
     if (ngu) {
@@ -304,6 +301,17 @@ const getAllDiscordIdsInLastedMemberActivity = async (connection: Connection, me
   return allDiscordIds;
 };
 
+/**
+ * Get guildMembers by filter
+ * @param {Connection} connection - Mongoose connection object for the database.
+ * @param {Object} filter - Mongo filter
+ * @param {Object} select - Selete fields
+ * @returns {Promise<HydratedDocument<IGuildMember>[] | []>}
+ */
+const getGuildMembers = async (connection: Connection, filter: object, select?: object): Promise<HydratedDocument<IGuildMember>[] | []> => {
+  return connection.models.GuildMember.find(filter).select(select);
+};
+
 export default {
   getGuildMemberInfoFromDiscordIds,
   getAllDiscordIdsInLastedMemberActivity,
@@ -313,4 +321,5 @@ export default {
   getNgu,
   getUsername,
   queryGuildMembers,
+  getGuildMembers
 };
