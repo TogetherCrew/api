@@ -2,6 +2,11 @@ import Joi from 'joi';
 import { objectId } from './custom.validation';
 
 const createAnnouncement = {
+  params: Joi.object()
+    .required()
+    .keys({
+      platformId: Joi.string().custom(objectId),
+    }),
   body: Joi.object().keys({
     title: Joi.string(),
     communityId: Joi.string().custom(objectId).required(),
@@ -27,6 +32,11 @@ const createAnnouncement = {
 };
 
 const updateAnnouncement = {
+  params: Joi.object()
+    .required()
+    .keys({
+      platformId: Joi.string().custom(objectId),
+    }),
   body: Joi.object().keys({
     title: Joi.string(),
     scheduledAt: Joi.date().greater('now').iso().description('ISO date string. UTC time zone'),
@@ -48,6 +58,11 @@ const updateAnnouncement = {
 };
 
 const getAnnouncements = {
+  params: Joi.object()
+    .required()
+    .keys({
+      platformId: Joi.string().custom(objectId),
+    }),
   query: Joi.object().keys({
     communityId: Joi.string().custom(objectId).required(),
     sortBy: Joi.string(),
@@ -66,8 +81,26 @@ const getAnnouncements = {
   }),
 };
 
+const getOneAnnouncement = {
+  params: Joi.object()
+    .required()
+    .keys({
+      platformId: Joi.string().custom(objectId),
+    }),
+};
+
+const deleteAnnouncement = {
+  params: Joi.object()
+    .required()
+    .keys({
+      platformId: Joi.string().custom(objectId),
+    }),
+};
+
 export default {
   createAnnouncement,
   updateAnnouncement,
   getAnnouncements,
+  getOneAnnouncement,
+  deleteAnnouncement,
 };

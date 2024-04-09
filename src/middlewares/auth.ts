@@ -40,9 +40,6 @@ async function getCommunity(req: Request, reject: Function): Promise<any | null>
     let communityId: string | null = null,
       platformId: string | null = null;
 
-    console.log(ids);
-    console.log('***********');
-
     if (ids.communityId) {
       communityId = ids.communityId;
     } else if (ids.community) {
@@ -50,9 +47,6 @@ async function getCommunity(req: Request, reject: Function): Promise<any | null>
     } else if (ids.platformId) {
       platformId = ids.platformId;
     }
-
-    console.log(typeof communityId, communityId);
-    console.log(typeof platformId, platformId);
 
     if (communityId !== null && !Types.ObjectId.isValid(communityId)) {
       reject(new ApiError(httpStatus.BAD_REQUEST, 'Invalid communityId'));
@@ -67,13 +61,11 @@ async function getCommunity(req: Request, reject: Function): Promise<any | null>
         req.community = community;
         return community;
       } else {
-        console.log(1);
         reject(new ApiError(httpStatus.NOT_FOUND, 'Community not found!'));
       }
     } else if (platformId) {
       const platform = await platformService.getPlatformById(new Types.ObjectId(platformId));
       if (!platform) {
-        console.log(2);
         reject(new ApiError(httpStatus.NOT_FOUND, 'Platform not found!'));
         return null;
       }
@@ -84,7 +76,6 @@ async function getCommunity(req: Request, reject: Function): Promise<any | null>
         req.community = community;
         return community;
       } else {
-        console.log(3);
         reject(new ApiError(httpStatus.NOT_FOUND, 'Community not found!'));
       }
     }
