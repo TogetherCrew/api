@@ -36,6 +36,7 @@ const updateAnnouncement = {
     .required()
     .keys({
       platformId: Joi.string().custom(objectId),
+      announcementId: Joi.string().custom(objectId),
     }),
   body: Joi.object().keys({
     title: Joi.string(),
@@ -86,6 +87,7 @@ const getOneAnnouncement = {
     .required()
     .keys({
       platformId: Joi.string().custom(objectId),
+      announcementId: Joi.string().custom(objectId),
     }),
 };
 
@@ -94,6 +96,7 @@ const deleteAnnouncement = {
     .required()
     .keys({
       platformId: Joi.string().custom(objectId),
+      announcementId: Joi.string().custom(objectId),
     }),
 };
 
