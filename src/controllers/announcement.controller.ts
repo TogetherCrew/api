@@ -43,14 +43,15 @@ async function getAnnouncementFieldsToReturn(announcement: IAnnouncement) {
 
 const createAnnouncement = catchAsync(async function (req: IAuthRequest, res: Response) {
   const { title, communityId, scheduledAt, draft, data } = req.body;
-  const community = await communityService.getCommunityByFilter({ _id: req.body.communityId, users: req.user.id });
-  if (!community) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Community not found');
-  }
+  // const community = await communityService.getCommunityByFilter({ _id: req.body.communityId, users: req.user.id });
+  // if (!community) {
+  //   throw new ApiError(httpStatus.NOT_FOUND, 'Community not found');
+  // }
+  const community = req.community;
 
   const requestedPlatformIds = data.map((data: object & { platformId: Types.ObjectId }) => data.platformId);
   const isPlatformIdsValid = requestedPlatformIds.every((platformId: Types.ObjectId) =>
-    community.platforms?.includes(platformId),
+    community?.platforms?.includes(platformId),
   );
   if (!isPlatformIdsValid) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid platformId');
@@ -84,15 +85,16 @@ const updateAnnouncement = catchAsync(async function (req: IAuthRequest, res: Re
     throw new ApiError(httpStatus.NOT_FOUND, 'Announcement not found');
   }
 
-  const community = await communityService.getCommunityByFilter({ _id: announcement.community, users: req.user.id });
-  if (!community) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Announcement not found');
-  }
+  // const community = await communityService.getCommunityByFilter({ _id: announcement.community, users: req.user.id });
+  // if (!community) {
+  //   throw new ApiError(httpStatus.NOT_FOUND, 'Announcement not found');
+  // }
+  const community = req.community;
 
   if (data) {
     const requestedPlatformIds = data.map((data: object & { platformId: Types.ObjectId }) => data.platformId);
     const isPlatformIdsValid = requestedPlatformIds.every((platformId: Types.ObjectId) =>
-      community.platforms?.includes(platformId),
+      community?.platforms?.includes(platformId),
     );
     if (!isPlatformIdsValid) {
       throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid platformId');
@@ -157,10 +159,11 @@ const getAnnouncements = catchAsync(async function (req: IAuthRequest, res: Resp
   const queryFilter = pick(req.query, ['communityId', 'startDate', 'endDate', 'timeZone']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
 
-  const community = await communityService.getCommunityByFilter({ _id: queryFilter.communityId, users: req.user.id });
-  if (!community) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Community not found');
-  }
+  // const community = await communityService.getCommunityByFilter({ _id: queryFilter.communityId, users: req.user.id });
+  // if (!community) {
+  //   throw new ApiError(httpStatus.NOT_FOUND, 'Community not found');
+  // }
+  const community = req.community;
 
   const utcStartDate = queryFilter.startDate && moment.tz(queryFilter.startDate, queryFilter.timeZone);
   const utcEndDate = queryFilter.endDate && moment.tz(queryFilter.endDate, queryFilter.timeZone);
@@ -188,10 +191,11 @@ const getOneAnnouncement = catchAsync(async function (req: IAuthRequest, res: Re
     throw new ApiError(httpStatus.NOT_FOUND, 'Announcement not found');
   }
 
-  const community = await communityService.getCommunityByFilter({ _id: announcement.community, users: req.user.id });
-  if (!community) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Announcement not found');
-  }
+  // const community = await communityService.getCommunityByFilter({ _id: announcement.community, users: req.user.id });
+  // if (!community) {
+  //   throw new ApiError(httpStatus.NOT_FOUND, 'Announcement not found');
+  // }
+  const community = req.community;
 
   res.status(httpStatus.OK).send(await getAnnouncementFieldsToReturn(announcement));
 });
@@ -205,10 +209,11 @@ const deleteAnnouncement = catchAsync(async function (req: IAuthRequest, res: Re
     throw new ApiError(httpStatus.NOT_FOUND, 'Announcement not found');
   }
 
-  const community = await communityService.getCommunityByFilter({ _id: announcement.community, users: req.user.id });
-  if (!community) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Announcement not found');
-  }
+  // const community = await communityService.getCommunityByFilter({ _id: announcement.community, users: req.user.id });
+  // if (!community) {
+  //   throw new ApiError(httpStatus.NOT_FOUND, 'Announcement not found');
+  // }
+  const community = req.community;
 
   await announcementService.deleteAnnouncementById(announcementId);
   res.status(httpStatus.NO_CONTENT).send();
