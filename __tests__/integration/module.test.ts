@@ -4,7 +4,7 @@ import app from '../../src/app';
 import setupTestDB, { cleanUpTenantDatabases } from '../utils/setupTestDB';
 import { userOne, insertUsers, userTwo } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
-import { Platform, Community, IPlatformUpdateBody, DatabaseManager, IModule,Module } from '@togethercrew.dev/db';
+import { Platform, Community, IPlatformUpdateBody, DatabaseManager, IModule, Module } from '@togethercrew.dev/db';
 import { communityOne, communityTwo, communityThree, insertCommunities } from '../fixtures/community.fixture';
 
 import {
@@ -93,6 +93,9 @@ describe('Module routes', () => {
                 id: expect.anything(),
                 name: newModule.name,
                 community: communityOne._id.toHexString(),
+                options: {
+                    platforms: []
+                }
             });
 
             const dbModule = await Module.findById(res.body.id);
@@ -100,6 +103,9 @@ describe('Module routes', () => {
             expect(dbModule).toMatchObject({
                 name: newModule.name,
                 community: newModule.community,
+                options: {
+                    platforms: []
+                }
             });
         });
 
@@ -117,7 +123,7 @@ describe('Module routes', () => {
                 .expect(httpStatus.BAD_REQUEST);
         });
 
-        test('should return 400 error if community doesn not exist', async () => {
+        test('should return 404 error if community doesn not exist', async () => {
             await insertCommunities([communityOne]);
             await insertUsers([userOne]);
             newModule.community = new Types.ObjectId();
@@ -125,7 +131,7 @@ describe('Module routes', () => {
                 .post(`/api/v1/modules`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send(newModule)
-                .expect(httpStatus.BAD_REQUEST);
+                .expect(httpStatus.NOT_FOUND);
         });
         test('should return 400 error if community is invalid', async () => {
             await insertCommunities([communityOne]);
