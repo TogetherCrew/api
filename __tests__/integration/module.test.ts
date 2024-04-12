@@ -181,22 +181,17 @@ describe('Module routes', () => {
                 page: 1,
                 limit: 10,
                 totalPages: 1,
-                totalResults: 2,
+                totalResults: 1,
             });
-            expect(res.body.results).toHaveLength(2);
+            expect(res.body.results).toHaveLength(1);
 
             expect(res.body.results[0]).toMatchObject({
-                id: platformTwo._id.toHexString(),
-                name: platformTwo.name,
-                metadata: platformTwo.metadata,
+                id: expect.anything(),
+                name: moduleOne.name,
                 community: communityOne._id.toHexString(),
-            });
-
-            expect(res.body.results[1]).toMatchObject({
-                id: platformOne._id.toHexString(),
-                name: platformOne.name,
-                metadata: platformOne.metadata,
-                community: communityOne._id.toHexString(),
+                options: {
+                    platforms: []
+                }
             });
         });
 
@@ -314,8 +309,8 @@ describe('Module routes', () => {
                 results: expect.any(Array),
                 page: 2,
                 limit: 1,
-                totalPages: 2,
-                totalResults: 2,
+                totalPages: 1,
+                totalResults: 1,
             });
             expect(res.body.results).toHaveLength(0);
         });
