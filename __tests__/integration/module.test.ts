@@ -6,6 +6,7 @@ import { userOne, insertUsers, userTwo } from '../fixtures/user.fixture';
 import { userOneAccessToken } from '../fixtures/token.fixture';
 import { Platform, Community, IPlatformUpdateBody, DatabaseManager, IModule, Module } from '@togethercrew.dev/db';
 import { communityOne, communityTwo, communityThree, insertCommunities } from '../fixtures/community.fixture';
+import { moduleOne, moduleTwo, moduleThree, insertModules } from '../fixtures/module.fixture';
 
 import {
     platformOne,
@@ -61,6 +62,11 @@ describe('Module routes', () => {
         platformThree.community = communityTwo._id;
         platformFour.community = communityThree._id;
         platformFive.community = communityOne._id;
+
+        moduleOne.community = communityOne._id;
+        moduleTwo.community = communityTwo._id;
+        moduleThree.community = communityThree._id;
+
     });
     describe('POST api/v1/modules', () => {
         beforeEach(async () => {
@@ -113,6 +119,17 @@ describe('Module routes', () => {
             await request(app).post(`/api/v1/modules`).send(newModule).expect(httpStatus.UNAUTHORIZED);
         });
 
+        test('should return 400 error if there is a module with same name already for community', async () => {
+            await insertCommunities([communityOne]);
+            await insertModules([moduleOne])
+            await insertUsers([userOne]);
+            await request(app)
+                .post(`/api/v1/modules`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send(moduleOne)
+                .expect(httpStatus.BAD_REQUEST);
+        });
+
         test('should return 400 error if name is invalid', async () => {
             await insertCommunities([communityOne]);
             await insertUsers([userOne]);
@@ -144,169 +161,165 @@ describe('Module routes', () => {
         });
 
     });
-    // describe('GET /api/v1/modules', () => {
-    //     beforeEach(async () => {
-    //         cleanUpTenantDatabases();
-    //     });
-    //     test('should return 200 and apply the default query options', async () => {
-    //         await insertCommunities([communityOne, communityTwo, communityThree]);
-    //         await insertUsers([userOne, userTwo]);
-    //         await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
-    //         const res = await request(app)
-    //             .get('/api/v1/platforms')
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .query({ community: communityOne._id.toHexString() })
-    //             .send()
-    //             .expect(httpStatus.OK);
+    describe('GET /api/v1/modules', () => {
+        beforeEach(async () => {
+            cleanUpTenantDatabases();
+        });
+        test('should return 200 and apply the default query options', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertModules([moduleOne, moduleTwo]);
+            const res = await request(app)
+                .get('/api/v1/modules')
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ community: communityOne._id.toHexString() })
+                .send()
+                .expect(httpStatus.OK);
 
-    //         expect(res.body).toEqual({
-    //             results: expect.any(Array),
-    //             page: 1,
-    //             limit: 10,
-    //             totalPages: 1,
-    //             totalResults: 2,
-    //         });
-    //         expect(res.body.results).toHaveLength(2);
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 2,
+            });
+            expect(res.body.results).toHaveLength(2);
 
-    //         expect(res.body.results[0]).toMatchObject({
-    //             id: platformTwo._id.toHexString(),
-    //             name: platformTwo.name,
-    //             metadata: platformTwo.metadata,
-    //             community: communityOne._id.toHexString(),
-    //         });
+            expect(res.body.results[0]).toMatchObject({
+                id: platformTwo._id.toHexString(),
+                name: platformTwo.name,
+                metadata: platformTwo.metadata,
+                community: communityOne._id.toHexString(),
+            });
 
-    //         expect(res.body.results[1]).toMatchObject({
-    //             id: platformOne._id.toHexString(),
-    //             name: platformOne.name,
-    //             metadata: platformOne.metadata,
-    //             community: communityOne._id.toHexString(),
-    //         });
-    //     });
+            expect(res.body.results[1]).toMatchObject({
+                id: platformOne._id.toHexString(),
+                name: platformOne.name,
+                metadata: platformOne.metadata,
+                community: communityOne._id.toHexString(),
+            });
+        });
 
-    //     test('should return 401 if access token is missing', async () => {
-    //         await insertCommunities([communityOne, communityTwo, communityThree]);
-    //         await insertUsers([userOne, userTwo]);
-    //         await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
-    //         await request(app)
-    //             .get('/api/v1/platforms')
-    //             .query({ community: communityOne._id.toHexString() })
-    //             .send()
-    //             .expect(httpStatus.UNAUTHORIZED);
-    //     });
+        test('should return 401 if access token is missing', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertModules([moduleOne, moduleTwo]);
+            await request(app)
+                .get('/api/v1/modules')
+                .query({ community: communityOne._id.toHexString() })
+                .send()
+                .expect(httpStatus.UNAUTHORIZED);
+        });
 
-    //     test('should correctly apply filter on name field', async () => {
-    //         await insertCommunities([communityOne, communityTwo, communityThree]);
-    //         await insertUsers([userOne, userTwo]);
-    //         await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
-    //         const res = await request(app)
-    //             .get('/api/v1/platforms')
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .query({ name: platformOne.name, community: communityOne._id.toHexString() })
-    //             .send()
-    //             .expect(httpStatus.OK);
+        test('should correctly apply filter on name field and return hivemind module', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertModules([moduleOne, moduleTwo]);
+            const res = await request(app)
+                .get('/api/v1/modules')
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ name: 'hivemind', community: communityOne._id.toHexString() })
+                .send()
+                .expect(httpStatus.OK);
 
-    //         expect(res.body).toEqual({
-    //             results: expect.any(Array),
-    //             page: 1,
-    //             limit: 10,
-    //             totalPages: 1,
-    //             totalResults: 2,
-    //         });
-    //         expect(res.body.results).toHaveLength(2);
-    //         expect(res.body.results[0].id).toBe(platformTwo._id.toHexString());
-    //         expect(res.body.results[1].id).toBe(platformOne._id.toHexString());
-    //     });
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 1,
+            });
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].id).toBe(moduleOne._id.toHexString());
+        });
 
-    //     test('should correctly sort the returned array if descending sort param is specified', async () => {
-    //         await insertCommunities([communityOne, communityTwo, communityThree]);
-    //         await insertUsers([userOne, userTwo]);
-    //         await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
-    //         const res = await request(app)
-    //             .get('/api/v1/platforms')
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .query({ sortBy: 'name:desc', community: communityOne._id.toHexString() })
-    //             .send()
-    //             .expect(httpStatus.OK);
+        test('should correctly sort the returned array if descending sort param is specified', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertModules([moduleOne, moduleTwo]);
+            const res = await request(app)
+                .get('/api/v1/modules')
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ sortBy: 'name:desc', community: communityOne._id.toHexString() })
+                .send()
+                .expect(httpStatus.OK);
 
-    //         expect(res.body).toEqual({
-    //             results: expect.any(Array),
-    //             page: 1,
-    //             limit: 10,
-    //             totalPages: 1,
-    //             totalResults: 2,
-    //         });
-    //         expect(res.body.results).toHaveLength(2);
-    //         expect(res.body.results[0].id).toBe(platformOne._id.toHexString());
-    //         expect(res.body.results[1].id).toBe(platformTwo._id.toHexString());
-    //     });
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 1,
+            });
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].id).toBe(moduleOne._id.toHexString());
+        });
 
-    //     test('should correctly sort the returned array if ascending sort param is specified', async () => {
-    //         await insertCommunities([communityOne, communityTwo, communityThree]);
-    //         await insertUsers([userOne, userTwo]);
-    //         await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
-    //         const res = await request(app)
-    //             .get('/api/v1/platforms')
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .query({ sortBy: 'name:asc', community: communityOne._id.toHexString() })
-    //             .send()
-    //             .expect(httpStatus.OK);
+        test('should correctly sort the returned array if ascending sort param is specified', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertModules([moduleOne, moduleTwo]);
+            const res = await request(app)
+                .get('/api/v1/modules')
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ sortBy: 'name:asc', community: communityOne._id.toHexString() })
+                .send()
+                .expect(httpStatus.OK);
 
-    //         expect(res.body).toEqual({
-    //             results: expect.any(Array),
-    //             page: 1,
-    //             limit: 10,
-    //             totalPages: 1,
-    //             totalResults: 2,
-    //         });
-    //         expect(res.body.results).toHaveLength(2);
-    //         expect(res.body.results[0].id).toBe(platformOne._id.toHexString());
-    //         expect(res.body.results[1].id).toBe(platformTwo._id.toHexString());
-    //     });
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 1,
+            });
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].id).toBe(moduleOne._id.toHexString());
+        });
 
-    //     test('should limit returned array if limit param is specified', async () => {
-    //         await insertCommunities([communityOne, communityTwo, communityThree]);
-    //         await insertUsers([userOne, userTwo]);
-    //         await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
-    //         const res = await request(app)
-    //             .get('/api/v1/platforms')
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .query({ limit: 1, community: communityOne._id.toHexString() })
-    //             .send()
-    //             .expect(httpStatus.OK);
+        test('should limit returned array if limit param is specified', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertModules([moduleOne, moduleTwo]);
+            const res = await request(app)
+                .get('/api/v1/modules')
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ limit: 1, community: communityOne._id.toHexString() })
+                .send()
+                .expect(httpStatus.OK);
 
-    //         expect(res.body).toEqual({
-    //             results: expect.any(Array),
-    //             page: 1,
-    //             limit: 1,
-    //             totalPages: 2,
-    //             totalResults: 2,
-    //         });
-    //         expect(res.body.results).toHaveLength(1);
-    //         expect(res.body.results[0].id).toBe(platformTwo._id.toHexString());
-    //     });
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 1,
+                totalPages: 1,
+                totalResults: 1,
+            });
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].id).toBe(moduleOne._id.toHexString());
+        });
 
-    //     test('should return the correct page if page and limit params are specified', async () => {
-    //         await insertCommunities([communityOne, communityTwo, communityThree]);
-    //         await insertUsers([userOne, userTwo]);
-    //         await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
-    //         const res = await request(app)
-    //             .get('/api/v1/platforms')
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .query({ page: 2, limit: 1, community: communityOne._id.toHexString() })
-    //             .send()
-    //             .expect(httpStatus.OK);
+        test('should return the correct page if page and limit params are specified', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertModules([moduleOne, moduleTwo]);
+            const res = await request(app)
+                .get('/api/v1/modules')
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ page: 2, limit: 1, community: communityOne._id.toHexString() })
+                .send()
+                .expect(httpStatus.OK);
 
-    //         expect(res.body).toEqual({
-    //             results: expect.any(Array),
-    //             page: 2,
-    //             limit: 1,
-    //             totalPages: 2,
-    //             totalResults: 2,
-    //         });
-    //         expect(res.body.results).toHaveLength(1);
-    //         expect(res.body.results[0].id).toBe(platformOne._id.toHexString());
-    //     });
-    // });
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 2,
+                limit: 1,
+                totalPages: 2,
+                totalResults: 2,
+            });
+            expect(res.body.results).toHaveLength(0);
+        });
+    });
     // describe('GET /api/v1/modules/:moduleId', () => {
     //     beforeEach(async () => {
     //         cleanUpTenantDatabases();
