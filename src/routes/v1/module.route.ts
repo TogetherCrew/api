@@ -9,7 +9,7 @@ const router = express.Router();
 router
     .route('/')
     .post(auth('admin'), validate(moduleValidation.createModule), moduleController.createModule)
-//   .get(auth('admin', 'view'), validate(platformValidation.getPlatforms), platformController.getPlatforms);
+    .get(auth('admin', 'view'), validate(moduleValidation.getModules), moduleController.getModules);
 
 // router
 //   .route('/:platformId')

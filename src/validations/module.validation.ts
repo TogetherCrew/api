@@ -9,6 +9,18 @@ const createModule = {
     }),
 };
 
+const getModules = {
+    query: Joi.object().keys({
+        name: Joi.string().valid('hivemind'),
+        community: Joi.string().required(),
+        sortBy: Joi.string(),
+        limit: Joi.number().integer(),
+        page: Joi.number().integer(),
+    }),
+};
+
+
 export default {
-    createModule
+    createModule,
+    getModules
 };
