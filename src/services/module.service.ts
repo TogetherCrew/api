@@ -24,7 +24,18 @@ const queryModules = async (filter: object, options: object) => {
     return Module.paginate(filter, options);
 };
 
+/**
+ * Get module by filter
+ * @param {Object} filter - Mongo filter
+ * @returns {Promise<HydratedDocument<IModule> | null>}
+ */
+const getModuleByFilter = async (filter: object): Promise<HydratedDocument<IModule> | null> => {
+    return Module.findOne(filter);
+};
+
+
 export default {
     createModule,
-    queryModules
+    queryModules,
+    getModuleByFilter
 };

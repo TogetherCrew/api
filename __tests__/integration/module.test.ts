@@ -40,12 +40,9 @@ import mongoose from 'mongoose';
 setupTestDB();
 
 describe('Module routes', () => {
-    let connection: Connection;
     beforeAll(async () => {
-        connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
     });
     beforeEach(async () => {
-        cleanUpTenantDatabases();
         userOne.communities = [communityOne._id, communityTwo._id];
         userTwo.communities = [communityThree._id];
 
@@ -69,14 +66,10 @@ describe('Module routes', () => {
 
     });
     describe('POST api/v1/modules', () => {
-        beforeEach(async () => {
-            cleanUpTenantDatabases();
-        });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let newModule: IModule;
 
         beforeEach(async () => {
-            await connection.collection('connection-platform').deleteMany({});
             newModule = {
                 name: 'hivemind',
                 community: communityOne._id,
@@ -123,11 +116,14 @@ describe('Module routes', () => {
             await insertCommunities([communityOne]);
             await insertModules([moduleOne])
             await insertUsers([userOne]);
-            await request(app)
+            newModule.community = communityOne._id;
+            const res = await request(app)
                 .post(`/api/v1/modules`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
-                .send(moduleOne)
+                .send(newModule)
                 .expect(httpStatus.BAD_REQUEST);
+
+            console.log(res.body)
         });
 
         test('should return 400 error if name is invalid', async () => {
@@ -162,9 +158,6 @@ describe('Module routes', () => {
 
     });
     describe('GET /api/v1/modules', () => {
-        beforeEach(async () => {
-            cleanUpTenantDatabases();
-        });
         test('should return 200 and apply the default query options', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
             await insertUsers([userOne, userTwo]);
@@ -315,87 +308,83 @@ describe('Module routes', () => {
             expect(res.body.results).toHaveLength(0);
         });
     });
-    // describe('GET /api/v1/modules/:moduleId', () => {
-    //     beforeEach(async () => {
-    //         cleanUpTenantDatabases();
-    //     });
-    //     discordServices.coreService.getBotPermissions = jest.fn().mockReturnValue(['ViewChannel', 'ReadMessageHistory']);
-    //     test('should return 200 and the platform object if data is ok', async () => {
-    //         await insertCommunities([communityOne, communityTwo, communityThree]);
-    //         await insertUsers([userOne, userTwo]);
-    //         await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
-    //         const res = await request(app)
-    //             .get(`/api/v1/platforms/${platformOne._id}`)
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .send()
-    //             .expect(httpStatus.OK);
+    describe('GET /api/v1/modules/:moduleId', () => {
+        test('should return 200 and the platform object if data is ok', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
+            const res = await request(app)
+                .get(`/api/v1/modules/${platformOne._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send()
+                .expect(httpStatus.OK);
 
-    //         expect(res.body).toEqual({
-    //             id: expect.anything(),
-    //             name: platformOne.name,
-    //             metadata: {
-    //                 ...platformOne.metadata,
-    //                 permissions: {
-    //                     ReadData: {
-    //                         ViewChannel: true,
-    //                         ReadMessageHistory: true,
-    //                     },
-    //                     Announcement: {
-    //                         ViewChannel: true,
-    //                         SendMessages: false,
-    //                         SendMessagesInThreads: false,
-    //                         CreatePublicThreads: false,
-    //                         CreatePrivateThreads: false,
-    //                         EmbedLinks: false,
-    //                         AttachFiles: false,
-    //                         MentionEveryone: false,
-    //                         Connect: false,
-    //                     },
-    //                 },
-    //             },
-    //             community: communityOne._id.toHexString(),
-    //             disconnectedAt: null,
-    //             connectedAt: expect.anything(),
-    //         });
-    //     });
+            expect(res.body).toEqual({
+                id: expect.anything(),
+                name: platformOne.name,
+                metadata: {
+                    ...platformOne.metadata,
+                    permissions: {
+                        ReadData: {
+                            ViewChannel: true,
+                            ReadMessageHistory: true,
+                        },
+                        Announcement: {
+                            ViewChannel: true,
+                            SendMessages: false,
+                            SendMessagesInThreads: false,
+                            CreatePublicThreads: false,
+                            CreatePrivateThreads: false,
+                            EmbedLinks: false,
+                            AttachFiles: false,
+                            MentionEveryone: false,
+                            Connect: false,
+                        },
+                    },
+                },
+                community: communityOne._id.toHexString(),
+                disconnectedAt: null,
+                connectedAt: expect.anything(),
+            });
+        });
 
-    //     test('should return 401 error if access token is missing', async () => {
-    //         await insertUsers([userOne]);
+        test('should return 401 error if access token is missing', async () => {
+            await insertUsers([userOne]);
 
-    //         await request(app).get(`/api/v1/platforms/${platformOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
-    //     });
+            await request(app).get(`/api/v1/platforms/${platformOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
+        });
 
-    //     test('should return 403 when user trys to access platoform they does not belong to', async () => {
-    //         await insertCommunities([communityOne, communityTwo, communityThree]);
-    //         await insertUsers([userOne, userTwo]);
-    //         await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
+        test('should return 403 when user trys to access platoform they does not belong to', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
 
-    //         await request(app)
-    //             .get(`/api/v1/platforms/${platformFour._id}`)
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .send()
-    //             .expect(httpStatus.FORBIDDEN);
-    //     });
+            await request(app)
+                .get(`/api/v1/platforms/${platformFour._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send()
+                .expect(httpStatus.FORBIDDEN);
+        });
 
-    //     test('should return 400 error if platformId is not a valid mongo id', async () => {
-    //         await insertUsers([userOne, userTwo]);
-    //         await request(app)
-    //             .get(`/api/v1/platforms/invalid`)
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .send()
-    //             .expect(httpStatus.BAD_REQUEST);
-    //     });
+        test('should return 400 error if platformId is not a valid mongo id', async () => {
+            await insertUsers([userOne, userTwo]);
+            await request(app)
+                .get(`/api/v1/platforms/invalid`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send()
+                .expect(httpStatus.BAD_REQUEST);
+        });
 
-    //     test('should return 404 error if platoform is not found', async () => {
-    //         await insertUsers([userOne]);
+        test('should return 404 error if platoform is not found', async () => {
+            await insertUsers([userOne]);
 
-    //         await request(app)
-    //             .get(`/api/v1/platforms/${platformOne._id}`)
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .send()
-    //             .expect(httpStatus.NOT_FOUND);
-    //     });
-    // });
+            await request(app)
+                .get(`/api/v1/platforms/${platformOne._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send()
+                .expect(httpStatus.NOT_FOUND);
+        });
+    });
     // describe('PATCH /api/v1/modules/:moduleId', () => {
     //     let updateBody: IPlatformUpdateBody;
     //     beforeEach(() => {

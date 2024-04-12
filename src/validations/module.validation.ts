@@ -5,14 +5,14 @@ import { Types } from 'mongoose';
 const createModule = {
     body: Joi.object().keys({
         name: Joi.string().required().valid('hivemind'),
-        community: Joi.string().custom(objectId),
+        community: Joi.string().custom(objectId).required(),
     }),
 };
 
 const getModules = {
     query: Joi.object().keys({
         name: Joi.string().valid('hivemind'),
-        community: Joi.string().required(),
+        community: Joi.string().custom(objectId).required(),
         sortBy: Joi.string(),
         limit: Joi.number().integer(),
         page: Joi.number().integer(),

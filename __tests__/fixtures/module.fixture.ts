@@ -16,25 +16,16 @@ interface ModuleFixture {
 export const moduleOne: ModuleFixture = {
     _id: new Types.ObjectId(),
     name: 'hivemind',
-    options: {
-        platforms: [],
-    },
 };
 
 export const moduleTwo: ModuleFixture = {
     _id: new Types.ObjectId(),
     name: 'hivemind',
-    options: {
-        platforms: [],
-    },
 };
 
 export const moduleThree: ModuleFixture = {
     _id: new Types.ObjectId(),
     name: 'hivemind',
-    options: {
-        platforms: [],
-    },
 };
 
 

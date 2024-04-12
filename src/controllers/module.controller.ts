@@ -4,10 +4,14 @@ import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync, pick, ApiError } from '../utils';
 import config from '../config';
 import httpStatus from 'http-status';
+import { Module } from '@togethercrew.dev/db';
 
 const createModule = catchAsync(async function (req: IAuthRequest, res: Response) {
-    const platform = await moduleService.createModule(req.body);
-    res.status(httpStatus.CREATED).send(platform);
+    if (await moduleService.getModuleByFilter(req.body)) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'This Module is already created!')
+    }
+    const module = await moduleService.createModule(req.body);
+    res.status(httpStatus.CREATED).send(module);
 });
 
 const getModules = catchAsync(async function (req: IAuthRequest, res: Response) {
