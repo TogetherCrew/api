@@ -309,77 +309,58 @@ describe('Module routes', () => {
         });
     });
     describe('GET /api/v1/modules/:moduleId', () => {
-        test('should return 200 and the platform object if data is ok', async () => {
+        test('should return 200 and the module object if data is ok', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
             await insertUsers([userOne, userTwo]);
-            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
+            await insertModules([moduleOne, moduleTwo]);
             const res = await request(app)
-                .get(`/api/v1/modules/${platformOne._id}`)
+                .get(`/api/v1/modules/${moduleOne._id}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(httpStatus.OK);
 
             expect(res.body).toEqual({
                 id: expect.anything(),
-                name: platformOne.name,
-                metadata: {
-                    ...platformOne.metadata,
-                    permissions: {
-                        ReadData: {
-                            ViewChannel: true,
-                            ReadMessageHistory: true,
-                        },
-                        Announcement: {
-                            ViewChannel: true,
-                            SendMessages: false,
-                            SendMessagesInThreads: false,
-                            CreatePublicThreads: false,
-                            CreatePrivateThreads: false,
-                            EmbedLinks: false,
-                            AttachFiles: false,
-                            MentionEveryone: false,
-                            Connect: false,
-                        },
-                    },
-                },
+                name: moduleOne.name,
                 community: communityOne._id.toHexString(),
-                disconnectedAt: null,
-                connectedAt: expect.anything(),
+                options: {
+                    platforms: []
+                }
             });
         });
 
         test('should return 401 error if access token is missing', async () => {
             await insertUsers([userOne]);
 
-            await request(app).get(`/api/v1/platforms/${platformOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
+            await request(app).get(`/api/v1/modules/${moduleOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
         });
 
         test('should return 403 when user trys to access platoform they does not belong to', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
             await insertUsers([userOne, userTwo]);
-            await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
+            await insertModules([moduleOne, moduleTwo]);
 
             await request(app)
-                .get(`/api/v1/platforms/${platformFour._id}`)
+                .get(`/api/v1/modules/${moduleOne._id}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(httpStatus.FORBIDDEN);
         });
 
-        test('should return 400 error if platformId is not a valid mongo id', async () => {
+        test('should return 400 error if module is not a valid mongo id', async () => {
             await insertUsers([userOne, userTwo]);
             await request(app)
-                .get(`/api/v1/platforms/invalid`)
+                .get(`/api/v1/modules/invalid`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(httpStatus.BAD_REQUEST);
         });
 
-        test('should return 404 error if platoform is not found', async () => {
+        test('should return 404 error if module is not found', async () => {
             await insertUsers([userOne]);
 
             await request(app)
-                .get(`/api/v1/platforms/${platformOne._id}`)
+                .get(`/api/v1/modules/${moduleOne._id}`)
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send()
                 .expect(httpStatus.NOT_FOUND);
