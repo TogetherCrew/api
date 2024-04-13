@@ -19,8 +19,16 @@ const getModules = {
     }),
 };
 
+const getModule = {
+    params: Joi.object().keys({
+        moduleId: Joi.string().custom(objectId),
+    }),
+};
+
+
 
 export default {
     createModule,
-    getModules
+    getModules,
+    getModule
 };

@@ -33,9 +33,19 @@ const getModuleByFilter = async (filter: object): Promise<HydratedDocument<IModu
     return Module.findOne(filter);
 };
 
+/**
+ * Get module by id
+ * @param {Types.ObjectId} id
+ * @returns {Promise<HydratedDocument<IModule> | null>}
+ */
+const getModuleById = async (id: Types.ObjectId): Promise<HydratedDocument<IModule> | null> => {
+    return Module.findById(id);
+};
+
 
 export default {
     createModule,
     queryModules,
-    getModuleByFilter
+    getModuleByFilter,
+    getModuleById
 };
