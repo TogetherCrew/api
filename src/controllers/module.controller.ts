@@ -2,9 +2,7 @@ import { Response } from 'express';
 import { moduleService, } from '../services';
 import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync, pick, ApiError } from '../utils';
-import config from '../config';
 import httpStatus from 'http-status';
-import { Module } from '@togethercrew.dev/db';
 
 const createModule = catchAsync(async function (req: IAuthRequest, res: Response) {
     if (await moduleService.getModuleByFilter(req.body)) {
@@ -21,7 +19,12 @@ const getModules = catchAsync(async function (req: IAuthRequest, res: Response) 
     res.send(result);
 });
 
+const getModule = catchAsync(async function (req: IAuthRequest, res: Response) {
+    res.send(req.module);
+});
+
 export default {
     createModule,
-    getModules
+    getModules,
+    getModule
 };

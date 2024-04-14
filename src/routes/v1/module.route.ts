@@ -9,12 +9,12 @@ const router = express.Router();
 router
     .route('/')
     .post(auth('admin'), validate(moduleValidation.createModule), moduleController.createModule)
-    .get(auth('admin', 'view'), validate(moduleValidation.getModules), moduleController.getModules);
+    .get(auth('admin'), validate(moduleValidation.getModules), moduleController.getModules);
 
-// router
-//   .route('/:platformId')
-//   .get(auth('admin', 'view'), validate(platformValidation.getPlatform), platformController.getPlatform)
-//   .patch(auth('admin'), validate(platformValidation.dynamicUpdatePlatform), platformController.updatePlatform)
-//   .delete(auth('admin'), validate(platformValidation.deletePlatform), platformController.deletePlatform);
+router
+    .route('/:moduleId')
+    .get(auth('admin'), validate(moduleValidation.getModule), moduleController.getModule)
+// .patch(auth('admin'), validate(platformValidation.dynamicUpdatePlatform), platformController.updatePlatform)
+// .delete(auth('admin'), validate(platformValidation.deletePlatform), platformController.deletePlatform);
 
 export default router;
