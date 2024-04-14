@@ -4,7 +4,7 @@ import app from '../../src/app';
 import setupTestDB, { cleanUpTenantDatabases } from '../utils/setupTestDB';
 import { userOne, insertUsers, userTwo } from '../fixtures/user.fixture';
 import { userOneAccessToken, userTwoAccessToken } from '../fixtures/token.fixture';
-import { Platform, Community, IPlatformUpdateBody, DatabaseManager, IModule, Module } from '@togethercrew.dev/db';
+import { Platform, Community, IPlatformUpdateBody, DatabaseManager, IModule, Module, IModuleUpdateBody } from '@togethercrew.dev/db';
 import { communityOne, communityTwo, communityThree, insertCommunities } from '../fixtures/community.fixture';
 import { moduleOne, moduleTwo, moduleThree, insertModules } from '../fixtures/module.fixture';
 
@@ -366,158 +366,105 @@ describe('Module routes', () => {
                 .expect(httpStatus.NOT_FOUND);
         });
     });
-    // describe('PATCH /api/v1/modules/:moduleId', () => {
-    //     let updateBody: IPlatformUpdateBody;
-    //     beforeEach(() => {
-    //         cleanUpTenantDatabases();
+    describe('PATCH /api/v1/modules/:moduleId', () => {
+        let updateBody: IModuleUpdateBody;
+        beforeEach(() => {
+            updateBody = {
+                options: {
+                    platforms: [{
+                        platform: platformOne._id,
+                        metadata: {
+                            answering: {
+                                selectedChannels: ['1234']
+                            },
+                            learning: {
+                                selectedChannels: ['8765', '1234'],
+                                fromDate: new Date()
+                            }
+                        }
+                    }]
+                },
+            };
+        });
+        test('should return 200 and successfully update hivemind module if data is ok', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertModules([moduleOne, moduleTwo]);
 
-    //         updateBody = {
-    //             metadata: {
-    //                 selectedChannels: ['8765', '1234'],
-    //                 period: new Date(),
-    //                 analyzerStartedAt: new Date(),
-    //             },
-    //         };
-    //     });
-    //     test('should return 200 and successfully update platform if data is ok', async () => {
-    //         await insertCommunities([communityOne, communityTwo]);
-    //         await insertUsers([userOne]);
-    //         await insertPlatforms([platformOne]);
+            const res = await request(app)
+                .patch(`/api/v1/modules/${moduleOne._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send(updateBody)
+                .expect(httpStatus.OK);
 
-    //         const res = await request(app)
-    //             .patch(`/api/v1/platforms/${platformOne._id}`)
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .send(updateBody)
-    //             .expect(httpStatus.OK);
+            expect(res.body).toEqual({
+                id: moduleOne._id,
+                name: moduleOne.name,
+                community: communityOne._id.toHexString(),
+                options: updateBody.options
+            });
 
-    //         expect(res.body).toEqual({
-    //             id: expect.anything(),
-    //             name: platformOne.name,
-    //             metadata: {
-    //                 id: platformOne.metadata?.id,
-    //                 selectedChannels: updateBody.metadata?.selectedChannels,
-    //                 period: updateBody.metadata?.period.toISOString(),
-    //                 analyzerStartedAt: expect.anything(),
-    //             },
-    //             community: communityOne._id.toHexString(),
-    //             disconnectedAt: null,
-    //             connectedAt: expect.anything(),
-    //         });
+            const dbModule = await Module.findById(res.body.id);
+            expect(dbModule).toBeDefined();
+            expect(dbModule).toMatchObject({
+                id: moduleOne._id,
+                name: moduleOne.name,
+                community: communityOne._id.toHexString(),
+                options: updateBody.options
+            });
+        });
 
-    //         const dbPlatform = await Platform.findById(res.body.id);
-    //         expect(dbPlatform).toBeDefined();
-    //         expect(dbPlatform).toMatchObject({
-    //             name: platformOne.name,
-    //             metadata: {
-    //                 id: platformOne.metadata?.id,
-    //                 selectedChannels: updateBody.metadata?.selectedChannels,
-    //                 period: updateBody.metadata?.period,
-    //                 analyzerStartedAt: expect.anything(),
-    //             },
-    //         });
-    //     });
+        test('should return 401 error if access token is missing', async () => {
+            await insertUsers([userOne]);
+            await request(app)
+                .patch(`/api/v1/modules/${moduleOne._id}`)
+                .send(updateBody)
+                .expect(httpStatus.UNAUTHORIZED);
+        });
 
-    //     test('should return 401 error if access token is missing', async () => {
-    //         await insertUsers([userOne]);
-    //         await request(app).patch(`/api/v1/platforms/${platformOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
-    //     });
+        test('should return 403 when user trys to update module they does not access to', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertModules([moduleOne, moduleTwo]);
+            await request(app)
+                .patch(`/api/v1/modules/${moduleOne._id}`)
+                .set('Authorization', `Bearer ${userTwoAccessToken}`)
+                .send(updateBody)
+                .expect(httpStatus.FORBIDDEN);
+        });
 
-    //     test('should return 403 when user trys to update platform they does not belong to', async () => {
-    //         await insertCommunities([communityOne, communityTwo, communityThree]);
-    //         await insertUsers([userOne, userTwo]);
-    //         await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
-    //         await request(app)
-    //             .patch(`/api/v1/platforms/${platformFour._id}`)
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .send(updateBody)
-    //             .expect(httpStatus.FORBIDDEN);
-    //     });
+        test('should return 400 error if moduleId is not a valid mongo id', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertModules([moduleOne, moduleTwo]);
+            await request(app)
+                .patch(`/api/v1/modules/invalid`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send(updateBody)
+                .expect(httpStatus.BAD_REQUEST);
+        });
 
-    //     test('should return 400 error if platformId is not a valid mongo id', async () => {
-    //         await insertCommunities([communityOne, communityTwo]);
-    //         await insertUsers([userOne]);
-    //         await insertPlatforms([platformOne]);
-    //         await request(app)
-    //             .patch(`/api/v1/platforms/invalid`)
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .send(updateBody)
-    //             .expect(httpStatus.BAD_REQUEST);
-    //     });
+        test('should return 400 error if metadata is invalid for the hivemind module', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertModules([moduleOne, moduleTwo]);
+            updateBody.options = {
+                platforms: [{
+                    platform: platformOne._id,
+                    metadata: {
+                        invalid: 1234
+                    }
+                }]
+            };
+            await request(app)
+                .patch(`/api/v1/modules/${platformOne._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send(updateBody)
+                .expect(httpStatus.BAD_REQUEST);
+        });
 
-    //     test('should return 400 error if metadata is invalid based on the name field', async () => {
-    //         await insertCommunities([communityOne, communityTwo]);
-    //         await insertUsers([userOne]);
-    //         await insertPlatforms([platformOne]);
-    //         updateBody.metadata = { id: '1234' };
-    //         await request(app)
-    //             .patch(`/api/v1/platforms/${platformOne._id}`)
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .send(updateBody)
-    //             .expect(httpStatus.BAD_REQUEST);
-    //     });
 
-    //     test('should return 400 error if metadata selectedChannels is invalid', async () => {
-    //         await insertCommunities([communityOne, communityTwo]);
-    //         await insertUsers([userOne]);
-    //         await insertPlatforms([platformOne]);
-    //         updateBody.metadata = { selectedChannels: '1234' };
-    //         await request(app)
-    //             .patch(`/api/v1/platforms/${platformOne._id}`)
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .send(updateBody)
-    //             .expect(httpStatus.BAD_REQUEST);
-    //     });
-
-    //     test('should return 400 error if metadata period is invalid', async () => {
-    //         await insertCommunities([communityOne, communityTwo]);
-    //         await insertUsers([userOne]);
-    //         await insertPlatforms([platformOne]);
-    //         updateBody.metadata = { period: false };
-    //         await request(app)
-    //             .patch(`/api/v1/platforms/${platformOne._id}`)
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .send(updateBody)
-    //             .expect(httpStatus.BAD_REQUEST);
-    //     });
-
-    //     test('should return 400 error if metadata analyzerStartedAt is invalid', async () => {
-    //         await insertCommunities([communityOne, communityTwo]);
-    //         await insertUsers([userOne]);
-    //         await insertPlatforms([platformOne]);
-    //         updateBody.metadata = { analyzerStartedAt: true };
-    //         await request(app)
-    //             .patch(`/api/v1/platforms/${platformOne._id}`)
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .send(updateBody)
-    //             .expect(httpStatus.BAD_REQUEST);
-    //     });
-
-    //     test('should return 400 error if isInprogress is true and user trys to update selectedChannel', async () => {
-    //         await insertCommunities([communityOne, communityTwo]);
-    //         await insertUsers([userOne]);
-    //         if (platformOne.metadata) platformOne.metadata.isInProgress = true;
-    //         await insertPlatforms([platformOne]);
-    //         if (platformOne.metadata) platformOne.metadata.isInProgress = false;
-    //         await request(app)
-    //             .patch(`/api/v1/platforms/${platformOne._id}`)
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .send(updateBody)
-    //             .expect(httpStatus.BAD_REQUEST);
-    //     });
-
-    //     test('should return 400 error if isInprogress is true and user trys to update period', async () => {
-    //         await insertCommunities([communityOne, communityTwo]);
-    //         await insertUsers([userOne]);
-    //         if (platformOne.metadata) platformOne.metadata.isInProgress = true;
-    //         await insertPlatforms([platformOne]);
-    //         if (platformOne.metadata) platformOne.metadata.isInProgress = false;
-    //         await request(app)
-    //             .patch(`/api/v1/platforms/${platformOne._id}`)
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .send(updateBody)
-    //             .expect(httpStatus.BAD_REQUEST);
-    //     });
-    // });
+    });
     describe('DELETE /api/v1/modules/:moduleId', () => {
         test('should return 204 and delete the module', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
