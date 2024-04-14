@@ -518,86 +518,64 @@ describe('Module routes', () => {
     //             .expect(httpStatus.BAD_REQUEST);
     //     });
     // });
-    // describe('DELETE /api/v1/modules/:moduleId', () => {
-    //     beforeEach(async () => {
-    //         cleanUpTenantDatabases();
-    //     });
-    //     discordServices.coreService.leaveBotFromGuild = jest.fn().mockReturnValue(null);
-    //     test('should return 204 and soft delete the platform is deleteType is soft', async () => {
-    //         await insertCommunities([communityOne, communityTwo, communityThree]);
-    //         await insertUsers([userOne, userTwo]);
-    //         await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
+    describe('DELETE /api/v1/modules/:moduleId', () => {
+        test('should return 204 and delete the module', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertModules([moduleOne, moduleTwo]);
 
-    //         await request(app)
-    //             .delete(`/api/v1/platforms/${platformOne._id}`)
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .send({ deleteType: 'soft' })
-    //             .expect(httpStatus.NO_CONTENT);
+            await request(app)
+                .delete(`/api/v1/modules/${moduleOne._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send()
+                .expect(httpStatus.NO_CONTENT);
 
-    //         const dbPlatform = await Platform.findById(platformOne._id);
-    //         expect(dbPlatform).toBeDefined();
-    //         expect(dbPlatform).toMatchObject({
-    //             disconnectedAt: expect.any(Date),
-    //         });
-    //     });
+            const dbModule = await Module.findById(moduleOne._id);
+            expect(dbModule).toBeNull();
+        });
 
-    //     test('should return 204 and hard delete the platform is deleteType is hard', async () => {
-    //         await insertCommunities([communityOne, communityTwo, communityThree]);
-    //         await insertUsers([userOne, userTwo]);
-    //         await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
+        test('should return 401 error if access token is missing', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertModules([moduleOne, moduleTwo]);
+            await request(app)
+                .delete(`/api/v1/modules/${moduleOne._id}`)
+                .send()
+                .expect(httpStatus.UNAUTHORIZED);
+        });
 
-    //         const res = await request(app)
-    //             .delete(`/api/v1/platforms/${platformOne._id}`)
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .send({ deleteType: 'hard' })
-    //             .expect(httpStatus.NO_CONTENT);
+        test('should return 403 when user trys to delete module they does not access to', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertModules([moduleOne, moduleTwo]);
 
-    //         const dbPlatform = await Platform.findById(res.body.id);
-    //         expect(dbPlatform).toBeNull();
-    //     });
+            await request(app)
+                .delete(`/api/v1/modules/${moduleOne._id}`)
+                .set('Authorization', `Bearer ${userTwoAccessToken}`)
+                .send()
+                .expect(httpStatus.FORBIDDEN);
+        });
 
-    //     test('should return 401 error if access token is missing', async () => {
-    //         await insertUsers([userOne]);
-    //         await request(app)
-    //             .delete(`/api/v1/platforms/${platformOne._id}`)
-    //             .send({ deleteType: 'hard' })
-    //             .expect(httpStatus.UNAUTHORIZED);
-    //     });
+        test('should return 400 error if moduleId is not a valid mongo id', async () => {
+            await insertUsers([userOne]);
 
-    //     test('should return 403 when user trys to delete platform they does not belong to', async () => {
-    //         await insertCommunities([communityOne, communityTwo, communityThree]);
-    //         await insertUsers([userOne, userTwo]);
-    //         await insertPlatforms([platformOne, platformTwo, platformThree, platformFour, platformFive]);
+            await request(app)
+                .delete(`/api/v1/modules/invalid`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send()
+                .expect(httpStatus.BAD_REQUEST);
+        });
 
-    //         await request(app)
-    //             .delete(`/api/v1/platforms/${platformFour._id}`)
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .send({ deleteType: 'hard' })
-    //             .expect(httpStatus.FORBIDDEN);
-    //     });
+        test('should return 404 error if module already is not found', async () => {
+            await insertUsers([userOne]);
 
-    //     test('should return 400 error if platformId is not a valid mongo id', async () => {
-    //         await insertUsers([userOne]);
-
-    //         await request(app)
-    //             .delete(`/api/v1/platforms/invalid`)
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .send()
-    //             .expect(httpStatus.BAD_REQUEST);
-    //     });
-
-    //     test('should return 404 error if platform already is not found', async () => {
-    //         await insertUsers([userOne]);
-
-    //         await request(app)
-    //             .delete(`/api/v1/platforms/${platformOne._id}`)
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .send({ deleteType: 'hard' })
-    //             .expect(httpStatus.NOT_FOUND);
-    //     });
-    // });
-
-    // TODO: add tests for connect platform and request access APIs
+            await request(app)
+                .delete(`/api/v1/modules/${moduleOne._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send()
+                .expect(httpStatus.NOT_FOUND);
+        });
+    });
 });
 
 describe('TEST', () => {
