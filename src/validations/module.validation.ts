@@ -21,14 +21,19 @@ const getModules = {
 
 const getModule = {
     params: Joi.object().keys({
-        moduleId: Joi.string().custom(objectId),
+        moduleId: Joi.string().custom(objectId).required(),
     }),
 };
 
-
+const deleteModule = {
+    params: Joi.object().keys({
+        moduleId: Joi.string().custom(objectId).required(),
+    }),
+};
 
 export default {
     createModule,
     getModules,
-    getModule
+    getModule,
+    deleteModule
 };

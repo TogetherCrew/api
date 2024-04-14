@@ -23,8 +23,16 @@ const getModule = catchAsync(async function (req: IAuthRequest, res: Response) {
     res.send(req.module);
 });
 
+const deleteModule = catchAsync(async function (req: IAuthRequest, res: Response) {
+    if (req.module) await moduleService.deleteModule(req.module);
+    res.status(httpStatus.NO_CONTENT).send();
+});
+
+
+
 export default {
     createModule,
     getModules,
-    getModule
+    getModule,
+    deleteModule
 };

@@ -42,10 +42,21 @@ const getModuleById = async (id: Types.ObjectId): Promise<HydratedDocument<IModu
     return Module.findById(id);
 };
 
+/**
+ * Delete module
+ * @param {HydratedDocument<IModule>} module - module doc
+ * @returns {Promise<HydratedDocument<IModule>>}
+ */
+const deleteModule = async (module: HydratedDocument<IModule>): Promise<HydratedDocument<IModule>> => {
+    return await module.remove();
+};
+
+
 
 export default {
     createModule,
     queryModules,
     getModuleByFilter,
-    getModuleById
+    getModuleById,
+    deleteModule
 };
