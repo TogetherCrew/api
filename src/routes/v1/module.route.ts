@@ -14,7 +14,7 @@ router
 router
     .route('/:moduleId')
     .get(auth('admin'), validate(moduleValidation.getModule), moduleController.getModule)
-    // .patch(auth('admin'), validate(platformValidation.dynamicUpdatePlatform), platformController.updatePlatform)
+    .patch(auth('admin'), validate(moduleValidation.dynamicModuleUpdate), moduleController.updateModule)
     .delete(auth('admin'), validate(moduleValidation.deleteModule), moduleController.deleteModule);
 
 export default router;

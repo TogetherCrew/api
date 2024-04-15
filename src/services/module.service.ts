@@ -1,6 +1,6 @@
 import { HydratedDocument, Types } from 'mongoose';
 import httpStatus from 'http-status';
-import { Module, IModule } from '@togethercrew.dev/db';
+import { Module, IModule, IModuleUpdateBody } from '@togethercrew.dev/db';
 import ApiError from '../utils/ApiError';
 
 /**
@@ -43,6 +43,20 @@ const getModuleById = async (id: Types.ObjectId): Promise<HydratedDocument<IModu
 };
 
 /**
+ * Update module
+ * @param {HydratedDocument<IModule>} module - module doc
+ * @param {Partial<IModule>} updateBody
+ * @returns {Promise<HydratedDocument<IModule>>}
+ */
+const updateModule = async (
+    module: HydratedDocument<IModule>,
+    updateBody: Partial<IModuleUpdateBody>,
+): Promise<HydratedDocument<IModule>> => {
+    Object.assign(module, updateBody);
+    return await module.save();
+};
+
+/**
  * Delete module
  * @param {HydratedDocument<IModule>} module - module doc
  * @returns {Promise<HydratedDocument<IModule>>}
@@ -58,5 +72,6 @@ export default {
     queryModules,
     getModuleByFilter,
     getModuleById,
-    deleteModule
+    deleteModule,
+    updateModule
 };
