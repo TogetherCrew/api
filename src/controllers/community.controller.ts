@@ -43,6 +43,9 @@ const getCommunity = catchAsync(async function (req: IAuthRequest, res: Response
   res.send(community);
 });
 const updateCommunity = catchAsync(async function (req: IAuthRequest, res: Response) {
+  if (req.body.roles && req.community) {
+    await communityService.validateRoleChanges(req.user, req.community, req.body.roles);
+  }
   const community = await communityService.updateCommunityByFilter({ _id: req.params.communityId }, req.body);
   res.send(community);
 });
