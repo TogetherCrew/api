@@ -1,7 +1,15 @@
 import { HydratedDocument, Types } from 'mongoose';
 import httpStatus from 'http-status';
-import { Community, ICommunity, DatabaseManager, GuildMember, IRole } from '@togethercrew.dev/db';
-import ApiError from '../utils/ApiError';
+import {
+  Community,
+  ICommunity,
+  DatabaseManager,
+  GuildMember,
+  IRole,
+  IUser,
+  ICommunityRoles,
+} from '@togethercrew.dev/db';
+import { ApiError, roleUtil } from '../utils';
 import guildMemberService from './discord/guildMember.service';
 import roleService from './discord/role.service';
 import platformService from './platform.service';
@@ -147,6 +155,27 @@ const populateRoles = async (community: HydratedDocument<ICommunity>): Promise<H
   return community;
 };
 
+/**
+ * Validates role changes to ensure an admin cannot revoke their own admin role
+ * @param {HydratedDocument<IUser>} user - The user object representing the current user
+ * @param {HydratedDocument<ICommunity>} community - The community document
+ * @param {string[]} newRoles - The new roles to be assigned to the community
+ * @throws {ApiError} If an admin tries to revoke their own admin role
+ */
+const validateRoleChanges = async (
+  user: HydratedDocument<IUser>,
+  community: HydratedDocument<ICommunity>,
+  newRoles: ICommunityRoles[],
+): Promise<void> => {
+  const initialUserRoles: string[] = await roleUtil.getUserRolesForCommunity(user, community);
+  const originalRoles = community.roles;
+  community.roles = newRoles;
+  const updatedUserRoles: string[] = await roleUtil.getUserRolesForCommunity(user, community);
+  community.roles = originalRoles;
+  if (initialUserRoles.includes('admin') && !updatedUserRoles.includes('admin')) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Admin role cannot be revoked by the user themselves.');
+  }
+};
 export default {
   createCommunity,
   queryCommunities,
@@ -157,4 +186,5 @@ export default {
   deleteCommunityByFilter,
   addPlatformToCommunityById,
   populateRoles,
+  validateRoleChanges,
 };
