@@ -372,7 +372,7 @@
 //           identifierValues: [{
 //             discordId: discordGuildMember2.discordId,
 //             username: discordGuildMember2.username,
-//             ngu: discordGuildMember2.nickname,
+//             // ngu: discordGuildMember2.nickname,
 //             discriminator: discordGuildMember2.discriminator,
 //             nickname: discordGuildMember2.nickname,
 //             globalName: discordGuildMember2.globalName,
@@ -388,7 +388,7 @@
 //           identifierValues: [{
 //             discordId: discordGuildMember2.discordId,
 //             username: discordGuildMember2.username,
-//             ngu: discordGuildMember2.nickname,
+//             // ngu: discordGuildMember2.nickname,
 //             discriminator: discordGuildMember2.discriminator,
 //             nickname: discordGuildMember2.nickname,
 //             globalName: discordGuildMember2.globalName,
