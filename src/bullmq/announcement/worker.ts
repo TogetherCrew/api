@@ -3,7 +3,7 @@ import { REDIS_CONNECTOR, announcementQueueName } from '../../config/bullmq';
 import processor from './processor';
 import logger from '../../config/logger';
 
-let worker: Worker
+let worker: Worker;
 
 export const setUpAnnouncementWorker = () => {
   worker = new Worker(announcementQueueName, processor, {

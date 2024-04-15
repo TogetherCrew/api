@@ -25,7 +25,9 @@ components:
           type: string
           format: date-time
           description: term and condition accepted date 
-
+        unverifiedTelegramUsername:
+          type: string
+          description: unverified telegram username
     # ********Community********
     Community:
       type: object
@@ -62,7 +64,36 @@ components:
           type: string
           format: date-time
           description: disconnected date 
-
+        roles:  
+          type: array
+          description: Roles associated with the community.
+          items:
+            type: object
+            properties:
+              roleType:
+                type: string
+                enum: ['view', 'admin']
+                description: Type of the role.
+              source:
+                type: object
+                properties:
+                  platform:
+                    type: string
+                    enum: ['discord']
+                    description: Platform of the source.
+                  identifierType:
+                    type: string
+                    enum: ['member', 'role']
+                    description: Type of identifier used in the platform.
+                  identifierValues:
+                    type: array
+                    items:
+                      type: string
+                    description: Values of the identifiers.
+                  platformId:
+                    type: string
+                    format: objectId
+                    description: ObjectId representing the platform ID.
     # ********Platform********
     Platform:
       type: object

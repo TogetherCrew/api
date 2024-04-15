@@ -18,17 +18,16 @@ const createPlatform = async (PlatformBody: IPlatform): Promise<HydratedDocument
       PlatformBody.metadata = {
         action: analyzerAction,
         window: analyzerWindow,
-        ...PlatformBody.metadata
+        ...PlatformBody.metadata,
       };
     }
   }
   const platform = await Platform.create(PlatformBody);
   if (PlatformBody.name === 'discord') {
-    await sagaService.createAndStartFetchMemberSaga(platform._id)
+    await sagaService.createAndStartFetchMemberSaga(platform._id);
   }
   return platform;
 };
-
 
 /**
  * Query for platforms
@@ -40,7 +39,6 @@ const createPlatform = async (PlatformBody: IPlatform): Promise<HydratedDocument
  */
 const queryPlatforms = async (filter: object, options: object) => {
   return Platform.paginate(filter, options);
-
 };
 
 /**
@@ -51,7 +49,6 @@ const queryPlatforms = async (filter: object, options: object) => {
 const getPlatformByFilter = async (filter: object): Promise<HydratedDocument<IPlatform> | null> => {
   return Platform.findOne(filter);
 };
-
 
 /**
  * Get Platform by id
@@ -68,7 +65,10 @@ const getPlatformById = async (id: Types.ObjectId): Promise<HydratedDocument<IPl
  * @param {Partial<IPlatform>} updateBody
  * @returns {Promise<HydratedDocument<IPlatform>>}
  */
-const updatePlatformByFilter = async (filter: object, updateBody: Partial<IPlatform>): Promise<HydratedDocument<IPlatform>> => {
+const updatePlatformByFilter = async (
+  filter: object,
+  updateBody: Partial<IPlatform>,
+): Promise<HydratedDocument<IPlatform>> => {
   const platform = await getPlatformByFilter(filter);
   if (!platform) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Platform not found');
@@ -76,7 +76,7 @@ const updatePlatformByFilter = async (filter: object, updateBody: Partial<IPlatf
   if (updateBody.metadata) {
     updateBody.metadata = {
       ...platform.metadata,
-      ...updateBody.metadata
+      ...updateBody.metadata,
     };
   }
   Object.assign(platform, updateBody);
@@ -85,25 +85,30 @@ const updatePlatformByFilter = async (filter: object, updateBody: Partial<IPlatf
 };
 
 /**
- * Update Platform 
+ * Update Platform
  * @param {HydratedDocument<IPlatform>} platform - platform doc
  * @param {Partial<IPlatform>} updateBody
  * @returns {Promise<HydratedDocument<IPlatform>>}
  */
-const updatePlatform = async (platform: HydratedDocument<IPlatform>, updateBody: Partial<IPlatform>, userDiscordId?: Snowflake): Promise<HydratedDocument<IPlatform>> => {
+const updatePlatform = async (
+  platform: HydratedDocument<IPlatform>,
+  updateBody: Partial<IPlatform>,
+  userDiscordId?: Snowflake,
+): Promise<HydratedDocument<IPlatform>> => {
   if (updateBody.metadata) {
     updateBody.metadata = {
       ...platform.metadata,
-      ...updateBody.metadata
+      ...updateBody.metadata,
     };
   }
   if ((updateBody.metadata?.period || updateBody.metadata?.selectedChannels) && userDiscordId) {
     await sagaService.createAndStartGuildSaga(platform._id, {
       created: false,
       discordId: userDiscordId,
-      message: "Your data import into TogetherCrew is complete! See your insights on your dashboard https://app.togethercrew.com/ .If you have questions send a DM to katerinabc (Discord) or k_bc0 (Telegram)",
-      useFallback: true
-    })
+      message:
+        'Your data import into TogetherCrew is complete! See your insights on your dashboard https://app.togethercrew.com/. If you have questions send a DM to katerinabc (Discord) or k_bc0 (Telegram).',
+      useFallback: true,
+    });
   }
 
   Object.assign(platform, updateBody);
@@ -132,12 +137,10 @@ const deletePlatformByFilter = async (filter: object): Promise<HydratedDocument<
   return await platform.remove();
 };
 
-
-
 /**
  * Checks if a platform with the specified metadata ID is already connected to the given community.
  * Throws an error if such a platform exists.
- * 
+ *
  * @param {Types.ObjectId} communityId - The ID of the community to check within.
  * @param {IPlatform} PlatformBody - The platform data to check against.
  */
@@ -145,19 +148,19 @@ const checkPlatformAlreadyConnected = async (communityId: Types.ObjectId, Platfo
   const platform = await getPlatformByFilter({
     community: communityId,
     'metadata.id': PlatformBody.metadata?.id,
-    disconnectedAt: null
+    disconnectedAt: null,
   });
 
   if (platform) {
     throw new ApiError(httpStatus.BAD_REQUEST, `This Platform is already connected`);
   }
-}
+};
 
 /**
  * Checks if there is already a platform of the same name connected to the given community.
  * If such a platform exists, and there is no platform with the same metadata ID in another community,
  * the bot will leave the guild.
- * 
+ *
  * @param {Types.ObjectId} communityId - The ID of the community to check within.
  * @param {IPlatform} PlatformBody - The platform data to check against.
  */
@@ -165,39 +168,39 @@ const checkSinglePlatformConnection = async (communityId: Types.ObjectId, Platfo
   const platform = await getPlatformByFilter({
     community: communityId,
     disconnectedAt: null,
-    name: PlatformBody.name
+    name: PlatformBody.name,
   });
 
   if (platform) {
     const platformDoc = await getPlatformByFilter({
       'metadata.id': PlatformBody.metadata?.id,
-      community: { $ne: communityId }
+      community: { $ne: communityId },
     });
     if (!platformDoc) {
-      await discordServices.coreService.leaveBotFromGuild(PlatformBody.metadata?.id)
+      await discordServices.coreService.leaveBotFromGuild(PlatformBody.metadata?.id);
     }
     throw new ApiError(httpStatus.BAD_REQUEST, `Only can connect one ${PlatformBody.name} platform`);
   }
-
-}
-
+};
 
 /**
  * Attempts to reconnect an existing platform, or adds a new platform to the community if none exists.
  * Throws an error if a platform with the same metadata ID is connected to another community.
- * 
+ *
  * @param {Types.ObjectId} communityId - The ID of the community to check within.
  * @param {IPlatform} PlatformBody - The platform data to use for reconnection or creation.
  * @returns {Promise<HydratedDocument<IPlatform>>} The updated or newly created platform document.
  */
-const reconnectOrAddNewPlatform = async (communityId: Types.ObjectId, PlatformBody: IPlatform): Promise<HydratedDocument<IPlatform>> => {
+const reconnectOrAddNewPlatform = async (
+  communityId: Types.ObjectId,
+  PlatformBody: IPlatform,
+): Promise<HydratedDocument<IPlatform>> => {
   let platformDoc = await getPlatformByFilter({
     community: communityId,
     disconnectedAt: { $ne: null }, // Check for platform if it is disconnected
     name: PlatformBody.name,
-    'metadata.id': PlatformBody.metadata?.id
+    'metadata.id': PlatformBody.metadata?.id,
   });
-
 
   if (platformDoc) {
     return await updatePlatform(platformDoc, { disconnectedAt: null });
@@ -209,10 +212,8 @@ const reconnectOrAddNewPlatform = async (communityId: Types.ObjectId, PlatformBo
   }
 
   const platform = await createPlatform(PlatformBody);
-  await communityService.addPlatformToCommunityById(platform.community, platform.id);
   return platform;
-}
-
+};
 
 export default {
   createPlatform,
@@ -225,5 +226,5 @@ export default {
   deletePlatformByFilter,
   checkPlatformAlreadyConnected,
   checkSinglePlatformConnection,
-  reconnectOrAddNewPlatform
+  reconnectOrAddNewPlatform,
 };

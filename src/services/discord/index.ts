@@ -5,9 +5,9 @@ import guildMemberService from './guildMember.service';
 import coreService from './core.service';
 
 export default {
-    channelService,
-    roleService,
-    guildMemberService,
-    // guildService,
-    coreService
-}
+  channelService,
+  roleService,
+  guildMemberService,
+  // guildService,
+  coreService,
+};

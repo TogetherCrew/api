@@ -19,13 +19,13 @@ import { IDiscordOAuth2EchangeCode, IAuthTokens } from 'src/interfaces';
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function generateToken(user: any, expires: moment.Moment, type: string, secret = config.jwt.secret) {
-    const payload = {
-        sub: user,
-        iat: moment().unix(),
-        exp: expires.unix(),
-        type
-    }
-    return jwt.sign(payload, secret);
+  const payload = {
+    sub: user,
+    iat: moment().unix(),
+    exp: expires.unix(),
+    type,
+  };
+  return jwt.sign(payload, secret);
 }
 
 /**
@@ -37,16 +37,21 @@ function generateToken(user: any, expires: moment.Moment, type: string, secret =
  * @param {boolean} [blacklisted]
  * @returns {Promise<IToken>}
  */
-async function saveToken(token: string, userId: Types.ObjectId, expires: moment.Moment, type: string, blacklisted = false): Promise<IToken> {
-    const tokenDoc: IToken = await Token.create({
-        token,
-        user: userId,
-        expires: expires.toDate(),
-        type,
-        blacklisted
-    });
-    return tokenDoc;
-
+async function saveToken(
+  token: string,
+  userId: Types.ObjectId,
+  expires: moment.Moment,
+  type: string,
+  blacklisted = false,
+): Promise<IToken> {
+  const tokenDoc: IToken = await Token.create({
+    token,
+    user: userId,
+    expires: expires.toDate(),
+    type,
+    blacklisted,
+  });
+  return tokenDoc;
 }
 
 /**
@@ -56,14 +61,14 @@ async function saveToken(token: string, userId: Types.ObjectId, expires: moment.
  * @returns {Promise<IToken>}
  */
 async function verifyToken(token: string, type: string) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const payload = jwt.verify(token, config.jwt.secret) as any;
-    const userId = typeof payload.sub === 'object' ? payload.sub?.id : undefined;
-    const tokenDoc = await Token.findOne({ token, type, user: userId, blacklisted: false });
-    if (!tokenDoc) {
-        throw new Error('Token not found');
-    }
-    return tokenDoc;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const payload = jwt.verify(token, config.jwt.secret) as any;
+  const userId = typeof payload.sub === 'object' ? payload.sub?.id : undefined;
+  const tokenDoc = await Token.findOne({ token, type, user: userId, blacklisted: false });
+  if (!tokenDoc) {
+    throw new Error('Token not found');
+  }
+  return tokenDoc;
 }
 
 /**
@@ -72,23 +77,23 @@ async function verifyToken(token: string, type: string) {
  * @returns {Promise<IAuthTokens>}
  */
 async function generateAuthTokens(user: HydratedDocument<IUser>): Promise<IAuthTokens> {
-    const accessTokenExpires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
-    const accessToken = generateToken(user, accessTokenExpires, tokenTypes.ACCESS);
+  const accessTokenExpires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
+  const accessToken = generateToken(user, accessTokenExpires, tokenTypes.ACCESS);
 
-    const refreshTokenExpires = moment().add(config.jwt.refreshExpirationDays, 'days');
-    const refreshToken = generateToken(user, refreshTokenExpires, tokenTypes.REFRESH);
-    await saveToken(refreshToken, user.id, refreshTokenExpires, tokenTypes.REFRESH);
+  const refreshTokenExpires = moment().add(config.jwt.refreshExpirationDays, 'days');
+  const refreshToken = generateToken(user, refreshTokenExpires, tokenTypes.REFRESH);
+  await saveToken(refreshToken, user.id, refreshTokenExpires, tokenTypes.REFRESH);
 
-    return {
-        access: {
-            token: accessToken,
-            expires: accessTokenExpires.toDate()
-        },
-        refresh: {
-            token: refreshToken,
-            expires: refreshTokenExpires.toDate()
-        }
-    };
+  return {
+    access: {
+      token: accessToken,
+      expires: accessTokenExpires.toDate(),
+    },
+    refresh: {
+      token: refreshToken,
+      expires: refreshTokenExpires.toDate(),
+    },
+  };
 }
 
 /**
@@ -98,22 +103,32 @@ async function generateAuthTokens(user: HydratedDocument<IUser>): Promise<IAuthT
  * @returns {Promise<Object>}
  */
 async function saveDiscordOAuth2Tokens(userId: Types.ObjectId, discordOAuth2Tokens: IDiscordOAuth2EchangeCode) {
-    await Token.deleteMany({ user: userId, type: { $in: [tokenTypes.DISCORD_ACCESS, tokenTypes.DISCORD_REFRESH] } });
-    const accessTokenExpires = moment().add(discordOAuth2Tokens.expires_in, 'seconds');
-    const refreshTokenExpires = moment().add(config.jwt.discordRefreshExpirationDays, 'days');
-    const DiscordAccessTokenDoc: IToken = await saveToken(discordOAuth2Tokens.access_token, userId, accessTokenExpires, tokenTypes.DISCORD_ACCESS);
-    const DiscordRefreshTokenDoc: IToken = await saveToken(discordOAuth2Tokens.refresh_token, userId, refreshTokenExpires, tokenTypes.DISCORD_REFRESH);
+  await Token.deleteMany({ user: userId, type: { $in: [tokenTypes.DISCORD_ACCESS, tokenTypes.DISCORD_REFRESH] } });
+  const accessTokenExpires = moment().add(discordOAuth2Tokens.expires_in, 'seconds');
+  const refreshTokenExpires = moment().add(config.jwt.discordRefreshExpirationDays, 'days');
+  const DiscordAccessTokenDoc: IToken = await saveToken(
+    discordOAuth2Tokens.access_token,
+    userId,
+    accessTokenExpires,
+    tokenTypes.DISCORD_ACCESS,
+  );
+  const DiscordRefreshTokenDoc: IToken = await saveToken(
+    discordOAuth2Tokens.refresh_token,
+    userId,
+    refreshTokenExpires,
+    tokenTypes.DISCORD_REFRESH,
+  );
 
-    return {
-        access: {
-            token: DiscordAccessTokenDoc.token,
-            expires: DiscordAccessTokenDoc.expires
-        },
-        refresh: {
-            token: DiscordRefreshTokenDoc.token,
-            expires: DiscordRefreshTokenDoc.expires
-        }
-    }
+  return {
+    access: {
+      token: DiscordAccessTokenDoc.token,
+      expires: DiscordAccessTokenDoc.expires,
+    },
+    refresh: {
+      token: DiscordRefreshTokenDoc.token,
+      expires: DiscordRefreshTokenDoc.expires,
+    },
+  };
 }
 
 /**
@@ -124,34 +139,34 @@ async function saveDiscordOAuth2Tokens(userId: Types.ObjectId, discordOAuth2Toke
  * @returns {Promise<Object>}
  */
 async function getDiscordOAuth2Tokens(userId: Types.ObjectId) {
-    const DiscordAccessTokenDoc = await Token.findOne({ user: userId, type: tokenTypes.DISCORD_ACCESS });
-    const DiscordRefreshTokenDoc = await Token.findOne({ user: userId, type: tokenTypes.DISCORD_REFRESH });
+  const DiscordAccessTokenDoc = await Token.findOne({ user: userId, type: tokenTypes.DISCORD_ACCESS });
+  const DiscordRefreshTokenDoc = await Token.findOne({ user: userId, type: tokenTypes.DISCORD_REFRESH });
 
-    if (!DiscordAccessTokenDoc || !DiscordRefreshTokenDoc) { throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'discord auth tokens missed'); }
-    if (new Date() > DiscordAccessTokenDoc.expires) {
-        const discordAuths = await authService.refreshDiscordAuth(DiscordRefreshTokenDoc.token);
-        return saveDiscordOAuth2Tokens(userId, discordAuths);
-    }
+  if (!DiscordAccessTokenDoc || !DiscordRefreshTokenDoc) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'discord auth tokens missed');
+  }
+  if (new Date() > DiscordAccessTokenDoc.expires) {
+    const discordAuths = await authService.refreshDiscordAuth(DiscordRefreshTokenDoc.token);
+    return saveDiscordOAuth2Tokens(userId, discordAuths);
+  }
 
-    return {
-        access: {
-            token: DiscordAccessTokenDoc.token,
-            expires: DiscordAccessTokenDoc.expires
-        },
-        refresh: {
-            token: DiscordRefreshTokenDoc.token,
-            expires: DiscordRefreshTokenDoc.expires
-        }
-    };
+  return {
+    access: {
+      token: DiscordAccessTokenDoc.token,
+      expires: DiscordAccessTokenDoc.expires,
+    },
+    refresh: {
+      token: DiscordRefreshTokenDoc.token,
+      expires: DiscordRefreshTokenDoc.expires,
+    },
+  };
 }
-
-
 
 export default {
-    generateToken,
-    verifyToken,
-    saveToken,
-    generateAuthTokens,
-    getDiscordOAuth2Tokens,
-    saveDiscordOAuth2Tokens
-}
+  generateToken,
+  verifyToken,
+  saveToken,
+  generateAuthTokens,
+  getDiscordOAuth2Tokens,
+  saveDiscordOAuth2Tokens,
+};

@@ -9,9 +9,8 @@ import ApiError from '../utils/ApiError';
  * @returns {Promise<HydratedDocument<IUser>>}
  */
 const createUser = async (userBody: IUser): Promise<HydratedDocument<IUser>> => {
-    return User.create(userBody);
+  return User.create(userBody);
 };
-
 
 /**
  * Query for users
@@ -22,7 +21,7 @@ const createUser = async (userBody: IUser): Promise<HydratedDocument<IUser>> => 
  * @param {number} [options.page] - Current page (default = 1)
  */
 const queryUsers = async (filter: object, options: object) => {
-    return User.paginate(filter, options);
+  return User.paginate(filter, options);
 };
 
 /**
@@ -31,7 +30,7 @@ const queryUsers = async (filter: object, options: object) => {
  * @returns {Promise<HydratedDocument<IUser> | null>}
  */
 const getUserByFilter = async (filter: object): Promise<HydratedDocument<IUser> | null> => {
-    return User.findOne(filter);
+  return User.findOne(filter);
 };
 
 /**
@@ -40,7 +39,7 @@ const getUserByFilter = async (filter: object): Promise<HydratedDocument<IUser> 
  * @returns {Promise<HydratedDocument<IUser> | null>}
  */
 const getUserById = async (id: Types.ObjectId): Promise<HydratedDocument<IUser> | null> => {
-    return User.findById(id);
+  return User.findById(id);
 };
 
 /**
@@ -50,13 +49,13 @@ const getUserById = async (id: Types.ObjectId): Promise<HydratedDocument<IUser> 
  * @returns {Promise<HydratedDocument<IUser>>}
  */
 const updateUserById = async (userId: Types.ObjectId, updateBody: Partial<IUser>): Promise<HydratedDocument<IUser>> => {
-    const user = await getUserById(userId);
-    if (!user) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
-    }
-    Object.assign(user, updateBody);
-    await user.save();
-    return user;
+  const user = await getUserById(userId);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
+  Object.assign(user, updateBody);
+  await user.save();
+  return user;
 };
 
 /**
@@ -65,12 +64,12 @@ const updateUserById = async (userId: Types.ObjectId, updateBody: Partial<IUser>
  * @returns {Promise<HydratedDocument<IUser>>}
  */
 const deleteUserById = async (userId: Types.ObjectId): Promise<HydratedDocument<IUser>> => {
-    const user = await getUserById(userId);
-    if (!user) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
-    }
-    await user.remove();
-    return user;
+  const user = await getUserById(userId);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
+  await user.remove();
+  return user;
 };
 
 /**
@@ -79,30 +78,22 @@ const deleteUserById = async (userId: Types.ObjectId): Promise<HydratedDocument<
  * @param {Types.ObjectId} communityId
  * @returns {Promise<IUser | null>}
  */
-const addCommunityToUserById = async (
-    userId: Types.ObjectId,
-    communityId: Types.ObjectId
-): Promise<IUser | null> => {
+const addCommunityToUserById = async (userId: Types.ObjectId, communityId: Types.ObjectId): Promise<IUser | null> => {
+  const user = await User.findByIdAndUpdate(userId, { $addToSet: { communities: communityId } }, { new: true });
 
-    const user = await User.findByIdAndUpdate(
-        userId,
-        { $addToSet: { communities: communityId } },
-        { new: true }
-    );
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
 
-    if (!user) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
-    }
-
-    return user;
+  return user;
 };
 
 export default {
-    createUser,
-    getUserById,
-    queryUsers,
-    getUserByFilter,
-    updateUserById,
-    deleteUserById,
-    addCommunityToUserById
+  createUser,
+  getUserById,
+  queryUsers,
+  getUserByFilter,
+  updateUserById,
+  deleteUserById,
+  addCommunityToUserById,
 };

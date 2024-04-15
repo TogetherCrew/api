@@ -27,8 +27,6 @@ paths:
                   description: The refresh token previously issued to the client.
               required:
                 - refreshToken
-              example:
-                refreshToken: "eyJhbGci...8yzwDEfJXAg"
       responses:
         "200":
           description: OK
@@ -68,8 +66,6 @@ paths:
                   description: The refresh token to be invalidated.
               required:
                 - refreshToken
-              example:
-                refreshToken: "eyJhbGci...8yzwDEfJXAg"
       responses:
         "204":
           description: No Content (Successfully logged out)

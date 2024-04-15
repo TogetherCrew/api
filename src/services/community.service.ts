@@ -1,8 +1,18 @@
 import { HydratedDocument, Types } from 'mongoose';
 import httpStatus from 'http-status';
-import { Community, ICommunity } from '@togethercrew.dev/db';
-import ApiError from '../utils/ApiError';
-
+import {
+  Community,
+  ICommunity,
+  DatabaseManager,
+  GuildMember,
+  IRole,
+  IUser,
+  ICommunityRoles,
+} from '@togethercrew.dev/db';
+import { ApiError, roleUtil } from '../utils';
+import guildMemberService from './discord/guildMember.service';
+import roleService from './discord/role.service';
+import platformService from './platform.service';
 /**
  * Create a community
  * @param {ICommunity} communityBody
@@ -11,7 +21,6 @@ import ApiError from '../utils/ApiError';
 const createCommunity = async (communityBody: ICommunity): Promise<HydratedDocument<ICommunity>> => {
   return Community.create(communityBody);
 };
-
 
 /**
  * Query for communities
@@ -23,7 +32,6 @@ const createCommunity = async (communityBody: ICommunity): Promise<HydratedDocum
  */
 const queryCommunities = async (filter: object, options: object) => {
   return Community.paginate(filter, options);
-
 };
 
 /**
@@ -35,7 +43,6 @@ const getCommunityByFilter = async (filter: object): Promise<HydratedDocument<IC
   return Community.findOne(filter);
 };
 
-
 /**
  * Get community by id
  * @param {Types.ObjectId} id
@@ -46,12 +53,24 @@ const getCommunityById = async (id: Types.ObjectId): Promise<HydratedDocument<IC
 };
 
 /**
+ * Get communities by filter
+ * @param {Object} filter - Mongo filter
+ * @returns {Promise<HydratedDocument<ICommunity>[] | []>}
+ */
+const getCommunities = async (filter: object): Promise<HydratedDocument<ICommunity>[] | []> => {
+  return Community.find(filter);
+};
+
+/**
  * Update community by filter
  * @param {Object} filter - Mongo filter
  * @param {Partial<ICommunity>} updateBody
  * @returns {Promise<HydratedDocument<ICommunity>>}
  */
-const updateCommunityByFilter = async (filter: object, updateBody: Partial<ICommunity>): Promise<HydratedDocument<ICommunity>> => {
+const updateCommunityByFilter = async (
+  filter: object,
+  updateBody: Partial<ICommunity>,
+): Promise<HydratedDocument<ICommunity>> => {
   const community = await getCommunityByFilter(filter);
   if (!community) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Community not found');
@@ -84,13 +103,11 @@ const deleteCommunityByFilter = async (filter: object): Promise<HydratedDocument
 const addPlatformToCommunityById = async (
   communityId: Types.ObjectId,
   platformId: Types.ObjectId,
-
 ): Promise<ICommunity | null> => {
-
   const community = await Community.findByIdAndUpdate(
     communityId,
     { $addToSet: { platforms: platformId } },
-    { new: true }
+    { new: true },
   );
 
   if (!community) {
@@ -100,12 +117,74 @@ const addPlatformToCommunityById = async (
   return community;
 };
 
+/**
+ * Populate roles
+ * @param {HydratedDocument<ICommunity>} community
+ * @returns {Promise<HydratedDocument<ICommunity>>}
+ */
+const populateRoles = async (community: HydratedDocument<ICommunity>): Promise<HydratedDocument<ICommunity>> => {
+  if (community.roles) {
+    for (const role of community.roles) {
+      const platformId = role.source.platformId;
+      const platform = await platformService.getPlatformById(platformId);
+      if (platform) {
+        const connection = await DatabaseManager.getInstance().getTenantDb(platform?.metadata?.id);
+        if (role.source.identifierType === 'member') {
+          const guildMembers = await guildMemberService.getGuildMembers(
+            connection,
+            { discordId: { $in: role.source.identifierValues } },
+            { avatar: 1, discordId: 1, username: 1, discriminator: 1, nickname: 1, globalName: 1 },
+          );
+          guildMembers.forEach((guildMember: any) => {
+            guildMember.ngu = guildMemberService.getNgu(guildMember);
+            guildMember.username = guildMemberService.getUsername(guildMember);
+          });
+          role.source.identifierValues = guildMembers;
+        } else if (role.source.identifierType === 'role') {
+          const roles: IRole[] = await roleService.getRoles(
+            connection,
+            { roleId: { $in: role.source.identifierValues } },
+            { roleId: 1, color: 1, name: 1 },
+          );
+          role.source.identifierValues = roles;
+        }
+      }
+    }
+  }
+
+  return community;
+};
+
+/**
+ * Validates role changes to ensure an admin cannot revoke their own admin role
+ * @param {HydratedDocument<IUser>} user - The user object representing the current user
+ * @param {HydratedDocument<ICommunity>} community - The community document
+ * @param {string[]} newRoles - The new roles to be assigned to the community
+ * @throws {ApiError} If an admin tries to revoke their own admin role
+ */
+const validateRoleChanges = async (
+  user: HydratedDocument<IUser>,
+  community: HydratedDocument<ICommunity>,
+  newRoles: ICommunityRoles[],
+): Promise<void> => {
+  const initialUserRoles: string[] = await roleUtil.getUserRolesForCommunity(user, community);
+  const originalRoles = community.roles;
+  community.roles = newRoles;
+  const updatedUserRoles: string[] = await roleUtil.getUserRolesForCommunity(user, community);
+  community.roles = originalRoles;
+  if (initialUserRoles.includes('admin') && !updatedUserRoles.includes('admin')) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Admin role cannot be revoked by the user themselves.');
+  }
+};
 export default {
   createCommunity,
   queryCommunities,
   getCommunityById,
   getCommunityByFilter,
+  getCommunities,
   updateCommunityByFilter,
   deleteCommunityByFilter,
-  addPlatformToCommunityById
+  addPlatformToCommunityById,
+  populateRoles,
+  validateRoleChanges,
 };

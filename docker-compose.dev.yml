@@ -1,27 +1,104 @@
 version: "3.9"
 
 services:
-  mongo:
-    image: "mongo:6.0.8"
-    ports:
-      - 27017:27017
+  app:
+    build:
+      context: .
+      target: development
+      dockerfile: Dockerfile
     environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DB_HOST=mongo
+      - DB_PORT=27017
+      - DB_USER=root
+      - DB_PASSWORD=pass
+      - DB_NAME=RnDAO
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+      - RABBIT_HOST=rabbitmq
+      - RABBIT_PORT=5672
+      - RABBIT_USER=root
+      - RABBIT_PASSWORD=pass
+      - NEO4J_PROTOCOL=bolt
+      - NEO4J_HOST=neo4j
+      - NEO4J_PORT=7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=password
+      - NEO4J_DB=neo4j
+      - SENTRY_DSN=https://791ed14c7dc84377a291ba2dd60270bb@o4505110094282752.ingest.sentry.io/4505158976733184
+      - SENTRY_ENV=development
+      - DISCORD_AUTHORIZE_CALLBACK_URI=empty
+      - DISCORD_CONNECT_CALLBACK_URI=empty
+      - DISCORD_REQUEST_ACCESS_CALLBACK_URI=empty
+      - TWITTER_CONNECT_CALLBACK_URI=empty
+      - TWITTER_CLIENT_ID=empty
+      - TWITTER_CLIENT_SECRET=empty
+      - DISCORD_CLIENT_ID=empty
+      - DISCORD_CLIENT_SECRET=empty
+      - DISCORD_BOT_TOKEN=empty
+      - JWT_SECRET=0%55e*enmvbfm@@u7v9+amg-ju_d_safeasdf6(v*88h4$#h&o-i7ste#tv*hx
+      - JWT_ACCESS_EXPIRATION_MINUTES=30
+      - JWT_REFRESH_EXPIRATION_DAYS=30
+      - JWT_DISCORD_REFRESH_EXPIRATION_DAY=30
+      - FRONTEND_URL=empty
+      - NOTION_API_KEY=empty
+      - NOTION_DATABASE_ID=empty
+      - LOG_LEVEL=error
+      - SESSION_SECRET=0%532345*edm@@u7v9+att-sdfed_l6(v*88h4$#h&o-i7awer3tv*yy
+    volumes:
+      - ./coverage:/project/coverage
+    depends_on:
+      redis:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+  redis:
+    image: "redis:7.0.12-alpine"
+    healthcheck:
+      test: ["CMD", "redis-cli","ping"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 2
+      start_period: 40s
+  mongo:
+    image: "mongo:5.0.10"
+    environment:
+      - MONGO_INITDB_DATABASE=RnDAO
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=pass
+    healthcheck:
+      test: echo 'db.stats().ok' | mongosh localhost:27017/test --quiet
+      interval: 60s
+      timeout: 10s
+      retries: 2
+      start_period: 40s
   rabbitmq:
     image: "rabbitmq:3-management-alpine"
-    ports:
-      - 5672:5672
-      - 15672:15672
     environment:
       - RABBITMQ_DEFAULT_USER=root
       - RABBITMQ_DEFAULT_PASS=pass
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 2
+      start_period: 40s
   neo4j:
     image: "neo4j:5.9.0"
-    ports:
-      - 7687:7687
-      - 7474:7474
     environment:
       - NEO4J_AUTH=neo4j/password
       - NEO4J_PLUGINS=["apoc", "graph-data-science"]
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
+    healthcheck:
+      test: ["CMD" ,"wget", "http://localhost:7474"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 2
+      start_period: 40s
+

@@ -7,13 +7,13 @@ import { Snowflake } from 'discord.js';
 const logger = parentLogger.child({ module: 'ChannelService' });
 
 /**
- *  check if a bot has the "Read Message History" permissio 
+ *  check if a bot has the "Read Message History" permissio
  * @param {number} botPermissions
  * @returns {boolean}
  */
 function hasReadMessageHistory(botPermissions: number): boolean {
-    const READ_MESSAGE_HISTORY = 0x40;
-    return (botPermissions & READ_MESSAGE_HISTORY) !== 0;
+  const READ_MESSAGE_HISTORY = 0x40;
+  return (botPermissions & READ_MESSAGE_HISTORY) !== 0;
 }
 
 /**
@@ -23,7 +23,7 @@ function hasReadMessageHistory(botPermissions: number): boolean {
  * @returns {Promise<IChannel | null>} - A promise that resolves to the matching channel object or null if not found.
  */
 async function getChannel(connection: Connection, filter: object): Promise<IChannel | null> {
-    return await connection.models.Channel.findOne(filter);
+  return await connection.models.Channel.findOne(filter);
 }
 
 /**
@@ -33,80 +33,84 @@ async function getChannel(connection: Connection, filter: object): Promise<IChan
  * @returns {Promise<IChannel[] | []>} - A promise that resolves to an array of the matching channel objects.
  */
 async function getChannels(connection: Connection, filter: object): Promise<IChannel[] | []> {
-    return await connection.models.Channel.find(filter);
+  return await connection.models.Channel.find(filter);
 }
-
 
 /**
  * Checks if the bot has specific permissions in a given channel.
  * This function combines all the specified permissions and checks if the bot has these permissions globally as well as any specific overwrites in the channel.
- * 
+ *
  * @param {Snowflake} guildId - The ID of the guild.
  * @param {IChannel} channel - The channel to check the permissions for.
  * @param {number[]} permissionsToCheck - An array of permission numbers (in hexadecimal format) to check.
  * @returns {Promise<boolean>} - A promise that resolves to a boolean indicating whether the bot has all the specified permissions in the given channel.
  */
-async function checkBotPermissions(guildId: Snowflake, channel: IChannel, permissionsToCheck: number[]): Promise<boolean> {
-    try {
-        const client = await coreService.DiscordBotManager.getClient();
-        const guild = await client.guilds.fetch(guildId);
-        const botMember = await guild.members.fetch(config.discord.clientId);
+async function checkBotPermissions(
+  guildId: Snowflake,
+  channel: IChannel,
+  permissionsToCheck: number[],
+): Promise<boolean> {
+  try {
+    const client = await coreService.DiscordBotManager.getClient();
+    const guild = await client.guilds.fetch(guildId);
+    const botMember = await guild.members.fetch(config.discord.clientId);
 
-        if (!channel || !botMember) {
-            return false;
-        }
-
-        // Combine all permissions to check
-        let combinedPermissions = BigInt(0);
-        permissionsToCheck.forEach(permission => {
-            combinedPermissions |= BigInt(permission);
-        });
-
-        // Check if bot has the combined global permissions
-        const botGlobalPermissions = BigInt(botMember.permissions.bitfield);
-        if (!(botGlobalPermissions & combinedPermissions)) {
-            return false;
-        }
-
-        // Check permission overwrites
-        let hasAccess = true;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const evaluateOverwrites = (overwrite: any) => {
-            const allowed = BigInt(overwrite.allow);
-            const denied = BigInt(overwrite.deny);
-
-            if (denied & combinedPermissions) {
-                hasAccess = false;
-            } else if (allowed & combinedPermissions) {
-                hasAccess = true;
-            }
-        };
-
-        channel.permissionOverwrites?.forEach(overwrite => {
-            if (overwrite.type === 0 && botMember.roles.cache.has(overwrite.id)) { // Role specific overwrites
-                evaluateOverwrites(overwrite);
-            }
-        });
-
-        // User-specific overwrite for the bot
-        const botSpecificOverwrite = channel.permissionOverwrites?.find(overwrite => overwrite.id === botMember.id && overwrite.type === 1);
-        if (botSpecificOverwrite) {
-            evaluateOverwrites(botSpecificOverwrite);
-        }
-
-        return hasAccess;
-    } catch (error) {
-        logger.error({ error }, 'Failed to check bot permissions');
-        return false;
+    if (!channel || !botMember) {
+      return false;
     }
+
+    // Combine all permissions to check
+    let combinedPermissions = BigInt(0);
+    permissionsToCheck.forEach((permission) => {
+      combinedPermissions |= BigInt(permission);
+    });
+
+    // Check if bot has the combined global permissions
+    const botGlobalPermissions = BigInt(botMember.permissions.bitfield);
+    if (!(botGlobalPermissions & combinedPermissions)) {
+      return false;
+    }
+
+    // Check permission overwrites
+    let hasAccess = true;
+    const evaluateOverwrites = (overwrite: any) => {
+      const allowed = BigInt(overwrite.allow);
+      const denied = BigInt(overwrite.deny);
+
+      if (denied & combinedPermissions) {
+        hasAccess = false;
+      } else if (allowed & combinedPermissions) {
+        hasAccess = true;
+      }
+    };
+
+    channel.permissionOverwrites?.forEach((overwrite) => {
+      if (overwrite.type === 0 && botMember.roles.cache.has(overwrite.id)) {
+        // Role specific overwrites
+        evaluateOverwrites(overwrite);
+      }
+    });
+
+    // User-specific overwrite for the bot
+    const botSpecificOverwrite = channel.permissionOverwrites?.find(
+      (overwrite) => overwrite.id === botMember.id && overwrite.type === 1,
+    );
+    if (botSpecificOverwrite) {
+      evaluateOverwrites(botSpecificOverwrite);
+    }
+
+    return hasAccess;
+  } catch (error) {
+    logger.error({ error }, 'Failed to check bot permissions');
+    return false;
+  }
 }
 
 async function getChannelInfoFromChannelIds(connection: Connection, channelIds: string[]) {
-    const channels = await connection.models.Channel.find({ channelId: { $in: channelIds } });
-    const channelInfo = channels.map((channel: IChannel) => ({ channelId: channel.channelId, name: channel.name }));
-    return channelInfo;
+  const channels = await connection.models.Channel.find({ channelId: { $in: channelIds } });
+  const channelInfo = channels.map((channel: IChannel) => ({ channelId: channel.channelId, name: channel.name }));
+  return channelInfo;
 }
-
 
 /**
  * Query for channels
@@ -116,17 +120,15 @@ async function getChannelInfoFromChannelIds(connection: Connection, channelIds: 
  * @param {number} [options.limit] - Maximum number of results per page (default = 10)
  * @param {number} [options.page] - Current page (default = 1)
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const queryChannels = async (connection: any, filter: object, options: object) => {
-    return await connection.models.Channel.paginate(filter, options);
-
+  return await connection.models.Channel.paginate(filter, options);
 };
 
 export default {
-    getChannelInfoFromChannelIds,
-    hasReadMessageHistory,
-    getChannel,
-    getChannels,
-    checkBotPermissions,
-    queryChannels
-}
+  getChannelInfoFromChannelIds,
+  hasReadMessageHistory,
+  getChannel,
+  getChannels,
+  checkBotPermissions,
+  queryChannels,
+};

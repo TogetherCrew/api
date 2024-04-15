@@ -24,7 +24,9 @@ paths:
     post:
       tags:
         - Platform
+        - Admin
       summary: Create a new platform.
+      description: Only Admins can create a new platform
       security:
         - bearerAuth: []
       requestBody:
@@ -62,6 +64,8 @@ paths:
     get:
       tags:
         - Platform
+        - Admin
+        - View
       summary: Retrieve all platforms.
       security:
         - bearerAuth: []
@@ -131,6 +135,8 @@ paths:
     get:
       tags:
         - Platform
+        - Admin
+        - View
       summary: Retrieve details of a specific platform by its ID.
       security:
         - bearerAuth: []
@@ -158,6 +164,7 @@ paths:
     patch:
       tags:
         - Platform
+        - Admin
       summary: Update a specific platform by its ID.
       security:
         - bearerAuth: []
@@ -197,6 +204,7 @@ paths:
     delete:
       tags:
         - Platform
+        - Admin
       summary: Delete a specific platform by its ID.
       security:
         - bearerAuth: []
@@ -233,6 +241,8 @@ paths:
     post:
       tags:
         - Platform
+        - Admin
+        - View
       summary: Retrieve specific properties of a platform based on the platform ID and property type.
       security:
         - bearerAuth: []

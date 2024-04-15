@@ -3,6 +3,7 @@ paths:
     post:
       tags:
         - Announcement
+        - Admin
       summary: Create a new announcement.
       security:
         - bearerAuth: []
@@ -158,6 +159,7 @@ paths:
     get:
       tags:
         - Announcement
+        - Admin
       summary: Retrieve details of a specific announcement by its ID.
       security:
         - bearerAuth: []
@@ -189,6 +191,7 @@ paths:
     patch:
       tags:
         - Announcement
+        - Admin
       summary: Update a specific announcement by its ID.
       security:
         - bearerAuth: []
@@ -275,6 +278,7 @@ paths:
     delete:
       tags:
         - Announcement
+        - Admin
       summary: Delete a specific announcement by its ID.
       security:
         - bearerAuth: []
