@@ -2,7 +2,7 @@ import passport, { use } from 'passport';
 import httpStatus from 'http-status';
 import { ApiError, roleUtil, pick } from '../utils';
 import { Request, Response, NextFunction } from 'express';
-import { communityService, platformService, moduleService } from '..//services';
+import { communityService, platformService, moduleService } from '../services';
 import { Types } from 'mongoose';
 import { UserRole } from '../interfaces';
 
