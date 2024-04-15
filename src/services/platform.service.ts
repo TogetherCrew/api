@@ -106,7 +106,7 @@ const updatePlatform = async (
       created: false,
       discordId: userDiscordId,
       message:
-        'Your data import into TogetherCrew is complete! See your insights on your dashboard https://app.togethercrew.com/',
+        'Your data import into TogetherCrew is complete! See your insights on your dashboard https://app.togethercrew.com/. If you have questions send a DM to katerinabc (Discord) or k_bc0 (Telegram).',
       useFallback: true,
     });
   }

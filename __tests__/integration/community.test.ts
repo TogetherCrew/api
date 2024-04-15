@@ -619,6 +619,40 @@
 //         .expect(httpStatus.FORBIDDEN);
 //     });
 
+//     test('should return 400 when admin users trys to revoke admin role from themselves', async () => {
+//       await insertCommunities([communityOne, communityTwo, communityThree]);
+//       await insertUsers([userOne, userTwo]);
+//       await insertPlatforms([platformOne, platformTwo, platformThree]);
+//       await insertGuildMembers(
+//         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
+//         connection,
+//       );
+//       await insertRoles([discordRole1, discordRole2, discordRole3, discordRole4], connection);
+
+//       const res1 = await request(app)
+//         .patch(`/api/v1/communities/${communityOne._id}`)
+//         .set('Authorization', `Bearer ${userTwoAccessToken}`)
+//         .send({ roles: [] })
+//         .expect(httpStatus.BAD_REQUEST);
+
+//       const res2 = await request(app)
+//         .patch(`/api/v1/communities/${communityOne._id}`)
+//         .set('Authorization', `Bearer ${userTwoAccessToken}`)
+//         .send({
+//           roles: [{
+//             roleType: 'admin',
+//             source: {
+//               platform: 'discord',
+//               identifierType: 'member',
+//               identifierValues: [userOne.discordId],
+//               platformId: platformOne._id,
+//             },
+//           },]
+//         })
+//         .expect(httpStatus.BAD_REQUEST);
+
+//     });
+
 //     test('should return 400 error if communityId is not a valid mongo id', async () => {
 //       await insertUsers([userOne]);
 
