@@ -459,6 +459,7 @@ describe('Module routes', () => {
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send(updateBody)
                 .expect(httpStatus.BAD_REQUEST);
+
         });
 
         test('should return 400 error if metadata is invalid for the discord hivemind module', async () => {
@@ -479,7 +480,10 @@ describe('Module routes', () => {
                 .set('Authorization', `Bearer ${userOneAccessToken}`)
                 .send(updateBody)
                 .expect(httpStatus.BAD_REQUEST);
+
         });
+
+
 
 
     });
