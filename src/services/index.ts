@@ -22,5 +22,5 @@ export {
   platformService,
   twitterService,
   announcementService,
-  moduleService
+  moduleService,
 };

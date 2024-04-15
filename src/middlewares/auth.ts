@@ -8,19 +8,19 @@ import { UserRole } from '../interfaces';
 
 const verifyCallback =
   (req: Request, resolve: Function, reject: Function, requiredRights: any) =>
-    async (err: Error | null, user: any, info: any): Promise<void> => {
-      if (err || info || !user) {
-        return reject(new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate'));
-      }
+  async (err: Error | null, user: any, info: any): Promise<void> => {
+    if (err || info || !user) {
+      return reject(new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate'));
+    }
 
-      req.user = user;
+    req.user = user;
 
-      if (requiredRights.length) {
-        await verifyRights(req, user, requiredRights, reject);
-      }
+    if (requiredRights.length) {
+      await verifyRights(req, user, requiredRights, reject);
+    }
 
-      resolve();
-    };
+    resolve();
+  };
 
 async function verifyRights(req: Request, user: any, requiredRights: UserRole[], reject: Function): Promise<void> {
   let community = await getCommunity(req, reject);
@@ -36,7 +36,12 @@ async function verifyRights(req: Request, user: any, requiredRights: UserRole[],
 
 async function getCommunity(req: Request, reject: Function): Promise<any | null> {
   try {
-    const ids = pick({ ...req.query, ...req.body, ...req.params }, ['communityId', 'community', 'platformId', 'moduleId']);
+    const ids = pick({ ...req.query, ...req.body, ...req.params }, [
+      'communityId',
+      'community',
+      'platformId',
+      'moduleId',
+    ]);
     let communityId: string | null = null,
       platformId: string | null = null,
       moduleId: string | null = null;
@@ -85,8 +90,7 @@ async function getCommunity(req: Request, reject: Function): Promise<any | null>
       } else {
         reject(new ApiError(httpStatus.NOT_FOUND, 'Community not found!'));
       }
-    }
-    else if (moduleId) {
+    } else if (moduleId) {
       const module = await moduleService.getModuleById(new Types.ObjectId(moduleId));
       if (!module) {
         reject(new ApiError(httpStatus.NOT_FOUND, 'Module not found!'));

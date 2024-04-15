@@ -9,7 +9,7 @@ import ApiError from '../utils/ApiError';
  * @returns {Promise<HydratedDocument<IModule>>}
  */
 const createModule = async (ModuleBody: IModule): Promise<HydratedDocument<IModule>> => {
-    return Module.create(ModuleBody);
+  return Module.create(ModuleBody);
 };
 
 /**
@@ -21,7 +21,7 @@ const createModule = async (ModuleBody: IModule): Promise<HydratedDocument<IModu
  * @param {number} [options.page] - Current page (default = 1)
  */
 const queryModules = async (filter: object, options: object) => {
-    return Module.paginate(filter, options);
+  return Module.paginate(filter, options);
 };
 
 /**
@@ -30,7 +30,7 @@ const queryModules = async (filter: object, options: object) => {
  * @returns {Promise<HydratedDocument<IModule> | null>}
  */
 const getModuleByFilter = async (filter: object): Promise<HydratedDocument<IModule> | null> => {
-    return Module.findOne(filter);
+  return Module.findOne(filter);
 };
 
 /**
@@ -39,7 +39,7 @@ const getModuleByFilter = async (filter: object): Promise<HydratedDocument<IModu
  * @returns {Promise<HydratedDocument<IModule> | null>}
  */
 const getModuleById = async (id: Types.ObjectId): Promise<HydratedDocument<IModule> | null> => {
-    return Module.findById(id);
+  return Module.findById(id);
 };
 
 /**
@@ -49,11 +49,11 @@ const getModuleById = async (id: Types.ObjectId): Promise<HydratedDocument<IModu
  * @returns {Promise<HydratedDocument<IModule>>}
  */
 const updateModule = async (
-    module: HydratedDocument<IModule>,
-    updateBody: Partial<IModuleUpdateBody>,
+  module: HydratedDocument<IModule>,
+  updateBody: Partial<IModuleUpdateBody>,
 ): Promise<HydratedDocument<IModule>> => {
-    Object.assign(module, updateBody);
-    return await module.save();
+  Object.assign(module, updateBody);
+  return await module.save();
 };
 
 /**
@@ -62,16 +62,14 @@ const updateModule = async (
  * @returns {Promise<HydratedDocument<IModule>>}
  */
 const deleteModule = async (module: HydratedDocument<IModule>): Promise<HydratedDocument<IModule>> => {
-    return await module.remove();
+  return await module.remove();
 };
 
-
-
 export default {
-    createModule,
-    queryModules,
-    getModuleByFilter,
-    getModuleById,
-    deleteModule,
-    updateModule
+  createModule,
+  queryModules,
+  getModuleByFilter,
+  getModuleById,
+  deleteModule,
+  updateModule,
 };

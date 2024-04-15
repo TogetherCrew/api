@@ -16,5 +16,5 @@ export {
   communityValidation,
   platformValidation,
   announcementValidation,
-  moduleValidation
+  moduleValidation,
 };

@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { moduleService, } from '../services';
+import { moduleService } from '../services';
 import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync, pick, ApiError } from '../utils';
 import httpStatus from 'http-status';
@@ -7,7 +7,7 @@ import { IModule } from '@togethercrew.dev/db';
 
 const createModule = catchAsync(async function (req: IAuthRequest, res: Response) {
   if (await moduleService.getModuleByFilter(req.body)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'This Module is already created!')
+    throw new ApiError(httpStatus.BAD_REQUEST, 'This Module is already created!');
   }
   const module = await moduleService.createModule(req.body);
   res.status(httpStatus.CREATED).send(module);
@@ -35,7 +35,7 @@ const updateModule = catchAsync(async function (req: IAuthRequest, res: Response
     module = await moduleService.updateModule(req.module, req.body);
     res.send(module);
   } else {
-    res.send({})
+    res.send({});
   }
 });
 
@@ -44,5 +44,5 @@ export default {
   getModules,
   getModule,
   deleteModule,
-  updateModule
+  updateModule,
 };

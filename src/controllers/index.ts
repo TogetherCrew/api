@@ -18,5 +18,5 @@ export {
   platformController,
   announcementController,
   categoryController,
-  moduleController
+  moduleController,
 };
