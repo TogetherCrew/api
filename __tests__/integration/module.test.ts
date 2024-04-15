@@ -65,248 +65,248 @@ describe('Module routes', () => {
         moduleThree.community = communityThree._id;
 
     });
-    // describe('POST api/v1/modules', () => {
-    //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    //     let newModule: IModule;
+    describe('POST api/v1/modules', () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let newModule: IModule;
 
-    //     beforeEach(async () => {
-    //         newModule = {
-    //             name: 'hivemind',
-    //             community: communityOne._id,
-    //         };
-    //     });
+        beforeEach(async () => {
+            newModule = {
+                name: 'hivemind',
+                community: communityOne._id,
+            };
+        });
 
-    //     test('should return 201 and successfully create new hivemind module if data is ok', async () => {
-    //         userOne.communities = [communityOne._id];
-    //         communityOne.users = [userOne._id];
-    //         await insertCommunities([communityOne]);
-    //         await insertUsers([userOne]);
+        test('should return 201 and successfully create new hivemind module if data is ok', async () => {
+            userOne.communities = [communityOne._id];
+            communityOne.users = [userOne._id];
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
 
-    //         const res = await request(app)
-    //             .post(`/api/v1/modules`)
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .send(newModule)
-    //             .expect(httpStatus.CREATED);
+            const res = await request(app)
+                .post(`/api/v1/modules`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send(newModule)
+                .expect(httpStatus.CREATED);
 
-    //         expect(res.body).toEqual({
-    //             id: expect.anything(),
-    //             name: newModule.name,
-    //             community: communityOne._id.toHexString(),
-    //             options: {
-    //                 platforms: []
-    //             }
-    //         });
+            expect(res.body).toEqual({
+                id: expect.anything(),
+                name: newModule.name,
+                community: communityOne._id.toHexString(),
+                options: {
+                    platforms: []
+                }
+            });
 
-    //         const dbModule = await Module.findById(res.body.id);
-    //         expect(dbModule).toBeDefined();
-    //         expect(dbModule).toMatchObject({
-    //             name: newModule.name,
-    //             community: newModule.community,
-    //             options: {
-    //                 platforms: []
-    //             }
-    //         });
-    //     });
+            const dbModule = await Module.findById(res.body.id);
+            expect(dbModule).toBeDefined();
+            expect(dbModule).toMatchObject({
+                name: newModule.name,
+                community: newModule.community,
+                options: {
+                    platforms: []
+                }
+            });
+        });
 
-    //     test('should return 401 error if access token is missing', async () => {
-    //         await request(app).post(`/api/v1/modules`).send(newModule).expect(httpStatus.UNAUTHORIZED);
-    //     });
+        test('should return 401 error if access token is missing', async () => {
+            await request(app).post(`/api/v1/modules`).send(newModule).expect(httpStatus.UNAUTHORIZED);
+        });
 
-    //     test('should return 400 error if there is a module with same name already for community', async () => {
-    //         await insertCommunities([communityOne]);
-    //         await insertModules([moduleOne])
-    //         await insertUsers([userOne]);
-    //         newModule.community = communityOne._id;
-    //         await request(app)
-    //             .post(`/api/v1/modules`)
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .send(newModule)
-    //             .expect(httpStatus.BAD_REQUEST);
+        test('should return 400 error if there is a module with same name already for community', async () => {
+            await insertCommunities([communityOne]);
+            await insertModules([moduleOne])
+            await insertUsers([userOne]);
+            newModule.community = communityOne._id;
+            await request(app)
+                .post(`/api/v1/modules`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send(newModule)
+                .expect(httpStatus.BAD_REQUEST);
 
-    //     });
+        });
 
-    //     test('should return 400 error if name is invalid', async () => {
-    //         await insertCommunities([communityOne]);
-    //         await insertUsers([userOne]);
-    //         await request(app)
-    //             .post(`/api/v1/modules`)
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .send({ name: 'invalid', community: communityOne._id })
-    //             .expect(httpStatus.BAD_REQUEST);
-    //     });
+        test('should return 400 error if name is invalid', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await request(app)
+                .post(`/api/v1/modules`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ name: 'invalid', community: communityOne._id })
+                .expect(httpStatus.BAD_REQUEST);
+        });
 
-    //     test('should return 404 error if community doesn not exist', async () => {
-    //         await insertCommunities([communityOne]);
-    //         await insertUsers([userOne]);
-    //         newModule.community = new Types.ObjectId();
-    //         await request(app)
-    //             .post(`/api/v1/modules`)
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .send(newModule)
-    //             .expect(httpStatus.NOT_FOUND);
-    //     });
-    //     test('should return 400 error if community is invalid', async () => {
-    //         await insertCommunities([communityOne]);
-    //         await insertUsers([userOne]);
-    //         await request(app)
-    //             .post(`/api/v1/platforms`)
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .send({ name: 'hivemind', community: 'invalid' })
-    //             .expect(httpStatus.BAD_REQUEST);
-    //     });
+        test('should return 404 error if community doesn not exist', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            newModule.community = new Types.ObjectId();
+            await request(app)
+                .post(`/api/v1/modules`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send(newModule)
+                .expect(httpStatus.NOT_FOUND);
+        });
+        test('should return 400 error if community is invalid', async () => {
+            await insertCommunities([communityOne]);
+            await insertUsers([userOne]);
+            await request(app)
+                .post(`/api/v1/platforms`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send({ name: 'hivemind', community: 'invalid' })
+                .expect(httpStatus.BAD_REQUEST);
+        });
 
-    // });
-    // describe('GET /api/v1/modules', () => {
-    //     test('should return 200 and apply the default query options', async () => {
-    //         await insertCommunities([communityOne, communityTwo, communityThree]);
-    //         await insertUsers([userOne, userTwo]);
-    //         await insertModules([moduleOne, moduleTwo]);
-    //         const res = await request(app)
-    //             .get('/api/v1/modules')
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .query({ community: communityOne._id.toHexString() })
-    //             .send()
-    //             .expect(httpStatus.OK);
+    });
+    describe('GET /api/v1/modules', () => {
+        test('should return 200 and apply the default query options', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertModules([moduleOne, moduleTwo]);
+            const res = await request(app)
+                .get('/api/v1/modules')
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ community: communityOne._id.toHexString() })
+                .send()
+                .expect(httpStatus.OK);
 
-    //         expect(res.body).toEqual({
-    //             results: expect.any(Array),
-    //             page: 1,
-    //             limit: 10,
-    //             totalPages: 1,
-    //             totalResults: 1,
-    //         });
-    //         expect(res.body.results).toHaveLength(1);
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 1,
+            });
+            expect(res.body.results).toHaveLength(1);
 
-    //         expect(res.body.results[0]).toMatchObject({
-    //             id: expect.anything(),
-    //             name: moduleOne.name,
-    //             community: communityOne._id.toHexString(),
-    //             options: {
-    //                 platforms: []
-    //             }
-    //         });
-    //     });
+            expect(res.body.results[0]).toMatchObject({
+                id: expect.anything(),
+                name: moduleOne.name,
+                community: communityOne._id.toHexString(),
+                options: {
+                    platforms: []
+                }
+            });
+        });
 
-    //     test('should return 401 if access token is missing', async () => {
-    //         await insertCommunities([communityOne, communityTwo, communityThree]);
-    //         await insertUsers([userOne, userTwo]);
-    //         await insertModules([moduleOne, moduleTwo]);
-    //         await request(app)
-    //             .get('/api/v1/modules')
-    //             .query({ community: communityOne._id.toHexString() })
-    //             .send()
-    //             .expect(httpStatus.UNAUTHORIZED);
-    //     });
+        test('should return 401 if access token is missing', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertModules([moduleOne, moduleTwo]);
+            await request(app)
+                .get('/api/v1/modules')
+                .query({ community: communityOne._id.toHexString() })
+                .send()
+                .expect(httpStatus.UNAUTHORIZED);
+        });
 
-    //     test('should correctly apply filter on name field and return hivemind module', async () => {
-    //         await insertCommunities([communityOne, communityTwo, communityThree]);
-    //         await insertUsers([userOne, userTwo]);
-    //         await insertModules([moduleOne, moduleTwo]);
-    //         const res = await request(app)
-    //             .get('/api/v1/modules')
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .query({ name: 'hivemind', community: communityOne._id.toHexString() })
-    //             .send()
-    //             .expect(httpStatus.OK);
+        test('should correctly apply filter on name field and return hivemind module', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertModules([moduleOne, moduleTwo]);
+            const res = await request(app)
+                .get('/api/v1/modules')
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ name: 'hivemind', community: communityOne._id.toHexString() })
+                .send()
+                .expect(httpStatus.OK);
 
-    //         expect(res.body).toEqual({
-    //             results: expect.any(Array),
-    //             page: 1,
-    //             limit: 10,
-    //             totalPages: 1,
-    //             totalResults: 1,
-    //         });
-    //         expect(res.body.results).toHaveLength(1);
-    //         expect(res.body.results[0].id).toBe(moduleOne._id.toHexString());
-    //     });
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 1,
+            });
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].id).toBe(moduleOne._id.toHexString());
+        });
 
-    //     test('should correctly sort the returned array if descending sort param is specified', async () => {
-    //         await insertCommunities([communityOne, communityTwo, communityThree]);
-    //         await insertUsers([userOne, userTwo]);
-    //         await insertModules([moduleOne, moduleTwo]);
-    //         const res = await request(app)
-    //             .get('/api/v1/modules')
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .query({ sortBy: 'name:desc', community: communityOne._id.toHexString() })
-    //             .send()
-    //             .expect(httpStatus.OK);
+        test('should correctly sort the returned array if descending sort param is specified', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertModules([moduleOne, moduleTwo]);
+            const res = await request(app)
+                .get('/api/v1/modules')
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ sortBy: 'name:desc', community: communityOne._id.toHexString() })
+                .send()
+                .expect(httpStatus.OK);
 
-    //         expect(res.body).toEqual({
-    //             results: expect.any(Array),
-    //             page: 1,
-    //             limit: 10,
-    //             totalPages: 1,
-    //             totalResults: 1,
-    //         });
-    //         expect(res.body.results).toHaveLength(1);
-    //         expect(res.body.results[0].id).toBe(moduleOne._id.toHexString());
-    //     });
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 1,
+            });
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].id).toBe(moduleOne._id.toHexString());
+        });
 
-    //     test('should correctly sort the returned array if ascending sort param is specified', async () => {
-    //         await insertCommunities([communityOne, communityTwo, communityThree]);
-    //         await insertUsers([userOne, userTwo]);
-    //         await insertModules([moduleOne, moduleTwo]);
-    //         const res = await request(app)
-    //             .get('/api/v1/modules')
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .query({ sortBy: 'name:asc', community: communityOne._id.toHexString() })
-    //             .send()
-    //             .expect(httpStatus.OK);
+        test('should correctly sort the returned array if ascending sort param is specified', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertModules([moduleOne, moduleTwo]);
+            const res = await request(app)
+                .get('/api/v1/modules')
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ sortBy: 'name:asc', community: communityOne._id.toHexString() })
+                .send()
+                .expect(httpStatus.OK);
 
-    //         expect(res.body).toEqual({
-    //             results: expect.any(Array),
-    //             page: 1,
-    //             limit: 10,
-    //             totalPages: 1,
-    //             totalResults: 1,
-    //         });
-    //         expect(res.body.results).toHaveLength(1);
-    //         expect(res.body.results[0].id).toBe(moduleOne._id.toHexString());
-    //     });
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 10,
+                totalPages: 1,
+                totalResults: 1,
+            });
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].id).toBe(moduleOne._id.toHexString());
+        });
 
-    //     test('should limit returned array if limit param is specified', async () => {
-    //         await insertCommunities([communityOne, communityTwo, communityThree]);
-    //         await insertUsers([userOne, userTwo]);
-    //         await insertModules([moduleOne, moduleTwo]);
-    //         const res = await request(app)
-    //             .get('/api/v1/modules')
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .query({ limit: 1, community: communityOne._id.toHexString() })
-    //             .send()
-    //             .expect(httpStatus.OK);
+        test('should limit returned array if limit param is specified', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertModules([moduleOne, moduleTwo]);
+            const res = await request(app)
+                .get('/api/v1/modules')
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ limit: 1, community: communityOne._id.toHexString() })
+                .send()
+                .expect(httpStatus.OK);
 
-    //         expect(res.body).toEqual({
-    //             results: expect.any(Array),
-    //             page: 1,
-    //             limit: 1,
-    //             totalPages: 1,
-    //             totalResults: 1,
-    //         });
-    //         expect(res.body.results).toHaveLength(1);
-    //         expect(res.body.results[0].id).toBe(moduleOne._id.toHexString());
-    //     });
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 1,
+                limit: 1,
+                totalPages: 1,
+                totalResults: 1,
+            });
+            expect(res.body.results).toHaveLength(1);
+            expect(res.body.results[0].id).toBe(moduleOne._id.toHexString());
+        });
 
-    //     test('should return the correct page if page and limit params are specified', async () => {
-    //         await insertCommunities([communityOne, communityTwo, communityThree]);
-    //         await insertUsers([userOne, userTwo]);
-    //         await insertModules([moduleOne, moduleTwo]);
-    //         const res = await request(app)
-    //             .get('/api/v1/modules')
-    //             .set('Authorization', `Bearer ${userOneAccessToken}`)
-    //             .query({ page: 2, limit: 1, community: communityOne._id.toHexString() })
-    //             .send()
-    //             .expect(httpStatus.OK);
+        test('should return the correct page if page and limit params are specified', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertModules([moduleOne, moduleTwo]);
+            const res = await request(app)
+                .get('/api/v1/modules')
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .query({ page: 2, limit: 1, community: communityOne._id.toHexString() })
+                .send()
+                .expect(httpStatus.OK);
 
-    //         expect(res.body).toEqual({
-    //             results: expect.any(Array),
-    //             page: 2,
-    //             limit: 1,
-    //             totalPages: 1,
-    //             totalResults: 1,
-    //         });
-    //         expect(res.body.results).toHaveLength(0);
-    //     });
-    // });
+            expect(res.body).toEqual({
+                results: expect.any(Array),
+                page: 2,
+                limit: 1,
+                totalPages: 1,
+                totalResults: 1,
+            });
+            expect(res.body.results).toHaveLength(0);
+        });
+    });
     describe('GET /api/v1/modules/:moduleId', () => {
         test('should return 200 and the module object if data is ok', async () => {
             await insertCommunities([communityOne, communityTwo, communityThree]);
@@ -380,8 +380,9 @@ describe('Module routes', () => {
                             learning: {
                                 selectedChannels: ['8765', '1234'],
                                 fromDate: new Date()
-                            }
-                        }
+                            },
+                        },
+                        name: 'discord'
                     }]
                 },
             };
@@ -397,8 +398,6 @@ describe('Module routes', () => {
                 .send(updateBody)
                 .expect(httpStatus.OK);
 
-            console.log(res.body)
-            console.log(res.body.options)
             expect(res.body).toEqual({
                 id: moduleOne._id,
                 name: moduleOne.name,
@@ -414,7 +413,8 @@ describe('Module routes', () => {
                                 selectedChannels: updateBody.options?.platforms[0].metadata?.learning.selectedChannels,
                                 fromDate: updateBody.options?.platforms[0].metadata?.learning.fromDate.toISOString()
                             }
-                        }
+                        },
+                        name:updateBody.options?.platforms[0].name
                     }]
                 },
             });
@@ -429,54 +429,55 @@ describe('Module routes', () => {
             });
         });
 
-        // test('should return 401 error if access token is missing', async () => {
-        //     await insertUsers([userOne]);
-        //     await request(app)
-        //         .patch(`/api/v1/modules/${moduleOne._id}`)
-        //         .send(updateBody)
-        //         .expect(httpStatus.UNAUTHORIZED);
-        // });
+        test('should return 401 error if access token is missing', async () => {
+            await insertUsers([userOne]);
+            await request(app)
+                .patch(`/api/v1/modules/${moduleOne._id}`)
+                .send(updateBody)
+                .expect(httpStatus.UNAUTHORIZED);
+        });
 
-        // test('should return 403 when user trys to update module they does not access to', async () => {
-        //     await insertCommunities([communityOne, communityTwo, communityThree]);
-        //     await insertUsers([userOne, userTwo]);
-        //     await insertModules([moduleOne, moduleTwo]);
-        //     await request(app)
-        //         .patch(`/api/v1/modules/${moduleOne._id}`)
-        //         .set('Authorization', `Bearer ${userTwoAccessToken}`)
-        //         .send(updateBody)
-        //         .expect(httpStatus.FORBIDDEN);
-        // });
+        test('should return 403 when user trys to update module they does not access to', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertModules([moduleOne, moduleTwo]);
+            await request(app)
+                .patch(`/api/v1/modules/${moduleOne._id}`)
+                .set('Authorization', `Bearer ${userTwoAccessToken}`)
+                .send(updateBody)
+                .expect(httpStatus.FORBIDDEN);
+        });
 
-        // test('should return 400 error if moduleId is not a valid mongo id', async () => {
-        //     await insertCommunities([communityOne, communityTwo, communityThree]);
-        //     await insertUsers([userOne, userTwo]);
-        //     await insertModules([moduleOne, moduleTwo]);
-        //     await request(app)
-        //         .patch(`/api/v1/modules/invalid`)
-        //         .set('Authorization', `Bearer ${userOneAccessToken}`)
-        //         .send(updateBody)
-        //         .expect(httpStatus.BAD_REQUEST);
-        // });
+        test('should return 400 error if moduleId is not a valid mongo id', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertModules([moduleOne, moduleTwo]);
+            await request(app)
+                .patch(`/api/v1/modules/invalid`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send(updateBody)
+                .expect(httpStatus.BAD_REQUEST);
+        });
 
-        // test('should return 400 error if metadata is invalid for the hivemind module', async () => {
-        //     await insertCommunities([communityOne, communityTwo, communityThree]);
-        //     await insertUsers([userOne, userTwo]);
-        //     await insertModules([moduleOne, moduleTwo]);
-        //     updateBody.options = {
-        //         platforms: [{
-        //             platform: platformOne._id,
-        //             metadata: {
-        //                 invalid: 1234
-        //             }
-        //         }]
-        //     };
-        //     await request(app)
-        //         .patch(`/api/v1/modules/${platformOne._id}`)
-        //         .set('Authorization', `Bearer ${userOneAccessToken}`)
-        //         .send(updateBody)
-        //         .expect(httpStatus.BAD_REQUEST);
-        // });
+        test('should return 400 error if metadata is invalid for the discord hivemind module', async () => {
+            await insertCommunities([communityOne, communityTwo, communityThree]);
+            await insertUsers([userOne, userTwo]);
+            await insertModules([moduleOne, moduleTwo]);
+            updateBody.options = {
+                platforms: [{
+                    platform: platformOne._id,
+                    metadata: {
+                        invalid: 1234
+                    },
+                    name:'discord'
+                }]
+            };
+            await request(app)
+                .patch(`/api/v1/modules/${platformOne._id}`)
+                .set('Authorization', `Bearer ${userOneAccessToken}`)
+                .send(updateBody)
+                .expect(httpStatus.BAD_REQUEST);
+        });
 
 
     });

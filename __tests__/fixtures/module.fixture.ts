@@ -9,6 +9,7 @@ interface ModuleFixture {
         platforms: Array<{
             platform: Types.ObjectId;
             metadata?: Record<string, any>;
+            name: 'discord'
         }>;
     };
 }
