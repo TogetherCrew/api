@@ -36,9 +36,9 @@ const dynamicModuleUpdate = (req: Request) => {
             body: Joi.object().required().keys({
                 options: Joi.object().required().keys({
                     platforms: Joi.array().items(Joi.object().keys({
-                        platformName: Joi.string().required(),
+                        name: Joi.string().required().valid('discord'),
                         platform: Joi.string().custom(objectId).required(),
-                        metadata: Joi.object().required().when('platformName', {
+                        metadata: Joi.object().required().when('name', {
                             switch: [
                                 {
                                     is: 'discord',
@@ -53,7 +53,7 @@ const dynamicModuleUpdate = (req: Request) => {
                                     })
                                 }
                             ],
-                            otherwise: Joi.any().forbidden() // This effectively causes validation to fail if platformName is not 'discord' or 'twitter'
+                            otherwise: Joi.any().forbidden()
                         })
                     })),
                 }),
