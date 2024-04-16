@@ -118,6 +118,41 @@ components:
           nullable: true
           description: Date and time when the platform was disconnected.
 
+    # ********Module********
+    Module:
+      type: object
+      description: Details about a module.
+      properties:
+        id:
+          type: string
+          format: objectId 
+        name:
+          type: string
+          description: Name of the module.
+          enum: ['hivemind']
+        community:
+          type: string
+          description: Mongoose ObjectId of the associated community.
+        options:
+          type: object
+          properties:
+            platforms:
+              type: array
+              items:
+                type: object
+                properties:
+                  platform:
+                    type: string
+                    format: objectId
+                  name:
+                    type: string
+                    description: Name of the platform.
+                    enum: ['discord']
+                  metadata:
+                    type: object
+                    additionalProperties: true
+                    description: Dynamic metadata related to the module.
+
     # ********Token********
     Token:
       type: object

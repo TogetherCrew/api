@@ -27,7 +27,7 @@
     "@discordjs/rest": "^1.7.0",
     "@notionhq/client": "^2.2.3",
     "@sentry/node": "^7.50.0",
-    "@togethercrew.dev/db": "^3.0.51",
+    "@togethercrew.dev/db": "^3.0.52",
     "@togethercrew.dev/tc-messagebroker": "^0.0.45",
     "@types/express-session": "^1.17.7",
     "@types/morgan": "^1.9.5",

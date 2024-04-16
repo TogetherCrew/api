@@ -1,0 +1,214 @@
+paths:
+  /api/v1/modules/:
+    post:
+      tags:
+        - Module
+        - Admin
+      summary: Create a new module.
+      description: Only Admins can create a new module
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  enum:
+                    - hivemind
+                community:
+                  type: string
+                  format: objectId
+      responses:
+        "201":
+          description: Module created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Module"
+        "400":
+          description: Bad Request
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        
+    get:
+      tags:
+        - Module
+        - Admin
+      summary: Retrieve all modules.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: name
+          schema:
+            type: string
+            enum:
+              - hivemind
+        - in: query
+          name: community
+          schema:
+            type: string
+            format: objectId
+          description: 
+          required: true
+        - in: query
+          name: sortBy
+          schema:
+            type: string
+          description: sort by query in the form of field:desc/asc (ex. name:asc)
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            default: 10
+          description: Maximum number of communities
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Module"
+                  page:
+                    type: integer
+                    example: 1
+                  limit:
+                    type: integer
+                    example: 10
+                  totalPages:
+                    type: integer
+                    example: 1
+                  totalResults:
+                    type: integer
+                    example: 1
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/v1/modules/{moduleId}:
+    get:
+      tags:
+        - Module
+        - Admin
+      summary: Retrieve details of a specific module by its ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          description: The ID of the module to retrieve.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Module details retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Module"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
+
+    patch:
+      tags:
+        - Module
+        - Admin
+      summary: Update a specific module by its ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          description: The ID of the module to update.
+          schema:
+            type: string
+            format: objectId
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                options:
+                  type: object
+                  properties:
+                    platforms:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          platform:
+                            type: string
+                            format: objectId
+                          name:
+                            type: string
+                            description: Name of the platform.
+                            enum: ['discord']
+                          metadata:
+                            type: object
+                            additionalProperties: true
+                            description: Dynamic metadata related to the module.
+              minProperties: 1
+      responses:
+        "200":
+          description: Module updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Module"
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      tags:
+        - Module
+        - Admin
+      summary: Delete a specific module by its ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          description: The ID of the module to delete.
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Module deleted successfully.
+        "401":
+          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: NotFound
+          $ref: "#/components/responses/NotFound"
