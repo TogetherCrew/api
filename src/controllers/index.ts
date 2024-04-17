@@ -7,7 +7,7 @@ import communityController from './community.controller';
 import platformController from './platform.controller';
 import announcementController from './announcement.controller';
 import categoryController from './category.controller';
-
+import moduleController from './module.controller';
 export {
   authController,
   userController,
@@ -18,4 +18,5 @@ export {
   platformController,
   announcementController,
   categoryController,
+  moduleController,
 };

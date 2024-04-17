@@ -2,7 +2,7 @@ import passport, { use } from 'passport';
 import httpStatus from 'http-status';
 import { ApiError, roleUtil, pick } from '../utils';
 import { Request, Response, NextFunction } from 'express';
-import { communityService, platformService } from '..//services';
+import { communityService, platformService, moduleService } from '../services';
 import { Types } from 'mongoose';
 import { UserRole } from '../interfaces';
 
@@ -36,9 +36,15 @@ async function verifyRights(req: Request, user: any, requiredRights: UserRole[],
 
 async function getCommunity(req: Request, reject: Function): Promise<any | null> {
   try {
-    const ids = pick({ ...req.query, ...req.body, ...req.params }, ['communityId', 'community', 'platformId']);
+    const ids = pick({ ...req.query, ...req.body, ...req.params }, [
+      'communityId',
+      'community',
+      'platformId',
+      'moduleId',
+    ]);
     let communityId: string | null = null,
-      platformId: string | null = null;
+      platformId: string | null = null,
+      moduleId: string | null = null;
 
     if (ids.communityId) {
       communityId = ids.communityId;
@@ -46,6 +52,8 @@ async function getCommunity(req: Request, reject: Function): Promise<any | null>
       communityId = ids.community;
     } else if (ids.platformId) {
       platformId = ids.platformId;
+    } else if (ids.moduleId) {
+      moduleId = ids.moduleId;
     }
 
     if (communityId !== null && !Types.ObjectId.isValid(communityId)) {
@@ -54,6 +62,10 @@ async function getCommunity(req: Request, reject: Function): Promise<any | null>
 
     if (platformId !== null && !Types.ObjectId.isValid(platformId)) {
       reject(new ApiError(httpStatus.BAD_REQUEST, 'Invalid platformId'));
+    }
+
+    if (moduleId !== null && !Types.ObjectId.isValid(moduleId)) {
+      reject(new ApiError(httpStatus.BAD_REQUEST, 'Invalid moduleId'));
     }
     if (communityId) {
       const community = await communityService.getCommunityById(new Types.ObjectId(communityId));
@@ -73,6 +85,21 @@ async function getCommunity(req: Request, reject: Function): Promise<any | null>
       const community = await communityService.getCommunityById(new Types.ObjectId(platform.community));
       if (community) {
         req.platform = platform;
+        req.community = community;
+        return community;
+      } else {
+        reject(new ApiError(httpStatus.NOT_FOUND, 'Community not found!'));
+      }
+    } else if (moduleId) {
+      const module = await moduleService.getModuleById(new Types.ObjectId(moduleId));
+      if (!module) {
+        reject(new ApiError(httpStatus.NOT_FOUND, 'Module not found!'));
+        return null;
+      }
+
+      const community = await communityService.getCommunityById(new Types.ObjectId(module.community));
+      if (community) {
+        req.module = module;
         req.community = community;
         return community;
       } else {

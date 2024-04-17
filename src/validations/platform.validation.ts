@@ -8,7 +8,7 @@ import { Types } from 'mongoose';
 const createPlatform = {
   body: Joi.object().keys({
     name: Joi.string().required().valid('twitter', 'discord'),
-    community: Joi.string().custom(objectId),
+    community: Joi.string().custom(objectId).required(),
     metadata: Joi.when('name', {
       switch: [
         {
@@ -41,7 +41,7 @@ const connectPlatform = {
 const getPlatforms = {
   query: Joi.object().keys({
     name: Joi.string().valid('twitter', 'discord'),
-    community: Joi.string().required(),
+    community: Joi.string().custom(objectId).required(),
     sortBy: Joi.string(),
     limit: Joi.number().integer(),
     page: Joi.number().integer(),

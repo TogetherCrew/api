@@ -9,7 +9,7 @@ import platformService from './platform.service';
 import twitterService from './twitter.service';
 import discordServices from './discord';
 import announcementService from './announcement.service';
-
+import moduleService from './module.service';
 export {
   userService,
   authService,
@@ -22,4 +22,5 @@ export {
   platformService,
   twitterService,
   announcementService,
+  moduleService,
 };
