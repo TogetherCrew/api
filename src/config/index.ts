@@ -78,30 +78,32 @@ export default {
     password: envVars.NEO4J_PASSWORD,
     database: envVars.NEO4J_DB,
   },
-  discord: {
-    clientId: envVars.DISCORD_CLIENT_ID,
-    clientSecret: envVars.DISCORD_CLIENT_SECRET,
-    botToken: envVars.DISCORD_BOT_TOKEN,
-    callbackURI: {
-      authorize: envVars.DISCORD_AUTHORIZE_CALLBACK_URI,
-      connect: envVars.DISCORD_CONNECT_CALLBACK_URI,
-      requestAccess: envVars.DISCORD_REQUEST_ACCESS_CALLBACK_URI,
+  oAuth2:{
+    discord: {
+      clientId: envVars.DISCORD_CLIENT_ID,
+      clientSecret: envVars.DISCORD_CLIENT_SECRET,
+      botToken: envVars.DISCORD_BOT_TOKEN,
+      callbackURI: {
+        authorize: envVars.DISCORD_AUTHORIZE_CALLBACK_URI,
+        connect: envVars.DISCORD_CONNECT_CALLBACK_URI,
+        requestAccess: envVars.DISCORD_REQUEST_ACCESS_CALLBACK_URI,
+      },
     },
+    twitter: {
+      clientId: envVars.TWITTER_CLIENT_ID,
+      clientSecret: envVars.TWITTER_CLIENT_SECRET,
+      callbackURI: {
+        connect: envVars.TWITTER_CONNECT_CALLBACK_URI,
+      },
+    },
+    google:{
+      clientId: envVars.GOOGLE_CLIENT_ID,
+      clientSecret: envVars.GOOGLE_CLIENT_SECERT,
+      callbackURI: {
+        connect: envVars.GOOGLE_CONNECT_CALLBACK_URI,
+      },
+    }
   },
-  twitter: {
-    clientId: envVars.TWITTER_CLIENT_ID,
-    clientSecret: envVars.TWITTER_CLIENT_SECRET,
-    callbackURI: {
-      connect: envVars.TWITTER_CONNECT_CALLBACK_URI,
-    },
-  },
-  google:{
-    clientId: envVars.GOOGLE_CLIENT_ID,
-    clientSecret: envVars.GOOGLE_CLIENT_SECERT,
-    callbackURI: {
-      connect: envVars.GOOGLE_CONNECT_CALLBACK_URI,
-    },
-  }
   jwt: {
     secret: envVars.JWT_SECRET,
     accessExpirationMinutes: envVars.JWT_ACCESS_EXPIRATION_MINUTES,

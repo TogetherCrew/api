@@ -53,7 +53,7 @@ async function checkBotPermissions(
   try {
     const client = await coreService.DiscordBotManager.getClient();
     const guild = await client.guilds.fetch(guildId);
-    const botMember = await guild.members.fetch(config.discord.clientId);
+    const botMember = await guild.members.fetch(config.oAuth2.discord.clientId);
 
     if (!channel || !botMember) {
       return false;

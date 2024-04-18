@@ -45,7 +45,8 @@ export const discord = {
     const client = new Client({
       intents: [GatewayIntentBits.Guilds],
     });
-    await client.login(config.discord.botToken);
+
+    await client.login(config.oAuth2.discord.botToken);
     return client;
   },
   generateDiscordAuthUrl(
@@ -57,7 +58,7 @@ export const discord = {
     disableGuildSelect: boolean = true,
   ): string {
     const queryParams = new URLSearchParams({
-      client_id: config.discord.clientId,
+      client_id: config.oAuth2.discord.clientId,
       redirect_uri: redirectUri,
       response_type: 'code',
       scope: scope,
@@ -79,8 +80,8 @@ export const twitter = {
   generateTwitterAuthUrl(state: string, codeChallenge: string): string {
     const queryParams = new URLSearchParams({
       response_type: 'code',
-      client_id: config.twitter.clientId,
-      redirect_uri: config.twitter.callbackURI.connect,
+      client_id: config.oAuth2.twitter.clientId,
+      redirect_uri: config.oAuth2.twitter.callbackURI.connect,
       scope: this.scopes.connectAccount,
       state: state,
       code_challenge: codeChallenge,

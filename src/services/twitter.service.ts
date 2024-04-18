@@ -18,7 +18,7 @@ async function exchangeTwitterCode(
   code_verifier: string,
 ): Promise<ITwitterOAuth2EchangeCode> {
   try {
-    const credentials = `${config.twitter.clientId}:${config.twitter.clientSecret}`;
+    const credentials = `${config.oAuth2.twitter.clientId}:${config.oAuth2.twitter.clientSecret}`;
     const encodedCredentials = Buffer.from(credentials).toString('base64');
 
     const data = {

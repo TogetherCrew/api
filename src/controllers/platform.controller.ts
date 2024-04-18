@@ -24,7 +24,7 @@ const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Re
   if (platform === 'discord') {
     const permissions = discord.permissions.ReadData.ViewChannel | discord.permissions.ReadData.ReadMessageHistory;
     const discordUrl = discord.generateDiscordAuthUrl(
-      config.discord.callbackURI.connect,
+      config.oAuth2.discord.callbackURI.connect,
       discord.scopes.connectGuild,
       permissions,
       state,
@@ -51,7 +51,7 @@ const connectDiscordCallback = catchAsync(async function (req: ISessionRequest, 
       throw new Error('Invalid code or state mismatch');
     }
 
-    const discordOathCallback = await authService.exchangeCode(code, config.discord.callbackURI.connect);
+    const discordOathCallback = await authService.exchangeCode(code, config.oAuth2.discord.callbackURI.connect);
     const params = {
       statusCode: STATUS_CODE_SUCCESS,
       platform: 'discord',
@@ -83,7 +83,7 @@ const connectTwitterCallback = catchAsync(async function (req: ISessionRequest, 
     }
     const twitterOAuthCallback = await twitterService.exchangeTwitterCode(
       code,
-      config.twitter.callbackURI.connect,
+      config.oAuth2.twitter.callbackURI.connect,
       storedCodeVerifier,
     );
     const twitterUser = await twitterService.getUserFromTwitterAPI(twitterOAuthCallback.access_token);
@@ -200,7 +200,7 @@ const requestAccess = catchAsync(async function (req: ISessionRequest, res: Resp
     const permissionsValue = discordServices.coreService.getCombinedPermissionsValue(combinedArray);
     const permissionsValueNumber = Number(permissionsValue);
     const discordUrl = discord.generateDiscordAuthUrl(
-      config.discord.callbackURI.requestAccess,
+      config.oAuth2.discord.callbackURI.requestAccess,
       discord.scopes.connectGuild,
       permissionsValueNumber,
       state,

@@ -135,8 +135,8 @@ async function leaveBotFromGuild(guildId: Snowflake) {
 async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscordOAuth2EchangeCode> {
   try {
     const data = {
-      client_id: config.discord.clientId,
-      client_secret: config.discord.clientSecret,
+      client_id: config.oAuth2.discord.clientId,
+      client_secret: config.oAuth2.discord.clientSecret,
       grant_type: 'authorization_code',
       redirect_uri,
       code,
@@ -189,7 +189,7 @@ async function getBotFromDiscordAPI(): Promise<IDiscordUser> {
   try {
     const response = await fetch('https://discord.com/api/users/@me', {
       method: 'GET',
-      headers: { Authorization: `Bot ${config.discord.botToken}` },
+      headers: { Authorization: `Bot ${config.oAuth2.discord.botToken}` },
     });
     if (response.ok) {
       return await response.json();
@@ -197,7 +197,7 @@ async function getBotFromDiscordAPI(): Promise<IDiscordUser> {
       throw new Error(await response.json());
     }
   } catch (error) {
-    logger.error({ bot_token: config.discord.botToken, error }, 'Failed to get bot from Discord API');
+    logger.error({ bot_token: config.oAuth2.discord.botToken, error }, 'Failed to get bot from Discord API');
     throw new ApiError(590, 'Can not fetch from discord API');
   }
 }
@@ -211,11 +211,11 @@ async function getBotPermissions(guildId: Snowflake): Promise<Array<string>> {
   try {
     const client = await DiscordBotManager.getClient();
     const guild = await client.guilds.fetch(guildId);
-    const member = await guild.members.fetch(config.discord.clientId);
+    const member = await guild.members.fetch(config.oAuth2.discord.clientId);
     return member.permissions.toArray();
   } catch (error) {
     logger.error(
-      { bot_token: config.discord.botToken, error },
+      { bot_token: config.oAuth2.discord.botToken, error },
       'Failed to get list of permissions that bot has in a specific guild',
     );
     throw new ApiError(590, 'Failed to get list of permissions that bot has in a specific guild');
@@ -303,7 +303,7 @@ class DiscordBotManager {
           GatewayIntentBits.DirectMessages,
         ],
       });
-      await DiscordBotManager.client.login(config.discord.botToken);
+      await DiscordBotManager.client.login(config.oAuth2.discord.botToken);
     }
     return DiscordBotManager.client;
   }
