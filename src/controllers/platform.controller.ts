@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { platformService, authService, twitterService, communityService, discordServices } from '../services';
+import { platformService, authService, twitterService, communityService, discordServices, googleService } from '../services';
 import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync, pick, ApiError } from '../utils';
 import { generateState, generateCodeVerifier, generateCodeChallenge, twitter, discord, google } from '../config/oAtuh2';
@@ -40,9 +40,11 @@ const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Re
     res.redirect(twitterUrl);
   }
   else if (platform === 'google') {
-    const googleClient = google.client;
-    const googleUrl = google.generateGoogleAuthUrl(googleClient, 'online', google.scopes.googleDrive);
-    res.redirect(googleUrl);
+    console.log('wtcvvdf')
+    const scopes = googleService.coreService.GoogleClientManager.scopes;
+    console.log(scopes)
+    const authUrl = await googleService.coreService.GoogleClientManager.generateAuthUrl('offline', scopes);
+    res.redirect(authUrl);
   }
 });
 

@@ -23,7 +23,7 @@ const envVarsSchema = Joi.object()
     TWITTER_CLIENT_ID: Joi.string().required().description('Twitter clinet id'),
     TWITTER_CLIENT_SECRET: Joi.string().required().description('Twitter clinet secret'),
     GOOGLE_CONNECT_CALLBACK_URI: Joi.string().required().description('Google connect callback uri'),
-    GOOGLE_CLIENT_SECERT: Joi.string().required().description('Google clinet id'),
+    GOOGLE_CLIENT_SECRET: Joi.string().required().description('Google clinet id'),
     GOOGLE_CLIENT_ID: Joi.string().required().description('Google clinet secret'),
     JWT_SECRET: Joi.string().required().description('JWT secret key'),
     JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().default(30).description('minutes after which access tokens expire'),
@@ -78,7 +78,7 @@ export default {
     password: envVars.NEO4J_PASSWORD,
     database: envVars.NEO4J_DB,
   },
-  oAuth2:{
+  oAuth2: {
     discord: {
       clientId: envVars.DISCORD_CLIENT_ID,
       clientSecret: envVars.DISCORD_CLIENT_SECRET,
@@ -96,9 +96,9 @@ export default {
         connect: envVars.TWITTER_CONNECT_CALLBACK_URI,
       },
     },
-    google:{
+    google: {
       clientId: envVars.GOOGLE_CLIENT_ID,
-      clientSecret: envVars.GOOGLE_CLIENT_SECERT,
+      clientSecret: envVars.GOOGLE_CLIENT_SECRET,
       callbackURI: {
         connect: envVars.GOOGLE_CONNECT_CALLBACK_URI,
       },
