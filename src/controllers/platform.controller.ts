@@ -40,9 +40,7 @@ const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Re
     res.redirect(twitterUrl);
   }
   else if (platform === 'google') {
-    console.log('wtcvvdf')
-    const scopes = googleService.coreService.GoogleClientManager.scopes;
-    console.log(scopes)
+    const scopes = google.scopes.googleDrive;
     const authUrl = await googleService.coreService.GoogleClientManager.generateAuthUrl('offline', scopes);
     res.redirect(authUrl);
   }
@@ -117,10 +115,8 @@ const connectGoogleCallback = catchAsync(async function (req: ISessionRequest, r
   const STATUS_CODE_SUCCESS = 1008;
   const STATUS_CODE_ERROR = 1009;
   const code = req.query.code as string;
-  const returnedState = req.query.state as string;
-  const storedState = req.session.state;
   try {
-    console.log(code, 999)
+    console.log(await googleService.coreService.GoogleClientManager.getTokens(code), 555)
     // if (!code || !returnedState || returnedState !== storedState) {
     //   throw new Error('Invalid code or state mismatch');
     // }
