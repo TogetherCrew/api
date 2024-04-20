@@ -2,12 +2,11 @@ import Joi from 'joi';
 import { Request } from 'express';
 import { objectId } from './custom.validation';
 import { IAuthAndPlatform } from '../interfaces';
-import { platformService } from '../services';
 import { Types } from 'mongoose';
 
 const createPlatform = {
   body: Joi.object().keys({
-    name: Joi.string().required().valid('twitter', 'discord'),
+    name: Joi.string().required().valid('twitter', 'discord', 'google'),
     community: Joi.string().custom(objectId).required(),
     metadata: Joi.when('name', {
       switch: [
@@ -27,6 +26,12 @@ const createPlatform = {
             profileImageUrl: Joi.string().required(),
           }),
         },
+        {
+          is: 'google',
+          then: Joi.object().keys({
+            userId: Joi.string().custom(objectId).required(),
+          }),
+        },
       ],
     }).required(),
   }),
@@ -34,13 +39,13 @@ const createPlatform = {
 
 const connectPlatform = {
   params: Joi.object().keys({
-    platform: Joi.string().valid('twitter', 'discord'),
+    platform: Joi.string().valid('twitter', 'discord', 'google'),
   }),
 };
 
 const getPlatforms = {
   query: Joi.object().keys({
-    name: Joi.string().valid('twitter', 'discord'),
+    name: Joi.string().valid('twitter', 'discord', 'google'),
     community: Joi.string().custom(objectId).required(),
     sortBy: Joi.string(),
     limit: Joi.number().integer(),
@@ -52,6 +57,16 @@ const getPlatform = {
   params: Joi.object().keys({
     platformId: Joi.string().custom(objectId),
   }),
+  // query: Joi.object().keys({
+  //   scope: Joi.when('name', {
+  //     switch: [
+  //       {
+  //         is: 'google',
+  //         then:Joi.array().items(Joi.string()..valid('googleDrive')),
+  //       }
+  //     ],
+  //   })
+  // }),
 };
 
 const deletePlatform = {

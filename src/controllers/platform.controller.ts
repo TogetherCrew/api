@@ -2,12 +2,13 @@ import { Response } from 'express';
 import { platformService, authService, twitterService, communityService, discordServices } from '../services';
 import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync, pick, ApiError } from '../utils';
-import { generateState, generateCodeVerifier, generateCodeChallenge, twitter } from '../config/oAtuh2';
+import { generateState, generateCodeVerifier, generateCodeChallenge, twitter, discord, google } from '../config/oAtuh2';
 import { ISessionRequest, IAuthAndPlatform } from '../interfaces';
 import config from '../config';
-import { discord } from '../config/oAtuh2';
 import httpStatus from 'http-status';
 import querystring from 'querystring';
+import { oauth2 } from 'googleapis/build/src/apis/oauth2';
+import { token } from 'morgan';
 
 const createPlatform = catchAsync(async function (req: IAuthRequest, res: Response) {
   const community = req.community;
@@ -37,6 +38,11 @@ const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Re
     req.session.codeVerifier = codeVerifier;
     const twitterUrl = twitter.generateTwitterAuthUrl(state, generateCodeChallenge(codeVerifier));
     res.redirect(twitterUrl);
+  }
+  else if (platform === 'google') {
+    const googleClient = google.client;
+    const googleUrl = google.generateGoogleAuthUrl(googleClient, 'online', google.scopes.googleDrive);
+    res.redirect(googleUrl);
   }
 });
 
@@ -99,6 +105,53 @@ const connectTwitterCallback = catchAsync(async function (req: ISessionRequest, 
   } catch (err) {
     const params = {
       statusCode: STATUS_CODE_FAILURE,
+    };
+    const query = querystring.stringify(params);
+    res.redirect(`${config.frontend.url}/callback?` + query);
+  }
+});
+
+const connectGoogleCallback = catchAsync(async function (req: ISessionRequest, res: Response) {
+  const STATUS_CODE_SUCCESS = 1008;
+  const STATUS_CODE_ERROR = 1009;
+  const code = req.query.code as string;
+  const returnedState = req.query.state as string;
+  const storedState = req.session.state;
+  try {
+    console.log(code, 999)
+    // if (!code || !returnedState || returnedState !== storedState) {
+    //   throw new Error('Invalid code or state mismatch');
+    // }
+
+    // const discordOathCallback = await authService.exchangeCode(code, config.oAuth2.discord.callbackURI.connect);
+    // const params = {
+    //   statusCode: STATUS_CODE_SUCCESS,
+    //   platform: 'discord',
+    //   id: discordOathCallback.guild.id,
+    //   name: discordOathCallback.guild.name,
+    //   icon: discordOathCallback.guild.icon,
+    // };
+    // const query = querystring.stringify(params);
+    // res.redirect(`${config.frontend.url}/callback?` + query);
+    console.log(222)
+    const client111 = google.client;
+
+    client111.on('tokens', (tokens) => {
+      if (tokens.refresh_token) {
+        // store the refresh_token in my database!
+        console.log(tokens.refresh_token, 666);
+      }
+      console.log(tokens.access_token, 555);
+    });
+    const { tokens } = await client111.getToken(code);
+    console.log(token, 111)
+    client111.setCredentials(tokens);
+
+    res.redirect(`${config.frontend.url}/callback?` + query);
+
+  } catch (err) {
+    const params = {
+      statusCode: STATUS_CODE_ERROR,
     };
     const query = querystring.stringify(params);
     res.redirect(`${config.frontend.url}/callback?` + query);
@@ -216,6 +269,7 @@ export default {
   connectPlatform,
   connectTwitterCallback,
   connectDiscordCallback,
+  connectGoogleCallback,
   getPlatforms,
   getPlatform,
   updatePlatform,

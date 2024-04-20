@@ -15,6 +15,8 @@ router.get(
 
 router.get('/twitter/callback', platformController.connectTwitterCallback);
 router.get('/discord/callback', platformController.connectDiscordCallback);
+router.get('/google/callback', platformController.connectGoogleCallback);
+
 router.get('/discord/request-access/callback', platformController.requestAccessCallback);
 
 router

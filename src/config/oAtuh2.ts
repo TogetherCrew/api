@@ -1,5 +1,7 @@
 import crypto from 'crypto';
 import { Client, GatewayIntentBits } from 'discord.js';
+import { google as googleapis } from 'googleapis';
+
 import config from './index';
 
 export function generateState(): string {
@@ -91,3 +93,22 @@ export const twitter = {
     return `https://twitter.com/i/oauth2/authorize?${queryParams.toString()}`;
   },
 };
+
+
+
+export const google = {
+  client: new googleapis.auth.OAuth2(
+    config.oAuth2.google.clientId,
+    config.oAuth2.google.clientSecret,
+    config.oAuth2.google.callbackURI.connect
+  ),
+  scopes: {
+    googleDrive: ['https://www.googleapis.com/auth/drive.readonly', 'https://www.googleapis.com/auth/drive.metadata.readonly']
+  },
+  generateGoogleAuthUrl(client: any, accessType: 'online' | 'offline', scopes: string | string[]): string {
+    return client.generateAuthUrl({
+      access_type: accessType,
+      scope: scopes
+    })
+  }
+}
