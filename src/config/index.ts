@@ -102,7 +102,7 @@ export default {
       callbackURI: {
         connect: envVars.GOOGLE_CONNECT_CALLBACK_URI,
       },
-    }
+    },
   },
   jwt: {
     secret: envVars.JWT_SECRET,

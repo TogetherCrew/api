@@ -1,5 +1,14 @@
 import { Response } from 'express';
-import { platformService, authService, twitterService, communityService, discordServices, googleService } from '../services';
+import {
+  platformService,
+  authService,
+  twitterService,
+  communityService,
+  discordServices,
+  googleService,
+  userService,
+  tokenService,
+} from '../services';
 import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync, pick, ApiError } from '../utils';
 import { generateState, generateCodeVerifier, generateCodeChallenge, twitter, discord, google } from '../config/oAtuh2';
@@ -9,6 +18,9 @@ import httpStatus from 'http-status';
 import querystring from 'querystring';
 import { oauth2 } from 'googleapis/build/src/apis/oauth2';
 import { token } from 'morgan';
+import parentLogger from '../config/logger';
+
+const logger = parentLogger.child({ module: 'PlatformController' });
 
 const createPlatform = catchAsync(async function (req: IAuthRequest, res: Response) {
   const community = req.community;
@@ -19,7 +31,7 @@ const createPlatform = catchAsync(async function (req: IAuthRequest, res: Respon
 });
 
 const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Response) {
-  const platform = req.params.platform;
+  const { platform } = req.query;
   const state = generateState();
   req.session.state = state;
   if (platform === 'discord') {
@@ -38,10 +50,18 @@ const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Re
     req.session.codeVerifier = codeVerifier;
     const twitterUrl = twitter.generateTwitterAuthUrl(state, generateCodeChallenge(codeVerifier));
     res.redirect(twitterUrl);
-  }
-  else if (platform === 'google') {
-    const scopes = google.scopes.googleDrive;
-    const authUrl = await googleService.coreService.GoogleClientManager.generateAuthUrl('offline', scopes);
+  } else if (platform === 'google') {
+    req.session.userId = req.query.userId;
+    let requestedScopes = req.query.scopes as string[];
+    let aggregatedScopes: string[] = [];
+    requestedScopes.forEach((scope) => {
+      if (google.scopes[scope]) {
+        aggregatedScopes = [...aggregatedScopes, ...google.scopes[scope]];
+      }
+    });
+
+    aggregatedScopes = [...new Set(aggregatedScopes)];
+    const authUrl = await googleService.coreService.GoogleClientManager.generateAuthUrl('offline', aggregatedScopes);
     res.redirect(authUrl);
   }
 });
@@ -68,6 +88,7 @@ const connectDiscordCallback = catchAsync(async function (req: ISessionRequest, 
     const query = querystring.stringify(params);
     res.redirect(`${config.frontend.url}/callback?` + query);
   } catch (err) {
+    logger.error({ err }, 'Failed in discord connect callback');
     const params = {
       statusCode: STATUS_CODE_ERROR,
     };
@@ -103,6 +124,7 @@ const connectTwitterCallback = catchAsync(async function (req: ISessionRequest, 
     const query = querystring.stringify(params);
     res.redirect(`${config.frontend.url}/callback?` + query);
   } catch (err) {
+    logger.error({ err }, 'Failed in twitter connect callback');
     const params = {
       statusCode: STATUS_CODE_FAILURE,
     };
@@ -115,39 +137,29 @@ const connectGoogleCallback = catchAsync(async function (req: ISessionRequest, r
   const STATUS_CODE_SUCCESS = 1008;
   const STATUS_CODE_ERROR = 1009;
   const code = req.query.code as string;
+  // const returnedState = req.query.state as string;
+  // const storedState = req.session.state;
+  const userId = req.session.userId;
+  let statusCode: number;
   try {
-    console.log(await googleService.coreService.GoogleClientManager.getTokens(code), 555)
-    // if (!code || !returnedState || returnedState !== storedState) {
-    //   throw new Error('Invalid code or state mismatch');
-    // }
+    const { tokens } = await googleService.coreService.GoogleClientManager.getTokens(code);
+    let user = await userService.getUserById(userId);
 
-    // const discordOathCallback = await authService.exchangeCode(code, config.oAuth2.discord.callbackURI.connect);
-    // const params = {
-    //   statusCode: STATUS_CODE_SUCCESS,
-    //   platform: 'discord',
-    //   id: discordOathCallback.guild.id,
-    //   name: discordOathCallback.guild.name,
-    //   icon: discordOathCallback.guild.icon,
-    // };
-    // const query = querystring.stringify(params);
-    // res.redirect(`${config.frontend.url}/callback?` + query);
-    console.log(222)
-    const client111 = google.client;
-
-    client111.on('tokens', (tokens) => {
-      if (tokens.refresh_token) {
-        // store the refresh_token in my database!
-        console.log(tokens.refresh_token, 666);
-      }
-      console.log(tokens.access_token, 555);
-    });
-    const { tokens } = await client111.getToken(code);
-    console.log(token, 111)
-    client111.setCredentials(tokens);
-
+    if (!user) {
+      statusCode = STATUS_CODE_ERROR;
+    } else {
+      statusCode = STATUS_CODE_SUCCESS;
+      await tokenService.saveGoogleOAuth2Tokens(user.id, tokens);
+    }
+    const params = {
+      statusCode,
+      platform: 'google',
+      userId,
+    };
+    const query = querystring.stringify(params);
     res.redirect(`${config.frontend.url}/callback?` + query);
-
   } catch (err) {
+    logger.error({ err }, 'Failed in google connect callback');
     const params = {
       statusCode: STATUS_CODE_ERROR,
     };
@@ -189,9 +201,7 @@ const getPlatforms = catchAsync(async function (req: IAuthRequest, res: Response
       $options: 'i',
     };
   }
-  // if (!filter.community) {
-  //   filter.community = { $in: req.user.communities };
-  // }
+
   filter.disconnectedAt = null;
   const result = await platformService.queryPlatforms(filter, options);
   res.send(result);
@@ -224,7 +234,9 @@ const deletePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Re
     await platformService.updatePlatform(req.platform, { disconnectedAt: new Date() });
   } else if (req.body.deleteType === 'hard') {
     await platformService.deletePlatform(req.platform);
-    await discordServices.coreService.leaveBotFromGuild(req.platform.metadata?.id);
+    if (req.platform.name === 'discord') {
+      await discordServices.coreService.leaveBotFromGuild(req.platform.metadata?.id);
+    }
   }
   res.status(httpStatus.NO_CONTENT).send();
 });

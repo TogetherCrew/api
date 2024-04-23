@@ -24,5 +24,5 @@ export {
   twitterService,
   announcementService,
   moduleService,
-  googleService
+  googleService,
 };

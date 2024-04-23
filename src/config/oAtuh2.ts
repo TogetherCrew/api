@@ -94,21 +94,28 @@ export const twitter = {
   },
 };
 
-
+interface IGoogleScopes {
+  googleDrive: string[];
+  [key: string]: string[];
+}
+const googleScopes: IGoogleScopes = {
+  googleDrive: [
+    'https://www.googleapis.com/auth/drive.readonly',
+    'https://www.googleapis.com/auth/drive.metadata.readonly',
+  ],
+};
 
 export const google = {
   client: new googleapis.auth.OAuth2(
     config.oAuth2.google.clientId,
     config.oAuth2.google.clientSecret,
-    config.oAuth2.google.callbackURI.connect
+    config.oAuth2.google.callbackURI.connect,
   ),
-  scopes: {
-    googleDrive: ['https://www.googleapis.com/auth/drive.readonly', 'https://www.googleapis.com/auth/drive.metadata.readonly']
-  },
+  scopes: googleScopes,
   generateGoogleAuthUrl(client: any, accessType: 'online' | 'offline', scopes: string | string[]): string {
     return client.generateAuthUrl({
       access_type: accessType,
-      scope: scopes
-    })
-  }
-}
+      scope: scopes,
+    });
+  },
+};

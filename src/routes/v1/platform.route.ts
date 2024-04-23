@@ -6,7 +6,7 @@ import { auth, validate } from '../../middlewares';
 const router = express.Router();
 
 // Routes
-router.get('/connect/:platform', validate(platformValidation.connectPlatform), platformController.connectPlatform);
+router.get('/connect', validate(platformValidation.connectPlatform), platformController.connectPlatform);
 router.get(
   '/request-access/:platform/:module/:id',
   validate(platformValidation.dynamicRequestAccess),

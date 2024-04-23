@@ -8,7 +8,7 @@ import { ApiError } from '../utils';
 import authService from './auth.service';
 import { IToken, Token, IUser } from '@togethercrew.dev/db';
 import { IDiscordOAuth2EchangeCode, IAuthTokens } from 'src/interfaces';
-
+import { Auth } from 'googleapis';
 /**
  * Generate token
  * @param {IUser} user
@@ -17,7 +17,6 @@ import { IDiscordOAuth2EchangeCode, IAuthTokens } from 'src/interfaces';
  * @param {string} [secret]
  * @returns {string}
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function generateToken(user: any, expires: moment.Moment, type: string, secret = config.jwt.secret) {
   const payload = {
     sub: user,
@@ -61,7 +60,6 @@ async function saveToken(
  * @returns {Promise<IToken>}
  */
 async function verifyToken(token: string, type: string) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const payload = jwt.verify(token, config.jwt.secret) as any;
   const userId = typeof payload.sub === 'object' ? payload.sub?.id : undefined;
   const tokenDoc = await Token.findOne({ token, type, user: userId, blacklisted: false });
@@ -103,7 +101,6 @@ async function generateAuthTokens(user: HydratedDocument<IUser>): Promise<IAuthT
  * @returns {Promise<Object>}
  */
 async function saveDiscordOAuth2Tokens(userId: Types.ObjectId, discordOAuth2Tokens: IDiscordOAuth2EchangeCode) {
-  await Token.deleteMany({ user: userId, type: { $in: [tokenTypes.DISCORD_ACCESS, tokenTypes.DISCORD_REFRESH] } });
   const accessTokenExpires = moment().add(discordOAuth2Tokens.expires_in, 'seconds');
   const refreshTokenExpires = moment().add(config.jwt.discordRefreshExpirationDays, 'days');
   const DiscordAccessTokenDoc: IToken = await saveToken(
@@ -129,6 +126,23 @@ async function saveDiscordOAuth2Tokens(userId: Types.ObjectId, discordOAuth2Toke
       expires: DiscordRefreshTokenDoc.expires,
     },
   };
+}
+
+/**
+ * save google oauth2 tokens
+ * @param {Types.ObjectId} userId
+ * @param {Auth.Credentials} googleAuth
+ * @returns {Promise<Object>}
+ */
+async function saveGoogleOAuth2Tokens(userId: Types.ObjectId, googleAuth: Auth.Credentials) {
+  const accessTokenExpires = moment(googleAuth.expiry_date);
+  const refreshTokenExpires = moment().add('180', 'days');
+  if (googleAuth.access_token) {
+    await saveToken(googleAuth.access_token, userId, accessTokenExpires, tokenTypes.GOOGLE_ACCESS);
+  }
+  if (googleAuth.refresh_token) {
+    await saveToken(googleAuth.refresh_token, userId, refreshTokenExpires, tokenTypes.GOOGLE_REFRESH);
+  }
 }
 
 /**
@@ -169,4 +183,5 @@ export default {
   generateAuthTokens,
   getDiscordOAuth2Tokens,
   saveDiscordOAuth2Tokens,
+  saveGoogleOAuth2Tokens,
 };
