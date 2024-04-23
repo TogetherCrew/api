@@ -1,9 +1,28 @@
 import Joi from 'joi';
-import { Request } from 'express';
+import { query, Request } from 'express';
 import { objectId } from './custom.validation';
 import { IAuthAndPlatform } from '../interfaces';
 import { Types } from 'mongoose';
 
+const discordMetadata = () => {
+  return Joi.object().keys({
+    id: Joi.string().required(),
+    name: Joi.string().required(),
+    icon: Joi.string().required().allow(''),
+  });
+};
+const twitterMetadata = () => {
+  return Joi.object().keys({
+    id: Joi.string().required(),
+    name: Joi.string().required(),
+    icon: Joi.string().required().allow(''),
+  });
+};
+const googleMetadata = () => {
+  return Joi.object().keys({
+    userId: Joi.string().custom(objectId).required(),
+  });
+};
 const createPlatform = {
   body: Joi.object().keys({
     name: Joi.string().required().valid('twitter', 'discord', 'google'),
@@ -12,25 +31,15 @@ const createPlatform = {
       switch: [
         {
           is: 'discord',
-          then: Joi.object().keys({
-            id: Joi.string().required(),
-            name: Joi.string().required(),
-            icon: Joi.string().required().allow(''),
-          }),
+          then: discordMetadata(),
         },
         {
           is: 'twitter',
-          then: Joi.object().keys({
-            id: Joi.string().required(),
-            username: Joi.string().required(),
-            profileImageUrl: Joi.string().required(),
-          }),
+          then: twitterMetadata(),
         },
         {
           is: 'google',
-          then: Joi.object().keys({
-            userId: Joi.string().custom(objectId).required(),
-          }),
+          then: googleMetadata(),
         },
       ],
     }).required(),
@@ -38,8 +47,18 @@ const createPlatform = {
 };
 
 const connectPlatform = {
-  params: Joi.object().keys({
-    platform: Joi.string().valid('twitter', 'discord', 'google'),
+  query: Joi.object().keys({
+    platform: Joi.string().valid('discord', 'google', 'twitter'),
+    userId: Joi.string().custom(objectId).when('platform', {
+      is: 'google',
+      then: Joi.required(),
+      otherwise: Joi.forbidden(),
+    }),
+    scopes: Joi.array().items(Joi.string().valid('googleDrive')).when('platform', {
+      is: 'google',
+      then: Joi.required(),
+      otherwise: Joi.forbidden(),
+    }),
   }),
 };
 
@@ -57,16 +76,6 @@ const getPlatform = {
   params: Joi.object().keys({
     platformId: Joi.string().custom(objectId),
   }),
-  // query: Joi.object().keys({
-  //   scope: Joi.when('name', {
-  //     switch: [
-  //       {
-  //         is: 'google',
-  //         then:Joi.array().items(Joi.string()..valid('googleDrive')),
-  //       }
-  //     ],
-  //   })
-  // }),
 };
 
 const deletePlatform = {
@@ -81,26 +90,29 @@ const deletePlatform = {
 };
 
 const dynamicUpdatePlatform = (req: Request) => {
-  if (Types.ObjectId.isValid(req.params.platformId)) {
-    return {
-      params: Joi.object().keys({
-        platformId: Joi.required().custom(objectId),
-      }),
-      body: Joi.object()
-        .required()
-        .keys({
-          metadata: Joi.object()
-            .required()
-            .keys({
-              selectedChannels: Joi.array().items(Joi.string()),
-              period: Joi.date(),
-              analyzerStartedAt: Joi.date(),
-            }),
+  const platformName = req.platform?.name;
+  switch (platformName) {
+    case 'discord': {
+      return {
+        params: Joi.object().keys({
+          platformId: Joi.required().custom(objectId),
         }),
-    };
-  } else {
-    req.allowInput = false;
-    return {};
+        body: Joi.object()
+          .required()
+          .keys({
+            metadata: Joi.object()
+              .required()
+              .keys({
+                selectedChannels: Joi.array().items(Joi.string()),
+                period: Joi.date(),
+                analyzerStartedAt: Joi.date(),
+              }),
+          }),
+      };
+    }
+    default:
+      req.allowInput = false;
+      return {};
   }
 };
 
