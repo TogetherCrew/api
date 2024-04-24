@@ -106,7 +106,7 @@ const dynamicUpdatePlatform = (req: Request) => {
           platformId: Joi.required().custom(objectId),
         }),
         body: Joi.object().required().keys({
-          metadata: discordUpdateMetadata
+          metadata: discordUpdateMetadata,
         }),
       };
     }
