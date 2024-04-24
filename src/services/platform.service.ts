@@ -166,7 +166,7 @@ const managePlatformConnection = async (
   platformData: IPlatform,
 ): Promise<HydratedDocument<IPlatform>> => {
   if (!platformData.metadata) {
-    throw new ApiError(httpStatus.BAD_REQUEST, `Metadata is Missing!`);
+    throw new ApiError(httpStatus.BAD_REQUEST, `Metadata is Missing for the '${platformData.name}!`);
   }
 
   const metadataKey = getMetadataKey(platformData.name);
