@@ -137,8 +137,6 @@ const deletePlatformByFilter = async (filter: object): Promise<HydratedDocument<
   return await platform.remove();
 };
 
-
-
 function getMetadataKey(platformName: string): string {
   switch (platformName) {
     case 'discord':
@@ -151,12 +149,11 @@ function getMetadataKey(platformName: string): string {
   }
 }
 
-
 /**
  * Manages the connection of a platform based on unique metadata identifiers. It first checks if the platform,
  * identified by specific metadata, is actively connected in any other community to prevent duplicate active connections
  * across different communities. It then checks within the specified community whether the platform is already connected,
- * disconnected, or available for a new connection. Actions performed may include the reconnection of a previously 
+ * disconnected, or available for a new connection. Actions performed may include the reconnection of a previously
  * disconnected platform or the creation of a new platform if no conflicts exist.
  * The function uses a dynamically determined key from the platform's metadata to ensure uniqueness in identification.
  * @param {Types.ObjectId} communityId - The MongoDB ObjectId of the community to check within.
@@ -164,7 +161,10 @@ function getMetadataKey(platformName: string): string {
  * @returns {Promise<HydratedDocument<IPlatform>>} Returns a promise that resolves to the document of the reconnected or newly created platform.
  * @throws {ApiError} Throws an error if the platform is already connected in the same community, or if the same platform is connected in a different community.
  */
-const managePlatformConnection = async (communityId: Types.ObjectId, platformData: IPlatform): Promise<HydratedDocument<IPlatform>> => {
+const managePlatformConnection = async (
+  communityId: Types.ObjectId,
+  platformData: IPlatform,
+): Promise<HydratedDocument<IPlatform>> => {
   if (!platformData.metadata) {
     throw new ApiError(httpStatus.BAD_REQUEST, `Metadata is Missing!`);
   }
@@ -174,7 +174,7 @@ const managePlatformConnection = async (communityId: Types.ObjectId, platformDat
 
   // First, check across all communities if this platform metadata is already connected elsewhere
   const activePlatformOtherCommunity = await Platform.findOne({
-    'community': { $ne: communityId },
+    community: { $ne: communityId },
     [`metadata.${metadataKey}`]: metadataId,
   });
 
@@ -185,12 +185,19 @@ const managePlatformConnection = async (communityId: Types.ObjectId, platformDat
   const existingActivePlatform = await Platform.findOne({
     community: communityId,
     name: platformData.name,
-    disconnectedAt: null  // Check specifically for active platforms
+    disconnectedAt: null, // Check specifically for active platforms
   });
 
   // Before proceeding, check if the metadata and the specific key in metadata are present
-  if (existingActivePlatform && existingActivePlatform.metadata && existingActivePlatform.metadata[metadataKey] !== metadataId) {
-    throw new ApiError(httpStatus.BAD_REQUEST, `A platform of type '${platformData.name}' is already connected to this community.`);
+  if (
+    existingActivePlatform &&
+    existingActivePlatform.metadata &&
+    existingActivePlatform.metadata[metadataKey] !== metadataId
+  ) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      `A platform of type '${platformData.name}' is already connected to this community.`,
+    );
   }
 
   // Proceed to check for the specific platform instance by unique identifier within the same community
@@ -213,7 +220,10 @@ const managePlatformConnection = async (communityId: Types.ObjectId, platformDat
   }
 
   // If existing platform is already connected (safety check), throw an error
-  throw new ApiError(httpStatus.BAD_REQUEST, `Platform ${platformData.name} with specified metadata is already connected to this community.`);
+  throw new ApiError(
+    httpStatus.BAD_REQUEST,
+    `Platform ${platformData.name} with specified metadata is already connected to this community.`,
+  );
 };
 
 export default {
@@ -225,5 +235,5 @@ export default {
   updatePlatformByFilter,
   deletePlatform,
   deletePlatformByFilter,
-  managePlatformConnection
+  managePlatformConnection,
 };
