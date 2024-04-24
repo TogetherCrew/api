@@ -4,7 +4,15 @@ import { objectId } from './custom.validation';
 import { IAuthAndPlatform } from '../interfaces';
 import { Types } from 'mongoose';
 
-const discordMetadata = () => {
+const discordCreateMetadata = () => {
+  return Joi.object().keys({
+    id: Joi.string().required(),
+    name: Joi.string().required(),
+    icon: Joi.string().required().allow(''),
+  });
+};
+
+const discordUpdateMetadata = () => {
   return Joi.object().keys({
     id: Joi.string().required(),
     name: Joi.string().required(),
@@ -31,7 +39,7 @@ const createPlatform = {
       switch: [
         {
           is: 'discord',
-          then: discordMetadata(),
+          then: discordCreateMetadata(),
         },
         {
           is: 'twitter',
@@ -97,17 +105,9 @@ const dynamicUpdatePlatform = (req: Request) => {
         params: Joi.object().keys({
           platformId: Joi.required().custom(objectId),
         }),
-        body: Joi.object()
-          .required()
-          .keys({
-            metadata: Joi.object()
-              .required()
-              .keys({
-                selectedChannels: Joi.array().items(Joi.string()),
-                period: Joi.date(),
-                analyzerStartedAt: Joi.date(),
-              }),
-          }),
+        body: Joi.object().required().keys({
+          metadata: discordUpdateMetadata
+        }),
       };
     }
     default:
