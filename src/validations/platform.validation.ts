@@ -14,9 +14,9 @@ const discordCreateMetadata = () => {
 
 const discordUpdateMetadata = () => {
   return Joi.object().keys({
-    id: Joi.string().required(),
-    name: Joi.string().required(),
-    icon: Joi.string().required().allow(''),
+    selectedChannels: Joi.array().items(Joi.string()),
+    period: Joi.date(),
+    analyzerStartedAt: Joi.date(),
   });
 };
 const twitterMetadata = () => {
