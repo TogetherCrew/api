@@ -111,6 +111,7 @@ const updatePlatform = async (
     });
   }
 
+  // console.log(updateBody)
   Object.assign(platform, updateBody);
   return await platform.save();
 };
