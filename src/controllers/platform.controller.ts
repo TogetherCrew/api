@@ -1,30 +1,41 @@
 import { Response } from 'express';
-import { platformService, authService, twitterService, communityService, discordServices } from '../services';
+import {
+  platformService,
+  authService,
+  twitterService,
+  communityService,
+  discordServices,
+  googleService,
+  userService,
+  tokenService,
+} from '../services';
 import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync, pick, ApiError } from '../utils';
-import { generateState, generateCodeVerifier, generateCodeChallenge, twitter } from '../config/oAtuh2';
+import { generateState, generateCodeVerifier, generateCodeChallenge, twitter, discord, google } from '../config/oAtuh2';
 import { ISessionRequest, IAuthAndPlatform } from '../interfaces';
 import config from '../config';
-import { discord } from '../config/oAtuh2';
 import httpStatus from 'http-status';
 import querystring from 'querystring';
+import { oauth2 } from 'googleapis/build/src/apis/oauth2';
+import { token } from 'morgan';
+import parentLogger from '../config/logger';
+
+const logger = parentLogger.child({ module: 'PlatformController' });
 
 const createPlatform = catchAsync(async function (req: IAuthRequest, res: Response) {
   const community = req.community;
-  await platformService.checkPlatformAlreadyConnected(community?.id, req.body);
-  await platformService.checkSinglePlatformConnection(community?.id, req.body);
-  const platform = await platformService.reconnectOrAddNewPlatform(community?.id, req.body);
+  const platform = await platformService.managePlatformConnection(community?.id, req.body);
   res.status(httpStatus.CREATED).send(platform);
 });
 
 const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Response) {
-  const platform = req.params.platform;
+  const { platform } = req.query;
   const state = generateState();
   req.session.state = state;
   if (platform === 'discord') {
     const permissions = discord.permissions.ReadData.ViewChannel | discord.permissions.ReadData.ReadMessageHistory;
     const discordUrl = discord.generateDiscordAuthUrl(
-      config.discord.callbackURI.connect,
+      config.oAuth2.discord.callbackURI.connect,
       discord.scopes.connectGuild,
       permissions,
       state,
@@ -37,6 +48,19 @@ const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Re
     req.session.codeVerifier = codeVerifier;
     const twitterUrl = twitter.generateTwitterAuthUrl(state, generateCodeChallenge(codeVerifier));
     res.redirect(twitterUrl);
+  } else if (platform === 'google') {
+    req.session.userId = req.query.userId;
+    let requestedScopes = req.query.scopes as string[];
+    let aggregatedScopes: string[] = [];
+    requestedScopes.forEach((scope) => {
+      if (google.scopes[scope]) {
+        aggregatedScopes = [...aggregatedScopes, ...google.scopes[scope]];
+      }
+    });
+
+    aggregatedScopes = [...new Set(aggregatedScopes)];
+    const authUrl = await googleService.coreService.GoogleClientManager.generateAuthUrl('offline', aggregatedScopes);
+    res.redirect(authUrl);
   }
 });
 
@@ -51,7 +75,7 @@ const connectDiscordCallback = catchAsync(async function (req: ISessionRequest, 
       throw new Error('Invalid code or state mismatch');
     }
 
-    const discordOathCallback = await authService.exchangeCode(code, config.discord.callbackURI.connect);
+    const discordOathCallback = await authService.exchangeCode(code, config.oAuth2.discord.callbackURI.connect);
     const params = {
       statusCode: STATUS_CODE_SUCCESS,
       platform: 'discord',
@@ -62,6 +86,7 @@ const connectDiscordCallback = catchAsync(async function (req: ISessionRequest, 
     const query = querystring.stringify(params);
     res.redirect(`${config.frontend.url}/callback?` + query);
   } catch (err) {
+    logger.error({ err }, 'Failed in discord connect callback');
     const params = {
       statusCode: STATUS_CODE_ERROR,
     };
@@ -83,7 +108,7 @@ const connectTwitterCallback = catchAsync(async function (req: ISessionRequest, 
     }
     const twitterOAuthCallback = await twitterService.exchangeTwitterCode(
       code,
-      config.twitter.callbackURI.connect,
+      config.oAuth2.twitter.callbackURI.connect,
       storedCodeVerifier,
     );
     const twitterUser = await twitterService.getUserFromTwitterAPI(twitterOAuthCallback.access_token);
@@ -97,8 +122,44 @@ const connectTwitterCallback = catchAsync(async function (req: ISessionRequest, 
     const query = querystring.stringify(params);
     res.redirect(`${config.frontend.url}/callback?` + query);
   } catch (err) {
+    logger.error({ err }, 'Failed in twitter connect callback');
     const params = {
       statusCode: STATUS_CODE_FAILURE,
+    };
+    const query = querystring.stringify(params);
+    res.redirect(`${config.frontend.url}/callback?` + query);
+  }
+});
+
+const connectGoogleCallback = catchAsync(async function (req: ISessionRequest, res: Response) {
+  const STATUS_CODE_SUCCESS = 1008;
+  const STATUS_CODE_ERROR = 1009;
+  const code = req.query.code as string;
+  // const returnedState = req.query.state as string;
+  // const storedState = req.session.state;
+  const userId = req.session.userId;
+  let statusCode: number;
+  try {
+    const { tokens } = await googleService.coreService.GoogleClientManager.getTokens(code);
+    let user = await userService.getUserById(userId);
+
+    if (!user) {
+      statusCode = STATUS_CODE_ERROR;
+    } else {
+      statusCode = STATUS_CODE_SUCCESS;
+      await tokenService.saveGoogleOAuth2Tokens(user.id, tokens);
+    }
+    const params = {
+      statusCode,
+      platform: 'google',
+      userId,
+    };
+    const query = querystring.stringify(params);
+    res.redirect(`${config.frontend.url}/callback?` + query);
+  } catch (err) {
+    logger.error({ err }, 'Failed in google connect callback');
+    const params = {
+      statusCode: STATUS_CODE_ERROR,
     };
     const query = querystring.stringify(params);
     res.redirect(`${config.frontend.url}/callback?` + query);
@@ -138,9 +199,7 @@ const getPlatforms = catchAsync(async function (req: IAuthRequest, res: Response
       $options: 'i',
     };
   }
-  // if (!filter.community) {
-  //   filter.community = { $in: req.user.communities };
-  // }
+
   filter.disconnectedAt = null;
   const result = await platformService.queryPlatforms(filter, options);
   res.send(result);
@@ -173,7 +232,9 @@ const deletePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Re
     await platformService.updatePlatform(req.platform, { disconnectedAt: new Date() });
   } else if (req.body.deleteType === 'hard') {
     await platformService.deletePlatform(req.platform);
-    await discordServices.coreService.leaveBotFromGuild(req.platform.metadata?.id);
+    if (req.platform.name === 'discord') {
+      await discordServices.coreService.leaveBotFromGuild(req.platform.metadata?.id);
+    }
   }
   res.status(httpStatus.NO_CONTENT).send();
 });
@@ -200,7 +261,7 @@ const requestAccess = catchAsync(async function (req: ISessionRequest, res: Resp
     const permissionsValue = discordServices.coreService.getCombinedPermissionsValue(combinedArray);
     const permissionsValueNumber = Number(permissionsValue);
     const discordUrl = discord.generateDiscordAuthUrl(
-      config.discord.callbackURI.requestAccess,
+      config.oAuth2.discord.callbackURI.requestAccess,
       discord.scopes.connectGuild,
       permissionsValueNumber,
       state,
@@ -216,6 +277,7 @@ export default {
   connectPlatform,
   connectTwitterCallback,
   connectDiscordCallback,
+  connectGoogleCallback,
   getPlatforms,
   getPlatform,
   updatePlatform,

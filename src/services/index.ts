@@ -10,6 +10,7 @@ import twitterService from './twitter.service';
 import discordServices from './discord';
 import announcementService from './announcement.service';
 import moduleService from './module.service';
+import googleService from './google';
 export {
   userService,
   authService,
@@ -23,4 +24,5 @@ export {
   twitterService,
   announcementService,
   moduleService,
+  googleService,
 };

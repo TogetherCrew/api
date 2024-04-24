@@ -91,17 +91,29 @@ const hivemindDiscordMetadata = () => {
   });
 };
 
+const hivemindGoogleMetadata = () => {
+  return Joi.object().keys({
+    driveIds: Joi.array().items(Joi.string()),
+    folderIds: Joi.array().items(Joi.string()),
+    fileIds: Joi.array().items(Joi.string()),
+  });
+};
+
 const hivemindOptions = () => {
   return Joi.object().keys({
     platforms: Joi.array().items(
       Joi.object().keys({
-        name: Joi.string().required().valid('discord'),
+        name: Joi.string().required().valid('discord', 'google'),
         platform: Joi.string().custom(objectId).required(),
         metadata: Joi.when('name', {
           switch: [
             {
               is: 'discord',
               then: hivemindDiscordMetadata(),
+            },
+            {
+              is: 'google',
+              then: hivemindGoogleMetadata(),
             },
           ],
           otherwise: Joi.any().forbidden(),

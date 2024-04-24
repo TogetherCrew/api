@@ -1,5 +1,7 @@
 import crypto from 'crypto';
 import { Client, GatewayIntentBits } from 'discord.js';
+import { google as googleapis } from 'googleapis';
+
 import config from './index';
 
 export function generateState(): string {
@@ -45,7 +47,8 @@ export const discord = {
     const client = new Client({
       intents: [GatewayIntentBits.Guilds],
     });
-    await client.login(config.discord.botToken);
+
+    await client.login(config.oAuth2.discord.botToken);
     return client;
   },
   generateDiscordAuthUrl(
@@ -57,7 +60,7 @@ export const discord = {
     disableGuildSelect: boolean = true,
   ): string {
     const queryParams = new URLSearchParams({
-      client_id: config.discord.clientId,
+      client_id: config.oAuth2.discord.clientId,
       redirect_uri: redirectUri,
       response_type: 'code',
       scope: scope,
@@ -79,8 +82,8 @@ export const twitter = {
   generateTwitterAuthUrl(state: string, codeChallenge: string): string {
     const queryParams = new URLSearchParams({
       response_type: 'code',
-      client_id: config.twitter.clientId,
-      redirect_uri: config.twitter.callbackURI.connect,
+      client_id: config.oAuth2.twitter.clientId,
+      redirect_uri: config.oAuth2.twitter.callbackURI.connect,
       scope: this.scopes.connectAccount,
       state: state,
       code_challenge: codeChallenge,
@@ -88,5 +91,31 @@ export const twitter = {
     });
 
     return `https://twitter.com/i/oauth2/authorize?${queryParams.toString()}`;
+  },
+};
+
+interface IGoogleScopes {
+  googleDrive: string[];
+  [key: string]: string[];
+}
+const googleScopes: IGoogleScopes = {
+  googleDrive: [
+    'https://www.googleapis.com/auth/drive.readonly',
+    'https://www.googleapis.com/auth/drive.metadata.readonly',
+  ],
+};
+
+export const google = {
+  client: new googleapis.auth.OAuth2(
+    config.oAuth2.google.clientId,
+    config.oAuth2.google.clientSecret,
+    config.oAuth2.google.callbackURI.connect,
+  ),
+  scopes: googleScopes,
+  generateGoogleAuthUrl(client: any, accessType: 'online' | 'offline', scopes: string | string[]): string {
+    return client.generateAuthUrl({
+      access_type: accessType,
+      scope: scopes,
+    });
   },
 };

@@ -21,8 +21,8 @@ const logger = parentLogger.child({ module: 'AuthService' });
 async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscordOAuth2EchangeCode> {
   try {
     const data = {
-      client_id: config.discord.clientId,
-      client_secret: config.discord.clientSecret,
+      client_id: config.oAuth2.discord.clientId,
+      client_secret: config.oAuth2.discord.clientSecret,
       grant_type: 'authorization_code',
       redirect_uri,
       code,
@@ -52,8 +52,8 @@ async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscor
 async function refreshDiscordAuth(refreshToken: string): Promise<IDiscordOAuth2EchangeCode> {
   try {
     const data = {
-      client_id: config.discord.clientId,
-      client_secret: config.discord.clientSecret,
+      client_id: config.oAuth2.discord.clientId,
+      client_secret: config.oAuth2.discord.clientSecret,
       grant_type: 'refresh_token',
       refresh_token: refreshToken,
     };

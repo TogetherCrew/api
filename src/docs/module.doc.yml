@@ -169,11 +169,50 @@ paths:
                           name:
                             type: string
                             description: Name of the platform.
-                            enum: ['discord']
+                            enum: ['discord', 'google']
                           metadata:
                             type: object
-                            additionalProperties: true
-                            description: Dynamic metadata related to the module.
+                            description: Metadata specific to the module and platform. Varies depending on the platform name and module name.
+                            oneOf:
+                              - type: object
+                                properties:
+                                  answering:
+                                    type: object
+                                    required: ["selectedChannels"]
+                                    properties:
+                                      selectedChannels:
+                                        type: array
+                                        items:
+                                          type: string
+                                    description: Channels selected for answering queries.
+                                  learning:
+                                    type: object
+                                    required: ["selectedChannels", "fromDate"]
+                                    properties:
+                                      selectedChannels:
+                                        type: array
+                                        items:
+                                          type: string
+                                      fromDate:
+                                        type: string
+                                        format: date
+                                        description: Date from which learning begins.
+                                description: Metadata for the hivemind module on Discord.
+                              - type: object
+                                properties:
+                                  driveIds:
+                                    type: array
+                                    items:
+                                      type: string
+                                  folderIds:
+                                    type: array
+                                    items:
+                                      type: string
+                                  fileIds:
+                                    type: array
+                                    items:
+                                      type: string
+                                description: Metadata for the hivemind module on Google.
               minProperties: 1
       responses:
         "200":

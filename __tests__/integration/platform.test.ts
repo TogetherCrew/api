@@ -82,7 +82,7 @@
 //       };
 //     });
 
-//     test('should return 201 and successfully create new platform if data is ok', async () => {
+//     test('should return 201 and successfully create new discord platform if data is ok', async () => {
 //       userOne.communities = [communityOne._id];
 //       communityOne.users = [userOne._id];
 //       await insertCommunities([communityOne]);
@@ -98,6 +98,49 @@
 //         id: expect.anything(),
 //         name: newPlatform.name,
 //         metadata: { ...newPlatform.metadata, action: analyzerAction, window: analyzerWindow },
+//         community: communityOne._id.toHexString(),
+//         disconnectedAt: null,
+//         connectedAt: expect.anything(),
+//       });
+
+//       const dbPlatform = await Platform.findById(res.body.id);
+//       expect(dbPlatform).toBeDefined();
+//       expect(dbPlatform).toMatchObject({
+//         name: newPlatform.name,
+//         metadata: newPlatform.metadata,
+//       });
+
+//       const dbCommunity = await Community.findById(res.body.community);
+//       expect(dbCommunity).toMatchObject({
+//         id: communityOne._id.toHexString(),
+//         name: communityOne.name,
+//         avatarURL: communityOne.avatarURL,
+//         users: [userOne._id],
+//       });
+//     });
+
+//     test('should return 201 and successfully create new google platform if data is ok', async () => {
+//       userOne.communities = [communityOne._id];
+//       communityOne.users = [userOne._id];
+//       await insertCommunities([communityOne]);
+//       await insertUsers([userOne]);
+//       newPlatform = {
+//         name: 'google',
+//         community: communityOne._id,
+//         metadata: {
+//           userId: userOne._id.toHexString(),
+//         },
+//       };
+//       const res = await request(app)
+//         .post(`/api/v1/platforms`)
+//         .set('Authorization', `Bearer ${userOneAccessToken}`)
+//         .send(newPlatform)
+//         .expect(httpStatus.CREATED);
+
+//       expect(res.body).toEqual({
+//         id: expect.anything(),
+//         name: newPlatform.name,
+//         metadata: { userId: userOne._id.toHexString() },
 //         community: communityOne._id.toHexString(),
 //         disconnectedAt: null,
 //         connectedAt: expect.anything(),
@@ -168,7 +211,7 @@
 //         .send(newPlatform)
 //         .expect(httpStatus.BAD_REQUEST);
 
-//       expect(res.body.message).toBe('This Platform is already connected');
+//       expect(res.body.message).toBe(`Platform ${newPlatform.name} with specified metadata is already connected to this community.`);
 //     });
 
 //     test('should return 400 error if user trys to connect a same platform', async () => {
@@ -181,7 +224,7 @@
 //         .send(newPlatform)
 //         .expect(httpStatus.BAD_REQUEST);
 
-//       expect(res.body.message).toBe('Only can connect one discord platform');
+//       expect(res.body.message).toBe(`A platform of type '${newPlatform.name}' is already connected to this community.`);
 //     });
 
 //     test('should return 400 error if user trys to connect a platform which is already connected to another community', async () => {
@@ -199,7 +242,7 @@
 //         .send(newPlatform)
 //         .expect(httpStatus.BAD_REQUEST);
 
-//       expect(res.body.message).toBe('This Platform is already connected to another community');
+//       expect(res.body.message).toBe('This platform is already connected to another community');
 //     });
 
 //     test('should return 400 error if name is invalid', async () => {

@@ -1,23 +1,40 @@
 paths:
-  /api/v1/platforms/connect/{platform}:
+  /api/v1/platforms/connect:
     get:
       tags:
         - Platform
       summary: Connect to a platform.
-      description: Discord-> SUCCESS:1004,ERROR:1005     Twiitter-> SUCCESS:1006,ERROR:1007
+      description: Connect to different platforms (Discord, Twitter, Google) with specific requirements based on the platform.
       parameters:
         - name: platform
-          in: path
+          in: query
           required: true
           description: The name of the platform to connect.
           schema:
             type: string
             enum:
-              - twitter
               - discord
+              - google
+              - twitter  
+        - name: userId
+          in: query
+          required: false
+          description: The user ID, required only for Google.
+          schema:
+            type: string
+        - name: scopes
+          in: query
+          required: false
+          description: Scope of access, required only for Google to include 'googleDrive'.
+          schema:
+            type: array
+            items:
+              type: string
+              enum: ['googleDrive']
+
       responses:
         "302":
-          description: Found (Redirect to Discord Or Twitter OAuth2 page)
+          description: Found - Redirects to the OAuth2 authorization page appropriate to the selected platform.
           $ref: "#/components/responses/Found"
 
   /api/v1/platforms/:
@@ -26,7 +43,7 @@ paths:
         - Platform
         - Admin
       summary: Create a new platform.
-      description: Only Admins can create a new platform
+      description: Allows administrators to create new platform entries with specific metadata requirements for each platform.
       security:
         - bearerAuth: []
       requestBody:
@@ -35,18 +52,55 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - name
+                - community
+                - metadata
               properties:
                 name:
                   type: string
                   enum:
                     - twitter
                     - discord
+                    - google
+                  description: Name of the platform to create. Must be one of the supported platforms.
                 community:
                   type: string
                   format: objectId
+                  description: The community ID associated with the platform, must be a valid object ID.
                 metadata:
                   type: object
-                  additionalProperties: true
+                  description: Metadata specific to the platform type. Varies depending on the platform.
+                  oneOf:
+                    - type: object
+                      required: [id, name, icon]
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        icon:
+                          type: string
+                          nullable: true
+                      description: Metadata for Discord.
+                    - type: object
+                      required: [id, name, icon]
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        icon:
+                          type: string
+                          nullable: true
+                      description: Metadata for Twitter.
+                    - type: object
+                      required: [userId]
+                      properties:
+                        userId:
+                          type: string
+                          format: objectId
+                      description: Metadata for Google.
       responses:
         "201":
           description: Platform created successfully.
@@ -386,13 +440,13 @@ paths:
     get:
       tags:
         - Platform
-      summary: request require access for a module. 
-      description: Discord-> SUCCESS:1008,ERROR:1009
+      summary: Request require access for a module.
+      description: Request access for a module on a specific platform with detailed success and error codes. For Discord-> SUCCESS:1008, ERROR:1009.
       parameters:
         - name: platform
           in: path
           required: true
-          description: The name of the platform to connect.
+          description: The name of the platform to connect, currently only 'Discord' is supported.
           schema:
             type: string
             enum:
@@ -400,19 +454,18 @@ paths:
         - name: module
           in: path
           required: true
-          description: The name of the platform to connect.
+          description: The name of the module to request access for, 'Announcement' is supported for the 'Discord' platform.
           schema:
             type: string
-            description: Announcement (supported for 'discord' platform)
             enum:
               - Announcement
         - name: id
           in: path
           required: true
-          description: the id of the platform (Example discord-> guildId).
+          description: The ID of the platform.
           schema:
             type: string
       responses:
         "302":
-          description: Found (Redirect to Discord Or Twitter OAuth2 page)
+          description: Found - Redirect to Discord OAuth2 page if conditions are met.
           $ref: "#/components/responses/Found"

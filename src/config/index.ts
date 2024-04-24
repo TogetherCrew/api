@@ -22,6 +22,9 @@ const envVarsSchema = Joi.object()
     TWITTER_CONNECT_CALLBACK_URI: Joi.string().required().description('Twitter connect callback uri'),
     TWITTER_CLIENT_ID: Joi.string().required().description('Twitter clinet id'),
     TWITTER_CLIENT_SECRET: Joi.string().required().description('Twitter clinet secret'),
+    GOOGLE_CONNECT_CALLBACK_URI: Joi.string().required().description('Google connect callback uri'),
+    GOOGLE_CLIENT_SECRET: Joi.string().required().description('Google clinet id'),
+    GOOGLE_CLIENT_ID: Joi.string().required().description('Google clinet secret'),
     JWT_SECRET: Joi.string().required().description('JWT secret key'),
     JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().default(30).description('minutes after which access tokens expire'),
     JWT_REFRESH_EXPIRATION_DAYS: Joi.number().default(30).description('days after which refresh tokens expire'),
@@ -75,21 +78,30 @@ export default {
     password: envVars.NEO4J_PASSWORD,
     database: envVars.NEO4J_DB,
   },
-  discord: {
-    clientId: envVars.DISCORD_CLIENT_ID,
-    clientSecret: envVars.DISCORD_CLIENT_SECRET,
-    botToken: envVars.DISCORD_BOT_TOKEN,
-    callbackURI: {
-      authorize: envVars.DISCORD_AUTHORIZE_CALLBACK_URI,
-      connect: envVars.DISCORD_CONNECT_CALLBACK_URI,
-      requestAccess: envVars.DISCORD_REQUEST_ACCESS_CALLBACK_URI,
+  oAuth2: {
+    discord: {
+      clientId: envVars.DISCORD_CLIENT_ID,
+      clientSecret: envVars.DISCORD_CLIENT_SECRET,
+      botToken: envVars.DISCORD_BOT_TOKEN,
+      callbackURI: {
+        authorize: envVars.DISCORD_AUTHORIZE_CALLBACK_URI,
+        connect: envVars.DISCORD_CONNECT_CALLBACK_URI,
+        requestAccess: envVars.DISCORD_REQUEST_ACCESS_CALLBACK_URI,
+      },
     },
-  },
-  twitter: {
-    clientId: envVars.TWITTER_CLIENT_ID,
-    clientSecret: envVars.TWITTER_CLIENT_SECRET,
-    callbackURI: {
-      connect: envVars.TWITTER_CONNECT_CALLBACK_URI,
+    twitter: {
+      clientId: envVars.TWITTER_CLIENT_ID,
+      clientSecret: envVars.TWITTER_CLIENT_SECRET,
+      callbackURI: {
+        connect: envVars.TWITTER_CONNECT_CALLBACK_URI,
+      },
+    },
+    google: {
+      clientId: envVars.GOOGLE_CLIENT_ID,
+      clientSecret: envVars.GOOGLE_CLIENT_SECRET,
+      callbackURI: {
+        connect: envVars.GOOGLE_CONNECT_CALLBACK_URI,
+      },
     },
   },
   jwt: {

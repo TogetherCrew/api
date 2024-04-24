@@ -111,6 +111,7 @@ const updatePlatform = async (
     });
   }
 
+  // console.log(updateBody)
   Object.assign(platform, updateBody);
   return await platform.save();
 };
@@ -137,82 +138,93 @@ const deletePlatformByFilter = async (filter: object): Promise<HydratedDocument<
   return await platform.remove();
 };
 
-/**
- * Checks if a platform with the specified metadata ID is already connected to the given community.
- * Throws an error if such a platform exists.
- *
- * @param {Types.ObjectId} communityId - The ID of the community to check within.
- * @param {IPlatform} PlatformBody - The platform data to check against.
- */
-const checkPlatformAlreadyConnected = async (communityId: Types.ObjectId, PlatformBody: IPlatform) => {
-  const platform = await getPlatformByFilter({
-    community: communityId,
-    'metadata.id': PlatformBody.metadata?.id,
-    disconnectedAt: null,
-  });
-
-  if (platform) {
-    throw new ApiError(httpStatus.BAD_REQUEST, `This Platform is already connected`);
+function getMetadataKey(platformName: string): string {
+  switch (platformName) {
+    case 'discord':
+      return 'id';
+    case 'google':
+    case 'twitter':
+      return 'userId';
+    default:
+      throw new Error('Unsupported platform');
   }
-};
+}
 
 /**
- * Checks if there is already a platform of the same name connected to the given community.
- * If such a platform exists, and there is no platform with the same metadata ID in another community,
- * the bot will leave the guild.
- *
- * @param {Types.ObjectId} communityId - The ID of the community to check within.
- * @param {IPlatform} PlatformBody - The platform data to check against.
+ * Manages the connection of a platform based on unique metadata identifiers. It first checks if the platform,
+ * identified by specific metadata, is actively connected in any other community to prevent duplicate active connections
+ * across different communities. It then checks within the specified community whether the platform is already connected,
+ * disconnected, or available for a new connection. Actions performed may include the reconnection of a previously
+ * disconnected platform or the creation of a new platform if no conflicts exist.
+ * The function uses a dynamically determined key from the platform's metadata to ensure uniqueness in identification.
+ * @param {Types.ObjectId} communityId - The MongoDB ObjectId of the community to check within.
+ * @param {IPlatform} platformData - The platform data containing name and metadata for connection management.
+ * @returns {Promise<HydratedDocument<IPlatform>>} Returns a promise that resolves to the document of the reconnected or newly created platform.
+ * @throws {ApiError} Throws an error if the platform is already connected in the same community, or if the same platform is connected in a different community.
  */
-const checkSinglePlatformConnection = async (communityId: Types.ObjectId, PlatformBody: IPlatform) => {
-  const platform = await getPlatformByFilter({
-    community: communityId,
-    disconnectedAt: null,
-    name: PlatformBody.name,
-  });
-
-  if (platform) {
-    const platformDoc = await getPlatformByFilter({
-      'metadata.id': PlatformBody.metadata?.id,
-      community: { $ne: communityId },
-    });
-    if (!platformDoc) {
-      await discordServices.coreService.leaveBotFromGuild(PlatformBody.metadata?.id);
-    }
-    throw new ApiError(httpStatus.BAD_REQUEST, `Only can connect one ${PlatformBody.name} platform`);
-  }
-};
-
-/**
- * Attempts to reconnect an existing platform, or adds a new platform to the community if none exists.
- * Throws an error if a platform with the same metadata ID is connected to another community.
- *
- * @param {Types.ObjectId} communityId - The ID of the community to check within.
- * @param {IPlatform} PlatformBody - The platform data to use for reconnection or creation.
- * @returns {Promise<HydratedDocument<IPlatform>>} The updated or newly created platform document.
- */
-const reconnectOrAddNewPlatform = async (
+const managePlatformConnection = async (
   communityId: Types.ObjectId,
-  PlatformBody: IPlatform,
+  platformData: IPlatform,
 ): Promise<HydratedDocument<IPlatform>> => {
-  let platformDoc = await getPlatformByFilter({
-    community: communityId,
-    disconnectedAt: { $ne: null }, // Check for platform if it is disconnected
-    name: PlatformBody.name,
-    'metadata.id': PlatformBody.metadata?.id,
+  if (!platformData.metadata) {
+    throw new ApiError(httpStatus.BAD_REQUEST, `Metadata is Missing for the '${platformData.name}!`);
+  }
+
+  const metadataKey = getMetadataKey(platformData.name);
+  const metadataId = platformData.metadata[metadataKey];
+
+  // First, check across all communities if this platform metadata is already connected elsewhere
+  const activePlatformOtherCommunity = await Platform.findOne({
+    community: { $ne: communityId },
+    [`metadata.${metadataKey}`]: metadataId,
   });
 
-  if (platformDoc) {
-    return await updatePlatform(platformDoc, { disconnectedAt: null });
+  if (activePlatformOtherCommunity) {
+    throw new ApiError(httpStatus.BAD_REQUEST, `This platform is already connected to another community`);
+  }
+  // Check if any platform of the same name is currently active in the same community
+  const existingActivePlatform = await Platform.findOne({
+    community: communityId,
+    name: platformData.name,
+    disconnectedAt: null, // Check specifically for active platforms
+  });
+
+  // Before proceeding, check if the metadata and the specific key in metadata are present
+  if (
+    existingActivePlatform &&
+    existingActivePlatform.metadata &&
+    existingActivePlatform.metadata[metadataKey] !== metadataId
+  ) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      `A platform of type '${platformData.name}' is already connected to this community.`,
+    );
   }
 
-  platformDoc = await getPlatformByFilter({ 'metadata.id': PlatformBody.metadata?.id });
-  if (platformDoc) {
-    throw new ApiError(httpStatus.BAD_REQUEST, `This Platform is already connected to another community`);
+  // Proceed to check for the specific platform instance by unique identifier within the same community
+  const existingPlatform = await Platform.findOne({
+    community: communityId,
+    name: platformData.name,
+    [`metadata.${metadataKey}`]: metadataId,
+  });
+
+  // Reconnect if previously disconnected
+  if (existingPlatform && existingPlatform.disconnectedAt !== null) {
+    existingPlatform.disconnectedAt = null;
+    await existingPlatform.save();
+    return existingPlatform;
   }
 
-  const platform = await createPlatform(PlatformBody);
-  return platform;
+  // If no such platform exists (neither active nor disconnected with the same metadata identifier), create a new one
+  if (!existingPlatform) {
+    return await createPlatform(platformData);
+  }
+
+  // If existing platform is already connected (safety check), throw an error
+  throw new ApiError(
+    httpStatus.BAD_REQUEST,
+    `Platform ${platformData.name} with specified metadata is already connected to this community.`,
+  );
 };
 
 export default {
@@ -224,7 +236,5 @@ export default {
   updatePlatformByFilter,
   deletePlatform,
   deletePlatformByFilter,
-  checkPlatformAlreadyConnected,
-  checkSinglePlatformConnection,
-  reconnectOrAddNewPlatform,
+  managePlatformConnection,
 };

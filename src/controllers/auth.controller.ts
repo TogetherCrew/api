@@ -13,7 +13,7 @@ const discordAuthorize = catchAsync(async function (req: ISessionRequest, res: R
   const state = generateState();
   req.session.state = state;
   res.redirect(
-    `https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${config.discord.callbackURI.authorize}&response_type=code&scope=${discord.scopes.authorize}&state=${state}`,
+    `https://discord.com/api/oauth2/authorize?client_id=${config.oAuth2.discord.clientId}&redirect_uri=${config.oAuth2.discord.callbackURI.authorize}&response_type=code&scope=${discord.scopes.authorize}&state=${state}`,
   );
 });
 
@@ -29,7 +29,7 @@ const discordAuthorizeCallback = catchAsync(async function (req: ISessionRequest
     if (!code || !returnedState || returnedState !== storedState) {
       throw new Error('Invalid code or state mismatch');
     }
-    const discordOathCallback = await authService.exchangeCode(code, config.discord.callbackURI.authorize);
+    const discordOathCallback = await authService.exchangeCode(code, config.oAuth2.discord.callbackURI.authorize);
     const discordUser = await discordServices.coreService.getUserFromDiscordAPI(discordOathCallback.access_token);
     let user = await userService.getUserByFilter({ discordId: discordUser.id });
 
