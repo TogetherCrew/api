@@ -211,7 +211,7 @@
 //         .send(newPlatform)
 //         .expect(httpStatus.BAD_REQUEST);
 
-//       expect(res.body.message).toBe('This Platform is already connected');
+//       expect(res.body.message).toBe(`Platform ${newPlatform.name} with specified metadata is already connected to this community.`);
 //     });
 
 //     test('should return 400 error if user trys to connect a same platform', async () => {
@@ -224,7 +224,7 @@
 //         .send(newPlatform)
 //         .expect(httpStatus.BAD_REQUEST);
 
-//       expect(res.body.message).toBe('Only can connect one discord platform');
+//       expect(res.body.message).toBe(`A platform of type '${newPlatform.name}' is already connected to this community.`);
 //     });
 
 //     test('should return 400 error if user trys to connect a platform which is already connected to another community', async () => {
@@ -242,7 +242,7 @@
 //         .send(newPlatform)
 //         .expect(httpStatus.BAD_REQUEST);
 
-//       expect(res.body.message).toBe('This Platform is already connected to another community');
+//       expect(res.body.message).toBe('This platform is already connected to another community');
 //     });
 
 //     test('should return 400 error if name is invalid', async () => {
