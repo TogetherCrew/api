@@ -132,8 +132,8 @@ const connectTwitterCallback = catchAsync(async function (req: ISessionRequest, 
 });
 
 const connectGoogleCallback = catchAsync(async function (req: ISessionRequest, res: Response) {
-  const STATUS_CODE_SUCCESS = 1008;
-  const STATUS_CODE_ERROR = 1009;
+  const STATUS_CODE_SUCCESS = 1010;
+  const STATUS_CODE_ERROR = 1011;
   const code = req.query.code as string;
   // const returnedState = req.query.state as string;
   // const storedState = req.session.state;
