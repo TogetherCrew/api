@@ -456,17 +456,31 @@
 //         ],
 //       };
 //       const res = await request(app)
-//         .patch(`/api/v1/modules/${moduleOne._id}`)
+//         .patch(`/api/v1/modules/${moduleTwo._id}`)
 //         .set('Authorization', `Bearer ${userOneAccessToken}`)
 //         .send(updateBody)
 //         .expect(httpStatus.OK);
 
 //       expect(res.body).toEqual({
-//         id: moduleOne._id.toHexString(),
-//         name: moduleOne.name,
-//         community: communityOne._id.toHexString(),
+//         id: moduleTwo._id.toHexString(),
+//         name: moduleTwo.name,
+//         community: communityTwo._id.toHexString(),
 //         options: {
 //           platforms: [
+//             {
+//               _id: expect.anything(),
+//               platform: expect.anything(),
+//               metadata: {
+//                 answering: {
+//                   selectedChannels: ['1234'],
+//                 },
+//                 learning: {
+//                   selectedChannels: ['8765', '1234'],
+//                   fromDate: new Date('2024-03-18T07:46:51.493+00:00').toISOString(),
+//                 },
+//               },
+//               name: 'discord',
+//             },
 //             {
 //               _id: expect.anything(),
 //               platform: platformOne._id.toHexString(),
