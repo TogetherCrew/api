@@ -52,7 +52,23 @@ const updateModule = async (
   module: HydratedDocument<IModule>,
   updateBody: Partial<IModuleUpdateBody>,
 ): Promise<HydratedDocument<IModule>> => {
-  Object.assign(module, updateBody);
+  // Check if `options.platforms` is in the updateBody
+  if (updateBody.options && updateBody.options.platforms) {
+    // Iterate through each platform in the incoming update
+    for (const newPlatform of updateBody.options.platforms) {
+      const existingPlatform = module.options?.platforms.find((p) => p.name === newPlatform.name);
+
+      // If the platform already exists, update it
+      if (existingPlatform) {
+        existingPlatform.metadata = newPlatform.metadata;
+      } else {
+        // If the platform does not exist, add new
+        module.options?.platforms.push(newPlatform);
+      }
+    }
+  }
+
+  // Other update operations can be handled here
   return await module.save();
 };
 

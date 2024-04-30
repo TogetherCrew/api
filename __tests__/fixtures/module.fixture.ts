@@ -21,7 +21,8 @@ export const moduleOne: ModuleFixture = {
 
 export const moduleTwo: ModuleFixture = {
   _id: new Types.ObjectId(),
-  name: 'hivemind', options: {
+  name: 'hivemind',
+  options: {
     platforms: [
       {
         platform: new Types.ObjectId(),
