@@ -40,8 +40,8 @@ const githubMetadata = () => {
     account: Joi.object().keys({
       login: Joi.string().required(),
       id: Joi.string().required(),
-      avatarUrl: Joi.string().required()
-    })
+      avatarUrl: Joi.string().required(),
+    }),
   });
 };
 

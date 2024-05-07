@@ -220,10 +220,7 @@ async function getBotPermissions(guildId: Snowflake): Promise<Array<string>> {
     const member = await guild.members.fetch(config.oAuth2.discord.clientId);
     return member.permissions.toArray();
   } catch (error) {
-    logger.error(
-      { error },
-      'Failed to get list of permissions that bot has in a specific guild',
-    );
+    logger.error({ error }, 'Failed to get list of permissions that bot has in a specific guild');
     throw new ApiError(590, 'Failed to get list of permissions that bot has in a specific guild');
   }
 }

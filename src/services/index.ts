@@ -27,5 +27,5 @@ export {
   announcementService,
   moduleService,
   googleService,
-  githubService
+  githubService,
 };

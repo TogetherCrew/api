@@ -9,7 +9,7 @@ import {
   googleService,
   userService,
   tokenService,
-  githubService
+  githubService,
 } from '../services';
 import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync, pick, ApiError } from '../utils';
@@ -21,7 +21,6 @@ import querystring from 'querystring';
 import { oauth2 } from 'googleapis/build/src/apis/oauth2';
 import { token } from 'morgan';
 import parentLogger from '../config/logger';
-
 
 const logger = parentLogger.child({ module: 'PlatformController' });
 
@@ -62,11 +61,14 @@ const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Re
     });
 
     aggregatedScopes = [...new Set(aggregatedScopes)];
-    const authUrl = await googleService.coreService.GoogleClientManager.generateAuthUrl('offline', aggregatedScopes, state);
+    const authUrl = await googleService.coreService.GoogleClientManager.generateAuthUrl(
+      'offline',
+      aggregatedScopes,
+      state,
+    );
     res.redirect(authUrl);
-  }
-  else if (platform === 'github') {
-    const link = `${config.oAuth2.github.publickLink}/installations/select_target`
+  } else if (platform === 'github') {
+    const link = `${config.oAuth2.github.publickLink}/installations/select_target`;
     res.redirect(link);
   }
 });
@@ -171,11 +173,9 @@ const connectGoogleCallback = catchAsync(async function (req: ISessionRequest, r
       };
       const query = querystring.stringify(params);
       res.redirect(`${config.frontend.url}/callback?` + query);
-    }
-    else {
+    } else {
       throw new Error('Missing Access Token');
     }
-
   } catch (err) {
     logger.error({ err }, 'Failed in google connect callback');
     const params = {
@@ -185,7 +185,6 @@ const connectGoogleCallback = catchAsync(async function (req: ISessionRequest, r
     res.redirect(`${config.frontend.url}/callback?` + query);
   }
 });
-
 
 const connectGithubCallback = catchAsync(async function (req: ISessionRequest, res: Response) {
   const STATUS_CODE_SUCCESS = 1012;
@@ -206,7 +205,7 @@ const connectGithubCallback = catchAsync(async function (req: ISessionRequest, r
       installationId: installation.id,
       account_login: installation.account.login,
       account_id: installation.account.id,
-      account_avatar_url: installation.account.avatar_url
+      account_avatar_url: installation.account.avatar_url,
     };
     const query = querystring.stringify(params);
     res.redirect(`${config.frontend.url}/callback?` + query);

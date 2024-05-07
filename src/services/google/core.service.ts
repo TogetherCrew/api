@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import config from '../../config';
-import { ApiError, } from '../../utils';
+import { ApiError } from '../../utils';
 import parentLogger from '../../config/logger';
 import { google, Common } from 'googleapis';
 import httpStatus from 'http-status';
@@ -31,12 +31,16 @@ class GoogleClientManager {
     }
     return GoogleClientManager.client;
   }
-  public static async generateAuthUrl(accessType: 'online' | 'offline', scopes: string | string[], state: string): Promise<string> {
+  public static async generateAuthUrl(
+    accessType: 'online' | 'offline',
+    scopes: string | string[],
+    state: string,
+  ): Promise<string> {
     const client = await GoogleClientManager.getClient();
     return client.generateAuthUrl({
       access_type: accessType,
       scope: scopes,
-      state
+      state,
     });
   }
 
@@ -52,14 +56,14 @@ class GoogleClientManager {
 }
 
 /**
- * get user profile  
+ * get user profile
  * @param {string} accessToken
  */
 async function getUserProfile(accessToken: string) {
   try {
     const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
       method: 'GET',
-      headers: { "Authorization": `Bearer ${accessToken}` },
+      headers: { Authorization: `Bearer ${accessToken}` },
     });
     if (response.ok) {
       return await response.json();
@@ -74,8 +78,7 @@ async function getUserProfile(accessToken: string) {
   }
 }
 
-
 export default {
   GoogleClientManager,
-  getUserProfile
+  getUserProfile,
 };
