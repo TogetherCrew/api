@@ -1,4 +1,5 @@
 import { Response } from 'express';
+
 import {
   platformService,
   authService,
@@ -8,6 +9,7 @@ import {
   googleService,
   userService,
   tokenService,
+  githubService
 } from '../services';
 import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync, pick, ApiError } from '../utils';
@@ -19,6 +21,7 @@ import querystring from 'querystring';
 import { oauth2 } from 'googleapis/build/src/apis/oauth2';
 import { token } from 'morgan';
 import parentLogger from '../config/logger';
+
 
 const logger = parentLogger.child({ module: 'PlatformController' });
 
@@ -61,6 +64,10 @@ const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Re
     aggregatedScopes = [...new Set(aggregatedScopes)];
     const authUrl = await googleService.coreService.GoogleClientManager.generateAuthUrl('offline', aggregatedScopes);
     res.redirect(authUrl);
+  }
+  else if (platform === 'github') {
+    const link = `${config.oAuth2.github.publickLink}/installations/select_target`
+    res.redirect(link);
   }
 });
 
@@ -158,6 +165,35 @@ const connectGoogleCallback = catchAsync(async function (req: ISessionRequest, r
     res.redirect(`${config.frontend.url}/callback?` + query);
   } catch (err) {
     logger.error({ err }, 'Failed in google connect callback');
+    const params = {
+      statusCode: STATUS_CODE_ERROR,
+    };
+    const query = querystring.stringify(params);
+    res.redirect(`${config.frontend.url}/callback?` + query);
+  }
+});
+
+
+const connectGithubCallback = catchAsync(async function (req: ISessionRequest, res: Response) {
+  const STATUS_CODE_SUCCESS = 1012;
+  const STATUS_CODE_ERROR = 1013;
+  const installationId = req.query.installation_id as string;
+  try {
+    const appAccessToken = await githubService.coreService.generateAppAccessToken();
+    const { token } = await githubService.coreService.getInstallationAccessToken(appAccessToken, installationId);
+    const installation = await await githubService.coreService.getInstallationDetails(appAccessToken, installationId);
+    const params = {
+      statusCode: STATUS_CODE_SUCCESS,
+      platform: 'github',
+      installationId: installation.id,
+      account_login: installation.account.login,
+      account_id: installation.account.id,
+      account_avatar_url: installation.account.avatar_url
+    };
+    const query = querystring.stringify(params);
+    res.redirect(`${config.frontend.url}/callback?` + query);
+  } catch (err) {
+    logger.error({ err }, 'Failed in github connect callback');
     const params = {
       statusCode: STATUS_CODE_ERROR,
     };
@@ -278,6 +314,7 @@ export default {
   connectTwitterCallback,
   connectDiscordCallback,
   connectGoogleCallback,
+  connectGithubCallback,
   getPlatforms,
   getPlatform,
   updatePlatform,

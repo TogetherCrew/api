@@ -11,6 +11,8 @@ import discordServices from './discord';
 import announcementService from './announcement.service';
 import moduleService from './module.service';
 import googleService from './google';
+import githubService from './github';
+
 export {
   userService,
   authService,
@@ -25,4 +27,5 @@ export {
   announcementService,
   moduleService,
   googleService,
+  githubService
 };

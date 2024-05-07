@@ -9,7 +9,7 @@ import channelService from './channel.service';
 import roleService from './role.service';
 import guildMemberService from './guildMember.service';
 import { discord } from '../../config/oAtuh2';
-const logger = parentLogger.child({ module: 'DiscordService' });
+const logger = parentLogger.child({ module: 'DiscordCoreService' });
 
 /**
  * exchange discord code with access token

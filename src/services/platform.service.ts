@@ -145,6 +145,8 @@ function getMetadataKey(platformName: string): string {
     case 'google':
     case 'twitter':
       return 'userId';
+    case 'github':
+      return 'installationId'
     default:
       throw new Error('Unsupported platform');
   }

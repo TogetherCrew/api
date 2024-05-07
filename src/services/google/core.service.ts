@@ -7,7 +7,7 @@ import parentLogger from '../../config/logger';
 import { discord } from '../../config/oAtuh2';
 import { google, drive_v3, Auth, Common } from 'googleapis';
 
-const logger = parentLogger.child({ module: 'DiscordService' });
+const logger = parentLogger.child({ module: 'GoogleCoreService' });
 
 class GoogleClientManager {
   public static client: Common.OAuth2Client;

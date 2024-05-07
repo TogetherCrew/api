@@ -99,11 +99,17 @@ const hivemindGoogleMetadata = () => {
   });
 };
 
+const hivemindGithubMetadata = () => {
+  return Joi.object().keys({
+    repoIds: Joi.array().items(Joi.string()),
+  });
+};
+
 const hivemindOptions = () => {
   return Joi.object().keys({
     platforms: Joi.array().items(
       Joi.object().keys({
-        name: Joi.string().required().valid('discord', 'google'),
+        name: Joi.string().required().valid('discord', 'google', 'github'),
         platform: Joi.string().custom(objectId).required(),
         metadata: Joi.when('name', {
           switch: [
@@ -114,6 +120,10 @@ const hivemindOptions = () => {
             {
               is: 'google',
               then: hivemindGoogleMetadata(),
+            },
+            {
+              is: 'github',
+              then: hivemindGithubMetadata(),
             },
           ],
           otherwise: Joi.any().forbidden(),
