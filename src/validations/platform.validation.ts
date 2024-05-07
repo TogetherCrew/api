@@ -29,6 +29,9 @@ const twitterMetadata = () => {
 const googleMetadata = () => {
   return Joi.object().keys({
     userId: Joi.string().custom(objectId).required(),
+    id: Joi.string().required(),
+    name: Joi.string().required(),
+    picture: Joi.string().required(),
   });
 };
 const githubMetadata = () => {

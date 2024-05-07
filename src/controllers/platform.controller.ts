@@ -165,7 +165,7 @@ const connectGoogleCallback = catchAsync(async function (req: ISessionRequest, r
         statusCode,
         platform: 'google',
         userId,
-        id: userProifle.name,
+        id: userProifle.id,
         name: userProifle.name,
         picture: userProifle.picture,
       };
