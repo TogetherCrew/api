@@ -129,6 +129,9 @@ describe('Platform routes', () => {
         community: communityOne._id,
         metadata: {
           userId: userOne._id.toHexString(),
+          id: 'id',
+          name: 'name',
+          picture: 'picture'
         },
       };
       const res = await request(app)
@@ -140,7 +143,7 @@ describe('Platform routes', () => {
       expect(res.body).toEqual({
         id: expect.anything(),
         name: newPlatform.name,
-        metadata: { userId: userOne._id.toHexString() },
+        metadata: { userId: userOne._id.toHexString(), ...newPlatform.metadata },
         community: communityOne._id.toHexString(),
         disconnectedAt: null,
         connectedAt: expect.anything(),
