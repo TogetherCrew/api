@@ -27,7 +27,6 @@ const envVarsSchema = Joi.object()
     GOOGLE_CLIENT_ID: Joi.string().required().description('Google clinet secret'),
 
     GITHUB_APP_ID: Joi.string().required().description('Github app id'),
-    GITHUB_APP_PRIVATE_KEY: Joi.string().required().description('Github app private key'),
     GITHUB_APP_PUBLIC_LINK: Joi.string().required().description('Github app public link'),
     GITHUB_APP_CLIENT_ID: Joi.string().required().description('Github app client id'),
     GITHUB_APP_CLIENT_SECRET: Joi.string().required().description('Github app client secret'),
@@ -119,7 +118,6 @@ export default {
       },
       appId: envVars.GITHUB_APP_ID,
       publickLink: envVars.GITHUB_APP_PUBLIC_LINK,
-      privateKey: envVars.GITHUB_APP_PRIVATE_KEY,
     },
   },
   jwt: {
