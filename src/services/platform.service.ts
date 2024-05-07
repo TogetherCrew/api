@@ -143,8 +143,7 @@ function getMetadataKey(platformName: string): string {
     case 'discord':
       return 'id';
     case 'google':
-    case 'twitter':
-      return 'userId';
+      return 'id';
     case 'github':
       return 'installationId';
     default:
