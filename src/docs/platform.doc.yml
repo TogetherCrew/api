@@ -96,7 +96,7 @@ paths:
                           nullable: true
                       description: Metadata for Twitter.
                     - type: object
-                      required: [userId,id,name,picture]
+                      required: [userId, id, name, picture]
                       properties:
                         userId:
                           type: string
@@ -109,7 +109,7 @@ paths:
                           type: string
                       description: Metadata for Google.
                     - type: object
-                      required: [installationId,account]
+                      required: [installationId, account]
                       properties:
                         installationId:
                           type: string
