@@ -96,14 +96,20 @@ paths:
                           nullable: true
                       description: Metadata for Twitter.
                     - type: object
-                      required: [userId]
+                      required: [userId,id,name,picture]
                       properties:
                         userId:
                           type: string
                           format: objectId
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        picture:
+                          type: string
                       description: Metadata for Google.
                     - type: object
-                      required: [userId]
+                      required: [installationId,account]
                       properties:
                         installationId:
                           type: string
