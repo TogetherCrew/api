@@ -27,7 +27,6 @@
     "@discordjs/rest": "^1.7.0",
     "@notionhq/client": "^2.2.3",
     "@octokit/app": "^15.0.1",
-    "@octokit/core": "^6.1.2",
     "@sentry/node": "^7.50.0",
     "@togethercrew.dev/db": "^3.0.54",
     "@togethercrew.dev/tc-messagebroker": "^0.0.45",
