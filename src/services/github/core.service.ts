@@ -33,7 +33,6 @@ async function generateAppAccessToken() {
  * get installation access token 
  * @param {string} appAccessToken
    @param {string} installationId
- * @returns {Promise<IDiscordOAuth2EchangeCode>}
  */
 async function getInstallationAccessToken(appAccessToken: string, installationId: string) {
     try {
@@ -44,7 +43,9 @@ async function getInstallationAccessToken(appAccessToken: string, installationId
         if (response.ok) {
             return await response.json();
         } else {
-            throw new Error();
+            const errorResponse = await response.text();
+            logger.error({ error: errorResponse }, 'Failed to get installation access token');
+            throw new Error(`Failed to get installation access token: ${errorResponse}`);
         }
     } catch (error) {
         logger.error({ installationId, error }, 'Failed to get installation access token');
@@ -56,7 +57,6 @@ async function getInstallationAccessToken(appAccessToken: string, installationId
  * get installation repos
  * @param {string} installationAccessToken
    @param {string} installationId
- * @returns {Promise<IDiscordOAuth2EchangeCode>}
  */
 async function getInstallationRepos(installationAccessToken: string, installationId: string) {
     try {
@@ -67,7 +67,9 @@ async function getInstallationRepos(installationAccessToken: string, installatio
         if (response.ok) {
             return await response.json();
         } else {
-            throw new Error();
+            const errorResponse = await response.text();
+            logger.error({ error: errorResponse }, 'Failed to get installation repos');
+            throw new Error(`Failed to get installation repos: ${errorResponse}`);
         }
     } catch (error) {
         logger.error({ installationId, error }, 'Failed to get installation repos');
@@ -79,7 +81,6 @@ async function getInstallationRepos(installationAccessToken: string, installatio
  * get installation details
  * @param {string} appAccessToken
    @param {string} installationId
- * @returns {Promise<IDiscordOAuth2EchangeCode>}
  */
 async function getInstallationDetails(appAccessToken: string, installationId: string) {
     try {
@@ -90,7 +91,9 @@ async function getInstallationDetails(appAccessToken: string, installationId: st
         if (response.ok) {
             return await response.json();
         } else {
-            throw new Error();
+            const errorResponse = await response.text();
+            logger.error({ error: errorResponse }, 'Failed to get installation details');
+            throw new Error(`Failed to get installation details: ${errorResponse}`);
         }
     } catch (error) {
         logger.error({ installationId, error }, 'Failed to get installation details');

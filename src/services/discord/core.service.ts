@@ -150,10 +150,12 @@ async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscor
     if (response.ok) {
       return await response.json();
     } else {
-      throw new Error();
+      const errorResponse = await response.text();
+      logger.error({ error: errorResponse }, 'Failed to exchange discord code');
+      throw new Error(`Failed to exchange discord code: ${errorResponse}`);
     }
   } catch (error) {
-    logger.error({ code, redirect_uri, error }, 'Failed to exchange discord code');
+    logger.error({ redirect_uri, error }, 'Failed to exchange discord code');
     throw new ApiError(590, 'Can not fetch from discord API');
   }
 }
@@ -172,10 +174,12 @@ async function getUserFromDiscordAPI(accessToken: string): Promise<IDiscordUser>
     if (response.ok) {
       return await response.json();
     } else {
-      throw new Error(await response.json());
+      const errorResponse = await response.text();
+      logger.error({ error: errorResponse }, 'Failed to get user from Discord API');
+      throw new Error(`Failed to get user from Discord API: ${errorResponse}`);
     }
   } catch (error) {
-    logger.error({ accessToken, error }, 'Failed to get user from Discord API');
+    logger.error({ error }, 'Failed to get user from Discord API');
     throw new ApiError(590, 'Can not fetch from discord API');
   }
 }
@@ -194,10 +198,12 @@ async function getBotFromDiscordAPI(): Promise<IDiscordUser> {
     if (response.ok) {
       return await response.json();
     } else {
-      throw new Error(await response.json());
+      const errorResponse = await response.text();
+      logger.error({ error: errorResponse }, 'Failed to get bot from Discord API');
+      throw new Error(`Failed to get bot from Discord API: ${errorResponse}`);
     }
   } catch (error) {
-    logger.error({ bot_token: config.oAuth2.discord.botToken, error }, 'Failed to get bot from Discord API');
+    logger.error({ error }, 'Failed to get bot from Discord API');
     throw new ApiError(590, 'Can not fetch from discord API');
   }
 }
@@ -215,7 +221,7 @@ async function getBotPermissions(guildId: Snowflake): Promise<Array<string>> {
     return member.permissions.toArray();
   } catch (error) {
     logger.error(
-      { bot_token: config.oAuth2.discord.botToken, error },
+      { error },
       'Failed to get list of permissions that bot has in a specific guild',
     );
     throw new ApiError(590, 'Failed to get list of permissions that bot has in a specific guild');

@@ -1,11 +1,9 @@
 import fetch from 'node-fetch';
-import { Client, GatewayIntentBits, Snowflake, Guild } from 'discord.js';
 import config from '../../config';
-import { DatabaseManager } from '@togethercrew.dev/db';
-import { ApiError, pick, sort } from '../../utils';
+import { ApiError, } from '../../utils';
 import parentLogger from '../../config/logger';
-import { discord } from '../../config/oAtuh2';
-import { google, drive_v3, Auth, Common } from 'googleapis';
+import { google, Common } from 'googleapis';
+import httpStatus from 'http-status';
 
 const logger = parentLogger.child({ module: 'GoogleCoreService' });
 
@@ -33,11 +31,12 @@ class GoogleClientManager {
     }
     return GoogleClientManager.client;
   }
-  public static async generateAuthUrl(accessType: 'online' | 'offline', scopes: string | string[]): Promise<string> {
+  public static async generateAuthUrl(accessType: 'online' | 'offline', scopes: string | string[], state: string): Promise<string> {
     const client = await GoogleClientManager.getClient();
     return client.generateAuthUrl({
       access_type: accessType,
       scope: scopes,
+      state
     });
   }
 
@@ -52,6 +51,31 @@ class GoogleClientManager {
   }
 }
 
+/**
+ * get user profile  
+ * @param {string} accessToken
+ */
+async function getUserProfile(accessToken: string) {
+  try {
+    const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      method: 'GET',
+      headers: { "Authorization": `Bearer ${accessToken}` },
+    });
+    if (response.ok) {
+      return await response.json();
+    } else {
+      const errorResponse = await response.text();
+      logger.error({ error: errorResponse }, 'Failed to get user profile');
+      throw new Error(`Failed to get user profile: ${errorResponse}`);
+    }
+  } catch (error) {
+    logger.error({ error }, 'Failed to get user profile');
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to get user profile');
+  }
+}
+
+
 export default {
   GoogleClientManager,
+  getUserProfile
 };
