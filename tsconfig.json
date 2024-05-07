@@ -5,7 +5,7 @@
         "removeComments": false,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
-        "target": "es2022",
+        "target": "es6",
         "sourceMap": false,
         "outDir": "./lib",
         "baseUrl": "./",
