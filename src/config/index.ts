@@ -119,9 +119,9 @@ export default {
       callbackURI: {
         connect: envVars.GITHUB_APP_CONNECT_CALLBACK_URI,
       },
-      appId:envVars.GITHUB_APP_ID,
-      publickLink:envVars.GITHUB_APP_PUBLIC_LINK,
-      privateKey:envVars.GITHUB_APP_PRIVATE_KEY
+      appId: envVars.GITHUB_APP_ID,
+      publickLink: envVars.GITHUB_APP_PUBLIC_LINK,
+      privateKey: envVars.GITHUB_APP_PRIVATE_KEY
     },
   },
   jwt: {
