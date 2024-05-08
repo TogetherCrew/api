@@ -69,7 +69,7 @@ async function refreshDiscordAuth(refreshToken: string): Promise<IDiscordOAuth2E
       throw new Error();
     }
   } catch (error) {
-    logger.error({ refreshToken, error }, 'Failed to refresh discord auth');
+    logger.error({ error }, 'Failed to refresh discord auth');
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Can not fetch from discord API');
   }
 }
@@ -137,7 +137,7 @@ async function refreshDiscordAuth(refreshToken: string): Promise<IDiscordOAuth2E
 //             throw new Error();
 //         }
 //     } catch (error) {
-//         logger.error({ refreshToken, error }, 'Failed to refresh twitter auth');
+//         logger.error({error }, 'Failed to refresh twitter auth');
 //         throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Can not fetch from twitter API');
 //     }
 // }

@@ -233,9 +233,9 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
   // TODO: use function that main application use to connect to mongodb
   try {
     await mongoose.connect(config.mongoose.serverURL);
-    logger.info({ url: config.mongoose.dbURL }, 'Setuped Message Broker connection!');
+    logger.info('Setuped Message Broker connection!');
   } catch (error) {
-    logger.fatal({ url: config.mongoose.dbURL, error }, 'Failed to setup to Message Broker!!');
+    logger.fatal('Failed to setup to Message Broker!!');
   }
 
   const announcement = await Announcement.findById(announcementId);

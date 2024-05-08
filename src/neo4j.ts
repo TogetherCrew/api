@@ -10,13 +10,9 @@ try {
   driver = neo4j.driver(config.neo4j.url, neo4j.auth.basic(config.neo4j.user, config.neo4j.password), {
     disableLosslessIntegers: true,
   });
-  logger.info(
-    `Connected to Neo4j!`,
-  );
+  logger.info(`Connected to Neo4j!`);
 } catch (error) {
-  logger.fatal(
-    `Failed to connect to Neo4j!`,
-  );
+  logger.fatal(`Failed to connect to Neo4j!`);
 }
 
 export async function read(cypher: Query, params = {}, database = config.neo4j.database) {
