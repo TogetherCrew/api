@@ -20,8 +20,11 @@ async function generateAppAccessToken() {
       iss: config.oAuth2.github.clientId,
     };
     const filePath: string = path.join(__dirname, '../../../githubapp.private-key.pem');
+    console.log(filePath, 'filePath')
     const privateKey = fs.readFileSync(filePath, 'utf8');
+    console.log(privateKey, 'privateKey')
     var token = jwt.sign(payload, privateKey, { algorithm: 'RS256' });
+    console.log(token, 'toekn')
     return token;
   } catch (error) {
     logger.error({ error }, 'Failed to create access token for github app');
