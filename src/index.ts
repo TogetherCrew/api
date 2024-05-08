@@ -12,9 +12,9 @@ mongoose.set('strictQuery', false);
 const connectToRabbitMQ = async () => {
   try {
     await RabbitMQ.connect(config.rabbitMQ.url, Queue.SERVER_API);
-    logger.info({ url: config.rabbitMQ.url, queue: Queue.SERVER_API }, 'Connected to RabbitMQ!');
+    logger.info({ queue: Queue.SERVER_API }, 'Connected to RabbitMQ!');
   } catch (error) {
-    logger.fatal({ url: config.rabbitMQ.url, queue: Queue.SERVER_API, error }, 'Failed to connect to RabbitMQ!');
+    logger.fatal({ queue: Queue.SERVER_API, error }, 'Failed to connect to RabbitMQ!');
   }
 };
 
@@ -22,9 +22,9 @@ const connectToRabbitMQ = async () => {
 const connectToMB = async () => {
   try {
     await MBConnection.connect(config.mongoose.dbURL);
-    logger.info({ url: config.mongoose.dbURL }, 'Setuped Message Broker connection!');
+    logger.info('Setuped Message Broker connection!');
   } catch (error) {
-    logger.fatal({ url: config.mongoose.dbURL, error }, 'Failed to setup to Message Broker!!');
+    logger.fatal({ error }, 'Failed to setup to Message Broker!!');
   }
 };
 
@@ -32,9 +32,9 @@ const connectToMB = async () => {
 const connectToMongoDB = async () => {
   try {
     await mongoose.connect(config.mongoose.serverURL);
-    logger.info({ url: config.mongoose.serverURL }, 'Connected to MongoDB!');
+    logger.info('Connected to MongoDB!');
   } catch (error) {
-    logger.fatal({ url: config.mongoose.serverURL, error }, 'Failed to connect to MongoDB!');
+    logger.fatal({ error }, 'Failed to connect to MongoDB!');
   }
 };
 

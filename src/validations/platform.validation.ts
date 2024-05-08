@@ -29,11 +29,25 @@ const twitterMetadata = () => {
 const googleMetadata = () => {
   return Joi.object().keys({
     userId: Joi.string().custom(objectId).required(),
+    id: Joi.string().required(),
+    name: Joi.string().required(),
+    picture: Joi.string().required(),
   });
 };
+const githubMetadata = () => {
+  return Joi.object().keys({
+    installationId: Joi.string().required(),
+    account: Joi.object().keys({
+      login: Joi.string().required(),
+      id: Joi.string().required(),
+      avatarUrl: Joi.string().required(),
+    }),
+  });
+};
+
 const createPlatform = {
   body: Joi.object().keys({
-    name: Joi.string().required().valid('twitter', 'discord', 'google'),
+    name: Joi.string().required().valid('twitter', 'discord', 'google', 'github'),
     community: Joi.string().custom(objectId).required(),
     metadata: Joi.when('name', {
       switch: [
@@ -49,6 +63,10 @@ const createPlatform = {
           is: 'google',
           then: googleMetadata(),
         },
+        {
+          is: 'github',
+          then: githubMetadata(),
+        },
       ],
     }).required(),
   }),
@@ -56,7 +74,7 @@ const createPlatform = {
 
 const connectPlatform = {
   query: Joi.object().keys({
-    platform: Joi.string().valid('discord', 'google', 'twitter'),
+    platform: Joi.string().valid('discord', 'google', 'twitter', 'github'),
     userId: Joi.string().custom(objectId).when('platform', {
       is: 'google',
       then: Joi.required(),
@@ -72,7 +90,7 @@ const connectPlatform = {
 
 const getPlatforms = {
   query: Joi.object().keys({
-    name: Joi.string().valid('twitter', 'discord', 'google'),
+    name: Joi.string().valid('twitter', 'discord', 'google', 'github'),
     community: Joi.string().custom(objectId).required(),
     sortBy: Joi.string(),
     limit: Joi.number().integer(),

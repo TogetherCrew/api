@@ -129,6 +129,9 @@
 //         community: communityOne._id,
 //         metadata: {
 //           userId: userOne._id.toHexString(),
+//           id: 'id',
+//           name: 'name',
+//           picture: 'picture'
 //         },
 //       };
 //       const res = await request(app)
@@ -140,7 +143,55 @@
 //       expect(res.body).toEqual({
 //         id: expect.anything(),
 //         name: newPlatform.name,
-//         metadata: { userId: userOne._id.toHexString() },
+//         metadata: { userId: userOne._id.toHexString(), ...newPlatform.metadata },
+//         community: communityOne._id.toHexString(),
+//         disconnectedAt: null,
+//         connectedAt: expect.anything(),
+//       });
+
+//       const dbPlatform = await Platform.findById(res.body.id);
+//       expect(dbPlatform).toBeDefined();
+//       expect(dbPlatform).toMatchObject({
+//         name: newPlatform.name,
+//         metadata: newPlatform.metadata,
+//       });
+
+//       const dbCommunity = await Community.findById(res.body.community);
+//       expect(dbCommunity).toMatchObject({
+//         id: communityOne._id.toHexString(),
+//         name: communityOne.name,
+//         avatarURL: communityOne.avatarURL,
+//         users: [userOne._id],
+//       });
+//     });
+
+//     test('should return 201 and successfully create new github platform if data is ok', async () => {
+//       userOne.communities = [communityOne._id];
+//       communityOne.users = [userOne._id];
+//       await insertCommunities([communityOne]);
+//       await insertUsers([userOne]);
+//       newPlatform = {
+//         name: 'github',
+//         community: communityOne._id,
+//         metadata: {
+//           installationId: 'id',
+//           account: {
+//             login: 'login',
+//             id: 'id',
+//             avatarUrl: 'url'
+//           }
+//         },
+//       };
+//       const res = await request(app)
+//         .post(`/api/v1/platforms`)
+//         .set('Authorization', `Bearer ${userOneAccessToken}`)
+//         .send(newPlatform)
+//         .expect(httpStatus.CREATED);
+
+//       expect(res.body).toEqual({
+//         id: expect.anything(),
+//         name: newPlatform.name,
+//         metadata: newPlatform.metadata,
 //         community: communityOne._id.toHexString(),
 //         disconnectedAt: null,
 //         connectedAt: expect.anything(),

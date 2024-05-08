@@ -3,8 +3,6 @@ paths:
     post:
       tags:
         - [Heatmap]
-        - Admin
-        - View
       summary: Get data for heatmap chart - discord only 
       security:
         - bearerAuth: []
@@ -64,8 +62,6 @@ paths:
     post:
       tags:
         - [Heatmap]
-        - Admin
-        - View
       summary: Get data for line graph - discord only 
       security:
         - bearerAuth: []

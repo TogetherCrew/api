@@ -3,8 +3,6 @@ paths:
     post:
       tags:
         - [Member-Activity]
-        - Admin
-        - View
       summary: Get data for active members composition line graph - discord only 
       security:
         - bearerAuth: []
@@ -88,8 +86,6 @@ paths:
     post:
       tags:
         - [Member-Activity]
-        - Admin
-        - View
       summary: Get data for disengaged memebres composition line graph - discord only 
       security:
         - bearerAuth: []
@@ -168,8 +164,6 @@ paths:
     post:
       tags:
         - [Member-Activity]
-        - Admin
-        - View
       summary: Get data for inactive members line graph - discord only 
       security:
         - bearerAuth: []
@@ -235,8 +229,6 @@ paths:
     post:
       tags:
         - [Member-Activity]
-        - Admin
-        - View
       summary: Get data for active members interactions graph - discord only 
       security:
         - bearerAuth: []
@@ -345,8 +337,6 @@ paths:
     get:
       tags:
         - [Member-Activity]
-        - Admin
-        - View
       summary: Get data for fragmentation score - discord only 
       security:
         - bearerAuth: []
@@ -396,8 +386,6 @@ paths:
     get:
       tags:
         - [Member-Activity]
-        - Admin
-        - View
       summary: Get data for decentralisation score - discord only 
       security:
         - bearerAuth: []
@@ -447,8 +435,6 @@ paths:
     post:
       tags:
         - [Member-Activity]
-        - Admin
-        - View
       summary: Get data for active members onboarding line graph - discord only 
       security:
         - bearerAuth: []
@@ -528,8 +514,6 @@ paths:
     post:
       tags:
         - [Member-Activity]
-        - Admin
-        - View
       summary: Get data for active members composition table - discord only 
       security:
         - bearerAuth: []
@@ -675,8 +659,6 @@ paths:
     post:
       tags:
         - [Member-Activity]
-        - Admin
-        - View
       summary: Get data for active members onboarding table - discord only 
       security:
         - bearerAuth: []
@@ -822,8 +804,6 @@ paths:
     post:
       tags:
         - [Member-Activity]
-        - Admin
-        - View
       summary: Get data for disengaged members composition table - discord only 
       security:
         - bearerAuth: []

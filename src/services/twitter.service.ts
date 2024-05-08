@@ -63,7 +63,7 @@ async function getUserFromTwitterAPI(accessToken: string): Promise<ITwitterUser>
       throw new Error();
     }
   } catch (error) {
-    logger.error({ accessToken, error }, 'Failed to get user from twitter API');
+    logger.error({ error }, 'Failed to get user from twitter API');
     throw new ApiError(590, 'Can not fetch from twitter API');
   }
 }

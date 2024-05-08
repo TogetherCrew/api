@@ -3,7 +3,6 @@ paths:
     post:
       tags:
         - Module
-        - Admin
       summary: Create a new module.
       description: Only Admins can create a new module
       security:
@@ -39,7 +38,6 @@ paths:
     get:
       tags:
         - Module
-        - Admin
       summary: Retrieve all modules.
       security:
         - bearerAuth: []
@@ -108,7 +106,6 @@ paths:
     get:
       tags:
         - Module
-        - Admin
       summary: Retrieve details of a specific module by its ID.
       security:
         - bearerAuth: []
@@ -136,7 +133,6 @@ paths:
     patch:
       tags:
         - Module
-        - Admin
       summary: Update a specific module by its ID.
       security:
         - bearerAuth: []
@@ -169,7 +165,7 @@ paths:
                           name:
                             type: string
                             description: Name of the platform.
-                            enum: ['discord', 'google']
+                            enum: ['discord', 'google','github']
                           metadata:
                             type: object
                             description: Metadata specific to the module and platform. Varies depending on the platform name and module name.
@@ -213,6 +209,13 @@ paths:
                                     items:
                                       type: string
                                 description: Metadata for the hivemind module on Google.
+                              - type: object
+                                properties:
+                                  repoIds:
+                                    type: array
+                                    items:
+                                      type: string
+                                description: Metadata for the hivemind module on Github.
               minProperties: 1
       responses:
         "200":
@@ -231,7 +234,6 @@ paths:
     delete:
       tags:
         - Module
-        - Admin
       summary: Delete a specific module by its ID.
       security:
         - bearerAuth: []

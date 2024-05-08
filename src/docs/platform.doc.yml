@@ -4,7 +4,7 @@ paths:
       tags:
         - Platform
       summary: Connect to a platform.
-      description: Connect to different platforms (Discord, Twitter, Google) with specific requirements based on the platform.
+      description: Connect to different platforms (Discord, Twitter, Google, Github) with specific requirements based on the platform.
       parameters:
         - name: platform
           in: query
@@ -16,6 +16,7 @@ paths:
               - discord
               - google
               - twitter  
+              - github
         - name: userId
           in: query
           required: false
@@ -41,7 +42,6 @@ paths:
     post:
       tags:
         - Platform
-        - Admin
       summary: Create a new platform.
       description: Allows administrators to create new platform entries with specific metadata requirements for each platform.
       security:
@@ -63,6 +63,7 @@ paths:
                     - twitter
                     - discord
                     - google
+                    - github
                   description: Name of the platform to create. Must be one of the supported platforms.
                 community:
                   type: string
@@ -95,12 +96,33 @@ paths:
                           nullable: true
                       description: Metadata for Twitter.
                     - type: object
-                      required: [userId]
+                      required: [userId, id, name, picture]
                       properties:
                         userId:
                           type: string
                           format: objectId
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        picture:
+                          type: string
                       description: Metadata for Google.
+                    - type: object
+                      required: [installationId, account]
+                      properties:
+                        installationId:
+                          type: string
+                        account:
+                          type: object
+                          properties:
+                            login:
+                              type: string
+                            id:
+                              type: string
+                            avatarUrl:
+                              type: string 
+                      description: Metadata for Github.
       responses:
         "201":
           description: Platform created successfully.
@@ -118,8 +140,6 @@ paths:
     get:
       tags:
         - Platform
-        - Admin
-        - View
       summary: Retrieve all platforms.
       security:
         - bearerAuth: []
@@ -131,6 +151,8 @@ paths:
             enum:
               - twitter
               - discord
+              - google
+              - github
         - in: query
           name: community
           schema:
@@ -189,8 +211,6 @@ paths:
     get:
       tags:
         - Platform
-        - Admin
-        - View
       summary: Retrieve details of a specific platform by its ID.
       security:
         - bearerAuth: []
@@ -218,7 +238,6 @@ paths:
     patch:
       tags:
         - Platform
-        - Admin
       summary: Update a specific platform by its ID.
       security:
         - bearerAuth: []
@@ -258,7 +277,6 @@ paths:
     delete:
       tags:
         - Platform
-        - Admin
       summary: Delete a specific platform by its ID.
       security:
         - bearerAuth: []
@@ -295,8 +313,6 @@ paths:
     post:
       tags:
         - Platform
-        - Admin
-        - View
       summary: Retrieve specific properties of a platform based on the platform ID and property type.
       security:
         - bearerAuth: []

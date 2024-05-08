@@ -1,4 +1,5 @@
 import { Response } from 'express';
+
 import {
   platformService,
   authService,
@@ -8,6 +9,7 @@ import {
   googleService,
   userService,
   tokenService,
+  githubService,
 } from '../services';
 import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync, pick, ApiError } from '../utils';
@@ -59,8 +61,15 @@ const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Re
     });
 
     aggregatedScopes = [...new Set(aggregatedScopes)];
-    const authUrl = await googleService.coreService.GoogleClientManager.generateAuthUrl('offline', aggregatedScopes);
+    const authUrl = await googleService.coreService.GoogleClientManager.generateAuthUrl(
+      'offline',
+      aggregatedScopes,
+      state,
+    );
     res.redirect(authUrl);
+  } else if (platform === 'github') {
+    const link = `${config.oAuth2.github.publickLink}/installations/select_target`;
+    res.redirect(link);
   }
 });
 
@@ -135,29 +144,73 @@ const connectGoogleCallback = catchAsync(async function (req: ISessionRequest, r
   const STATUS_CODE_SUCCESS = 1010;
   const STATUS_CODE_ERROR = 1011;
   const code = req.query.code as string;
-  // const returnedState = req.query.state as string;
-  // const storedState = req.session.state;
+  const returnedState = req.query.state as string;
+  const storedState = req.session.state;
   const userId = req.session.userId;
   let statusCode: number;
   try {
+    if (!code || !returnedState || returnedState !== storedState) {
+      throw new Error('Invalid code or state mismatch');
+    }
     const { tokens } = await googleService.coreService.GoogleClientManager.getTokens(code);
     let user = await userService.getUserById(userId);
 
-    if (!user) {
-      statusCode = STATUS_CODE_ERROR;
+    if (tokens.access_token) {
+      const userProifle = await googleService.coreService.getUserProfile(tokens.access_token);
+      if (!user) {
+        statusCode = STATUS_CODE_ERROR;
+      } else {
+        statusCode = STATUS_CODE_SUCCESS;
+        await tokenService.saveGoogleOAuth2Tokens(user.id, tokens);
+      }
+      const params = {
+        statusCode,
+        platform: 'google',
+        userId,
+        id: userProifle.id,
+        name: userProifle.name,
+        picture: userProifle.picture,
+      };
+      const query = querystring.stringify(params);
+      res.redirect(`${config.frontend.url}/callback?` + query);
     } else {
-      statusCode = STATUS_CODE_SUCCESS;
-      await tokenService.saveGoogleOAuth2Tokens(user.id, tokens);
+      throw new Error('Missing Access Token');
     }
+  } catch (err) {
+    logger.error({ err }, 'Failed in google connect callback');
     const params = {
-      statusCode,
-      platform: 'google',
-      userId,
+      statusCode: STATUS_CODE_ERROR,
+    };
+    const query = querystring.stringify(params);
+    res.redirect(`${config.frontend.url}/callback?` + query);
+  }
+});
+
+const connectGithubCallback = catchAsync(async function (req: ISessionRequest, res: Response) {
+  const STATUS_CODE_SUCCESS = 1012;
+  const STATUS_CODE_ERROR = 1013;
+  const code = req.query.code as string;
+  const installationId = req.query.installation_id as string;
+
+  try {
+    if (!code || !installationId) {
+      throw new Error('Invalid code or installationId');
+    }
+    const appAccessToken = await githubService.coreService.generateAppAccessToken();
+    const { token } = await githubService.coreService.getInstallationAccessToken(appAccessToken, installationId);
+    const installation = await await githubService.coreService.getInstallationDetails(appAccessToken, installationId);
+    const params = {
+      statusCode: STATUS_CODE_SUCCESS,
+      platform: 'github',
+      installationId: installation.id,
+      account_login: installation.account.login,
+      account_id: installation.account.id,
+      account_avatar_url: installation.account.avatar_url,
     };
     const query = querystring.stringify(params);
     res.redirect(`${config.frontend.url}/callback?` + query);
   } catch (err) {
-    logger.error({ err }, 'Failed in google connect callback');
+    logger.error({ err }, 'Failed in github connect callback');
     const params = {
       statusCode: STATUS_CODE_ERROR,
     };
@@ -278,6 +331,7 @@ export default {
   connectTwitterCallback,
   connectDiscordCallback,
   connectGoogleCallback,
+  connectGithubCallback,
   getPlatforms,
   getPlatform,
   updatePlatform,
