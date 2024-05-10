@@ -47,11 +47,11 @@ const githubMetadata = () => {
 
 const notionMetadata = () => {
   return Joi.object().keys({
-    workspaceId: Joi.string().required(),
-    workspaceName: Joi.string().required(),
-    workspaceIcon: Joi.string().required(),
-    botId: Joi.string().required(),
-    requestId: Joi.string().required(),
+    workspace_id: Joi.string().required(),
+    workspace_name: Joi.string().required(),
+    workspace_icon: Joi.string().required(),
+    bot_id: Joi.string().required(),
+    request_id: Joi.string().required(),
     owner: Joi.object().keys({
       type: Joi.string().required(),
       user: Joi.object().keys({
@@ -59,9 +59,8 @@ const notionMetadata = () => {
         object: Joi.string().required(),
         id: Joi.string().required(),
         name: Joi.string().required(),
-        avatarUrl: Joi.string().required(),
+        avatar_url: Joi.string().required(),
       }),
-
     }),
   });
 };
