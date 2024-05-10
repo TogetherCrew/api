@@ -26,53 +26,6 @@ const getModule = {
   }),
 };
 
-// const dynamicModuleUpdate = (req: Request) => {
-//   const module = req.module;
-//   if (module?.name === 'hivemind') {
-//     return {
-//       params: Joi.object().keys({
-//         moduleId: Joi.required().custom(objectId),
-//       }),
-//       body: Joi.object()
-//         .required()
-//         .keys({
-//           options: Joi.object()
-//             .required()
-//             .keys({
-//               platforms: Joi.array().items(
-//                 Joi.object().keys({
-//                   name: Joi.string().required().valid('discord'),
-//                   platform: Joi.string().custom(objectId).required(),
-//                   metadata: Joi.object()
-//                     .required()
-//                     .when('name', {
-//                       switch: [
-//                         {
-//                           is: 'discord',
-//                           then: Joi.object().keys({
-//                             answering: Joi.object().keys({
-//                               selectedChannels: Joi.array().items(Joi.string()).required(),
-//                             }),
-//                             learning: Joi.object().keys({
-//                               selectedChannels: Joi.array().items(Joi.string()).required(),
-//                               fromDate: Joi.date().required(),
-//                             }),
-//                           }),
-//                         },
-//                       ],
-//                       otherwise: Joi.any().forbidden(),
-//                     }),
-//                 }),
-//               ),
-//             }),
-//         }),
-//     };
-//   } else {
-//     req.allowInput = false;
-//     return {};
-//   }
-// };
-
 const deleteModule = {
   params: Joi.object().keys({
     moduleId: Joi.string().custom(objectId).required(),
@@ -105,6 +58,14 @@ const hivemindGithubMetadata = () => {
   });
 };
 
+const hivemindNotionMetadata = () => {
+  return Joi.object().keys({
+    pageIds: Joi.array().items(Joi.string()),
+    databaseIds: Joi.array().items(Joi.string()),
+  });
+};
+
+
 const hivemindOptions = () => {
   return Joi.object().keys({
     platforms: Joi.array().items(
@@ -125,6 +86,10 @@ const hivemindOptions = () => {
               is: 'github',
               then: hivemindGithubMetadata(),
             },
+            {
+              is: 'notion',
+              then: hivemindNotionMetadata(),
+            }
           ],
           otherwise: Joi.any().forbidden(),
         }).required(),
