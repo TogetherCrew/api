@@ -70,7 +70,7 @@ const hivemindOptions = () => {
   return Joi.object().keys({
     platforms: Joi.array().items(
       Joi.object().keys({
-        name: Joi.string().required().valid('discord', 'google', 'github'),
+        name: Joi.string().required().valid('discord', 'google', 'github', 'notion'),
         platform: Joi.string().custom(objectId).required(),
         metadata: Joi.when('name', {
           switch: [

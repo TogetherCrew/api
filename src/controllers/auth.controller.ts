@@ -29,7 +29,7 @@ const discordAuthorizeCallback = catchAsync(async function (req: ISessionRequest
     if (!code || !returnedState || returnedState !== storedState) {
       throw new Error('Invalid code or state mismatch');
     }
-    const discordOathCallback = await authService.exchangeCode(code, config.oAuth2.discord.callbackURI.authorize);
+    const discordOathCallback = await discordServices.coreService.exchangeCode(code);
     const discordUser = await discordServices.coreService.getUserFromDiscordAPI(discordOathCallback.access_token);
     let user = await userService.getUserByFilter({ discordId: discordUser.id });
 
