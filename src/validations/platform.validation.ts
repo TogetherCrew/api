@@ -45,9 +45,27 @@ const githubMetadata = () => {
   });
 };
 
+const notionMetadata = () => {
+  return Joi.object().keys({
+    workspaceId: Joi.string().required(),
+    workspaceName: Joi.string().required(),
+    workspaceIcon: Joi.string().required(),
+    botId: Joi.string().required(),
+    requestId: Joi.string().required(),
+    owner: Joi.object().keys({
+      ownerType: Joi.string().required(),
+      ownerUserObject: Joi.string().required(),
+      ownerUserId: Joi.string().required(),
+      ownerUserName: Joi.string().required(),
+      ownerUserAvatarUrl: Joi.string().required(),
+      ownerUserType: Joi.string().required(),
+    }),
+  });
+};
+
 const createPlatform = {
   body: Joi.object().keys({
-    name: Joi.string().required().valid('twitter', 'discord', 'google', 'github'),
+    name: Joi.string().required().valid('twitter', 'discord', 'google', 'github', 'notion'),
     community: Joi.string().custom(objectId).required(),
     metadata: Joi.when('name', {
       switch: [
@@ -67,6 +85,10 @@ const createPlatform = {
           is: 'github',
           then: githubMetadata(),
         },
+        {
+          is: 'notion',
+          then: notionMetadata(),
+        }
       ],
     }).required(),
   }),

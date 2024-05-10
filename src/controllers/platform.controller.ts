@@ -246,18 +246,17 @@ const connectNotionCallback = catchAsync(async function (req: ISessionRequest, r
     const params = {
       statusCode: STATUS_CODE_SUCCESS,
       platform: 'notion',
-      bot_id: data.bot_id,
-      workspace_name: data.workspace_name,
-      workspace_icon: data.workspace_icon,
-      workspace_id: data.workspace_id,
-      duplicated_template_id: data.duplicated_template_id,
-      request_id: data.request_id,
-      owner_type: data.owner.type,
-      owner_user_object: data.owner.user.object,
-      owner_user_id: data.owner.user.id,
-      owner_user_name: data.owner.user.name,
-      owner_user_avatar_url: data.owner.user.avatar_url,
-      owner_user_type: data.owner.user.type
+      botId: data.bot_id,
+      workspaceName: data.workspace_name,
+      workspaceIcon: data.workspace_icon,
+      workspaceId: data.workspace_id,
+      requestId: data.request_id,
+      ownerType: data.owner.type,
+      ownerUserObject: data.owner.user.object,
+      ownerUserId: data.owner.user.id,
+      ownerUserName: data.owner.user.name,
+      ownerUserAvatarUrl: data.owner.user.avatar_url,
+      ownerUserType: data.owner.user.type
     };
     const query = querystring.stringify(params);
     res.redirect(`${config.frontend.url}/callback?` + query);
