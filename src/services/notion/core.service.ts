@@ -1,0 +1,44 @@
+import fetch from 'node-fetch';
+import config from '../../config';
+import { ApiError } from '../../utils';
+import parentLogger from '../../config/logger';
+import httpStatus from 'http-status';
+
+const logger = parentLogger.child({ module: 'NotionCoreService' });
+
+/**
+ * exchange code with access token
+ * @param {string} code
+   @param {string} redirect_uri
+ */
+async function exchangeCode(code: string, redirect_uri: string) {
+    try {
+        const data = {
+            grant_type: 'authorization_code',
+            redirect_uri,
+            code,
+        };
+
+        const encoded = Buffer.from(`${config.oAuth2.notion.clientId}:${config.oAuth2.notion.clientSecret}`).toString("base64");
+
+        const response = await fetch('https://api.notion.com/v1/oauth/token', {
+            method: 'POST',
+            body: new URLSearchParams(data),
+            headers: { "Accept": "application/json", "Content-Type": "application/json", Authorization: `Basic ${encoded}` },
+        });
+        if (response.ok) {
+            return await response.json();
+        } else {
+            const errorResponse = await response.text();
+            logger.error({ error: errorResponse }, 'Failed to exchange notion code');
+            throw new Error(`Failed to exchange notion code: ${errorResponse}`);
+        }
+    } catch (error) {
+        logger.error({ redirect_uri, error }, 'Failed to exchange notion code');
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to exchange notion code');
+    }
+}
+
+export default {
+    exchangeCode
+};

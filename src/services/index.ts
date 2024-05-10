@@ -12,7 +12,7 @@ import announcementService from './announcement.service';
 import moduleService from './module.service';
 import googleService from './google';
 import githubService from './github';
-
+import notionService from './notion';
 export {
   userService,
   authService,
@@ -28,4 +28,5 @@ export {
   moduleService,
   googleService,
   githubService,
+  notionService
 };
