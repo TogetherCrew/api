@@ -30,6 +30,9 @@ const envVarsSchema = Joi.object()
     GITHUB_APP_CLIENT_ID: Joi.string().required().description('Github app client id'),
     GITHUB_APP_CLIENT_SECRET: Joi.string().required().description('Github app client secret'),
     GITHUB_APP_CONNECT_CALLBACK_URI: Joi.string().required().description('Github app connect callback uri'),
+    NOTION_CONNECT_CALLBACK_URI: Joi.string().required().description('Notion connect callback uri'),
+    NOTION_CLIENT_SECRET: Joi.string().required().description('Notion clinet id'),
+    NOTION_CLIENT_ID: Joi.string().required().description('Notion clinet secret'),
     JWT_SECRET: Joi.string().required().description('JWT secret key'),
     JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().default(30).description('minutes after which access tokens expire'),
     JWT_REFRESH_EXPIRATION_DAYS: Joi.number().default(30).description('days after which refresh tokens expire'),
@@ -116,6 +119,13 @@ export default {
       },
       appId: envVars.GITHUB_APP_ID,
       publickLink: envVars.GITHUB_APP_PUBLIC_LINK,
+    },
+    notion: {
+      clientId: envVars.NOTION_CLIENT_ID,
+      clientSecret: envVars.NOTION_CLIENT_SECRET,
+      callbackURI: {
+        connect: envVars.NOTION_CONNECT_CALLBACK_URI,
+      },
     },
   },
   jwt: {
