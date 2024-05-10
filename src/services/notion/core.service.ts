@@ -9,13 +9,12 @@ const logger = parentLogger.child({ module: 'NotionCoreService' });
 /**
  * exchange code with access token
  * @param {string} code
-   @param {string} redirect_uri
  */
-async function exchangeCode(code: string, redirect_uri: string) {
+async function exchangeCode(code: string) {
     try {
         const data = {
             grant_type: 'authorization_code',
-            redirect_uri,
+            redirect_uri: config.oAuth2.notion.callbackURI.connect,
             code,
         };
 
@@ -23,7 +22,7 @@ async function exchangeCode(code: string, redirect_uri: string) {
 
         const response = await fetch('https://api.notion.com/v1/oauth/token', {
             method: 'POST',
-            body: new URLSearchParams(data),
+            body: JSON.stringify(data),
             headers: { "Accept": "application/json", "Content-Type": "application/json", Authorization: `Basic ${encoded}` },
         });
         if (response.ok) {
@@ -34,7 +33,7 @@ async function exchangeCode(code: string, redirect_uri: string) {
             throw new Error(`Failed to exchange notion code: ${errorResponse}`);
         }
     } catch (error) {
-        logger.error({ redirect_uri, error }, 'Failed to exchange notion code');
+        logger.error({ redirect_uri: config.oAuth2.notion.callbackURI.connect, error }, 'Failed to exchange notion code');
         throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to exchange notion code');
     }
 }
