@@ -4,12 +4,12 @@ import {
   platformService,
   authService,
   twitterService,
-  communityService,
   discordServices,
   googleService,
   userService,
   tokenService,
   githubService,
+  notionService,
 } from '../services';
 import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync, pick, ApiError } from '../utils';
@@ -18,8 +18,6 @@ import { ISessionRequest, IAuthAndPlatform } from '../interfaces';
 import config from '../config';
 import httpStatus from 'http-status';
 import querystring from 'querystring';
-import { oauth2 } from 'googleapis/build/src/apis/oauth2';
-import { token } from 'morgan';
 import parentLogger from '../config/logger';
 
 const logger = parentLogger.child({ module: 'PlatformController' });
@@ -72,7 +70,7 @@ const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Re
     res.redirect(link);
   }
   else if (platform === 'notion') {
-    console.log(config.oAuth2.notion.callbackURI, config.oAuth2.notion.clientId)
+    req.session.userId = req.query.userId;
     const link = `https://api.notion.com/v1/oauth/authorize?client_id=${config.oAuth2.notion.clientId}&response_type=code&owner=user&redirect_uri=${config.oAuth2.notion.callbackURI.connect}&state=${state}`;
     res.redirect(link);
   }
@@ -89,7 +87,7 @@ const connectDiscordCallback = catchAsync(async function (req: ISessionRequest, 
       throw new Error('Invalid code or state mismatch');
     }
 
-    const discordOathCallback = await authService.exchangeCode(code, config.oAuth2.discord.callbackURI.connect);
+    const discordOathCallback = await discordServices.coreService.exchangeCode(code);
     const params = {
       statusCode: STATUS_CODE_SUCCESS,
       platform: 'discord',
@@ -154,7 +152,7 @@ const connectGoogleCallback = catchAsync(async function (req: ISessionRequest, r
   const userId = req.session.userId;
   let statusCode: number;
   try {
-    if (!code || !returnedState || returnedState !== storedState) {
+    if (!code || !returnedState || returnedState !== storedState || !userId) {
       throw new Error('Invalid code or state mismatch');
     }
     const { tokens } = await googleService.coreService.GoogleClientManager.getTokens(code);
@@ -226,20 +224,40 @@ const connectGithubCallback = catchAsync(async function (req: ISessionRequest, r
 
 
 const connectNotionCallback = catchAsync(async function (req: ISessionRequest, res: Response) {
-  const STATUS_CODE_SUCCESS = 1012;
-  const STATUS_CODE_ERROR = 1013;
+  const STATUS_CODE_SUCCESS = 1014;
+  const STATUS_CODE_ERROR = 1015;
   const code = req.query.code as string;
   const returnedState = req.query.state as string;
   const storedState = req.session.state;
+  const userId = req.session.userId;
+  let statusCode: number;
   try {
-    console.log(code, returnedState, storedState)
-
-    if (!code || !returnedState || returnedState !== storedState) {
+    if (!code || !returnedState || returnedState !== storedState || !userId) {
       throw new Error('Invalid code or state mismatch');
+    }
+    const data = await notionService.coreService.exchangeCode(code);
+    let user = await userService.getUserById(userId);
+    if (!user) {
+      statusCode = STATUS_CODE_ERROR;
+    } else {
+      statusCode = STATUS_CODE_SUCCESS;
+      await tokenService.saveNotionAccessToken(user.id, data.access_token);
     }
     const params = {
       statusCode: STATUS_CODE_SUCCESS,
       platform: 'notion',
+      bot_id: data.bot_id,
+      workspace_name: data.workspace_name,
+      workspace_icon: data.workspace_icon,
+      workspace_id: data.workspace_id,
+      duplicated_template_id: data.duplicated_template_id,
+      request_id: data.request_id,
+      owner_type: data.owner.type,
+      owner_user_object: data.owner.user.object,
+      owner_user_id: data.owner.user.id,
+      owner_user_name: data.owner.user.name,
+      owner_user_avatar_url: data.owner.user.avatar_url,
+      owner_user_type: data.owner.user.type
     };
     const query = querystring.stringify(params);
     res.redirect(`${config.frontend.url}/callback?` + query);

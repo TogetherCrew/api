@@ -76,7 +76,7 @@ const connectPlatform = {
   query: Joi.object().keys({
     platform: Joi.string().valid('discord', 'google', 'twitter', 'github', 'notion'),
     userId: Joi.string().custom(objectId).when('platform', {
-      is: 'google',
+      is: Joi.string().valid('google', 'notion'),
       then: Joi.required(),
       otherwise: Joi.forbidden(),
     }),

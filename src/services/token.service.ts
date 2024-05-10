@@ -5,10 +5,10 @@ import httpStatus from 'http-status';
 import config from '../config';
 import { tokenTypes } from '../config/tokens';
 import { ApiError } from '../utils';
-import authService from './auth.service';
 import { IToken, Token, IUser } from '@togethercrew.dev/db';
 import { IDiscordOAuth2EchangeCode, IAuthTokens } from 'src/interfaces';
 import { Auth } from 'googleapis';
+import discordServices from './discord';
 /**
  * Generate token
  * @param {IUser} user
@@ -160,7 +160,7 @@ async function getDiscordOAuth2Tokens(userId: Types.ObjectId) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'discord auth tokens missed');
   }
   if (new Date() > DiscordAccessTokenDoc.expires) {
-    const discordAuths = await authService.refreshDiscordAuth(DiscordRefreshTokenDoc.token);
+    const discordAuths = await discordServices.coreService.refreshAuth(DiscordRefreshTokenDoc.token);
     return saveDiscordOAuth2Tokens(userId, discordAuths);
   }
 
@@ -176,6 +176,19 @@ async function getDiscordOAuth2Tokens(userId: Types.ObjectId) {
   };
 }
 
+
+/**
+ * save notion access token
+ * @param {Types.ObjectId} userId
+ * @param {String} accessToken
+ * @returns {Promise<Object>}
+ */
+async function saveNotionAccessToken(userId: Types.ObjectId, accessToken: string) {
+  const accessTokenExpires = moment('9999-12-31T23:59:59Z');
+  await saveToken(accessToken, userId, accessTokenExpires, tokenTypes.NOTION_ACCESS);
+}
+
+
 export default {
   generateToken,
   verifyToken,
@@ -184,4 +197,5 @@ export default {
   getDiscordOAuth2Tokens,
   saveDiscordOAuth2Tokens,
   saveGoogleOAuth2Tokens,
+  saveNotionAccessToken
 };
