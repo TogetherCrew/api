@@ -176,7 +176,6 @@ async function getDiscordOAuth2Tokens(userId: Types.ObjectId) {
   };
 }
 
-
 /**
  * save notion access token
  * @param {Types.ObjectId} userId
@@ -188,7 +187,6 @@ async function saveNotionAccessToken(userId: Types.ObjectId, accessToken: string
   await saveToken(accessToken, userId, accessTokenExpires, tokenTypes.NOTION_ACCESS);
 }
 
-
 export default {
   generateToken,
   verifyToken,
@@ -197,5 +195,5 @@ export default {
   getDiscordOAuth2Tokens,
   saveDiscordOAuth2Tokens,
   saveGoogleOAuth2Tokens,
-  saveNotionAccessToken
+  saveNotionAccessToken,
 };

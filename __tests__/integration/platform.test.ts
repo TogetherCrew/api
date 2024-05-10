@@ -131,7 +131,7 @@ describe('Platform routes', () => {
           userId: userOne._id.toHexString(),
           id: 'id',
           name: 'name',
-          picture: 'picture'
+          picture: 'picture',
         },
       };
       const res = await request(app)
@@ -178,8 +178,8 @@ describe('Platform routes', () => {
           account: {
             login: 'login',
             id: 'id',
-            avatarUrl: 'url'
-          }
+            avatarUrl: 'url',
+          },
         },
       };
       const res = await request(app)
@@ -213,7 +213,6 @@ describe('Platform routes', () => {
       });
     });
 
-
     test('should return 201 and successfully create new notion platform if data is ok', async () => {
       userOne.communities = [communityOne._id];
       communityOne.users = [userOne._id];
@@ -238,9 +237,9 @@ describe('Platform routes', () => {
                 id: 'id',
                 name: 'name',
                 avatar_url: 'avatarURL',
-              }
-            }
-          }
+              },
+            },
+          },
         },
       };
       const res = await request(app)
@@ -323,7 +322,9 @@ describe('Platform routes', () => {
         .send(newPlatform)
         .expect(httpStatus.BAD_REQUEST);
 
-      expect(res.body.message).toBe(`Platform ${newPlatform.name} with specified metadata is already connected to this community.`);
+      expect(res.body.message).toBe(
+        `Platform ${newPlatform.name} with specified metadata is already connected to this community.`,
+      );
     });
 
     test('should return 400 error if user trys to connect a same platform', async () => {

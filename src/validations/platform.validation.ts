@@ -64,7 +64,7 @@ const notionMetadata = () => {
           avatar_url: Joi.string().required(),
         }),
       }),
-    }
+    },
   });
 };
 
@@ -93,7 +93,7 @@ const createPlatform = {
         {
           is: 'notion',
           then: notionMetadata(),
-        }
+        },
       ],
     }).required(),
   }),
@@ -102,11 +102,13 @@ const createPlatform = {
 const connectPlatform = {
   query: Joi.object().keys({
     platform: Joi.string().valid('discord', 'google', 'twitter', 'github', 'notion'),
-    userId: Joi.string().custom(objectId).when('platform', {
-      is: Joi.string().valid('google', 'notion'),
-      then: Joi.required(),
-      otherwise: Joi.forbidden(),
-    }),
+    userId: Joi.string()
+      .custom(objectId)
+      .when('platform', {
+        is: Joi.string().valid('google', 'notion'),
+        then: Joi.required(),
+        otherwise: Joi.forbidden(),
+      }),
     scopes: Joi.array().items(Joi.string().valid('googleDrive')).when('platform', {
       is: 'google',
       then: Joi.required(),

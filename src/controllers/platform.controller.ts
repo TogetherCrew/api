@@ -68,8 +68,7 @@ const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Re
   } else if (platform === 'github') {
     const link = `${config.oAuth2.github.publickLink}/installations/select_target`;
     res.redirect(link);
-  }
-  else if (platform === 'notion') {
+  } else if (platform === 'notion') {
     req.session.userId = req.query.userId;
     const link = `https://api.notion.com/v1/oauth/authorize?client_id=${config.oAuth2.notion.clientId}&response_type=code&owner=user&redirect_uri=${config.oAuth2.notion.callbackURI.connect}&state=${state}`;
     res.redirect(link);
@@ -222,7 +221,6 @@ const connectGithubCallback = catchAsync(async function (req: ISessionRequest, r
   }
 });
 
-
 const connectNotionCallback = catchAsync(async function (req: ISessionRequest, res: Response) {
   const STATUS_CODE_SUCCESS = 1014;
   const STATUS_CODE_ERROR = 1015;
@@ -256,7 +254,7 @@ const connectNotionCallback = catchAsync(async function (req: ISessionRequest, r
       owner_user_id: data.owner.user.id,
       owner_user_name: data.owner.user.name,
       owner_user_avatar_url: data.owner.user.avatar_url,
-      owner_user_type: data.owner.user.type
+      owner_user_type: data.owner.user.type,
     };
     const query = querystring.stringify(params);
     res.redirect(`${config.frontend.url}/callback?` + query);
@@ -269,7 +267,6 @@ const connectNotionCallback = catchAsync(async function (req: ISessionRequest, r
     res.redirect(`${config.frontend.url}/callback?` + query);
   }
 });
-
 
 const requestAccessCallback = catchAsync(async function (req: ISessionRequest, res: Response) {
   const STATUS_CODE_SUCCESS = 1008;

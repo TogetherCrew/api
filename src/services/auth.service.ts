@@ -12,7 +12,6 @@ import parentLogger from '../config/logger';
 
 const logger = parentLogger.child({ module: 'AuthService' });
 
-
 // /**
 //  * exchange twitter code with access token
 //  * @param {string} code

@@ -28,5 +28,5 @@ export {
   moduleService,
   googleService,
   githubService,
-  notionService
+  notionService,
 };

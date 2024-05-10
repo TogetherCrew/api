@@ -354,5 +354,5 @@ export default {
   getRequirePermissionsForModule,
   getCombinedPermissionsValue,
   getPermissionsStatus,
-  refreshAuth
+  refreshAuth,
 };

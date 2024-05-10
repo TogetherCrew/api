@@ -48,7 +48,7 @@ import mongoose from 'mongoose';
 setupTestDB();
 
 describe('Module routes', () => {
-  beforeAll(async () => { });
+  beforeAll(async () => {});
   beforeEach(async () => {
     userOne.communities = [communityOne._id, communityTwo._id];
     userTwo.communities = [communityThree._id];
@@ -582,7 +582,7 @@ describe('Module routes', () => {
             platform: platformOne._id,
             metadata: {
               pageIds: ['1'],
-              databaseIds: ['1']
+              databaseIds: ['1'],
             },
             name: 'notion',
           },
@@ -619,9 +619,9 @@ describe('Module routes', () => {
               platform: platformOne._id.toHexString(),
               metadata: {
                 pageIds: ['1'],
-                databaseIds: ['1']
+                databaseIds: ['1'],
               },
-              name: 'notion'
+              name: 'notion',
             },
           ],
         },

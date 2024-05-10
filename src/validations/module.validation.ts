@@ -65,7 +65,6 @@ const hivemindNotionMetadata = () => {
   });
 };
 
-
 const hivemindOptions = () => {
   return Joi.object().keys({
     platforms: Joi.array().items(
@@ -89,7 +88,7 @@ const hivemindOptions = () => {
             {
               is: 'notion',
               then: hivemindNotionMetadata(),
-            }
+            },
           ],
           otherwise: Joi.any().forbidden(),
         }).required(),

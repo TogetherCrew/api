@@ -11,33 +11,35 @@ const logger = parentLogger.child({ module: 'NotionCoreService' });
  * @param {string} code
  */
 async function exchangeCode(code: string) {
-    try {
-        const data = {
-            grant_type: 'authorization_code',
-            redirect_uri: config.oAuth2.notion.callbackURI.connect,
-            code,
-        };
+  try {
+    const data = {
+      grant_type: 'authorization_code',
+      redirect_uri: config.oAuth2.notion.callbackURI.connect,
+      code,
+    };
 
-        const encoded = Buffer.from(`${config.oAuth2.notion.clientId}:${config.oAuth2.notion.clientSecret}`).toString("base64");
+    const encoded = Buffer.from(`${config.oAuth2.notion.clientId}:${config.oAuth2.notion.clientSecret}`).toString(
+      'base64',
+    );
 
-        const response = await fetch('https://api.notion.com/v1/oauth/token', {
-            method: 'POST',
-            body: JSON.stringify(data),
-            headers: { "Accept": "application/json", "Content-Type": "application/json", Authorization: `Basic ${encoded}` },
-        });
-        if (response.ok) {
-            return await response.json();
-        } else {
-            const errorResponse = await response.text();
-            logger.error({ error: errorResponse }, 'Failed to exchange notion code');
-            throw new Error(`Failed to exchange notion code: ${errorResponse}`);
-        }
-    } catch (error) {
-        logger.error({ redirect_uri: config.oAuth2.notion.callbackURI.connect, error }, 'Failed to exchange notion code');
-        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to exchange notion code');
+    const response = await fetch('https://api.notion.com/v1/oauth/token', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Basic ${encoded}` },
+    });
+    if (response.ok) {
+      return await response.json();
+    } else {
+      const errorResponse = await response.text();
+      logger.error({ error: errorResponse }, 'Failed to exchange notion code');
+      throw new Error(`Failed to exchange notion code: ${errorResponse}`);
     }
+  } catch (error) {
+    logger.error({ redirect_uri: config.oAuth2.notion.callbackURI.connect, error }, 'Failed to exchange notion code');
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to exchange notion code');
+  }
 }
 
 export default {
-    exchangeCode
+  exchangeCode,
 };
