@@ -53,12 +53,15 @@ const notionMetadata = () => {
     botId: Joi.string().required(),
     requestId: Joi.string().required(),
     owner: Joi.object().keys({
-      ownerType: Joi.string().required(),
-      ownerUserObject: Joi.string().required(),
-      ownerUserId: Joi.string().required(),
-      ownerUserName: Joi.string().required(),
-      ownerUserAvatarUrl: Joi.string().required(),
-      ownerUserType: Joi.string().required(),
+      type: Joi.string().required(),
+      user: Joi.object().keys({
+        type: Joi.string().required(),
+        object: Joi.string().required(),
+        id: Joi.string().required(),
+        name: Joi.string().required(),
+        avatarUrl: Joi.string().required(),
+      }),
+
     }),
   });
 };
