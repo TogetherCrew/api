@@ -71,6 +71,11 @@ const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Re
     const link = `${config.oAuth2.github.publickLink}/installations/select_target`;
     res.redirect(link);
   }
+  else if (platform === 'notion') {
+    console.log(config.oAuth2.notion.callbackURI, config.oAuth2.notion.clientId)
+    const link = `https://api.notion.com/v1/oauth/authorize?client_id=${config.oAuth2.notion.clientId}&response_type=code&owner=user&redirect_uri=${config.oAuth2.notion.callbackURI.connect}&state=${state}`;
+    res.redirect(link);
+  }
 });
 
 const connectDiscordCallback = catchAsync(async function (req: ISessionRequest, res: Response) {
@@ -219,6 +224,36 @@ const connectGithubCallback = catchAsync(async function (req: ISessionRequest, r
   }
 });
 
+
+const connectNotionCallback = catchAsync(async function (req: ISessionRequest, res: Response) {
+  const STATUS_CODE_SUCCESS = 1012;
+  const STATUS_CODE_ERROR = 1013;
+  const code = req.query.code as string;
+  const returnedState = req.query.state as string;
+  const storedState = req.session.state;
+  try {
+    console.log(code, returnedState, storedState)
+
+    if (!code || !returnedState || returnedState !== storedState) {
+      throw new Error('Invalid code or state mismatch');
+    }
+    const params = {
+      statusCode: STATUS_CODE_SUCCESS,
+      platform: 'notion',
+    };
+    const query = querystring.stringify(params);
+    res.redirect(`${config.frontend.url}/callback?` + query);
+  } catch (err) {
+    logger.error({ err }, 'Failed in notion connect callback');
+    const params = {
+      statusCode: STATUS_CODE_ERROR,
+    };
+    const query = querystring.stringify(params);
+    res.redirect(`${config.frontend.url}/callback?` + query);
+  }
+});
+
+
 const requestAccessCallback = catchAsync(async function (req: ISessionRequest, res: Response) {
   const STATUS_CODE_SUCCESS = 1008;
   const STATUS_CODE_ERROR = 1009;
@@ -332,6 +367,7 @@ export default {
   connectDiscordCallback,
   connectGoogleCallback,
   connectGithubCallback,
+  connectNotionCallback,
   getPlatforms,
   getPlatform,
   updatePlatform,
