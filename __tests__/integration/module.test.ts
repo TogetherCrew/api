@@ -571,6 +571,72 @@
 //       // });
 //     });
 
+//     test('should return 200 and successfully update hivemind module if platform is notion', async () => {
+//       await insertCommunities([communityOne, communityTwo, communityThree]);
+//       await insertUsers([userOne, userTwo]);
+//       await insertModules([moduleOne, moduleTwo]);
+
+//       updateBody.options = {
+//         platforms: [
+//           {
+//             platform: platformOne._id,
+//             metadata: {
+//               pageIds: ['1'],
+//               databaseIds: ['1'],
+//             },
+//             name: 'notion',
+//           },
+//         ],
+//       };
+//       const res = await request(app)
+//         .patch(`/api/v1/modules/${moduleTwo._id}`)
+//         .set('Authorization', `Bearer ${userOneAccessToken}`)
+//         .send(updateBody)
+//         .expect(httpStatus.OK);
+
+//       expect(res.body).toEqual({
+//         id: moduleTwo._id.toHexString(),
+//         name: moduleTwo.name,
+//         community: communityTwo._id.toHexString(),
+//         options: {
+//           platforms: [
+//             {
+//               _id: expect.anything(),
+//               platform: expect.anything(),
+//               metadata: {
+//                 answering: {
+//                   selectedChannels: ['1234'],
+//                 },
+//                 learning: {
+//                   selectedChannels: ['8765', '1234'],
+//                   fromDate: new Date('2024-03-18T07:46:51.493+00:00').toISOString(),
+//                 },
+//               },
+//               name: 'discord',
+//             },
+//             {
+//               _id: expect.anything(),
+//               platform: platformOne._id.toHexString(),
+//               metadata: {
+//                 pageIds: ['1'],
+//                 databaseIds: ['1'],
+//               },
+//               name: 'notion',
+//             },
+//           ],
+//         },
+//       });
+
+//       const dbModule = await Module.findById(res.body.id);
+//       expect(dbModule).toBeDefined();
+//       // TODO: fix below code
+//       // expect(dbModule?.options).toMatchObject({
+//       //     id: moduleOne._id.toHexString(),
+//       //     name: moduleOne.name,
+//       //     community: communityOne._id.toHexString(),
+//       //     options: updateBody.options
+//       // });
+//     });
 //     test('should return 401 error if access token is missing', async () => {
 //       await insertUsers([userOne]);
 //       await request(app).patch(`/api/v1/modules/${moduleOne._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);

@@ -7,4 +7,5 @@ export const tokenTypes = {
   TWITTER_REFRESH: 'twitter_refresh',
   GOOGLE_ACCESS: 'google_access',
   GOOGLE_REFRESH: 'google_refresh',
+  NOTION_ACCESS: 'notion_access',
 };

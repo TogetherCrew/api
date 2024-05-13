@@ -12,68 +12,6 @@ import parentLogger from '../config/logger';
 
 const logger = parentLogger.child({ module: 'AuthService' });
 
-/**
- * exchange discord code with access token
- * @param {string} code
-   @param {string} redirect_uri
- * @returns {Promise<IDiscordOAuth2EchangeCode>}
- */
-async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscordOAuth2EchangeCode> {
-  try {
-    const data = {
-      client_id: config.oAuth2.discord.clientId,
-      client_secret: config.oAuth2.discord.clientSecret,
-      grant_type: 'authorization_code',
-      redirect_uri,
-      code,
-    };
-
-    const response = await fetch('https://discord.com/api/oauth2/token', {
-      method: 'POST',
-      body: new URLSearchParams(data),
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    });
-    if (response.ok) {
-      return await response.json();
-    } else {
-      throw new Error(await response.json());
-    }
-  } catch (error) {
-    logger.error({ code, redirect_uri, error }, 'Failed to exchange discord code');
-    throw new ApiError(590, 'Can not fetch from discord API');
-  }
-}
-
-/**
- * refresh token
- * @param {string} refreshToken
- * @returns {Promise<IDiscordOAuth2EchangeCode>}
- */
-async function refreshDiscordAuth(refreshToken: string): Promise<IDiscordOAuth2EchangeCode> {
-  try {
-    const data = {
-      client_id: config.oAuth2.discord.clientId,
-      client_secret: config.oAuth2.discord.clientSecret,
-      grant_type: 'refresh_token',
-      refresh_token: refreshToken,
-    };
-
-    const response = await fetch('https://discord.com/api/oauth2/token', {
-      method: 'POST',
-      body: new URLSearchParams(data),
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    });
-    if (response.ok) {
-      return await response.json();
-    } else {
-      throw new Error();
-    }
-  } catch (error) {
-    logger.error({ error }, 'Failed to refresh discord auth');
-    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Can not fetch from discord API');
-  }
-}
-
 // /**
 //  * exchange twitter code with access token
 //  * @param {string} code
@@ -176,8 +114,6 @@ async function refreshAuth(refreshToken: string) {
 }
 
 export default {
-  exchangeCode,
-  refreshDiscordAuth,
   logout,
   refreshAuth,
 };

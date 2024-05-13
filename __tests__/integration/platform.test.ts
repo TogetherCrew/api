@@ -131,7 +131,7 @@
 //           userId: userOne._id.toHexString(),
 //           id: 'id',
 //           name: 'name',
-//           picture: 'picture'
+//           picture: 'picture',
 //         },
 //       };
 //       const res = await request(app)
@@ -178,8 +178,8 @@
 //           account: {
 //             login: 'login',
 //             id: 'id',
-//             avatarUrl: 'url'
-//           }
+//             avatarUrl: 'url',
+//           },
 //         },
 //       };
 //       const res = await request(app)
@@ -192,6 +192,64 @@
 //         id: expect.anything(),
 //         name: newPlatform.name,
 //         metadata: newPlatform.metadata,
+//         community: communityOne._id.toHexString(),
+//         disconnectedAt: null,
+//         connectedAt: expect.anything(),
+//       });
+
+//       const dbPlatform = await Platform.findById(res.body.id);
+//       expect(dbPlatform).toBeDefined();
+//       expect(dbPlatform).toMatchObject({
+//         name: newPlatform.name,
+//         metadata: newPlatform.metadata,
+//       });
+
+//       const dbCommunity = await Community.findById(res.body.community);
+//       expect(dbCommunity).toMatchObject({
+//         id: communityOne._id.toHexString(),
+//         name: communityOne.name,
+//         avatarURL: communityOne.avatarURL,
+//         users: [userOne._id],
+//       });
+//     });
+
+//     test('should return 201 and successfully create new notion platform if data is ok', async () => {
+//       userOne.communities = [communityOne._id];
+//       communityOne.users = [userOne._id];
+//       await insertCommunities([communityOne]);
+//       await insertUsers([userOne]);
+//       newPlatform = {
+//         name: 'notion',
+//         community: communityOne._id,
+//         metadata: {
+//           userId: userOne._id.toHexString(),
+//           bot_id: 'botId',
+//           request_id: 'requestId',
+//           workspace_name: 'wsn',
+//           workspace_icon: 'wsi',
+//           workspace_id: 'wsId',
+//           owner: {
+//             type: 'type',
+//             user: {
+//               type: 'user',
+//               object: 'object',
+//               id: 'id',
+//               name: 'name',
+//               avatar_url: 'avatarURL',
+//             },
+//           },
+//         },
+//       };
+//       const res = await request(app)
+//         .post(`/api/v1/platforms`)
+//         .set('Authorization', `Bearer ${userOneAccessToken}`)
+//         .send(newPlatform)
+//         .expect(httpStatus.CREATED);
+
+//       expect(res.body).toEqual({
+//         id: expect.anything(),
+//         name: newPlatform.name,
+//         metadata: { userId: userOne._id.toHexString(), ...newPlatform.metadata },
 //         community: communityOne._id.toHexString(),
 //         disconnectedAt: null,
 //         connectedAt: expect.anything(),
@@ -262,7 +320,9 @@
 //         .send(newPlatform)
 //         .expect(httpStatus.BAD_REQUEST);
 
-//       expect(res.body.message).toBe(`Platform ${newPlatform.name} with specified metadata is already connected to this community.`);
+//       expect(res.body.message).toBe(
+//         `Platform ${newPlatform.name} with specified metadata is already connected to this community.`,
+//       );
 //     });
 
 //     test('should return 400 error if user trys to connect a same platform', async () => {

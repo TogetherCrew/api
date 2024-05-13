@@ -165,7 +165,7 @@ paths:
                           name:
                             type: string
                             description: Name of the platform.
-                            enum: ['discord', 'google','github']
+                            enum: ['discord', 'google','github','notion']
                           metadata:
                             type: object
                             description: Metadata specific to the module and platform. Varies depending on the platform name and module name.
@@ -216,6 +216,17 @@ paths:
                                     items:
                                       type: string
                                 description: Metadata for the hivemind module on Github.
+                              - type: object
+                                properties:
+                                  pageIds:
+                                    type: array
+                                    items:
+                                      type: string
+                                  databaseIds:
+                                    type: array
+                                    items:
+                                      type: string
+                                description: Metadata for the hivemind module on Notion.
               minProperties: 1
       responses:
         "200":

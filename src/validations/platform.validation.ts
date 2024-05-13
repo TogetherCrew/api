@@ -45,9 +45,30 @@ const githubMetadata = () => {
   });
 };
 
+const notionMetadata = () => {
+  return Joi.object().keys({
+    userId: Joi.string().custom(objectId).required(),
+    workspace_id: Joi.string().required(),
+    workspace_name: Joi.string().required(),
+    workspace_icon: Joi.string().required(),
+    bot_id: Joi.string().required(),
+    request_id: Joi.string().required(),
+    owner: Joi.object().keys({
+      type: Joi.string().required(),
+      user: Joi.object().keys({
+        type: Joi.string().required(),
+        object: Joi.string().required(),
+        id: Joi.string().required(),
+        name: Joi.string().required(),
+        avatar_url: Joi.string().required(),
+      }),
+    }),
+  });
+};
+
 const createPlatform = {
   body: Joi.object().keys({
-    name: Joi.string().required().valid('twitter', 'discord', 'google', 'github'),
+    name: Joi.string().required().valid('twitter', 'discord', 'google', 'github', 'notion'),
     community: Joi.string().custom(objectId).required(),
     metadata: Joi.when('name', {
       switch: [
@@ -67,6 +88,10 @@ const createPlatform = {
           is: 'github',
           then: githubMetadata(),
         },
+        {
+          is: 'notion',
+          then: notionMetadata(),
+        },
       ],
     }).required(),
   }),
@@ -74,12 +99,14 @@ const createPlatform = {
 
 const connectPlatform = {
   query: Joi.object().keys({
-    platform: Joi.string().valid('discord', 'google', 'twitter', 'github'),
-    userId: Joi.string().custom(objectId).when('platform', {
-      is: 'google',
-      then: Joi.required(),
-      otherwise: Joi.forbidden(),
-    }),
+    platform: Joi.string().valid('discord', 'google', 'twitter', 'github', 'notion'),
+    userId: Joi.string()
+      .custom(objectId)
+      .when('platform', {
+        is: Joi.string().valid('google', 'notion'),
+        then: Joi.required(),
+        otherwise: Joi.forbidden(),
+      }),
     scopes: Joi.array().items(Joi.string().valid('googleDrive')).when('platform', {
       is: 'google',
       then: Joi.required(),
