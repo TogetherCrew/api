@@ -147,7 +147,7 @@ function getMetadataKey(platformName: string): string {
     case 'github':
       return 'installationId';
     case 'notion':
-      return 'workspaceId';
+      return 'workspace_id';
     default:
       throw new Error('Unsupported platform');
   }

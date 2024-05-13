@@ -48,23 +48,21 @@ const githubMetadata = () => {
 const notionMetadata = () => {
   return Joi.object().keys({
     userId: Joi.string().custom(objectId).required(),
-    notionData: {
-      workspace_id: Joi.string().required(),
-      workspace_name: Joi.string().required(),
-      workspace_icon: Joi.string().required(),
-      bot_id: Joi.string().required(),
-      request_id: Joi.string().required(),
-      owner: Joi.object().keys({
+    workspace_id: Joi.string().required(),
+    workspace_name: Joi.string().required(),
+    workspace_icon: Joi.string().required(),
+    bot_id: Joi.string().required(),
+    request_id: Joi.string().required(),
+    owner: Joi.object().keys({
+      type: Joi.string().required(),
+      user: Joi.object().keys({
         type: Joi.string().required(),
-        user: Joi.object().keys({
-          type: Joi.string().required(),
-          object: Joi.string().required(),
-          id: Joi.string().required(),
-          name: Joi.string().required(),
-          avatar_url: Joi.string().required(),
-        }),
+        object: Joi.string().required(),
+        id: Joi.string().required(),
+        name: Joi.string().required(),
+        avatar_url: Joi.string().required(),
       }),
-    },
+    }),
   });
 };
 

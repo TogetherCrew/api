@@ -86,7 +86,10 @@ const connectDiscordCallback = catchAsync(async function (req: ISessionRequest, 
       throw new Error('Invalid code or state mismatch');
     }
 
-    const discordOathCallback = await discordServices.coreService.exchangeCode(code);
+    const discordOathCallback = await discordServices.coreService.exchangeCode(
+      code,
+      config.oAuth2.discord.callbackURI.connect,
+    );
     const params = {
       statusCode: STATUS_CODE_SUCCESS,
       platform: 'discord',

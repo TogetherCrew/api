@@ -131,15 +131,16 @@ async function leaveBotFromGuild(guildId: Snowflake) {
 /**
  * exchange discord code with access token
  * @param {string} code
+ * @param {string} redirect_uri
  * @returns {Promise<IDiscordOAuth2EchangeCode>}
  */
-async function exchangeCode(code: string): Promise<IDiscordOAuth2EchangeCode> {
+async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscordOAuth2EchangeCode> {
   try {
     const data = {
       client_id: config.oAuth2.discord.clientId,
       client_secret: config.oAuth2.discord.clientSecret,
       grant_type: 'authorization_code',
-      redirect_uri: config.oAuth2.discord.callbackURI.connect,
+      redirect_uri,
       code,
     };
 
