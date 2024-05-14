@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import { objectId } from './custom.validation';
+import { PlatformNames } from '@togethercrew.dev/db';
 
 const createCommunity = {
   body: Joi.object().keys({
@@ -39,7 +40,7 @@ const updateCommunity = {
           source: Joi.object()
             .required()
             .keys({
-              platform: Joi.string().valid('discord').required(),
+              platform: Joi.string().valid(PlatformNames.Discord).required(),
               identifierType: Joi.string().valid('member', 'role').required(),
               identifierValues: Joi.array().items(Joi.string().required()).required(),
               platformId: Joi.required().custom(objectId),
