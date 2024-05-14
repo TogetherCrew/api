@@ -177,6 +177,7 @@ async function getUserFromDiscordAPI(accessToken: string): Promise<IDiscordUser>
       return await response.json();
     } else {
       const errorResponse = await response.text();
+      logger.error({ error: errorResponse }, 'Failed to get user from Discord API');
       throw new Error(`Failed to get user from Discord API: ${errorResponse}`);
     }
   } catch (error) {
