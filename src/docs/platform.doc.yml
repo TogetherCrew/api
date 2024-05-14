@@ -4,7 +4,7 @@ paths:
       tags:
         - Platform
       summary: Connect to a platform.
-      description: Connect to different platforms (Discord, Twitter, Google, Github) with specific requirements based on the platform.
+      description: Connect to different platforms (Discord, Twitter, Google, Github, Notion) with specific requirements based on the platform.
       parameters:
         - name: platform
           in: query
@@ -66,6 +66,7 @@ paths:
                     - google
                     - github
                     - notion
+                    - mediaWiki
                   description: Name of the platform to create. Must be one of the supported platforms.
                 community:
                   type: string
@@ -160,6 +161,12 @@ paths:
                                 avatar_url:
                                   type: string                                                                
                       description: Metadata for Notion.
+                    - type: object
+                      required: [baseURL]
+                      properties:
+                        baseURL:
+                          type: string                                                             
+                      description: Metadata for MediaWiki.
       responses:
         "201":
           description: Platform created successfully.
@@ -191,6 +198,7 @@ paths:
               - google
               - github
               - notion
+              - mediaWiki
         - in: query
           name: community
           schema:
