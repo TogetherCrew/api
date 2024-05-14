@@ -87,7 +87,11 @@ const logger = parentLogger.child({ module: 'AuthService' });
  */
 
 async function logout(refreshToken: string) {
-  const refreshTokenDoc = await Token.findOne({ token: refreshToken, type: TokenTypeNames.REFRESH, blacklisted: false });
+  const refreshTokenDoc = await Token.findOne({
+    token: refreshToken,
+    type: TokenTypeNames.REFRESH,
+    blacklisted: false,
+  });
   if (!refreshTokenDoc) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Refresh token did not find');
   }

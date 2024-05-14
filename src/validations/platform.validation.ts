@@ -73,10 +73,11 @@ const mediaWikiMetadata = () => {
   });
 };
 
-
 const createPlatform = {
   body: Joi.object().keys({
-    name: Joi.string().required().valid(...Object.values(PlatformNames)),
+    name: Joi.string()
+      .required()
+      .valid(...Object.values(PlatformNames)),
     community: Joi.string().custom(objectId).required(),
     metadata: Joi.when('name', {
       switch: [
@@ -111,7 +112,9 @@ const createPlatform = {
 
 const connectPlatform = {
   query: Joi.object().keys({
-    name: Joi.string().required().valid(...Object.values(PlatformNames)),
+    name: Joi.string()
+      .required()
+      .valid(...Object.values(PlatformNames)),
     userId: Joi.string()
       .custom(objectId)
       .when('platform', {

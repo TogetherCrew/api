@@ -4,7 +4,9 @@ import { PlatformNames, ModuleNames, HivemindPlatformNames } from '@togethercrew
 
 const createModule = {
   body: Joi.object().keys({
-    name: Joi.string().required().valid(...Object.values(ModuleNames)),
+    name: Joi.string()
+      .required()
+      .valid(...Object.values(ModuleNames)),
     community: Joi.string().custom(objectId).required(),
   }),
 };
@@ -74,7 +76,9 @@ const hivemindOptions = () => {
   return Joi.object().keys({
     platforms: Joi.array().items(
       Joi.object().keys({
-        name: Joi.string().required().valid(...Object.values(HivemindPlatformNames)),
+        name: Joi.string()
+          .required()
+          .valid(...Object.values(HivemindPlatformNames)),
         platform: Joi.string().custom(objectId).required(),
         metadata: Joi.when('name', {
           switch: [
