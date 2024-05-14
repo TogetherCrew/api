@@ -246,6 +246,7 @@ const connectNotionCallback = catchAsync(async function (req: ISessionRequest, r
     }
     const params = {
       statusCode: STATUS_CODE_SUCCESS,
+      userId,
       platform: 'notion',
       bot_id: data.bot_id,
       workspace_name: data.workspace_name,
