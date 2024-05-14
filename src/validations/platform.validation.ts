@@ -117,7 +117,7 @@ const connectPlatform = {
 
 const getPlatforms = {
   query: Joi.object().keys({
-    name: Joi.string().valid('twitter', 'discord', 'google', 'github'),
+    name: Joi.string().valid('twitter', 'discord', 'google', 'github', 'notion'),
     community: Joi.string().custom(objectId).required(),
     sortBy: Joi.string(),
     limit: Joi.number().integer(),
