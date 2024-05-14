@@ -3,7 +3,7 @@ import { Types, HydratedDocument } from 'mongoose';
 import moment from 'moment';
 import httpStatus from 'http-status';
 import config from '../config';
-import { tokenTypes } from '../config/tokens';
+import { TokenTypeNames } from '@togethercrew.dev/db';
 import { ApiError } from '../utils';
 import { IToken, Token, IUser } from '@togethercrew.dev/db';
 import { IDiscordOAuth2EchangeCode, IAuthTokens } from 'src/interfaces';
@@ -76,11 +76,11 @@ async function verifyToken(token: string, type: string) {
  */
 async function generateAuthTokens(user: HydratedDocument<IUser>): Promise<IAuthTokens> {
   const accessTokenExpires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
-  const accessToken = generateToken(user, accessTokenExpires, tokenTypes.ACCESS);
+  const accessToken = generateToken(user, accessTokenExpires, TokenTypeNames.ACCESS);
 
   const refreshTokenExpires = moment().add(config.jwt.refreshExpirationDays, 'days');
-  const refreshToken = generateToken(user, refreshTokenExpires, tokenTypes.REFRESH);
-  await saveToken(refreshToken, user.id, refreshTokenExpires, tokenTypes.REFRESH);
+  const refreshToken = generateToken(user, refreshTokenExpires, TokenTypeNames.REFRESH);
+  await saveToken(refreshToken, user.id, refreshTokenExpires, TokenTypeNames.REFRESH);
 
   return {
     access: {
@@ -107,13 +107,13 @@ async function saveDiscordOAuth2Tokens(userId: Types.ObjectId, discordOAuth2Toke
     discordOAuth2Tokens.access_token,
     userId,
     accessTokenExpires,
-    tokenTypes.DISCORD_ACCESS,
+    TokenTypeNames.DISCORD_ACCESS,
   );
   const DiscordRefreshTokenDoc: IToken = await saveToken(
     discordOAuth2Tokens.refresh_token,
     userId,
     refreshTokenExpires,
-    tokenTypes.DISCORD_REFRESH,
+    TokenTypeNames.DISCORD_REFRESH,
   );
 
   return {
@@ -138,10 +138,10 @@ async function saveGoogleOAuth2Tokens(userId: Types.ObjectId, googleAuth: Auth.C
   const accessTokenExpires = moment(googleAuth.expiry_date);
   const refreshTokenExpires = moment().add('180', 'days');
   if (googleAuth.access_token) {
-    await saveToken(googleAuth.access_token, userId, accessTokenExpires, tokenTypes.GOOGLE_ACCESS);
+    await saveToken(googleAuth.access_token, userId, accessTokenExpires, TokenTypeNames.GOOGLE_ACCESS);
   }
   if (googleAuth.refresh_token) {
-    await saveToken(googleAuth.refresh_token, userId, refreshTokenExpires, tokenTypes.GOOGLE_REFRESH);
+    await saveToken(googleAuth.refresh_token, userId, refreshTokenExpires, TokenTypeNames.GOOGLE_REFRESH);
   }
 }
 
@@ -153,8 +153,8 @@ async function saveGoogleOAuth2Tokens(userId: Types.ObjectId, googleAuth: Auth.C
  * @returns {Promise<Object>}
  */
 async function getDiscordOAuth2Tokens(userId: Types.ObjectId) {
-  const DiscordAccessTokenDoc = await Token.findOne({ user: userId, type: tokenTypes.DISCORD_ACCESS });
-  const DiscordRefreshTokenDoc = await Token.findOne({ user: userId, type: tokenTypes.DISCORD_REFRESH });
+  const DiscordAccessTokenDoc = await Token.findOne({ user: userId, type: TokenTypeNames.DISCORD_ACCESS });
+  const DiscordRefreshTokenDoc = await Token.findOne({ user: userId, type: TokenTypeNames.DISCORD_REFRESH });
 
   if (!DiscordAccessTokenDoc || !DiscordRefreshTokenDoc) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'discord auth tokens missed');
@@ -184,7 +184,7 @@ async function getDiscordOAuth2Tokens(userId: Types.ObjectId) {
  */
 async function saveNotionAccessToken(userId: Types.ObjectId, accessToken: string) {
   const accessTokenExpires = moment('9999-12-31T23:59:59Z');
-  await saveToken(accessToken, userId, accessTokenExpires, tokenTypes.NOTION_ACCESS);
+  await saveToken(accessToken, userId, accessTokenExpires, TokenTypeNames.NOTION_ACCESS);
 }
 
 export default {
