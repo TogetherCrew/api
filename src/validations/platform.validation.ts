@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { query, Request } from 'express';
+import { Request } from 'express';
 import { objectId } from './custom.validation';
 import { IAuthAndPlatform } from '../interfaces';
 import { Types } from 'mongoose';

@@ -1,18 +1,17 @@
-import Joi, { ObjectSchema } from 'joi';
+import Joi from 'joi';
 import { objectId } from './custom.validation';
-import { Types } from 'mongoose';
-import { Request } from 'express';
+import { PlatformNames, ModuleNames, HivemindPlatformNames } from '@togethercrew.dev/db';
 
 const createModule = {
   body: Joi.object().keys({
-    name: Joi.string().required().valid('hivemind'),
+    name: Joi.string().required().valid(...Object.values(ModuleNames)),
     community: Joi.string().custom(objectId).required(),
   }),
 };
 
 const getModules = {
   query: Joi.object().keys({
-    name: Joi.string().valid('hivemind'),
+    name: Joi.string().valid(...Object.values(ModuleNames)),
     community: Joi.string().custom(objectId).required(),
     sortBy: Joi.string(),
     limit: Joi.number().integer(),
@@ -65,29 +64,39 @@ const hivemindNotionMetadata = () => {
   });
 };
 
+const hivemindMediaWikiMetadata = () => {
+  return Joi.object().keys({
+    pageIds: Joi.array().items(Joi.string()),
+  });
+};
+
 const hivemindOptions = () => {
   return Joi.object().keys({
     platforms: Joi.array().items(
       Joi.object().keys({
-        name: Joi.string().required().valid('discord', 'google', 'github', 'notion'),
+        name: Joi.string().required().valid(...Object.values(HivemindPlatformNames)),
         platform: Joi.string().custom(objectId).required(),
         metadata: Joi.when('name', {
           switch: [
             {
-              is: 'discord',
+              is: PlatformNames.Discord,
               then: hivemindDiscordMetadata(),
             },
             {
-              is: 'google',
+              is: PlatformNames.Google,
               then: hivemindGoogleMetadata(),
             },
             {
-              is: 'github',
+              is: PlatformNames.GitHub,
               then: hivemindGithubMetadata(),
             },
             {
-              is: 'notion',
+              is: PlatformNames.Notion,
               then: hivemindNotionMetadata(),
+            },
+            {
+              is: PlatformNames.MediaWiki,
+              then: hivemindMediaWikiMetadata(),
             },
           ],
           otherwise: Joi.any().forbidden(),
@@ -107,7 +116,7 @@ const dynamicModuleUpdate = (req: any) => {
   let bodyOption = {};
 
   switch (moduleName) {
-    case 'hivemind':
+    case ModuleNames.Hivemind:
       bodyOption = {
         body: Joi.object().required().keys({
           options: hivemindOptions(),
