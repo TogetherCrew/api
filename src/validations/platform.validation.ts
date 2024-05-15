@@ -1,8 +1,9 @@
 import Joi from 'joi';
-import { query, Request } from 'express';
+import { Request } from 'express';
 import { objectId } from './custom.validation';
 import { IAuthAndPlatform } from '../interfaces';
 import { Types } from 'mongoose';
+import { PlatformNames } from '@togethercrew.dev/db';
 
 const discordCreateMetadata = () => {
   return Joi.object().keys({
@@ -66,31 +67,43 @@ const notionMetadata = () => {
   });
 };
 
+const mediaWikiMetadata = () => {
+  return Joi.object().keys({
+    baseURL: Joi.string().required(),
+  });
+};
+
 const createPlatform = {
   body: Joi.object().keys({
-    name: Joi.string().required().valid('twitter', 'discord', 'google', 'github', 'notion'),
+    name: Joi.string()
+      .required()
+      .valid(...Object.values(PlatformNames)),
     community: Joi.string().custom(objectId).required(),
     metadata: Joi.when('name', {
       switch: [
         {
-          is: 'discord',
+          is: PlatformNames.Discord,
           then: discordCreateMetadata(),
         },
         {
-          is: 'twitter',
+          is: PlatformNames.Twitter,
           then: twitterMetadata(),
         },
         {
-          is: 'google',
+          is: PlatformNames.Google,
           then: googleMetadata(),
         },
         {
-          is: 'github',
+          is: PlatformNames.GitHub,
           then: githubMetadata(),
         },
         {
-          is: 'notion',
+          is: PlatformNames.Notion,
           then: notionMetadata(),
+        },
+        {
+          is: PlatformNames.MediaWiki,
+          then: mediaWikiMetadata(),
         },
       ],
     }).required(),
@@ -99,16 +112,18 @@ const createPlatform = {
 
 const connectPlatform = {
   query: Joi.object().keys({
-    platform: Joi.string().valid('discord', 'google', 'twitter', 'github', 'notion'),
+    name: Joi.string()
+      .required()
+      .valid(...Object.values(PlatformNames)),
     userId: Joi.string()
       .custom(objectId)
       .when('platform', {
-        is: Joi.string().valid('google', 'notion'),
+        is: Joi.string().valid(PlatformNames.Google, PlatformNames.Notion),
         then: Joi.required(),
         otherwise: Joi.forbidden(),
       }),
     scopes: Joi.array().items(Joi.string().valid('googleDrive')).when('platform', {
-      is: 'google',
+      is: PlatformNames.Google,
       then: Joi.required(),
       otherwise: Joi.forbidden(),
     }),
@@ -117,7 +132,7 @@ const connectPlatform = {
 
 const getPlatforms = {
   query: Joi.object().keys({
-    name: Joi.string().valid('twitter', 'discord', 'google', 'github', 'notion'),
+    name: Joi.string().valid(...Object.values(PlatformNames)),
     community: Joi.string().custom(objectId).required(),
     sortBy: Joi.string(),
     limit: Joi.number().integer(),
@@ -145,7 +160,7 @@ const deletePlatform = {
 const dynamicUpdatePlatform = (req: Request) => {
   const platformName = req.platform?.name;
   switch (platformName) {
-    case 'discord': {
+    case PlatformNames.Discord: {
       return {
         params: Joi.object().keys({
           platformId: Joi.required().custom(objectId),
@@ -223,10 +238,10 @@ const dynamicPlatformProperty = (req: Request) => {
 
 const dynamicRequestAccess = (req: Request) => {
   const platform = req.params.platform;
-  if (platform === 'discord') {
+  if (platform === PlatformNames.Discord) {
     return {
       params: Joi.object().keys({
-        platform: Joi.string().valid('discord').required(),
+        platform: Joi.string().valid(PlatformNames.Discord).required(),
         module: Joi.string().valid('Announcement').required(),
         id: Joi.string().required(),
       }),

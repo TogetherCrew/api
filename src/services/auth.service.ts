@@ -4,7 +4,7 @@ import httpStatus from 'http-status';
 import config from '../config';
 import tokenService from './token.service';
 import userService from './user.service';
-import { tokenTypes } from '../config/tokens';
+import { TokenTypeNames } from '@togethercrew.dev/db';
 import { ApiError } from '../utils';
 import { Token } from '@togethercrew.dev/db';
 import { IDiscordOAuth2EchangeCode } from '../interfaces';
@@ -87,7 +87,11 @@ const logger = parentLogger.child({ module: 'AuthService' });
  */
 
 async function logout(refreshToken: string) {
-  const refreshTokenDoc = await Token.findOne({ token: refreshToken, type: tokenTypes.REFRESH, blacklisted: false });
+  const refreshTokenDoc = await Token.findOne({
+    token: refreshToken,
+    type: TokenTypeNames.REFRESH,
+    blacklisted: false,
+  });
   if (!refreshTokenDoc) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Refresh token did not find');
   }
@@ -101,7 +105,7 @@ async function logout(refreshToken: string) {
  */
 async function refreshAuth(refreshToken: string) {
   try {
-    const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
+    const refreshTokenDoc = await tokenService.verifyToken(refreshToken, TokenTypeNames.REFRESH);
     const user = await userService.getUserById(new Types.ObjectId(refreshTokenDoc.user));
     if (!user) {
       throw new Error();

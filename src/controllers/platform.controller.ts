@@ -1,8 +1,6 @@
 import { Response } from 'express';
-
 import {
   platformService,
-  authService,
   twitterService,
   discordServices,
   googleService,
@@ -19,6 +17,7 @@ import config from '../config';
 import httpStatus from 'http-status';
 import querystring from 'querystring';
 import parentLogger from '../config/logger';
+import { PlatformNames } from '@togethercrew.dev/db';
 
 const logger = parentLogger.child({ module: 'PlatformController' });
 
@@ -32,7 +31,7 @@ const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Re
   const { platform } = req.query;
   const state = generateState();
   req.session.state = state;
-  if (platform === 'discord') {
+  if (platform === PlatformNames.Discord) {
     const permissions = discord.permissions.ReadData.ViewChannel | discord.permissions.ReadData.ReadMessageHistory;
     const discordUrl = discord.generateDiscordAuthUrl(
       config.oAuth2.discord.callbackURI.connect,
@@ -43,12 +42,12 @@ const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Re
       false,
     );
     res.redirect(discordUrl);
-  } else if (platform === 'twitter') {
+  } else if (platform === PlatformNames.Twitter) {
     const codeVerifier = generateCodeVerifier();
     req.session.codeVerifier = codeVerifier;
     const twitterUrl = twitter.generateTwitterAuthUrl(state, generateCodeChallenge(codeVerifier));
     res.redirect(twitterUrl);
-  } else if (platform === 'google') {
+  } else if (platform === PlatformNames.Google) {
     req.session.userId = req.query.userId;
     let requestedScopes = req.query.scopes as string[];
     let aggregatedScopes: string[] = [];
@@ -65,10 +64,10 @@ const connectPlatform = catchAsync(async function (req: ISessionRequest, res: Re
       state,
     );
     res.redirect(authUrl);
-  } else if (platform === 'github') {
+  } else if (platform === PlatformNames.GitHub) {
     const link = `${config.oAuth2.github.publickLink}/installations/select_target`;
     res.redirect(link);
-  } else if (platform === 'notion') {
+  } else if (platform === PlatformNames.Notion) {
     req.session.userId = req.query.userId;
     const link = `https://api.notion.com/v1/oauth/authorize?client_id=${config.oAuth2.notion.clientId}&response_type=code&owner=user&redirect_uri=${config.oAuth2.notion.callbackURI.connect}&state=${state}`;
     res.redirect(link);
@@ -92,7 +91,7 @@ const connectDiscordCallback = catchAsync(async function (req: ISessionRequest, 
     );
     const params = {
       statusCode: STATUS_CODE_SUCCESS,
-      platform: 'discord',
+      platform: PlatformNames.Discord,
       id: discordOathCallback.guild.id,
       name: discordOathCallback.guild.name,
       icon: discordOathCallback.guild.icon,
@@ -100,7 +99,7 @@ const connectDiscordCallback = catchAsync(async function (req: ISessionRequest, 
     const query = querystring.stringify(params);
     res.redirect(`${config.frontend.url}/callback?` + query);
   } catch (err) {
-    logger.error({ err }, 'Failed in discord connect callback');
+    logger.error({ err }, `Failed in ${PlatformNames.Discord} connect callback`);
     const params = {
       statusCode: STATUS_CODE_ERROR,
     };
@@ -128,7 +127,7 @@ const connectTwitterCallback = catchAsync(async function (req: ISessionRequest, 
     const twitterUser = await twitterService.getUserFromTwitterAPI(twitterOAuthCallback.access_token);
     const params = {
       statusCode: STATUS_CODE_SUCCESS,
-      platform: 'twitter',
+      platform: PlatformNames.Twitter,
       id: twitterUser.id,
       username: twitterUser.username,
       profileImageUrl: twitterUser.profile_image_url,
@@ -136,7 +135,7 @@ const connectTwitterCallback = catchAsync(async function (req: ISessionRequest, 
     const query = querystring.stringify(params);
     res.redirect(`${config.frontend.url}/callback?` + query);
   } catch (err) {
-    logger.error({ err }, 'Failed in twitter connect callback');
+    logger.error({ err }, `Failed in ${PlatformNames.Twitter} connect callback`);
     const params = {
       statusCode: STATUS_CODE_FAILURE,
     };
@@ -170,7 +169,7 @@ const connectGoogleCallback = catchAsync(async function (req: ISessionRequest, r
       }
       const params = {
         statusCode,
-        platform: 'google',
+        platform: PlatformNames.Google,
         userId,
         id: userProifle.id,
         name: userProifle.name,
@@ -182,7 +181,7 @@ const connectGoogleCallback = catchAsync(async function (req: ISessionRequest, r
       throw new Error('Missing Access Token');
     }
   } catch (err) {
-    logger.error({ err }, 'Failed in google connect callback');
+    logger.error({ err }, `Failed in ${PlatformNames.Google} connect callback`);
     const params = {
       statusCode: STATUS_CODE_ERROR,
     };
@@ -206,7 +205,7 @@ const connectGithubCallback = catchAsync(async function (req: ISessionRequest, r
     const installation = await await githubService.coreService.getInstallationDetails(appAccessToken, installationId);
     const params = {
       statusCode: STATUS_CODE_SUCCESS,
-      platform: 'github',
+      platform: PlatformNames.GitHub,
       installationId: installation.id,
       account_login: installation.account.login,
       account_id: installation.account.id,
@@ -215,7 +214,7 @@ const connectGithubCallback = catchAsync(async function (req: ISessionRequest, r
     const query = querystring.stringify(params);
     res.redirect(`${config.frontend.url}/callback?` + query);
   } catch (err) {
-    logger.error({ err }, 'Failed in github connect callback');
+    logger.error({ err }, `Failed in ${PlatformNames.GitHub} connect callback`);
     const params = {
       statusCode: STATUS_CODE_ERROR,
     };
@@ -247,7 +246,7 @@ const connectNotionCallback = catchAsync(async function (req: ISessionRequest, r
     const params = {
       statusCode: STATUS_CODE_SUCCESS,
       userId,
-      platform: 'notion',
+      platform: PlatformNames.Notion,
       bot_id: data.bot_id,
       workspace_name: data.workspace_name,
       workspace_icon: data.workspace_icon,
@@ -263,7 +262,7 @@ const connectNotionCallback = catchAsync(async function (req: ISessionRequest, r
     const query = querystring.stringify(params);
     res.redirect(`${config.frontend.url}/callback?` + query);
   } catch (err) {
-    logger.error({ err }, 'Failed in notion connect callback');
+    logger.error({ err }, `Failed in ${PlatformNames.Notion} connect callback`);
     const params = {
       statusCode: STATUS_CODE_ERROR,
     };
@@ -313,7 +312,7 @@ const getPlatforms = catchAsync(async function (req: IAuthRequest, res: Response
 
 const getPlatform = catchAsync(async function (req: IAuthRequest, res: Response) {
   const platform = req.platform;
-  if (platform?.metadata && platform.name === 'discord') {
+  if (platform?.metadata && platform.name === PlatformNames.Discord) {
     const BotPermissions = await discordServices.coreService.getBotPermissions(platform.metadata?.id);
     platform.metadata.permissions = discordServices.coreService.getPermissionsStatus(BotPermissions);
   }
@@ -321,7 +320,7 @@ const getPlatform = catchAsync(async function (req: IAuthRequest, res: Response)
 });
 const updatePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
   if (
-    req.platform.name === 'discord' &&
+    req.platform.name === PlatformNames.Discord &&
     req.platform.metadata?.isInProgress &&
     (req.body.metadata.selectedChannels || req.body.metadata.period)
   ) {
@@ -338,7 +337,7 @@ const deletePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Re
     await platformService.updatePlatform(req.platform, { disconnectedAt: new Date() });
   } else if (req.body.deleteType === 'hard') {
     await platformService.deletePlatform(req.platform);
-    if (req.platform.name === 'discord') {
+    if (req.platform.name === PlatformNames.Discord) {
       await discordServices.coreService.leaveBotFromGuild(req.platform.metadata?.id);
     }
   }
@@ -348,7 +347,7 @@ const deletePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Re
 const getProperties = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
   const platform = req.platform;
   let result;
-  if (platform?.name === 'discord') {
+  if (platform?.name === PlatformNames.Discord) {
     result = await discordServices.coreService.getPropertyHandler(req);
   }
   res.status(httpStatus.OK).send(result);
@@ -360,7 +359,7 @@ const requestAccess = catchAsync(async function (req: ISessionRequest, res: Resp
   const module = req.params.module as module;
   const state = generateState();
   req.session.state = state;
-  if (platform === 'discord') {
+  if (platform === PlatformNames.Discord) {
     const currentBotPermissions = await discordServices.coreService.getBotPermissions(id);
     const requireBotPermissions = discordServices.coreService.getRequirePermissionsForModule(module);
     const combinedArray = currentBotPermissions.concat(requireBotPermissions);

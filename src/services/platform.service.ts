@@ -5,15 +5,15 @@ import ApiError from '../utils/ApiError';
 import sagaService from './saga.service';
 import { Snowflake } from 'discord.js';
 import { analyzerAction, analyzerWindow } from '../config/analyzer.statics';
-import communityService from './community.service';
-import discordServices from './discord';
+import { PlatformNames } from '@togethercrew.dev/db';
+
 /**
  * Create a platform
  * @param {IPlatform} PlatformBody
  * @returns {Promise<HydratedDocument<IPlatform>>}
  */
 const createPlatform = async (PlatformBody: IPlatform): Promise<HydratedDocument<IPlatform>> => {
-  if (PlatformBody.name === 'discord') {
+  if (PlatformBody.name === PlatformNames.Discord) {
     if (PlatformBody.metadata) {
       PlatformBody.metadata = {
         action: analyzerAction,
@@ -23,7 +23,7 @@ const createPlatform = async (PlatformBody: IPlatform): Promise<HydratedDocument
     }
   }
   const platform = await Platform.create(PlatformBody);
-  if (PlatformBody.name === 'discord') {
+  if (PlatformBody.name === PlatformNames.Discord) {
     await sagaService.createAndStartFetchMemberSaga(platform._id);
   }
   return platform;
@@ -140,14 +140,16 @@ const deletePlatformByFilter = async (filter: object): Promise<HydratedDocument<
 
 function getMetadataKey(platformName: string): string {
   switch (platformName) {
-    case 'discord':
+    case PlatformNames.Discord:
       return 'id';
-    case 'google':
+    case PlatformNames.Google:
       return 'id';
-    case 'github':
+    case PlatformNames.GitHub:
       return 'installationId';
-    case 'notion':
+    case PlatformNames.Notion:
       return 'workspace_id';
+    case PlatformNames.MediaWiki:
+      return 'baseURL';
     default:
       throw new Error('Unsupported platform');
   }

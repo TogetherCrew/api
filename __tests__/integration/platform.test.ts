@@ -271,6 +271,49 @@
 //       });
 //     });
 
+//     test('should return 201 and successfully create new mediaWiki platform if data is ok', async () => {
+//       userOne.communities = [communityOne._id];
+//       communityOne.users = [userOne._id];
+//       await insertCommunities([communityOne]);
+//       await insertUsers([userOne]);
+//       newPlatform = {
+//         name: 'mediaWiki',
+//         community: communityOne._id,
+//         metadata: {
+//           baseURL: 'base',
+//         },
+//       };
+//       const res = await request(app)
+//         .post(`/api/v1/platforms`)
+//         .set('Authorization', `Bearer ${userOneAccessToken}`)
+//         .send(newPlatform)
+//         .expect(httpStatus.CREATED);
+
+//       expect(res.body).toEqual({
+//         id: expect.anything(),
+//         name: newPlatform.name,
+//         metadata: newPlatform.metadata,
+//         community: communityOne._id.toHexString(),
+//         disconnectedAt: null,
+//         connectedAt: expect.anything(),
+//       });
+
+//       const dbPlatform = await Platform.findById(res.body.id);
+//       expect(dbPlatform).toBeDefined();
+//       expect(dbPlatform).toMatchObject({
+//         name: newPlatform.name,
+//         metadata: newPlatform.metadata,
+//       });
+
+//       const dbCommunity = await Community.findById(res.body.community);
+//       expect(dbCommunity).toMatchObject({
+//         id: communityOne._id.toHexString(),
+//         name: communityOne.name,
+//         avatarURL: communityOne.avatarURL,
+//         users: [userOne._id],
+//       });
+//     });
+
 //     test('should return 201 and successfully connect a disconneced platform if data is ok', async () => {
 //       userOne.communities = [communityOne._id];
 //       communityOne.users = [userOne._id];

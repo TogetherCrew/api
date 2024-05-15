@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import passportJwt from 'passport-jwt';
 import config from './index';
-import { tokenTypes } from './tokens';
+import { TokenTypeNames } from '@togethercrew.dev/db';
 import { userService } from '../services';
 interface VerifiedCallback {
   (error: any, user?: any, info?: any): void;
@@ -17,7 +16,7 @@ const jwtOptions = {
 
 const jwtVerify = async (payload: any, done: VerifiedCallback) => {
   try {
-    if (payload.type !== tokenTypes.ACCESS) {
+    if (payload.type !== TokenTypeNames.ACCESS) {
       throw new Error('Invalid token type');
     }
     const user = await userService.getUserById(payload.sub.id);
