@@ -112,9 +112,7 @@ const createPlatform = {
 
 const connectPlatform = {
   query: Joi.object().keys({
-    name: Joi.string()
-      .required()
-      .valid(...Object.values(PlatformNames)),
+    platform: Joi.string().valid(...Object.values(PlatformNames)),
     userId: Joi.string()
       .custom(objectId)
       .when('platform', {
