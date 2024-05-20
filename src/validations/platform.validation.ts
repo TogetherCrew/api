@@ -174,7 +174,7 @@ const dynamicUpdatePlatform = (req: Request) => {
   }
 };
 
-const discordProperties = (property: string) => {
+const discordProperties = (req: Request, property: string) => {
   switch (property) {
     case 'channel': {
       return {
@@ -226,7 +226,8 @@ const discordProperties = (property: string) => {
       };
     }
     default:
-      return {};
+      req.allowInput = false;
+      return {}
   }
 };
 
@@ -235,7 +236,7 @@ const dynamicPlatformProperty = (req: Request) => {
   const property = req.query.property as string;
   switch (platformName) {
     case PlatformNames.Discord: {
-      return discordProperties(property);
+      return discordProperties(req, property);
     }
     default:
       req.allowInput = false;

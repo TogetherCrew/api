@@ -49,7 +49,7 @@
 // setupTestDB();
 
 // describe('Module routes', () => {
-//   beforeAll(async () => {});
+//   beforeAll(async () => { });
 //   beforeEach(async () => {
 //     userOne.communities = [communityOne._id, communityTwo._id];
 //     userTwo.communities = [communityThree._id];
