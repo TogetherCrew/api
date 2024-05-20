@@ -227,7 +227,7 @@ const discordProperties = (req: Request, property: string) => {
     }
     default:
       req.allowInput = false;
-      return {}
+      return {};
   }
 };
 
