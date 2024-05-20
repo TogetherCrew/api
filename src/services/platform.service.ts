@@ -22,6 +22,7 @@ const createPlatform = async (PlatformBody: IPlatform): Promise<HydratedDocument
       };
     }
   }
+
   const platform = await Platform.create(PlatformBody);
   if (PlatformBody.name === PlatformNames.Discord) {
     await sagaService.createAndStartFetchMemberSaga(platform._id);
@@ -111,7 +112,6 @@ const updatePlatform = async (
     });
   }
 
-  // console.log(updateBody)
   Object.assign(platform, updateBody);
   return await platform.save();
 };
@@ -215,6 +215,7 @@ const managePlatformConnection = async (
 
   // Reconnect if previously disconnected
   if (existingPlatform && existingPlatform.disconnectedAt !== null) {
+    // existingPlatform.connectedAt = new Date();
     existingPlatform.disconnectedAt = null;
     await existingPlatform.save();
     return existingPlatform;
