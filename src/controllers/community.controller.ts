@@ -3,6 +3,7 @@ import { communityService, userService, platformService, discordServices } from 
 import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync, pick, ApiError, roleUtil } from '../utils';
 import httpStatus from 'http-status';
+import { PlatformNames } from '@togethercrew.dev/db';
 
 const createCommunity = catchAsync(async function (req: IAuthRequest, res: Response) {
   const community = await communityService.createCommunity({ ...req.body, users: [req.user.id] });
@@ -52,7 +53,9 @@ const updateCommunity = catchAsync(async function (req: IAuthRequest, res: Respo
 const deleteCommunity = catchAsync(async function (req: IAuthRequest, res: Response) {
   const platforms = await platformService.queryPlatforms({ community: req.params.communityId }, {});
   for (let i = 0; i < platforms.results.length; i++) {
-    await discordServices.coreService.leaveBotFromGuild(platforms.results[i].metadata.id);
+    if (platforms.results[i].name === PlatformNames.Discord) {
+      await discordServices.coreService.leaveBotFromGuild(platforms.results[i].metadata.id);
+    }
   }
   await communityService.deleteCommunityByFilter({ _id: req.params.communityId });
   res.status(httpStatus.NO_CONTENT).send();

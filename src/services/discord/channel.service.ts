@@ -59,45 +59,34 @@ async function checkBotPermissions(
       return false;
     }
 
-    // Combine all permissions to check
-    let combinedPermissions = BigInt(0);
-    permissionsToCheck.forEach((permission) => {
-      combinedPermissions |= BigInt(permission);
-    });
+    // Combine all permissions to check using bitwise OR
+    let requiredPermissions = permissionsToCheck.reduce((acc, perm) => acc | BigInt(perm), BigInt(0));
 
-    // Check if bot has the combined global permissions
+    // Check if bot has the combined global permissions using bitwise AND
     const botGlobalPermissions = BigInt(botMember.permissions.bitfield);
-    if (!(botGlobalPermissions & combinedPermissions)) {
+    if ((botGlobalPermissions & requiredPermissions) !== requiredPermissions) {
       return false;
     }
 
-    // Check permission overwrites
-    let hasAccess = true;
+    // Function to evaluate permission overwrites
     const evaluateOverwrites = (overwrite: any) => {
       const allowed = BigInt(overwrite.allow);
-      const denied = BigInt(overwrite.deny);
-
-      if (denied & combinedPermissions) {
-        hasAccess = false;
-      } else if (allowed & combinedPermissions) {
-        hasAccess = true;
-      }
+      return (allowed & requiredPermissions) === requiredPermissions;
     };
 
+    // Check permission overwrites in the channel
+    let hasAccess = false;
     channel.permissionOverwrites?.forEach((overwrite) => {
       if (overwrite.type === 0 && botMember.roles.cache.has(overwrite.id)) {
-        // Role specific overwrites
-        evaluateOverwrites(overwrite);
+        if (evaluateOverwrites(overwrite)) {
+          hasAccess = true;
+        }
+      } else if (overwrite.type === 1 && overwrite.id === botMember.id) {
+        if (evaluateOverwrites(overwrite)) {
+          hasAccess = true;
+        }
       }
     });
-
-    // User-specific overwrite for the bot
-    const botSpecificOverwrite = channel.permissionOverwrites?.find(
-      (overwrite) => overwrite.id === botMember.id && overwrite.type === 1,
-    );
-    if (botSpecificOverwrite) {
-      evaluateOverwrites(botSpecificOverwrite);
-    }
 
     return hasAccess;
   } catch (error) {

@@ -53,6 +53,7 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
         channels[i],
         [discord.permissions.ReadData.ViewChannel, discord.permissions.ReadData.ReadMessageHistory],
       );
+
       let announcementAccess: boolean;
       if (channels[i].type === 0 || channels[i].type === 4) {
         announcementAccess = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [
@@ -69,9 +70,6 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
         announcementAccess = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [
           discord.permissions.Announcement.ViewChannel,
           discord.permissions.Announcement.SendMessages,
-          discord.permissions.Announcement.SendMessagesInThreads,
-          discord.permissions.Announcement.CreatePrivateThreads,
-          discord.permissions.Announcement.CreatePublicThreads,
           discord.permissions.Announcement.EmbedLinks,
           discord.permissions.Announcement.AttachFiles,
           discord.permissions.Announcement.MentionEveryone,

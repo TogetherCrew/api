@@ -174,11 +174,9 @@ const dynamicUpdatePlatform = (req: Request) => {
   }
 };
 
-const dynamicPlatformProperty = (req: Request) => {
-  if (Types.ObjectId.isValid(req.params.platformId)) {
-    const authReq = req as IAuthAndPlatform;
-    const { property } = authReq.query;
-    if (property === 'channel') {
+const discordProperties = (req: Request, property: string) => {
+  switch (property) {
+    case 'channel': {
       return {
         params: Joi.object().keys({
           platformId: Joi.required().custom(objectId),
@@ -194,7 +192,8 @@ const dynamicPlatformProperty = (req: Request) => {
             channelIds: Joi.array().items(Joi.string()),
           }),
       };
-    } else if (property === 'role') {
+    }
+    case 'role': {
       return {
         params: Joi.object().keys({
           platformId: Joi.required().custom(objectId),
@@ -209,7 +208,8 @@ const dynamicPlatformProperty = (req: Request) => {
             page: Joi.number().integer(),
           }),
       };
-    } else if (property === 'guildMember') {
+    }
+    case 'guildMember': {
       return {
         params: Joi.object().keys({
           platformId: Joi.required().custom(objectId),
@@ -224,13 +224,23 @@ const dynamicPlatformProperty = (req: Request) => {
             page: Joi.number().integer(),
           }),
       };
-    } else {
+    }
+    default:
       req.allowInput = false;
       return {};
+  }
+};
+
+const dynamicPlatformProperty = (req: Request) => {
+  const platformName = req.platform?.name;
+  const property = req.query.property as string;
+  switch (platformName) {
+    case PlatformNames.Discord: {
+      return discordProperties(req, property);
     }
-  } else {
-    req.allowInput = false;
-    return {};
+    default:
+      req.allowInput = false;
+      return {};
   }
 };
 
