@@ -56,7 +56,6 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
 
       let announcementAccess: boolean;
       if (channels[i].type === 0 || channels[i].type === 4) {
-        console.log(2)
         announcementAccess = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [
           discord.permissions.Announcement.ViewChannel,
           discord.permissions.Announcement.SendMessages,
@@ -68,13 +67,9 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
           discord.permissions.Announcement.MentionEveryone,
         ]);
       } else {
-        console.log(3)
         announcementAccess = await channelService.checkBotPermissions(req.platform?.metadata?.id, channels[i], [
           discord.permissions.Announcement.ViewChannel,
           discord.permissions.Announcement.SendMessages,
-          // discord.permissions.Announcement.SendMessagesInThreads,
-          // discord.permissions.Announcement.CreatePrivateThreads,
-          // discord.permissions.Announcement.CreatePublicThreads,
           discord.permissions.Announcement.EmbedLinks,
           discord.permissions.Announcement.AttachFiles,
           discord.permissions.Announcement.MentionEveryone,
