@@ -60,35 +60,36 @@ async function checkBotPermissions(
     }
 
     // Combine all permissions to check using bitwise OR
-    let requiredPermissions = permissionsToCheck.reduce((acc, perm) => acc | BigInt(perm), BigInt(0));
+    const requiredPermissions = permissionsToCheck.reduce((acc, perm) => acc | BigInt(perm), BigInt(0));
 
     // Check if bot has the combined global permissions using bitwise AND
     const botGlobalPermissions = BigInt(botMember.permissions.bitfield);
-    if ((botGlobalPermissions & requiredPermissions) !== requiredPermissions) {
-      return false;
+    if ((botGlobalPermissions & requiredPermissions) === requiredPermissions) {
+      // Check permission overwrites in the channel
+      let isExplicitlyDenied = false;
+      let isExplicitlyAllowed = false;
+
+      channel.permissionOverwrites?.forEach((overwrite) => {
+        const allowed = BigInt(overwrite.allow);
+        const denied = BigInt(overwrite.deny);
+
+        if (
+          (overwrite.type === 0 && botMember.roles.cache.has(overwrite.id)) ||
+          (overwrite.type === 1 && overwrite.id === botMember.id)
+        ) {
+          if ((denied & requiredPermissions) !== BigInt(0)) {
+            isExplicitlyDenied = true;
+          }
+          if ((allowed & requiredPermissions) === requiredPermissions) {
+            isExplicitlyAllowed = true;
+          }
+        }
+      });
+
+      // Return true if explicitly allowed or not explicitly denied
+      return isExplicitlyAllowed || !isExplicitlyDenied;
     }
-
-    // Function to evaluate permission overwrites
-    const evaluateOverwrites = (overwrite: any) => {
-      const allowed = BigInt(overwrite.allow);
-      return (allowed & requiredPermissions) === requiredPermissions;
-    };
-
-    // Check permission overwrites in the channel
-    let hasAccess = false;
-    channel.permissionOverwrites?.forEach((overwrite) => {
-      if (overwrite.type === 0 && botMember.roles.cache.has(overwrite.id)) {
-        if (evaluateOverwrites(overwrite)) {
-          hasAccess = true;
-        }
-      } else if (overwrite.type === 1 && overwrite.id === botMember.id) {
-        if (evaluateOverwrites(overwrite)) {
-          hasAccess = true;
-        }
-      }
-    });
-
-    return hasAccess;
+    return false;
   } catch (error) {
     logger.error({ error }, 'Failed to check bot permissions');
     return false;
