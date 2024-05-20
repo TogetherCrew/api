@@ -215,7 +215,7 @@ const managePlatformConnection = async (
 
   // Reconnect if previously disconnected
   if (existingPlatform && existingPlatform.disconnectedAt !== null) {
-    // existingPlatform.connectedAt = new Date();
+    existingPlatform.connectedAt = new Date();
     existingPlatform.disconnectedAt = null;
     await existingPlatform.save();
     return existingPlatform;
