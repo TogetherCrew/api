@@ -32,7 +32,7 @@ const googleMetadata = () => {
     userId: Joi.string().custom(objectId).required(),
     id: Joi.string().required(),
     name: Joi.string().required(),
-    picture: Joi.string().required(),
+    picture: Joi.string().required().allow(''),
   });
 };
 const githubMetadata = () => {
@@ -41,7 +41,7 @@ const githubMetadata = () => {
     account: Joi.object().keys({
       login: Joi.string().required(),
       id: Joi.string().required(),
-      avatarUrl: Joi.string().required(),
+      avatarUrl: Joi.string().required().allow(''),
     }),
   });
 };
@@ -51,7 +51,7 @@ const notionMetadata = () => {
     userId: Joi.string().custom(objectId).required(),
     workspace_id: Joi.string().required(),
     workspace_name: Joi.string().required(),
-    workspace_icon: Joi.string().required(),
+    workspace_icon: Joi.string().required().allow(''),
     bot_id: Joi.string().required(),
     request_id: Joi.string().required(),
     owner: Joi.object().keys({
@@ -61,7 +61,7 @@ const notionMetadata = () => {
         object: Joi.string().required(),
         id: Joi.string().required(),
         name: Joi.string().required(),
-        avatar_url: Joi.string().required(),
+        avatar_url: Joi.string().required().allow(''),
       }),
     }),
   });
