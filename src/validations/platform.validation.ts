@@ -70,6 +70,7 @@ const notionMetadata = () => {
 const mediaWikiMetadata = () => {
   return Joi.object().keys({
     baseURL: Joi.string().required(),
+    path: Joi.string().required().valid('/w/api.php'),
   });
 };
 
