@@ -281,7 +281,7 @@ describe('Platform routes', () => {
         community: communityOne._id,
         metadata: {
           baseURL: 'base',
-          path: "/w/api.php"
+          path: '/w/api.php',
         },
       };
       const res = await request(app)

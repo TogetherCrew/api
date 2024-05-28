@@ -56,7 +56,6 @@ const hivemindGoogleMetadata = () => {
 const hivemindGithubMetadata = () => {
   return Joi.object().keys({
     // repoIds: Joi.array().items(Joi.string()),
-
   });
 };
 
