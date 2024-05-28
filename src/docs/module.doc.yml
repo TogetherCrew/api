@@ -211,10 +211,8 @@ paths:
                                 description: Metadata for the hivemind module on Google.
                               - type: object
                                 properties:
-                                  # repoIds:
-                                  #   type: array
-                                  #   items:
-                                  #     type: string
+                                  activated:
+                                    type: boolean
                                 description: Metadata for the hivemind module on Github.
                               - type: object
                                 properties:
