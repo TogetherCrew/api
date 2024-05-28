@@ -168,7 +168,7 @@ paths:
                           type: string        
                         path: 
                           type: string
-                          defualt: /w/api.php'                                                     
+                          defualt: /w/api.php                                                   
                       description: Metadata for MediaWiki.
       responses:
         "201":
