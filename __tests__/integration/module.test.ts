@@ -517,7 +517,7 @@
 //           {
 //             platform: platformOne._id,
 //             metadata: {
-//               repoIds: ['1'],
+//               activated: true,
 //             },
 //             name: PlatformNames.GitHub,
 //           },
@@ -552,9 +552,7 @@
 //             {
 //               _id: expect.anything(),
 //               platform: platformOne._id.toHexString(),
-//               metadata: {
-//                 repoIds: ['1'],
-//               },
+//               metadata: updateBody.options.platforms[0].metadata,
 //               name: 'github',
 //             },
 //           ],

@@ -17,7 +17,7 @@ import config from '../config';
 import httpStatus from 'http-status';
 import querystring from 'querystring';
 import parentLogger from '../config/logger';
-import { PlatformNames } from '@togethercrew.dev/db';
+import { IPlatform, PlatformNames } from '@togethercrew.dev/db';
 
 const logger = parentLogger.child({ module: 'PlatformController' });
 
@@ -334,7 +334,9 @@ const updatePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Re
 });
 const deletePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
   if (req.body.deleteType === 'soft') {
-    await platformService.updatePlatform(req.platform, { disconnectedAt: new Date() });
+    // TODO: FIX any
+    const platform: any = req.platform;
+    platform.softDelete();
   } else if (req.body.deleteType === 'hard') {
     await platformService.deletePlatform(req.platform);
     if (req.platform.name === PlatformNames.Discord) {

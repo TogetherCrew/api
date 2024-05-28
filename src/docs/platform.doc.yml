@@ -162,10 +162,13 @@ paths:
                                   type: string                                                                
                       description: Metadata for Notion.
                     - type: object
-                      required: [baseURL]
+                      required: [baseURL , path]
                       properties:
                         baseURL:
-                          type: string                                                             
+                          type: string        
+                        path: 
+                          type: string
+                          default: /w/api.php                                                   
                       description: Metadata for MediaWiki.
       responses:
         "201":
