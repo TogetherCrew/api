@@ -1,6 +1,9 @@
 import { Types } from 'mongoose';
 import { ChoreographyDict, MBConnection, Status } from '@togethercrew.dev/tc-messagebroker';
 import { Snowflake } from 'discord.js';
+import parentLogger from '../config/logger';
+
+const logger = parentLogger.child({ module: 'SagaService' });
 
 async function createAndStartGuildSaga(
   platformId: Types.ObjectId,
@@ -11,8 +14,7 @@ async function createAndStartGuildSaga(
     data: { platformId, ...other },
     choreography: ChoreographyDict.DISCORD_UPDATE_CHANNELS,
   });
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  logger.info({ platformId, other }, 'firing createAndStartGuildSaga saga');
   await saga.start(() => {});
 }
 
@@ -22,8 +24,8 @@ async function createAndStartFetchMemberSaga(platformId: Types.ObjectId) {
     data: { platformId },
     choreography: ChoreographyDict.DISCORD_FETCH_MEMBERS,
   });
+  logger.info({ platformId }, 'firing createAndStartFetchMemberSaga saga');
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   await saga.start(() => {});
 }
 
@@ -37,7 +39,7 @@ async function createAndStartRefreshTwitterSaga(
     choreography: ChoreographyDict.TWITTER_REFRESH,
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  logger.info({ twitter_username, other }, 'firing createAndStartRefreshTwitterSaga saga');
   await saga.start(() => {});
   return saga;
 }
@@ -51,8 +53,8 @@ async function createAndStartAnnouncementSendMessageToChannelSaga(
     data: { announcementId, ...info },
     choreography: ChoreographyDict.ANNOUNCEMENT_SEND_MESSAGE_TO_CHANNEL,
   });
+  logger.info({ announcementId, info }, 'firing createAndStartAnnouncementSendMessageToChannelSaga saga');
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   await saga.start(() => {});
 }
 
@@ -65,8 +67,8 @@ async function createAndStartAnnouncementSendMessageToUserSaga(
     data: { announcementId, ...info, isSafetyMessage: true },
     choreography: ChoreographyDict.ANNOUNCEMENT_SEND_MESSAGE_TO_USER,
   });
+  logger.info({ announcementId, info }, 'firing createAndStartAnnouncementSendMessageToUserSaga saga');
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   await saga.start(() => {});
 }
 
