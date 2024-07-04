@@ -14,7 +14,7 @@ async function createAndStartGuildSaga(
     data: { platformId, ...other },
     choreography: ChoreographyDict.DISCORD_UPDATE_CHANNELS,
   });
-  logger.info({ platformId,other }, 'firing createAndStartGuildSaga saga');
+  logger.info({ platformId, other }, 'firing createAndStartGuildSaga saga');
   await saga.start(() => {});
 }
 
@@ -39,7 +39,7 @@ async function createAndStartRefreshTwitterSaga(
     choreography: ChoreographyDict.TWITTER_REFRESH,
   });
 
-  logger.info({ twitter_username ,other}, 'firing createAndStartRefreshTwitterSaga saga');
+  logger.info({ twitter_username, other }, 'firing createAndStartRefreshTwitterSaga saga');
   await saga.start(() => {});
   return saga;
 }
@@ -53,7 +53,7 @@ async function createAndStartAnnouncementSendMessageToChannelSaga(
     data: { announcementId, ...info },
     choreography: ChoreographyDict.ANNOUNCEMENT_SEND_MESSAGE_TO_CHANNEL,
   });
-  logger.info({ announcementId ,info}, 'firing createAndStartAnnouncementSendMessageToChannelSaga saga');
+  logger.info({ announcementId, info }, 'firing createAndStartAnnouncementSendMessageToChannelSaga saga');
 
   await saga.start(() => {});
 }
@@ -67,7 +67,7 @@ async function createAndStartAnnouncementSendMessageToUserSaga(
     data: { announcementId, ...info, isSafetyMessage: true },
     choreography: ChoreographyDict.ANNOUNCEMENT_SEND_MESSAGE_TO_USER,
   });
-  logger.info({ announcementId ,info}, 'firing createAndStartAnnouncementSendMessageToUserSaga saga');
+  logger.info({ announcementId, info }, 'firing createAndStartAnnouncementSendMessageToUserSaga saga');
 
   await saga.start(() => {});
 }
