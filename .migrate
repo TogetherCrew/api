@@ -1,9 +1,9 @@
 {
-  "lastRun": "1702287534517-migrate-to-cc.ts",
+  "lastRun": "1720532975152-add-isfetchingintialdata.ts",
   "migrations": [
     {
-      "title": "1702287534517-migrate-to-cc.ts",
-      "timestamp": 1702475464508
+      "title": "1720532975152-add-isfetchingintialdata.ts",
+      "timestamp": 1720533282435
     }
   ]
 }

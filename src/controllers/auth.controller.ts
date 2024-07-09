@@ -52,6 +52,7 @@ const discordAuthorizeCallback = catchAsync(async function (req: ISessionRequest
     const query = querystring.stringify(params);
     res.redirect(`${config.frontend.url}/callback?` + query);
   } catch (err) {
+    console.log(err);
     logger.error({ err }, 'Failed to authorize discord account');
     const params = {
       statusCode: STATUS_CODE_ERROR,
