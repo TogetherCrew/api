@@ -330,11 +330,7 @@ const updatePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Re
     );
   }
 
-  if (
-    req.platform.name === PlatformNames.Discord &&
-    req.platform.metadata?.isFetchingIntialData &&
-    (req.body.metadata.selectedChannels || req.body.metadata.period)
-  ) {
+  if (req.platform.name === PlatformNames.Discord && req.platform.metadata?.isFetchingIntialData) {
     throw new ApiError(
       httpStatus.BAD_REQUEST,
       'Updating channels or date periods is not allowed during the initial fetching of the server.',
