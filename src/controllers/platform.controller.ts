@@ -329,6 +329,13 @@ const updatePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Re
       'Updating channels or date period is not allowed during server analysis.',
     );
   }
+
+  if (req.platform.name === PlatformNames.Discord && req.platform.metadata?.isFetchingIntialData) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      'Updating channels or date periods is not allowed during the initial fetching of the server.',
+    );
+  }
   const platform = await platformService.updatePlatform(req.platform, req.body, req.user.discordId);
   res.send(platform);
 });
