@@ -21,7 +21,7 @@ export const up = async () => {
   for (let i = 0; i < discordPlatforms.length; i++) {
     const platform = discordPlatforms[i];
     if (platform?.metadata) {
-      platform.metadata.isFetchingIntialData = false;
+      platform.metadata.isFetchingInitialData = false;
       platform.markModified('metadata');
       await platform.save();
     }
