@@ -6,7 +6,7 @@ import config from '../../src/config';
 import { tokenService } from '../../src/services';
 import setupTestDB from '../utils/setupTestDB';
 import { userOne, insertUsers } from '../fixtures/user.fixture';
-import { Token,TokenTypeNames } from '@togethercrew.dev/db';
+import { Token, TokenTypeNames } from '@togethercrew.dev/db';
 
 setupTestDB();
 

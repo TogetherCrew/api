@@ -139,7 +139,15 @@ async function queryGuildMembersForTables(
     };
   } catch (error) {
     logger.error(
-      { guildConnection: guildConnection.name,platformConnection: platformConnection.name ,  filter, options, memberActivity, activityCompostionsTypes, error },
+      {
+        guildConnection: guildConnection.name,
+        platformConnection: platformConnection.name,
+        filter,
+        options,
+        memberActivity,
+        activityCompostionsTypes,
+        error,
+      },
       'Failed to query guild members',
     );
     return {

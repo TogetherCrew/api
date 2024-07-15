@@ -791,7 +791,10 @@ async function inactiveMembersLineGraph(platformConnection: Connection, startDat
       ),
     };
   } catch (error) {
-    logger.error({ platform_connection: platformConnection.name, startDate, endDate, error }, 'Failed to get inactive members line graph');
+    logger.error(
+      { platform_connection: platformConnection.name, startDate, endDate, error },
+      'Failed to get inactive members line graph',
+    );
     return {
       categories: [],
       series: [],

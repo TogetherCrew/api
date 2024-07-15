@@ -54,7 +54,10 @@ describe('member-activity routes', () => {
       await insertCommunities([communityOne]);
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       const res = await request(app)
         .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-line-graph`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -148,7 +151,10 @@ describe('member-activity routes', () => {
       await insertCommunities([communityOne]);
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
 
       const res = await request(app)
         .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-line-graph`)
@@ -238,7 +244,10 @@ describe('member-activity routes', () => {
       await insertCommunities([communityOne]);
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       const res = await request(app)
         .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-line-graph`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -325,7 +334,10 @@ describe('member-activity routes', () => {
       await insertCommunities([communityOne]);
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       const res = await request(app)
         .post(`/api/v1/member-activity/${platformOne._id}/inactive-members-line-graph`)
         .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -916,7 +928,10 @@ describe('member-activity routes', () => {
       await insertCommunities([communityOne]);
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -1004,7 +1019,10 @@ describe('member-activity routes', () => {
     test('should correctly apply filter on roles field if include provided', async () => {
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -1031,7 +1049,10 @@ describe('member-activity routes', () => {
     test('should correctly apply filter on roles field if exclude provided', async () => {
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -1058,7 +1079,10 @@ describe('member-activity routes', () => {
     test('should correctly apply filter on username field', async () => {
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -1085,7 +1109,10 @@ describe('member-activity routes', () => {
     test('should correctly sort the returned array if descending sort param is specified', async () => {
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -1115,7 +1142,10 @@ describe('member-activity routes', () => {
     test('should correctly sort the returned array if ascending  sort param is specified', async () => {
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -1146,7 +1176,10 @@ describe('member-activity routes', () => {
     test('should correctly sort the returned array if multiple sorting criteria are specified', async () => {
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -1188,7 +1221,10 @@ describe('member-activity routes', () => {
     test('should limit returned array if limit param is specified', async () => {
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -1218,7 +1254,10 @@ describe('member-activity routes', () => {
     test('should correctly sort the returned array if page and limit are  specified', async () => {
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -1264,7 +1303,10 @@ describe('member-activity routes', () => {
     test('should return 200 and apply the default query options', async () => {
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -1364,7 +1406,10 @@ describe('member-activity routes', () => {
     test('should correctly apply filter on activityComposition field', async () => {
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -1452,7 +1497,10 @@ describe('member-activity routes', () => {
     test('should correctly apply filter on roles field if include provided', async () => {
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -1480,7 +1528,10 @@ describe('member-activity routes', () => {
     test('should correctly apply filter on roles field if exclude provided', async () => {
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -1508,7 +1559,10 @@ describe('member-activity routes', () => {
     test('should correctly apply filter on username field', async () => {
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -1536,7 +1590,10 @@ describe('member-activity routes', () => {
     test('should correctly sort the returned array if descending sort param is specified', async () => {
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -1567,7 +1624,10 @@ describe('member-activity routes', () => {
     test('should correctly sort the returned array if ascending  sort param is specified', async () => {
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -1598,7 +1658,10 @@ describe('member-activity routes', () => {
     test('should correctly sort the returned array if multiple sorting criteria are specified', async () => {
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -1640,7 +1703,10 @@ describe('member-activity routes', () => {
     test('should limit returned array if limit param is specified', async () => {
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -1670,7 +1736,10 @@ describe('member-activity routes', () => {
     test('should correctly sort the returned array if page and limit are specified', async () => {
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -1716,7 +1785,10 @@ describe('member-activity routes', () => {
     test('should return 200 and apply the default query options', async () => {
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -1816,7 +1888,10 @@ describe('member-activity routes', () => {
       await insertCommunities([communityOne]);
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -1905,7 +1980,10 @@ describe('member-activity routes', () => {
       await insertCommunities([communityOne]);
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -1934,7 +2012,10 @@ describe('member-activity routes', () => {
       await insertCommunities([communityOne]);
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -1962,7 +2043,10 @@ describe('member-activity routes', () => {
       await insertCommunities([communityOne]);
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -1991,7 +2075,10 @@ describe('member-activity routes', () => {
       await insertCommunities([communityOne]);
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -2023,7 +2110,10 @@ describe('member-activity routes', () => {
       await insertCommunities([communityOne]);
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -2055,7 +2145,10 @@ describe('member-activity routes', () => {
       await insertCommunities([communityOne]);
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -2098,7 +2191,10 @@ describe('member-activity routes', () => {
       await insertCommunities([communityOne]);
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,
@@ -2129,7 +2225,10 @@ describe('member-activity routes', () => {
       await insertCommunities([communityOne]);
       await insertUsers([userOne]);
       await insertPlatforms([platformOne]);
-      await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], platformConnection);
+      await insertMemberActivities(
+        [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+        platformConnection,
+      );
       await insertGuildMembers(
         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
         guildConnection,

@@ -14,7 +14,7 @@ export const cleanUpTenantDatabases = async () => {
 
   for (const tenantId of tenantIds) {
     const connection = await DatabaseManager.getInstance().getGuildDb(tenantId);
-    
+
     await Promise.all(Object.values(connection.collections).map(async (collection) => collection.deleteMany({})));
   }
 };

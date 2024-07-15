@@ -45,7 +45,6 @@ describe('Platform routes', () => {
   beforeAll(async () => {
     platformConnection = await DatabaseManager.getInstance().getPlatformDb(platformOne._id.toString());
     guildConnection = await DatabaseManager.getInstance().getGuildDb(platformOne.metadata?.id);
-
   });
 
   beforeEach(async () => {

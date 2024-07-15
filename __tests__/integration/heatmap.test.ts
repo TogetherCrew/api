@@ -38,11 +38,10 @@ describe('Heatmap routes', () => {
     };
     let guildConnection: Connection;
     let platformConnection: Connection;
-    
+
     beforeEach(async () => {
       platformConnection = await DatabaseManager.getInstance().getPlatformDb(platformOne._id.toString());
       guildConnection = await DatabaseManager.getInstance().getGuildDb(platformOne.metadata?.id);
-  
 
       await guildConnection.dropDatabase();
       await platformConnection.dropDatabase();

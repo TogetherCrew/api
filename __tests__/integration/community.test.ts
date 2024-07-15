@@ -29,11 +29,10 @@ setupTestDB();
 describe('Community routes', () => {
   let guildConnection: Connection;
   let platformguildConnection: Connection;
-  
+
   beforeAll(async () => {
     platformguildConnection = await DatabaseManager.getInstance().getPlatformDb(platformOne._id.toString());
     guildConnection = await DatabaseManager.getInstance().getGuildDb(platformOne.metadata?.id);
-
   });
 
   beforeEach(() => {
@@ -373,15 +372,17 @@ describe('Community routes', () => {
         source: {
           platform: 'discord',
           identifierType: 'member',
-          identifierValues: [{
-            discordId: discordGuildMember2.discordId,
-            username: discordGuildMember2.username,
-            // ngu: discordGuildMember2.nickname,
-            discriminator: discordGuildMember2.discriminator,
-            nickname: discordGuildMember2.nickname,
-            globalName: discordGuildMember2.globalName,
-            avatar: discordGuildMember2.avatar,
-          }],
+          identifierValues: [
+            {
+              discordId: discordGuildMember2.discordId,
+              username: discordGuildMember2.username,
+              // ngu: discordGuildMember2.nickname,
+              discriminator: discordGuildMember2.discriminator,
+              nickname: discordGuildMember2.nickname,
+              globalName: discordGuildMember2.globalName,
+              avatar: discordGuildMember2.avatar,
+            },
+          ],
         },
       });
       expect(res.body.roles[1]).toMatchObject({
@@ -389,15 +390,17 @@ describe('Community routes', () => {
         source: {
           platform: 'discord',
           identifierType: 'member',
-          identifierValues: [{
-            discordId: discordGuildMember2.discordId,
-            username: discordGuildMember2.username,
-            // ngu: discordGuildMember2.nickname,
-            discriminator: discordGuildMember2.discriminator,
-            nickname: discordGuildMember2.nickname,
-            globalName: discordGuildMember2.globalName,
-            avatar: discordGuildMember2.avatar,
-          }],
+          identifierValues: [
+            {
+              discordId: discordGuildMember2.discordId,
+              username: discordGuildMember2.username,
+              // ngu: discordGuildMember2.nickname,
+              discriminator: discordGuildMember2.discriminator,
+              nickname: discordGuildMember2.nickname,
+              globalName: discordGuildMember2.globalName,
+              avatar: discordGuildMember2.avatar,
+            },
+          ],
           //   platformId: new Types.ObjectId(),
         },
       });
@@ -406,11 +409,13 @@ describe('Community routes', () => {
         source: {
           platform: 'discord',
           identifierType: 'role',
-          identifierValues: [{
-            roleId: discordRole1.roleId,
-            name: discordRole1.name,
-            color: discordRole1.color,
-          }],
+          identifierValues: [
+            {
+              roleId: discordRole1.roleId,
+              name: discordRole1.name,
+              color: discordRole1.color,
+            },
+          ],
           //   platformId: new Types.ObjectId(),
         },
       });
@@ -643,18 +648,19 @@ describe('Community routes', () => {
         .patch(`/api/v1/communities/${communityOne._id}`)
         .set('Authorization', `Bearer ${userTwoAccessToken}`)
         .send({
-          roles: [{
-            roleType: 'admin',
-            source: {
-              platform: 'discord',
-              identifierType: 'member',
-              identifierValues: [userOne.discordId],
-              platformId: platformOne._id,
+          roles: [
+            {
+              roleType: 'admin',
+              source: {
+                platform: 'discord',
+                identifierType: 'member',
+                identifierValues: [userOne.discordId],
+                platformId: platformOne._id,
+              },
             },
-          },]
+          ],
         })
         .expect(httpStatus.BAD_REQUEST);
-
     });
 
     test('should return 400 error if communityId is not a valid mongo id', async () => {

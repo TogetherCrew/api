@@ -71,7 +71,7 @@ const membersInteractionsNetworkGraph = catchAsync(async function (req: IAuthAnd
 
   const networkGraphData = await memberActivityService.getMembersInteractionsNetworkGraph(
     req.platform?.metadata?.id,
-    guildConnection
+    guildConnection,
   );
   res.send(networkGraphData);
 });
@@ -126,7 +126,7 @@ const activeMembersOnboardingTable = catchAsync(async function (req: IAuthAndPla
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const platformConnection = await DatabaseManager.getInstance().getPlatformDb(req.platform?.id);
   const guildConnection = await DatabaseManager.getInstance().getGuildDb(req.platform?.metadata?.id);
-    const activityCompostionFields = memberActivityService.getActivityCompositionOfActiveMembersOnboarding();
+  const activityCompostionFields = memberActivityService.getActivityCompositionOfActiveMembersOnboarding();
   const memberActivity = await memberActivityService.getLastDocumentForTablesUsage(
     platformConnection,
     activityCompostionFields,
@@ -160,7 +160,7 @@ const disengagedMembersCompositionTable = catchAsync(async function (req: IAuthA
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const platformConnection = await DatabaseManager.getInstance().getPlatformDb(req.platform?.id);
   const guildConnection = await DatabaseManager.getInstance().getGuildDb(req.platform?.metadata?.id);
-    const activityCompostionFields = memberActivityService.getActivityCompositionOfDisengagedComposition();
+  const activityCompostionFields = memberActivityService.getActivityCompositionOfDisengagedComposition();
   const memberActivity = await memberActivityService.getLastDocumentForTablesUsage(
     platformConnection,
     activityCompostionFields,

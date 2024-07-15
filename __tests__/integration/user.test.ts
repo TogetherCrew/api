@@ -34,7 +34,6 @@ describe('User routes', () => {
   beforeAll(async () => {
     platformConnection = await DatabaseManager.getInstance().getPlatformDb(platformOne._id.toString());
     guildConnection = await DatabaseManager.getInstance().getGuildDb(platformOne.metadata?.id);
-
   });
   beforeEach(() => {
     cleanUpTenantDatabases();
@@ -83,7 +82,7 @@ describe('User routes', () => {
       updateBody = {
         email: 'email@yahoo.com',
         tcaAt: currentDate,
-        unverifiedTelegramUsername: 'alex_jan'
+        unverifiedTelegramUsername: 'alex_jan',
       };
     });
     test('should return 200 and successfully update user if data is ok', async () => {
@@ -100,7 +99,7 @@ describe('User routes', () => {
         email: updateBody.email,
         communities: [communityOne._id.toString(), communityTwo._id.toString()],
         tcaAt: currentDate.toISOString(),
-        unverifiedTelegramUsername: updateBody.unverifiedTelegramUsername
+        unverifiedTelegramUsername: updateBody.unverifiedTelegramUsername,
       });
 
       const dbUser = await User.findById(userOne._id);
@@ -145,7 +144,6 @@ describe('User routes', () => {
     });
   });
   describe('GET /api/v1/users/@me/:communityId/roles', () => {
-
     test('should return 200 and array of roleTypes that user has in the community if data is ok', async () => {
       await insertCommunities([communityOne]);
       await insertPlatforms([platformOne]);
@@ -177,14 +175,10 @@ describe('User routes', () => {
         .expect(httpStatus.OK);
 
       expect(res3.body).toEqual([]);
-
     });
     test('should return 401 if access token is missing', async () => {
       await insertUsers([userOne]);
-      await request(app)
-        .get(`/api/v1/users/@me/${communityOne._id}/roles`)
-        .send()
-        .expect(httpStatus.UNAUTHORIZED);
+      await request(app).get(`/api/v1/users/@me/${communityOne._id}/roles`).send().expect(httpStatus.UNAUTHORIZED);
     });
     test('should return 400 error if communityId is not a valid mongo id', async () => {
       await insertUsers([userOne]);
