@@ -77,8 +77,8 @@ export const discordChannel5: IChannel = {
   type: 0,
 };
 
-export const insertChannels = async function <Type>(channels: Array<Type>, connection: Connection) {
+export const insertChannels = async function <Type>(channels: Array<Type>, guildConnection: Connection) {
   for (const channel of channels) {
-    await connection.models.Channel.create(channel);
+    await guildConnection.models.Channel.create(channel);
   }
 };

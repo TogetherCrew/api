@@ -60,8 +60,8 @@ export const discordGuildMember5 = {
   globalName: null,
 };
 
-export const insertGuildMembers = async function <Type>(guildMembers: Array<Type>, connection: Connection) {
+export const insertGuildMembers = async function <Type>(guildMembers: Array<Type>, guildConnection: Connection) {
   for (const guildMember of guildMembers) {
-    await connection.models.GuildMember.create(guildMember);
+    await guildConnection.models.GuildMember.create(guildMember);
   }
 };

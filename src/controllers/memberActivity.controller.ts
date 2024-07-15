@@ -7,9 +7,9 @@ import { pick } from '../utils';
 import { activityCompostionsTypes } from '../config/memberBreakDownTables';
 
 const activeMembersCompositionLineGraph = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
-  const connection = await DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
+  const platformConnection = await DatabaseManager.getInstance().getPlatformDb(req.platform?.id);
   let activeMembersCompositionLineGraph = await memberActivityService.activeMembersCompositionLineGraph(
-    connection,
+    platformConnection,
     req.body.startDate,
     req.body.endDate,
   );
@@ -22,9 +22,9 @@ const activeMembersCompositionLineGraph = catchAsync(async function (req: IAuthA
 });
 
 const activeMembersOnboardingLineGraph = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
-  const connection = await DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
+  const platformConnection = await DatabaseManager.getInstance().getPlatformDb(req.platform?.id);
   let activeMembersOnboardingLineGraph = await memberActivityService.activeMembersOnboardingLineGraph(
-    connection,
+    platformConnection,
     req.body.startDate,
     req.body.endDate,
   );
@@ -37,9 +37,9 @@ const activeMembersOnboardingLineGraph = catchAsync(async function (req: IAuthAn
 });
 
 const disengagedMembersCompositionLineGraph = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
-  const connection = await DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
+  const platformConnection = await DatabaseManager.getInstance().getPlatformDb(req.platform?.id);
   let disengagedMembersLineGraph = await memberActivityService.disengagedMembersCompositionLineGraph(
-    connection,
+    platformConnection,
     req.body.startDate,
     req.body.endDate,
   );
@@ -52,9 +52,9 @@ const disengagedMembersCompositionLineGraph = catchAsync(async function (req: IA
 });
 
 const inactiveMembersLineGraph = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
-  const connection = await DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
+  const platformConnection = await DatabaseManager.getInstance().getPlatformDb(req.platform?.id);
   let inactiveMembersLineGraph = await memberActivityService.inactiveMembersLineGraph(
-    connection,
+    platformConnection,
     req.body.startDate,
     req.body.endDate,
   );
@@ -67,10 +67,11 @@ const inactiveMembersLineGraph = catchAsync(async function (req: IAuthAndPlatfor
 });
 
 const membersInteractionsNetworkGraph = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
-  const connection = await DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
+  const guildConnection = await DatabaseManager.getInstance().getGuildDb(req.platform?.metadata?.id);
+
   const networkGraphData = await memberActivityService.getMembersInteractionsNetworkGraph(
     req.platform?.metadata?.id,
-    connection,
+    guildConnection
   );
   res.send(networkGraphData);
 });
@@ -88,21 +89,23 @@ const fragmentationScore = catchAsync(async function (req: IAuthAndPlatform, res
 const activeMembersCompositionTable = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
   const filter = pick({ ...req.query, ...req.body }, ['activityComposition', 'ngu', 'allRoles', 'include', 'exclude']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const connection = await DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
+  const platformConnection = await DatabaseManager.getInstance().getPlatformDb(req.platform?.id);
+  const guildConnection = await DatabaseManager.getInstance().getGuildDb(req.platform?.metadata?.id);
   const activityCompostionFields = memberActivityService.getActivityCompositionOfActiveMembersComposition();
   const memberActivity = await memberActivityService.getLastDocumentForTablesUsage(
-    connection,
+    platformConnection,
     activityCompostionFields,
   );
   const guildMembers = await discordServices.guildMemberService.queryGuildMembersForTables(
-    connection,
+    platformConnection,
+    guildConnection,
     filter,
     options,
     memberActivity,
     activityCompostionsTypes.activeMembersComposition,
   );
 
-  const roles = await discordServices.roleService.getRoles(connection, {});
+  const roles = await discordServices.roleService.getRoles(guildConnection, {});
   if (guildMembers) {
     guildMembers.results.forEach((guildMember) => {
       guildMember.roles = discordServices.roleService.getRolesForGuildMember(guildMember, roles);
@@ -121,20 +124,22 @@ const activeMembersCompositionTable = catchAsync(async function (req: IAuthAndPl
 const activeMembersOnboardingTable = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
   const filter = pick({ ...req.query, ...req.body }, ['activityComposition', 'ngu', 'allRoles', 'include', 'exclude']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const connection = await DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
-  const activityCompostionFields = memberActivityService.getActivityCompositionOfActiveMembersOnboarding();
+  const platformConnection = await DatabaseManager.getInstance().getPlatformDb(req.platform?.id);
+  const guildConnection = await DatabaseManager.getInstance().getGuildDb(req.platform?.metadata?.id);
+    const activityCompostionFields = memberActivityService.getActivityCompositionOfActiveMembersOnboarding();
   const memberActivity = await memberActivityService.getLastDocumentForTablesUsage(
-    connection,
+    platformConnection,
     activityCompostionFields,
   );
   const guildMembers = await discordServices.guildMemberService.queryGuildMembersForTables(
-    connection,
+    platformConnection,
+    guildConnection,
     filter,
     options,
     memberActivity,
     activityCompostionsTypes.activeMembersOnboarding,
   );
-  const roles = await discordServices.roleService.getRoles(connection, {});
+  const roles = await discordServices.roleService.getRoles(guildConnection, {});
   if (guildMembers) {
     guildMembers.results.forEach((guildMember) => {
       guildMember.roles = discordServices.roleService.getRolesForGuildMember(guildMember, roles);
@@ -153,20 +158,22 @@ const activeMembersOnboardingTable = catchAsync(async function (req: IAuthAndPla
 const disengagedMembersCompositionTable = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
   const filter = pick({ ...req.query, ...req.body }, ['activityComposition', 'ngu', 'allRoles', 'include', 'exclude']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const connection = await DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
-  const activityCompostionFields = memberActivityService.getActivityCompositionOfDisengagedComposition();
+  const platformConnection = await DatabaseManager.getInstance().getPlatformDb(req.platform?.id);
+  const guildConnection = await DatabaseManager.getInstance().getGuildDb(req.platform?.metadata?.id);
+    const activityCompostionFields = memberActivityService.getActivityCompositionOfDisengagedComposition();
   const memberActivity = await memberActivityService.getLastDocumentForTablesUsage(
-    connection,
+    platformConnection,
     activityCompostionFields,
   );
   const guildMembers = await discordServices.guildMemberService.queryGuildMembersForTables(
-    connection,
+    platformConnection,
+    guildConnection,
     filter,
     options,
     memberActivity,
     activityCompostionsTypes.disengagedMembersCompostion,
   );
-  const roles = await discordServices.roleService.getRoles(connection, {});
+  const roles = await discordServices.roleService.getRoles(guildConnection, {});
   if (guildMembers) {
     guildMembers.results.forEach((guildMember) => {
       guildMember.roles = discordServices.roleService.getRolesForGuildMember(guildMember, roles);

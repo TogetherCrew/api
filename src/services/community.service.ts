@@ -128,10 +128,10 @@ const populateRoles = async (community: HydratedDocument<ICommunity>): Promise<H
       const platformId = role.source.platformId;
       const platform = await platformService.getPlatformById(platformId);
       if (platform) {
-        const connection = await DatabaseManager.getInstance().getTenantDb(platform?.metadata?.id);
+        const guildConnection = await DatabaseManager.getInstance().getGuildDb(platform?.metadata?.id);
         if (role.source.identifierType === 'member') {
           const guildMembers = await guildMemberService.getGuildMembers(
-            connection,
+            guildConnection,
             { discordId: { $in: role.source.identifierValues } },
             { avatar: 1, discordId: 1, username: 1, discriminator: 1, nickname: 1, globalName: 1 },
           );
@@ -142,7 +142,7 @@ const populateRoles = async (community: HydratedDocument<ICommunity>): Promise<H
           role.source.identifierValues = guildMembers;
         } else if (role.source.identifierType === 'role') {
           const roles: IRole[] = await roleService.getRoles(
-            connection,
+            guildConnection,
             { roleId: { $in: role.source.identifierValues } },
             { roleId: 1, color: 1, name: 1 },
           );

@@ -174,11 +174,11 @@ const enhanceAnnouncementDataOption = async (platformId: string, options: Record
     _id: platformId.toString(),
     disconnectedAt: null,
   });
-  const connection = await DatabaseManager.getInstance().getTenantDb(platform?.metadata?.id);
+  const guildConnection = await DatabaseManager.getInstance().getGuildDb(platform?.metadata?.id);
 
   const safetyMessageChannel = options?.safetyMessageChannelId;
   if (safetyMessageChannel) {
-    const channelInfo = await discordService.channelService.getChannelInfoFromChannelIds(connection, [
+    const channelInfo = await discordService.channelService.getChannelInfoFromChannelIds(guildConnection, [
       safetyMessageChannel,
     ]);
     newOptions['safetyMessageChannel'] = channelInfo[0];
@@ -186,19 +186,19 @@ const enhanceAnnouncementDataOption = async (platformId: string, options: Record
 
   const channelIds = options?.channelIds;
   if (channelIds) {
-    const channelInfo = await discordService.channelService.getChannelInfoFromChannelIds(connection, channelIds);
+    const channelInfo = await discordService.channelService.getChannelInfoFromChannelIds(guildConnection, channelIds);
     newOptions['channels'] = channelInfo;
   }
 
   const userIds = options?.userIds;
   if (userIds) {
-    const userInfo = await discordService.guildMemberService.getGuildMemberInfoFromDiscordIds(connection, userIds);
+    const userInfo = await discordService.guildMemberService.getGuildMemberInfoFromDiscordIds(guildConnection, userIds);
     newOptions['users'] = userInfo;
   }
 
   const roleIds = options?.roleIds;
   if (roleIds) {
-    const roleInfo = await discordService.roleService.getRoleInfoFromRoleIds(connection, roleIds);
+    const roleInfo = await discordService.roleService.getRoleInfoFromRoleIds(guildConnection, roleIds);
     newOptions['roles'] = roleInfo;
   }
 
@@ -294,7 +294,7 @@ const sendPrivateMessageToUser = async (saga: any) => {
       disconnectedAt: null,
     });
     const community = await communityService.getCommunityByFilter({ _id: platform?.community });
-    const connection = await DatabaseManager.getInstance().getTenantDb(platform?.metadata?.id);
+    const guildConnection = await DatabaseManager.getInstance().getGuildDb(platform?.metadata?.id);
 
     const userIds = options?.userIds;
     const roleIds = options?.roleIds;
@@ -309,14 +309,14 @@ const sendPrivateMessageToUser = async (saga: any) => {
         });
       }
       if (roleIds) {
-        const discordIds = await discordService.roleService.getDiscordIdsFromRoleIds(connection, roleIds);
+        const discordIds = await discordService.roleService.getDiscordIdsFromRoleIds(guildConnection, roleIds);
         discordIds.forEach((discordId: string) => {
           allDiscordIds.add(discordId);
         });
       }
       if (categories) {
         const discordIds = await discordService.guildMemberService.getAllDiscordIdsInLastedMemberActivity(
-          connection,
+          guildConnection,
           categories,
         );
         discordIds.forEach((discordId: string) => {

@@ -136,8 +136,8 @@ export const heatmap8 = {
   account_name: 'acc',
 };
 
-export const insertHeatmaps = async function <Type>(heatmaps: Array<Type>, connection: Connection) {
+export const insertHeatmaps = async function <Type>(heatmaps: Array<Type>, platformConnection: Connection) {
   for (const heatmap of heatmaps) {
-    await connection.models.HeatMap.create(heatmap);
+    await platformConnection.models.HeatMap.create(heatmap);
   }
 };

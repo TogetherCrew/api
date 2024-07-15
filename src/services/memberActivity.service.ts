@@ -13,17 +13,17 @@ const logger = parentLogger.child({ module: 'MemberActivityService' });
 
 /**
  * active members composition line graph
- * @param {Connection} connection
+ * @param {Connection} platformConnection
  * @param {Date} startDate
  * @param {Date} endDate
  * @returns {Object}
  */
-async function activeMembersCompositionLineGraph(connection: Connection, startDate: Date, endDate: Date) {
+async function activeMembersCompositionLineGraph(platformConnection: Connection, startDate: Date, endDate: Date) {
   const start = new Date(startDate);
   const end = new Date(endDate);
 
   try {
-    const membersActivities = await connection.models.MemberActivity.aggregate([
+    const membersActivities = await platformConnection.models.MemberActivity.aggregate([
       // Stage 1: Convert date from string to date type and extract needed data
       {
         $project: {
@@ -143,7 +143,7 @@ async function activeMembersCompositionLineGraph(connection: Connection, startDa
       endDate,
       membersActivities[0].categories[membersActivities[0].categories.length - 1],
     );
-    const AdjustedMemberActivity = await connection.models.MemberActivity.aggregate([
+    const AdjustedMemberActivity = await platformConnection.models.MemberActivity.aggregate([
       // Stage 1: Convert date from string to date type and extract needed data
       {
         $project: {
@@ -215,7 +215,7 @@ async function activeMembersCompositionLineGraph(connection: Connection, startDa
     };
   } catch (error) {
     logger.error(
-      { database: connection.name, startDate, endDate, error },
+      { platform_connection: platformConnection.name, startDate, endDate, error },
       'Failed to get active members composition line graph',
     );
     return {
@@ -237,17 +237,17 @@ async function activeMembersCompositionLineGraph(connection: Connection, startDa
 
 /**
  * active members onboarding line graph
- * @param {Connection} connection
+ * @param {Connection} platformConnection
  * @param {Date} startDate
  * @param {Date} endDate
  * @returns {Object}
  */
-async function activeMembersOnboardingLineGraph(connection: Connection, startDate: Date, endDate: Date) {
+async function activeMembersOnboardingLineGraph(platformConnection: Connection, startDate: Date, endDate: Date) {
   const start = new Date(startDate);
   const end = new Date(endDate);
 
   try {
-    const membersActivities = await connection.models.MemberActivity.aggregate([
+    const membersActivities = await platformConnection.models.MemberActivity.aggregate([
       // Stage 1: Convert date from string to date type and extract needed data
       {
         $project: {
@@ -360,7 +360,7 @@ async function activeMembersOnboardingLineGraph(connection: Connection, startDat
       endDate,
       membersActivities[0].categories[membersActivities[0].categories.length - 1],
     );
-    const AdjustedMemberActivity = await connection.models.MemberActivity.aggregate([
+    const AdjustedMemberActivity = await platformConnection.models.MemberActivity.aggregate([
       // Stage 1: Convert date from string to date type and extract needed data
       {
         $project: {
@@ -425,7 +425,7 @@ async function activeMembersOnboardingLineGraph(connection: Connection, startDat
     };
   } catch (error) {
     logger.error(
-      { database: connection.name, startDate, endDate, error },
+      { platform_connection: platformConnection.name, startDate, endDate, error },
       'Failed to get active members onboarding line graph',
     );
     return {
@@ -445,17 +445,17 @@ async function activeMembersOnboardingLineGraph(connection: Connection, startDat
 
 /**
  * disengaged members line graph
- * @param {Connection} connection
+ * @param {Connection} platformConnection
  * @param {Date} startDate
  * @param {Date} endDate
  * @returns {Object}
  */
-async function disengagedMembersCompositionLineGraph(connection: Connection, startDate: Date, endDate: Date) {
+async function disengagedMembersCompositionLineGraph(platformConnection: Connection, startDate: Date, endDate: Date) {
   const start = new Date(startDate);
   const end = new Date(endDate);
 
   try {
-    const membersActivities = await connection.models.MemberActivity.aggregate([
+    const membersActivities = await platformConnection.models.MemberActivity.aggregate([
       // Stage 1: Convert date from string to date type and extract needed data
       {
         $project: {
@@ -567,7 +567,7 @@ async function disengagedMembersCompositionLineGraph(connection: Connection, sta
       endDate,
       membersActivities[0].categories[membersActivities[0].categories.length - 1],
     );
-    const AdjustedMemberActivity = await connection.models.MemberActivity.aggregate([
+    const AdjustedMemberActivity = await platformConnection.models.MemberActivity.aggregate([
       // Stage 1: Convert date from string to date type and extract needed data
       {
         $project: {
@@ -632,7 +632,7 @@ async function disengagedMembersCompositionLineGraph(connection: Connection, sta
     };
   } catch (error) {
     logger.error(
-      { database: connection.name, startDate, endDate, error },
+      { platform_connection: platformConnection.name, startDate, endDate, error },
       'Failed to get disengaged members composition line graph',
     );
     return {
@@ -652,17 +652,17 @@ async function disengagedMembersCompositionLineGraph(connection: Connection, sta
 
 /**
  * inactive members line graph
- * @param {Connection} connection
+ * @param {Connection} platformConnection
  * @param {Date} startDate
  * @param {Date} endDate
  * @returns {Object}
  */
-async function inactiveMembersLineGraph(connection: Connection, startDate: Date, endDate: Date) {
+async function inactiveMembersLineGraph(platformConnection: Connection, startDate: Date, endDate: Date) {
   const start = new Date(startDate);
   const end = new Date(endDate);
 
   try {
-    const membersActivities = await connection.models.MemberActivity.aggregate([
+    const membersActivities = await platformConnection.models.MemberActivity.aggregate([
       // Stage 1: Convert date from string to date type and extract needed data
       {
         $project: {
@@ -748,7 +748,7 @@ async function inactiveMembersLineGraph(connection: Connection, startDate: Date,
       endDate,
       membersActivities[0].categories[membersActivities[0].categories.length - 1],
     );
-    const AdjustedMemberActivity = await connection.models.MemberActivity.aggregate([
+    const AdjustedMemberActivity = await platformConnection.models.MemberActivity.aggregate([
       // Stage 1: Convert date from string to date type and extract needed data
       {
         $project: {
@@ -791,7 +791,7 @@ async function inactiveMembersLineGraph(connection: Connection, startDate: Date,
       ),
     };
   } catch (error) {
-    logger.error({ database: connection.name, startDate, endDate, error }, 'Failed to get inactive members line graph');
+    logger.error({ platform_connection: platformConnection.name, startDate, endDate, error }, 'Failed to get inactive members line graph');
     return {
       categories: [],
       series: [],
@@ -857,13 +857,13 @@ function getActivityCompositionOfDisengagedComposition() {
 
 /**
  * get last member activity document for usage of member activity table
- * @param {Connection} connection
+ * @param {Connection} platformConnection
  * @param {Any} activityComposition
  * @returns {Object}
  */
-async function getLastDocumentForTablesUsage(connection: Connection, activityComposition: Array<string>) {
+async function getLastDocumentForTablesUsage(platformConnection: Connection, activityComposition: Array<string>) {
   const projectStage = buildProjectStageBasedOnActivityComposition(activityComposition);
-  const lastDocument = await connection.models.MemberActivity.aggregate([
+  const lastDocument = await platformConnection.models.MemberActivity.aggregate([
     { $sort: { date: -1 } },
     { $limit: 1 },
     { $project: projectStage },
