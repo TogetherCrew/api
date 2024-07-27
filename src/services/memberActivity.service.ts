@@ -937,16 +937,16 @@ function getUserInformationForNetworkGraph(user: IGuildMember, guildRoles: IRole
 type memberInteractionType = { id: string; radius: number; stats: NodeStats } & networkGraphUserInformationType;
 type memberInteractionsGraphResponseType = { width: number; from: memberInteractionType; to: memberInteractionType }[];
 async function getMembersInteractionsNetworkGraph(
-  guildId: string,
+  platformId: string,
   guildConnection: Connection,
 ): Promise<memberInteractionsGraphResponseType> {
   // TODO: refactor function later
   const usersInNetworkGraph: string[] = [];
   // userInteraction
   const usersInteractionsQuery = `
-    MATCH () -[r:INTERACTED_WITH {guildId: "${guildId}"}]-()
+    MATCH () -[r:INTERACTED_WITH {platformId: ${platformId}}]-()
     WITH max(r.date) as latest_date
-    MATCH (a:DiscordAccount)-[r:INTERACTED_WITH {guildId: "${guildId}", date: latest_date}]->(b:DiscordAccount)
+    MATCH (a:DiscordMember)-[r:INTERACTED_WITH {platformId: ${platformId}, date: latest_date}]->(b:DiscordMember)
     RETURN a, r, b`;
   const neo4jUsersInteractionsData = await Neo4j.read(usersInteractionsQuery);
   const { records: neo4jUsersInteractions } = neo4jUsersInteractionsData;
@@ -974,11 +974,11 @@ async function getMembersInteractionsNetworkGraph(
 
   // userRadius
   const userRadiusQuery = `
-    MATCH () -[r:INTERACTED_WITH {guildId: "${guildId}"}]-()
+    MATCH () -[r:INTERACTED_WITH {platformId: ${platformId}}]-()
     WITH max(r.date) as latest_date
-    MATCH (a:DiscordAccount) -[r:INTERACTED_WITH {date: latest_date, guildId: "${guildId}"}]-(:DiscordAccount)
+    MATCH (a:DiscordMember) -[r:INTERACTED_WITH {date: latest_date, platformId :${platformId}}]-(:DiscordMember)
     WITH a, r 
-    RETURN a.userId as userId, SUM(r.weight) as radius`;
+    RETURN a.id as userId, SUM(r.weight) as radius`;
   const neo4jUserRadiusData = await Neo4j.read(userRadiusQuery);
   const { records: neo4jUserRadius } = neo4jUserRadiusData;
   const userRadius = neo4jUserRadius.map((userRadius) => {
@@ -992,10 +992,10 @@ async function getMembersInteractionsNetworkGraph(
 
   // userStatus
   const userStatusQuery = `
-    MATCH () -[r:INTERACTED_IN]-(g:Guild {guildId: "${guildId}"})
+    MATCH () -[r:INTERACTED_IN]-(g:DiscordPlatform {id: ${platformId}})
     WITH max(r.date) as latest_date
-    MATCH (a:DiscordAccount)-[r:INTERACTED_IN {date: latest_date}]->(g:Guild {guildId: "${guildId}"})
-    RETURN a.userId as userId, r.status as status`;
+    MATCH (a:DiscordMember)-[r:INTERACTED_IN {date: latest_date}]->(g:DiscordPlatform {id: ${platformId}})
+    RETURN a.id as userId, r.status as status`;
   const neo4jUserStatusData = await Neo4j.read(userStatusQuery);
   const { records: neo4jUserStatus } = neo4jUserStatusData;
   const userStatus = neo4jUserStatus.map((userStatus) => {
@@ -1054,14 +1054,14 @@ type fragmentationScoreResponseType = {
   fragmentationScoreRange: { minimumFragmentationScore: number; maximumFragmentationScore: number };
   scoreStatus: ScoreStatus | null;
 };
-async function getFragmentationScore(guildId: string): Promise<fragmentationScoreResponseType> {
+async function getFragmentationScore(platformId: string): Promise<fragmentationScoreResponseType> {
   const fragmentationScale = 200;
   const fragmentationScoreRange = { minimumFragmentationScore: 0, maximumFragmentationScore: fragmentationScale };
   const fragmentationScoreQuery = `
-        MATCH ()-[r:INTERACTED_WITH {guildId: "${guildId}"}]-()
-        WITH max(r.date) as latest_date
-        MATCH (g:Guild {guildId: "${guildId}"})-[r:HAVE_METRICS {date: latest_date}]->(g)
-        RETURN ((r.louvainModularityScore - (-1)) / 2) * 200 as fragmentation_score
+    MATCH ()-[r:INTERACTED_WITH {platformId: ${platformId}}]-()
+    WITH max(r.date) as latest_date
+    MATCH (g:DiscordPlatform {id: ${platformId}})-[r:HAVE_METRICS {date: latest_date}]->(g)
+    RETURN ((r.louvainModularityScore - (-1)) / 2) * 200 as fragmentation_score;
     `;
 
   const neo4jData = await Neo4j.read(fragmentationScoreQuery);
@@ -1102,11 +1102,11 @@ type decentralisationScoreResponseType = {
   decentralisationScoreRange: { minimumDecentralisationScore: number; maximumDecentralisationScore: number };
   scoreStatus: ScoreStatus | null;
 };
-async function getDecentralisationScore(guildId: string): Promise<decentralisationScoreResponseType> {
+async function getDecentralisationScore(platformId: string): Promise<decentralisationScoreResponseType> {
   const decentralisationScoreRange = { minimumDecentralisationScore: 0, maximumDecentralisationScore: 200 };
   const decentralisationScoreQuery = `
-        MATCH (g:Guild {guildId: "${guildId}"})-[r:HAVE_METRICS]->(g)
-        RETURN r.decentralizationScore as decentralization_score ORDER BY r.date DESC LIMIT 1
+    MATCH (g:DiscordPlatform {id: "${platformId}"})-[r:HAVE_METRICS]->(g)
+    RETURN r.decentralizationScore as decentralization_score ORDER BY r.date DESC LIMIT 1;
     `;
   const neo4jData = await Neo4j.read(decentralisationScoreQuery);
   const { records } = neo4jData;
