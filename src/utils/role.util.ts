@@ -1,7 +1,6 @@
 import { HydratedDocument, Types } from 'mongoose';
-import { ICommunity, IPlatform, IUser } from '@togethercrew.dev/db';
-import { discordServices, platformService, communityService } from '../services';
-import { DatabaseManager } from '@togethercrew.dev/db';
+import { ICommunity, IPlatform, IUser, PlatformNames, DatabaseManager } from '@togethercrew.dev/db';
+import { discordServices, platformService } from '../services';
 import { UserRole } from '../interfaces';
 /**
  * Get user roles in a community
@@ -18,6 +17,7 @@ async function getUserRolesForCommunity(user: HydratedDocument<IUser>, community
     const connectedPlatformDoc = await platformService.getPlatformByFilter({
       community: community.id,
       disconnectedAt: null,
+      name: PlatformNames.Discord,
     });
     if (connectedPlatformDoc !== null) {
       const guildConnection = await DatabaseManager.getInstance().getGuildDb(connectedPlatformDoc.metadata?.id);
