@@ -36,11 +36,16 @@
 //       timeZone: string;
 //       channelIds: Array<string>;
 //     };
-//     let connection: Connection;
-//     beforeEach(async () => {
-//       connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+//     let guildConnection: Connection;
+//     let platformConnection: Connection;
 
-//       await connection.dropDatabase();
+//     beforeEach(async () => {
+//       platformConnection = await DatabaseManager.getInstance().getPlatformDb(platformOne._id.toString());
+//       guildConnection = await DatabaseManager.getInstance().getGuildDb(platformOne.metadata?.id);
+
+//       await guildConnection.dropDatabase();
+//       await platformConnection.dropDatabase();
+
 //       requestBody = {
 //         startDate: new Date('2023-01-01'),
 //         endDate: new Date('2023-01-31'),
@@ -53,7 +58,7 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertHeatmaps([heatmap1, heatmap2, heatmap5], connection);
+//       await insertHeatmaps([heatmap1, heatmap2, heatmap5], platformConnection);
 //       const res = await request(app)
 //         .post(`/api/v1/heatmaps/${platformOne._id}/heatmap-chart`)
 //         .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -73,7 +78,7 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertHeatmaps([heatmap1, heatmap2, heatmap5], connection);
+//       await insertHeatmaps([heatmap1, heatmap2, heatmap5], platformConnection);
 //       requestBody.timeZone = 'Asia/Tehran'; // +3:30
 
 //       const res = await request(app)
@@ -95,7 +100,7 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertHeatmaps([heatmap1, heatmap2, heatmap5], connection);
+//       await insertHeatmaps([heatmap1, heatmap2, heatmap5], platformConnection);
 //       requestBody.timeZone = 'Brazil/East'; // -3:30
 
 //       const res = await request(app)
@@ -117,7 +122,7 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertHeatmaps([heatmap1, heatmap2, heatmap5], connection);
+//       await insertHeatmaps([heatmap1, heatmap2, heatmap5], platformConnection);
 //       requestBody.startDate = new Date('2023-01-20');
 //       requestBody.endDate = new Date('2023-01-22');
 //       requestBody.channelIds = ['1012430565959553148'];
@@ -140,7 +145,7 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertHeatmaps([heatmap1, heatmap2, heatmap5], connection);
+//       await insertHeatmaps([heatmap1, heatmap2, heatmap5], platformConnection);
 //       requestBody.startDate = new Date('2023-01-20');
 //       requestBody.endDate = new Date('2023-01-22');
 //       requestBody.channelIds = [];
@@ -174,16 +179,16 @@
 //   });
 
 //   describe('POST /api/v1/heatmaps/:platformId/line-graph', () => {
-//     let connection: Connection;
+//     let platformguildConnection: Connection;
 //     beforeEach(async () => {
-//       connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
-//       await connection.dropDatabase();
+//       platformguildConnection = await DatabaseManager.getInstance().getPlatformDb(platformOne._id.toString());
+//       await platformguildConnection.dropDatabase();
 //     });
 //     test('should return 200 and line graph data if req data is ok', async () => {
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertHeatmaps([heatmap3, heatmap4, heatmap5, heatmap6, heatmap7, heatmap8], connection);
+//       await insertHeatmaps([heatmap3, heatmap4, heatmap5, heatmap6, heatmap7, heatmap8], platformguildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/heatmaps/${platformOne._id}/line-graph`)

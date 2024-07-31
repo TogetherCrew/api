@@ -20,8 +20,8 @@ async function getUserRolesForCommunity(user: HydratedDocument<IUser>, community
       name: PlatformNames.Discord,
     });
     if (connectedPlatformDoc !== null) {
-      const connection = await DatabaseManager.getInstance().getTenantDb(connectedPlatformDoc.metadata?.id);
-      const guildMemberDoc = await discordServices.guildMemberService.getGuildMember(connection, {
+      const guildConnection = await DatabaseManager.getInstance().getGuildDb(connectedPlatformDoc.metadata?.id);
+      const guildMemberDoc = await discordServices.guildMemberService.getGuildMember(guildConnection, {
         discordId: user.discordId,
       });
       if (community.roles) {

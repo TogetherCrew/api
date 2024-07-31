@@ -1,4 +1,4 @@
-// /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // import request from 'supertest';
 // import httpStatus from 'http-status';
 // import app from '../../src/app';
@@ -34,9 +34,12 @@
 //     userTwo._id,
 //   ]);
 
-//   let connection: Connection;
+//   let guildConnection: Connection;
+//   let platformConnection: Connection;
+
 //   beforeAll(async () => {
-//     connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+//     platformConnection = await DatabaseManager.getInstance().getPlatformDb(platformOne._id.toString());
+//     guildConnection = await DatabaseManager.getInstance().getGuildDb(platformOne.metadata?.id);
 //   });
 
 //   beforeEach(async () => {
@@ -64,8 +67,8 @@
 //       await insertPlatforms([platformOne]);
 //       await insertCommunities([communityOne, communityTwo, communityThree]);
 //       await insertUsers([userOne, userTwo]);
-//       await insertChannels([discordChannel4, discordChannel3], connection);
-//       await insertGuildMembers([discordGuildMember1, discordGuildMember2], connection);
+//       await insertChannels([discordChannel4, discordChannel3], guildConnection);
+//       await insertGuildMembers([discordGuildMember1, discordGuildMember2], guildConnection);
 
 //       newDraftAnnouncement = {
 //         title: 'salam azzm',
@@ -119,8 +122,8 @@
 //       await insertPlatforms([platformOne]);
 //       await insertCommunities([communityOne, communityTwo, communityThree]);
 //       await insertUsers([userOne, userTwo]);
-//       await insertChannels([discordChannel4, discordChannel3], connection);
-//       await insertGuildMembers([discordGuildMember1, discordGuildMember2], connection);
+//       await insertChannels([discordChannel4, discordChannel3], guildConnection);
+//       await insertGuildMembers([discordGuildMember1, discordGuildMember2], guildConnection);
 //       await insertAnnouncement([announcementOne, announcementTwo]);
 
 //       const newAnnouncement = {
@@ -235,8 +238,8 @@
 //       await insertPlatforms([platformOne]);
 //       await insertCommunities([communityOne, communityTwo, communityThree]);
 //       await insertUsers([userOne, userTwo]);
-//       await insertChannels([discordChannel4, discordChannel3], connection);
-//       await insertGuildMembers([discordGuildMember1, discordGuildMember2], connection);
+//       await insertChannels([discordChannel4, discordChannel3], guildConnection);
+//       await insertGuildMembers([discordGuildMember1, discordGuildMember2], guildConnection);
 //       await insertAnnouncement([announcementOne, announcementTwo]);
 
 //       const res = await request(app)
@@ -315,8 +318,8 @@
 //       await insertPlatforms([platformOne]);
 //       await insertCommunities([communityOne, communityTwo, communityThree]);
 //       await insertUsers([userOne, userTwo]);
-//       await insertChannels([discordChannel4, discordChannel3], connection);
-//       await insertGuildMembers([discordGuildMember1, discordGuildMember2], connection);
+//       await insertChannels([discordChannel4, discordChannel3], guildConnection);
+//       await insertGuildMembers([discordGuildMember1, discordGuildMember2], guildConnection);
 //       await insertAnnouncement([announcementOne, announcementTwo]);
 
 //       const res = await request(app)
@@ -432,7 +435,7 @@
 //       await insertPlatforms([platformOne]);
 //       await insertCommunities([communityOne, communityTwo, communityThree]);
 //       await insertUsers([userOne, userTwo]);
-//       await insertChannels([discordChannel4, discordChannel3], connection);
+//       await insertChannels([discordChannel4, discordChannel3], guildConnection);
 //       await insertAnnouncement([announcementOne, announcementTwo]);
 
 //       const res = await request(app)

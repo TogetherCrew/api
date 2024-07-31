@@ -13,17 +13,17 @@ const logger = parentLogger.child({ module: 'MemberActivityService' });
 
 /**
  * active members composition line graph
- * @param {Connection} connection
+ * @param {Connection} platformConnection
  * @param {Date} startDate
  * @param {Date} endDate
  * @returns {Object}
  */
-async function activeMembersCompositionLineGraph(connection: Connection, startDate: Date, endDate: Date) {
+async function activeMembersCompositionLineGraph(platformConnection: Connection, startDate: Date, endDate: Date) {
   const start = new Date(startDate);
   const end = new Date(endDate);
 
   try {
-    const membersActivities = await connection.models.MemberActivity.aggregate([
+    const membersActivities = await platformConnection.models.MemberActivity.aggregate([
       // Stage 1: Convert date from string to date type and extract needed data
       {
         $project: {
@@ -143,7 +143,7 @@ async function activeMembersCompositionLineGraph(connection: Connection, startDa
       endDate,
       membersActivities[0].categories[membersActivities[0].categories.length - 1],
     );
-    const AdjustedMemberActivity = await connection.models.MemberActivity.aggregate([
+    const AdjustedMemberActivity = await platformConnection.models.MemberActivity.aggregate([
       // Stage 1: Convert date from string to date type and extract needed data
       {
         $project: {
@@ -215,7 +215,7 @@ async function activeMembersCompositionLineGraph(connection: Connection, startDa
     };
   } catch (error) {
     logger.error(
-      { database: connection.name, startDate, endDate, error },
+      { platform_connection: platformConnection.name, startDate, endDate, error },
       'Failed to get active members composition line graph',
     );
     return {
@@ -237,17 +237,17 @@ async function activeMembersCompositionLineGraph(connection: Connection, startDa
 
 /**
  * active members onboarding line graph
- * @param {Connection} connection
+ * @param {Connection} platformConnection
  * @param {Date} startDate
  * @param {Date} endDate
  * @returns {Object}
  */
-async function activeMembersOnboardingLineGraph(connection: Connection, startDate: Date, endDate: Date) {
+async function activeMembersOnboardingLineGraph(platformConnection: Connection, startDate: Date, endDate: Date) {
   const start = new Date(startDate);
   const end = new Date(endDate);
 
   try {
-    const membersActivities = await connection.models.MemberActivity.aggregate([
+    const membersActivities = await platformConnection.models.MemberActivity.aggregate([
       // Stage 1: Convert date from string to date type and extract needed data
       {
         $project: {
@@ -360,7 +360,7 @@ async function activeMembersOnboardingLineGraph(connection: Connection, startDat
       endDate,
       membersActivities[0].categories[membersActivities[0].categories.length - 1],
     );
-    const AdjustedMemberActivity = await connection.models.MemberActivity.aggregate([
+    const AdjustedMemberActivity = await platformConnection.models.MemberActivity.aggregate([
       // Stage 1: Convert date from string to date type and extract needed data
       {
         $project: {
@@ -425,7 +425,7 @@ async function activeMembersOnboardingLineGraph(connection: Connection, startDat
     };
   } catch (error) {
     logger.error(
-      { database: connection.name, startDate, endDate, error },
+      { platform_connection: platformConnection.name, startDate, endDate, error },
       'Failed to get active members onboarding line graph',
     );
     return {
@@ -445,17 +445,17 @@ async function activeMembersOnboardingLineGraph(connection: Connection, startDat
 
 /**
  * disengaged members line graph
- * @param {Connection} connection
+ * @param {Connection} platformConnection
  * @param {Date} startDate
  * @param {Date} endDate
  * @returns {Object}
  */
-async function disengagedMembersCompositionLineGraph(connection: Connection, startDate: Date, endDate: Date) {
+async function disengagedMembersCompositionLineGraph(platformConnection: Connection, startDate: Date, endDate: Date) {
   const start = new Date(startDate);
   const end = new Date(endDate);
 
   try {
-    const membersActivities = await connection.models.MemberActivity.aggregate([
+    const membersActivities = await platformConnection.models.MemberActivity.aggregate([
       // Stage 1: Convert date from string to date type and extract needed data
       {
         $project: {
@@ -567,7 +567,7 @@ async function disengagedMembersCompositionLineGraph(connection: Connection, sta
       endDate,
       membersActivities[0].categories[membersActivities[0].categories.length - 1],
     );
-    const AdjustedMemberActivity = await connection.models.MemberActivity.aggregate([
+    const AdjustedMemberActivity = await platformConnection.models.MemberActivity.aggregate([
       // Stage 1: Convert date from string to date type and extract needed data
       {
         $project: {
@@ -632,7 +632,7 @@ async function disengagedMembersCompositionLineGraph(connection: Connection, sta
     };
   } catch (error) {
     logger.error(
-      { database: connection.name, startDate, endDate, error },
+      { platform_connection: platformConnection.name, startDate, endDate, error },
       'Failed to get disengaged members composition line graph',
     );
     return {
@@ -652,17 +652,17 @@ async function disengagedMembersCompositionLineGraph(connection: Connection, sta
 
 /**
  * inactive members line graph
- * @param {Connection} connection
+ * @param {Connection} platformConnection
  * @param {Date} startDate
  * @param {Date} endDate
  * @returns {Object}
  */
-async function inactiveMembersLineGraph(connection: Connection, startDate: Date, endDate: Date) {
+async function inactiveMembersLineGraph(platformConnection: Connection, startDate: Date, endDate: Date) {
   const start = new Date(startDate);
   const end = new Date(endDate);
 
   try {
-    const membersActivities = await connection.models.MemberActivity.aggregate([
+    const membersActivities = await platformConnection.models.MemberActivity.aggregate([
       // Stage 1: Convert date from string to date type and extract needed data
       {
         $project: {
@@ -748,7 +748,7 @@ async function inactiveMembersLineGraph(connection: Connection, startDate: Date,
       endDate,
       membersActivities[0].categories[membersActivities[0].categories.length - 1],
     );
-    const AdjustedMemberActivity = await connection.models.MemberActivity.aggregate([
+    const AdjustedMemberActivity = await platformConnection.models.MemberActivity.aggregate([
       // Stage 1: Convert date from string to date type and extract needed data
       {
         $project: {
@@ -791,7 +791,10 @@ async function inactiveMembersLineGraph(connection: Connection, startDate: Date,
       ),
     };
   } catch (error) {
-    logger.error({ database: connection.name, startDate, endDate, error }, 'Failed to get inactive members line graph');
+    logger.error(
+      { platform_connection: platformConnection.name, startDate, endDate, error },
+      'Failed to get inactive members line graph',
+    );
     return {
       categories: [],
       series: [],
@@ -857,13 +860,13 @@ function getActivityCompositionOfDisengagedComposition() {
 
 /**
  * get last member activity document for usage of member activity table
- * @param {Connection} connection
+ * @param {Connection} platformConnection
  * @param {Any} activityComposition
  * @returns {Object}
  */
-async function getLastDocumentForTablesUsage(connection: Connection, activityComposition: Array<string>) {
+async function getLastDocumentForTablesUsage(platformConnection: Connection, activityComposition: Array<string>) {
   const projectStage = buildProjectStageBasedOnActivityComposition(activityComposition);
-  const lastDocument = await connection.models.MemberActivity.aggregate([
+  const lastDocument = await platformConnection.models.MemberActivity.aggregate([
     { $sort: { date: -1 } },
     { $limit: 1 },
     { $project: projectStage },
@@ -934,16 +937,16 @@ function getUserInformationForNetworkGraph(user: IGuildMember, guildRoles: IRole
 type memberInteractionType = { id: string; radius: number; stats: NodeStats } & networkGraphUserInformationType;
 type memberInteractionsGraphResponseType = { width: number; from: memberInteractionType; to: memberInteractionType }[];
 async function getMembersInteractionsNetworkGraph(
-  guildId: string,
+  platformId: string,
   guildConnection: Connection,
 ): Promise<memberInteractionsGraphResponseType> {
   // TODO: refactor function later
   const usersInNetworkGraph: string[] = [];
   // userInteraction
   const usersInteractionsQuery = `
-    MATCH () -[r:INTERACTED_WITH {guildId: "${guildId}"}]-()
+    MATCH () -[r:INTERACTED_WITH {platformId: ${platformId}}]-()
     WITH max(r.date) as latest_date
-    MATCH (a:DiscordAccount)-[r:INTERACTED_WITH {guildId: "${guildId}", date: latest_date}]->(b:DiscordAccount)
+    MATCH (a:DiscordMember)-[r:INTERACTED_WITH {platformId: ${platformId}, date: latest_date}]->(b:DiscordMember)
     RETURN a, r, b`;
   const neo4jUsersInteractionsData = await Neo4j.read(usersInteractionsQuery);
   const { records: neo4jUsersInteractions } = neo4jUsersInteractionsData;
@@ -971,11 +974,11 @@ async function getMembersInteractionsNetworkGraph(
 
   // userRadius
   const userRadiusQuery = `
-    MATCH () -[r:INTERACTED_WITH {guildId: "${guildId}"}]-()
+    MATCH () -[r:INTERACTED_WITH {platformId: ${platformId}}]-()
     WITH max(r.date) as latest_date
-    MATCH (a:DiscordAccount) -[r:INTERACTED_WITH {date: latest_date, guildId: "${guildId}"}]-(:DiscordAccount)
+    MATCH (a:DiscordMember) -[r:INTERACTED_WITH {date: latest_date, platformId :${platformId}}]-(:DiscordMember)
     WITH a, r 
-    RETURN a.userId as userId, SUM(r.weight) as radius`;
+    RETURN a.id as userId, SUM(r.weight) as radius`;
   const neo4jUserRadiusData = await Neo4j.read(userRadiusQuery);
   const { records: neo4jUserRadius } = neo4jUserRadiusData;
   const userRadius = neo4jUserRadius.map((userRadius) => {
@@ -989,10 +992,10 @@ async function getMembersInteractionsNetworkGraph(
 
   // userStatus
   const userStatusQuery = `
-    MATCH () -[r:INTERACTED_IN]-(g:Guild {guildId: "${guildId}"})
+    MATCH () -[r:INTERACTED_IN]-(g:DiscordPlatform {id: ${platformId}})
     WITH max(r.date) as latest_date
-    MATCH (a:DiscordAccount)-[r:INTERACTED_IN {date: latest_date}]->(g:Guild {guildId: "${guildId}"})
-    RETURN a.userId as userId, r.status as status`;
+    MATCH (a:DiscordMember)-[r:INTERACTED_IN {date: latest_date}]->(g:DiscordPlatform {id: ${platformId}})
+    RETURN a.id as userId, r.status as status`;
   const neo4jUserStatusData = await Neo4j.read(userStatusQuery);
   const { records: neo4jUserStatus } = neo4jUserStatusData;
   const userStatus = neo4jUserStatus.map((userStatus) => {
@@ -1051,14 +1054,14 @@ type fragmentationScoreResponseType = {
   fragmentationScoreRange: { minimumFragmentationScore: number; maximumFragmentationScore: number };
   scoreStatus: ScoreStatus | null;
 };
-async function getFragmentationScore(guildId: string): Promise<fragmentationScoreResponseType> {
+async function getFragmentationScore(platformId: string): Promise<fragmentationScoreResponseType> {
   const fragmentationScale = 200;
   const fragmentationScoreRange = { minimumFragmentationScore: 0, maximumFragmentationScore: fragmentationScale };
   const fragmentationScoreQuery = `
-        MATCH ()-[r:INTERACTED_WITH {guildId: "${guildId}"}]-()
-        WITH max(r.date) as latest_date
-        MATCH (g:Guild {guildId: "${guildId}"})-[r:HAVE_METRICS {date: latest_date}]->(g)
-        RETURN ((r.louvainModularityScore - (-1)) / 2) * 200 as fragmentation_score
+    MATCH ()-[r:INTERACTED_WITH {platformId: ${platformId}}]-()
+    WITH max(r.date) as latest_date
+    MATCH (g:DiscordPlatform {id: ${platformId}})-[r:HAVE_METRICS {date: latest_date}]->(g)
+    RETURN ((r.louvainModularityScore - (-1)) / 2) * 200 as fragmentation_score;
     `;
 
   const neo4jData = await Neo4j.read(fragmentationScoreQuery);
@@ -1099,11 +1102,11 @@ type decentralisationScoreResponseType = {
   decentralisationScoreRange: { minimumDecentralisationScore: number; maximumDecentralisationScore: number };
   scoreStatus: ScoreStatus | null;
 };
-async function getDecentralisationScore(guildId: string): Promise<decentralisationScoreResponseType> {
+async function getDecentralisationScore(platformId: string): Promise<decentralisationScoreResponseType> {
   const decentralisationScoreRange = { minimumDecentralisationScore: 0, maximumDecentralisationScore: 200 };
   const decentralisationScoreQuery = `
-        MATCH (g:Guild {guildId: "${guildId}"})-[r:HAVE_METRICS]->(g)
-        RETURN r.decentralizationScore as decentralization_score ORDER BY r.date DESC LIMIT 1
+    MATCH (g:DiscordPlatform {id: "${platformId}"})-[r:HAVE_METRICS]->(g)
+    RETURN r.decentralizationScore as decentralization_score ORDER BY r.date DESC LIMIT 1;
     `;
   const neo4jData = await Neo4j.read(decentralisationScoreQuery);
   const { records } = neo4jData;

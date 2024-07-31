@@ -7,14 +7,14 @@ const logger = parentLogger.child({ module: 'HeatmapService' });
 
 /**
  * get heatmap chart
- * @param {Connection} connection
+ * @param {Connection} platformConnection
  * @param {IHeatmapChartRequestBody} body
  * @returns {Array<Array<number>>}
  */
-async function getHeatmapChart(connection: Connection, body: IHeatmapChartRequestBody) {
+async function getHeatmapChart(platformConnection: Connection, body: IHeatmapChartRequestBody) {
   const { startDate, endDate, channelIds } = body;
   try {
-    const heatmaps = await connection.models.HeatMap.aggregate([
+    const heatmaps = await platformConnection.models.HeatMap.aggregate([
       // Stage1 : convert date from string to date type and extract needed data
       {
         $project: {
@@ -75,7 +75,7 @@ async function getHeatmapChart(connection: Connection, body: IHeatmapChartReques
     // Convert Arrays of objects to array of 2D arrays
     return heatmaps.map((object) => [object._id.dayOfWeek, object._id.hour, object.interactions]);
   } catch (error) {
-    logger.error({ database: connection.name, body, error }, 'Failed to get heatmap chart');
+    logger.error({ platform_connection: platformConnection.name, body, error }, 'Failed to get heatmap chart');
     return [];
   }
 }
@@ -87,11 +87,11 @@ async function getHeatmapChart(connection: Connection, body: IHeatmapChartReques
  * @param {Date} endDate
  * @returns {Object}
  */
-async function lineGraph(connection: Connection, startDate: Date, endDate: Date) {
+async function lineGraph(platformConnection: Connection, startDate: Date, endDate: Date) {
   const start = new Date(startDate);
   const end = new Date(endDate);
   try {
-    const heatmaps = await connection.models.HeatMap.aggregate([
+    const heatmaps = await platformConnection.models.HeatMap.aggregate([
       // Stage 1: Convert date from string to date type and extract needed data
       {
         $project: {
@@ -227,7 +227,7 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
     }
 
     const adjustedDate = date.calculateAdjustedDate(endDate, heatmaps[0].categories[heatmaps[0].categories.length - 1]);
-    const adjustedHeatmap = await connection.models.HeatMap.aggregate([
+    const adjustedHeatmap = await platformConnection.models.HeatMap.aggregate([
       // Stage 1: Convert date from string to date type and extract needed data
       {
         $project: {
@@ -320,7 +320,7 @@ async function lineGraph(connection: Connection, startDate: Date, endDate: Date)
       emojiPercentageChange: math.calculatePercentageChange(adjustedHeatmap[0].emojis, heatmaps[0].emojis),
     };
   } catch (err) {
-    logger.error({ database: connection.name, startDate, endDate }, 'Failed to get line graph data');
+    logger.error({ platform_connection: platformConnection.name, startDate, endDate }, 'Failed to get line graph data');
     return {
       categories: [],
       series: [],

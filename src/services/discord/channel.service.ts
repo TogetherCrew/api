@@ -18,22 +18,22 @@ function hasReadMessageHistory(botPermissions: number): boolean {
 
 /**
  * Get a channel from the database based on the filter criteria.
- * @param {Connection} connection - Mongoose connection object for the database.
+ * @param {Connection} guildConnection - Mongoose connection object for the database.
  * @param {object} filter - An object specifying the filter criteria to match the desired channel entry.
  * @returns {Promise<IChannel | null>} - A promise that resolves to the matching channel object or null if not found.
  */
-async function getChannel(connection: Connection, filter: object): Promise<IChannel | null> {
-  return await connection.models.Channel.findOne(filter);
+async function getChannel(guildConnection: Connection, filter: object): Promise<IChannel | null> {
+  return await guildConnection.models.Channel.findOne(filter);
 }
 
 /**
  * Get channels from the database based on the filter criteria.
- * @param {Connection} connection - Mongoose connection object for the database.
+ * @param {Connection} guildConnection - Mongoose connection object for the database.
  * @param {object} filter - An object specifying the filter criteria to match the desired channel entries.
  * @returns {Promise<IChannel[] | []>} - A promise that resolves to an array of the matching channel objects.
  */
-async function getChannels(connection: Connection, filter: object): Promise<IChannel[] | []> {
-  return await connection.models.Channel.find(filter);
+async function getChannels(guildConnection: Connection, filter: object): Promise<IChannel[] | []> {
+  return await guildConnection.models.Channel.find(filter);
 }
 
 /**
@@ -96,8 +96,8 @@ async function checkBotPermissions(
   }
 }
 
-async function getChannelInfoFromChannelIds(connection: Connection, channelIds: string[]) {
-  const channels = await connection.models.Channel.find({ channelId: { $in: channelIds } });
+async function getChannelInfoFromChannelIds(guildConnection: Connection, channelIds: string[]) {
+  const channels = await guildConnection.models.Channel.find({ channelId: { $in: channelIds } });
   const channelInfo = channels.map((channel: IChannel) => ({ channelId: channel.channelId, name: channel.name }));
   return channelInfo;
 }
@@ -110,8 +110,8 @@ async function getChannelInfoFromChannelIds(connection: Connection, channelIds: 
  * @param {number} [options.limit] - Maximum number of results per page (default = 10)
  * @param {number} [options.page] - Current page (default = 1)
  */
-const queryChannels = async (connection: any, filter: object, options: object) => {
-  return await connection.models.Channel.paginate(filter, options);
+const queryChannels = async (guildConnection: any, filter: object, options: object) => {
+  return await guildConnection.models.Channel.paginate(filter, options);
 };
 
 export default {

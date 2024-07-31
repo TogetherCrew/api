@@ -30,9 +30,12 @@
 // setupTestDB();
 
 // describe('member-activity routes', () => {
-//   let connection: Connection;
+//   let guildConnection: Connection;
+//   let platformConnection: Connection;
+
 //   beforeAll(async () => {
-//     connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+//     platformConnection = await DatabaseManager.getInstance().getPlatformDb(platformOne._id.toString());
+//     guildConnection = await DatabaseManager.getInstance().getGuildDb(platformOne.metadata?.id);
 //   });
 //   beforeEach(async () => {
 //     cleanUpTenantDatabases();
@@ -51,7 +54,10 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-line-graph`)
 //         .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -145,7 +151,10 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-line-graph`)
@@ -235,7 +244,10 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-line-graph`)
 //         .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -322,7 +334,10 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/inactive-members-line-graph`)
 //         .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -813,12 +828,12 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2], connection);
+//       await insertMemberActivities([memberActivity1, memberActivity2], platformConnection);
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4, discordGuildMember5],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
 //         .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -913,12 +928,15 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 
 //       let res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
@@ -1001,12 +1019,15 @@
 //     test('should correctly apply filter on roles field if include provided', async () => {
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
 //         .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -1028,12 +1049,15 @@
 //     test('should correctly apply filter on roles field if exclude provided', async () => {
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
 //         .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -1055,12 +1079,15 @@
 //     test('should correctly apply filter on username field', async () => {
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
 //         .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -1082,12 +1109,15 @@
 //     test('should correctly sort the returned array if descending sort param is specified', async () => {
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
 //         .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -1112,12 +1142,15 @@
 //     test('should correctly sort the returned array if ascending  sort param is specified', async () => {
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
@@ -1143,12 +1176,15 @@
 //     test('should correctly sort the returned array if multiple sorting criteria are specified', async () => {
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
@@ -1185,12 +1221,15 @@
 //     test('should limit returned array if limit param is specified', async () => {
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
@@ -1215,12 +1254,15 @@
 //     test('should correctly sort the returned array if page and limit are  specified', async () => {
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/active-members-composition-table`)
@@ -1261,12 +1303,15 @@
 //     test('should return 200 and apply the default query options', async () => {
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
@@ -1361,12 +1406,15 @@
 //     test('should correctly apply filter on activityComposition field', async () => {
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 
 //       let res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
@@ -1449,12 +1497,15 @@
 //     test('should correctly apply filter on roles field if include provided', async () => {
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
@@ -1477,12 +1528,15 @@
 //     test('should correctly apply filter on roles field if exclude provided', async () => {
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
@@ -1505,12 +1559,15 @@
 //     test('should correctly apply filter on username field', async () => {
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
@@ -1533,12 +1590,15 @@
 //     test('should correctly sort the returned array if descending sort param is specified', async () => {
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
@@ -1564,12 +1624,15 @@
 //     test('should correctly sort the returned array if ascending  sort param is specified', async () => {
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
@@ -1595,12 +1658,15 @@
 //     test('should correctly sort the returned array if multiple sorting criteria are specified', async () => {
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
@@ -1637,12 +1703,15 @@
 //     test('should limit returned array if limit param is specified', async () => {
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
@@ -1667,12 +1736,15 @@
 //     test('should correctly sort the returned array if page and limit are specified', async () => {
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/active-members-onboarding-table`)
@@ -1713,12 +1785,15 @@
 //     test('should return 200 and apply the default query options', async () => {
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)
 //         .set('Authorization', `Bearer ${userOneAccessToken}`)
@@ -1813,12 +1888,15 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 
 //       let res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)
@@ -1902,12 +1980,15 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)
@@ -1931,12 +2012,15 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)
@@ -1959,12 +2043,15 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)
@@ -1988,12 +2075,15 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)
@@ -2020,12 +2110,15 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)
@@ -2052,12 +2145,15 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)
@@ -2095,12 +2191,15 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)
@@ -2126,12 +2225,15 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertMemberActivities([memberActivity1, memberActivity2, memberActivity3, memberActivity4], connection);
+//       await insertMemberActivities(
+//         [memberActivity1, memberActivity2, memberActivity3, memberActivity4],
+//         platformConnection,
+//       );
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/member-activity/${platformOne._id}/disengaged-members-composition-table`)

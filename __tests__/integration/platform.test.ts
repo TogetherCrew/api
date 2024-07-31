@@ -39,10 +39,14 @@
 // setupTestDB();
 
 // describe('Platform routes', () => {
-//   let connection: Connection;
+//   let guildConnection: Connection;
+//   let platformConnection: Connection;
+
 //   beforeAll(async () => {
-//     connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+//     platformConnection = await DatabaseManager.getInstance().getPlatformDb(platformOne._id.toString());
+//     guildConnection = await DatabaseManager.getInstance().getGuildDb(platformOne.metadata?.id);
 //   });
+
 //   beforeEach(async () => {
 //     cleanUpTenantDatabases();
 //     userOne.communities = [communityOne._id, communityTwo._id];
@@ -70,7 +74,7 @@
 //     let newPlatform: any;
 
 //     beforeEach(async () => {
-//       await connection.collection('connection-platform').deleteMany({});
+//       await guildConnection.collection('connection-platform').deleteMany({});
 //       newPlatform = {
 //         name: 'discord',
 //         community: communityOne._id,
@@ -927,7 +931,7 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertRoles([discordRole1, discordRole2, discordRole3, discordRole4], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3, discordRole4], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/platforms/${platformOne._id}/properties`)
@@ -967,7 +971,7 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertRoles([discordRole1, discordRole2, discordRole3, discordRole4], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3, discordRole4], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/platforms/${platformOne._id}/properties`)
@@ -991,7 +995,7 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertRoles([discordRole1, discordRole2, discordRole3, discordRole4], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3, discordRole4], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/platforms/${platformOne._id}/properties`)
@@ -1017,7 +1021,7 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertRoles([discordRole1, discordRole2, discordRole3, discordRole4], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3, discordRole4], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/platforms/${platformOne._id}/properties`)
@@ -1043,7 +1047,7 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertRoles([discordRole1, discordRole2, discordRole3, discordRole4], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3, discordRole4], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/platforms/${platformOne._id}/properties`)
@@ -1067,7 +1071,7 @@
 //       await insertCommunities([communityOne]);
 //       await insertUsers([userOne]);
 //       await insertPlatforms([platformOne]);
-//       await insertRoles([discordRole1, discordRole2, discordRole3, discordRole4], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3, discordRole4], guildConnection);
 
 //       const res = await request(app)
 //         .post(`/api/v1/platforms/${platformOne._id}/properties`)
@@ -1175,7 +1179,7 @@
 //       await insertPlatforms([platformOne]);
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
 
 //       const res = await request(app)
@@ -1240,7 +1244,7 @@
 //       await insertPlatforms([platformOne]);
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
 
 //       const res = await request(app)
@@ -1268,7 +1272,7 @@
 //       await insertPlatforms([platformOne]);
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
 
 //       const res = await request(app)

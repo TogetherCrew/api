@@ -5,9 +5,8 @@
 // import config from '../../src/config';
 // import { tokenService } from '../../src/services';
 // import setupTestDB from '../utils/setupTestDB';
-// import { tokenTypes } from '../../src/config/tokens';
 // import { userOne, insertUsers } from '../fixtures/user.fixture';
-// import { Token } from '@togethercrew.dev/db';
+// import { Token, TokenTypeNames } from '@togethercrew.dev/db';
 
 // setupTestDB();
 
@@ -16,8 +15,8 @@
 //     test('should return 204 if refresh token is valid', async () => {
 //       await insertUsers([userOne]);
 //       const expires = moment().add(config.jwt.refreshExpirationDays, 'days');
-//       const refreshToken = tokenService.generateToken({ ...userOne, id: userOne._id }, expires, tokenTypes.REFRESH);
-//       await tokenService.saveToken(refreshToken, userOne._id, expires, tokenTypes.REFRESH);
+//       const refreshToken = tokenService.generateToken({ ...userOne, id: userOne._id }, expires, TokenTypeNames.REFRESH);
+//       await tokenService.saveToken(refreshToken, userOne._id, expires, TokenTypeNames.REFRESH);
 
 //       await request(app).post('/api/v1/auth/logout').send({ refreshToken }).expect(httpStatus.NO_CONTENT);
 
@@ -28,7 +27,7 @@
 //     test('should return 404 error if refresh token is not found in the database', async () => {
 //       await insertUsers([userOne]);
 //       const expires = moment().add(config.jwt.refreshExpirationDays, 'days');
-//       const refreshToken = tokenService.generateToken(userOne, expires, tokenTypes.REFRESH);
+//       const refreshToken = tokenService.generateToken(userOne, expires, TokenTypeNames.REFRESH);
 
 //       await request(app).post('/api/v1/auth/logout').send({ refreshToken }).expect(httpStatus.NOT_FOUND);
 //     });
@@ -36,8 +35,8 @@
 //     test('should return 404 error if refresh token is blacklisted', async () => {
 //       await insertUsers([userOne]);
 //       const expires = moment().add(config.jwt.refreshExpirationDays, 'days');
-//       const refreshToken = tokenService.generateToken(userOne, expires, tokenTypes.REFRESH);
-//       await tokenService.saveToken(refreshToken, userOne._id, expires, tokenTypes.REFRESH, true);
+//       const refreshToken = tokenService.generateToken(userOne, expires, TokenTypeNames.REFRESH);
+//       await tokenService.saveToken(refreshToken, userOne._id, expires, TokenTypeNames.REFRESH, true);
 
 //       await request(app).post('/api/v1/auth/logout').send({ refreshToken }).expect(httpStatus.NOT_FOUND);
 //     });
@@ -51,8 +50,8 @@
 //     test('should return 200 and new auth tokens if refresh token is valid', async () => {
 //       await insertUsers([userOne]);
 //       const expires = moment().add(config.jwt.refreshExpirationDays, 'days');
-//       const refreshToken = tokenService.generateToken({ ...userOne, id: userOne._id }, expires, tokenTypes.REFRESH);
-//       await tokenService.saveToken(refreshToken, userOne._id, expires, tokenTypes.REFRESH);
+//       const refreshToken = tokenService.generateToken({ ...userOne, id: userOne._id }, expires, TokenTypeNames.REFRESH);
+//       await tokenService.saveToken(refreshToken, userOne._id, expires, TokenTypeNames.REFRESH);
 
 //       const res = await request(app).post('/api/v1/auth/refresh-tokens').send({ refreshToken }).expect(httpStatus.OK);
 
@@ -62,7 +61,7 @@
 //       });
 
 //       const dbRefreshTokenDoc = await Token.findOne({ token: res.body.refresh.token });
-//       expect(dbRefreshTokenDoc).toMatchObject({ type: tokenTypes.REFRESH, user: userOne._id, blacklisted: false });
+//       expect(dbRefreshTokenDoc).toMatchObject({ type: TokenTypeNames.REFRESH, user: userOne._id, blacklisted: false });
 
 //       const dbRefreshTokenCount = await Token.countDocuments();
 //       expect(dbRefreshTokenCount).toBe(1);
@@ -74,10 +73,10 @@
 //       const refreshToken = tokenService.generateToken(
 //         { ...userOne, id: userOne._id },
 //         expires,
-//         tokenTypes.REFRESH,
+//         TokenTypeNames.REFRESH,
 //         'invalidSecret',
 //       );
-//       await tokenService.saveToken(refreshToken, userOne._id, expires, tokenTypes.REFRESH);
+//       await tokenService.saveToken(refreshToken, userOne._id, expires, TokenTypeNames.REFRESH);
 
 //       await request(app).post('/api/v1/auth/refresh-tokens').send({ refreshToken }).expect(httpStatus.UNAUTHORIZED);
 //     });
@@ -85,7 +84,7 @@
 //     test('should return 401 error if refresh token is not found in the database', async () => {
 //       await insertUsers([userOne]);
 //       const expires = moment().add(config.jwt.refreshExpirationDays, 'days');
-//       const refreshToken = tokenService.generateToken({ ...userOne, id: userOne._id }, expires, tokenTypes.REFRESH);
+//       const refreshToken = tokenService.generateToken({ ...userOne, id: userOne._id }, expires, TokenTypeNames.REFRESH);
 
 //       await request(app).post('/api/v1/auth/refresh-tokens').send({ refreshToken }).expect(httpStatus.UNAUTHORIZED);
 //     });
@@ -93,8 +92,8 @@
 //     test('should return 401 error if refresh token is blacklisted', async () => {
 //       await insertUsers([userOne]);
 //       const expires = moment().add(config.jwt.refreshExpirationDays, 'days');
-//       const refreshToken = tokenService.generateToken({ ...userOne, id: userOne._id }, expires, tokenTypes.REFRESH);
-//       await tokenService.saveToken(refreshToken, userOne._id, expires, tokenTypes.REFRESH, true);
+//       const refreshToken = tokenService.generateToken({ ...userOne, id: userOne._id }, expires, TokenTypeNames.REFRESH);
+//       await tokenService.saveToken(refreshToken, userOne._id, expires, TokenTypeNames.REFRESH, true);
 
 //       await request(app).post('/api/v1/auth/refresh-tokens').send({ refreshToken }).expect(httpStatus.UNAUTHORIZED);
 //     });
@@ -102,16 +101,16 @@
 //     test('should return 401 error if refresh token is expired', async () => {
 //       await insertUsers([userOne]);
 //       const expires = moment().subtract(1, 'minutes');
-//       const refreshToken = tokenService.generateToken({ ...userOne, id: userOne._id }, expires, tokenTypes.REFRESH);
-//       await tokenService.saveToken(refreshToken, userOne._id, expires, tokenTypes.REFRESH);
+//       const refreshToken = tokenService.generateToken({ ...userOne, id: userOne._id }, expires, TokenTypeNames.REFRESH);
+//       await tokenService.saveToken(refreshToken, userOne._id, expires, TokenTypeNames.REFRESH);
 
 //       await request(app).post('/api/v1/auth/refresh-tokens').send({ refreshToken }).expect(httpStatus.UNAUTHORIZED);
 //     });
 
 //     test('should return 401 error if user is not found', async () => {
 //       const expires = moment().add(config.jwt.refreshExpirationDays, 'days');
-//       const refreshToken = tokenService.generateToken({ ...userOne, id: userOne._id }, expires, tokenTypes.REFRESH);
-//       await tokenService.saveToken(refreshToken, userOne._id, expires, tokenTypes.REFRESH);
+//       const refreshToken = tokenService.generateToken({ ...userOne, id: userOne._id }, expires, TokenTypeNames.REFRESH);
+//       await tokenService.saveToken(refreshToken, userOne._id, expires, TokenTypeNames.REFRESH);
 
 //       await request(app).post('/api/v1/auth/refresh-tokens').send({ refreshToken }).expect(httpStatus.UNAUTHORIZED);
 //     });

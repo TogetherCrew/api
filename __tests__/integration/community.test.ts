@@ -27,9 +27,12 @@
 // setupTestDB();
 
 // describe('Community routes', () => {
-//   let connection: Connection;
+//   let guildConnection: Connection;
+//   let platformguildConnection: Connection;
+
 //   beforeAll(async () => {
-//     connection = await DatabaseManager.getInstance().getTenantDb(platformOne.metadata?.id);
+//     platformguildConnection = await DatabaseManager.getInstance().getPlatformDb(platformOne._id.toString());
+//     guildConnection = await DatabaseManager.getInstance().getGuildDb(platformOne.metadata?.id);
 //   });
 
 //   beforeEach(() => {
@@ -142,7 +145,7 @@
 //       await insertPlatforms([platformOne, platformTwo, platformThree]);
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
 //       const res1 = await request(app)
 //         .get('/api/v1/communities')
@@ -347,9 +350,9 @@
 //       await insertPlatforms([platformOne, platformTwo, platformThree]);
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3, discordRole4], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3, discordRole4], guildConnection);
 
 //       const res = await request(app)
 //         .get(`/api/v1/communities/${communityOne._id}`)
@@ -369,15 +372,17 @@
 //         source: {
 //           platform: 'discord',
 //           identifierType: 'member',
-//           identifierValues: [{
-//             discordId: discordGuildMember2.discordId,
-//             username: discordGuildMember2.username,
-//             // ngu: discordGuildMember2.nickname,
-//             discriminator: discordGuildMember2.discriminator,
-//             nickname: discordGuildMember2.nickname,
-//             globalName: discordGuildMember2.globalName,
-//             avatar: discordGuildMember2.avatar,
-//           }],
+//           identifierValues: [
+//             {
+//               discordId: discordGuildMember2.discordId,
+//               username: discordGuildMember2.username,
+//               // ngu: discordGuildMember2.nickname,
+//               discriminator: discordGuildMember2.discriminator,
+//               nickname: discordGuildMember2.nickname,
+//               globalName: discordGuildMember2.globalName,
+//               avatar: discordGuildMember2.avatar,
+//             },
+//           ],
 //         },
 //       });
 //       expect(res.body.roles[1]).toMatchObject({
@@ -385,15 +390,17 @@
 //         source: {
 //           platform: 'discord',
 //           identifierType: 'member',
-//           identifierValues: [{
-//             discordId: discordGuildMember2.discordId,
-//             username: discordGuildMember2.username,
-//             // ngu: discordGuildMember2.nickname,
-//             discriminator: discordGuildMember2.discriminator,
-//             nickname: discordGuildMember2.nickname,
-//             globalName: discordGuildMember2.globalName,
-//             avatar: discordGuildMember2.avatar,
-//           }],
+//           identifierValues: [
+//             {
+//               discordId: discordGuildMember2.discordId,
+//               username: discordGuildMember2.username,
+//               // ngu: discordGuildMember2.nickname,
+//               discriminator: discordGuildMember2.discriminator,
+//               nickname: discordGuildMember2.nickname,
+//               globalName: discordGuildMember2.globalName,
+//               avatar: discordGuildMember2.avatar,
+//             },
+//           ],
 //           //   platformId: new Types.ObjectId(),
 //         },
 //       });
@@ -402,11 +409,13 @@
 //         source: {
 //           platform: 'discord',
 //           identifierType: 'role',
-//           identifierValues: [{
-//             roleId: discordRole1.roleId,
-//             name: discordRole1.name,
-//             color: discordRole1.color,
-//           }],
+//           identifierValues: [
+//             {
+//               roleId: discordRole1.roleId,
+//               name: discordRole1.name,
+//               color: discordRole1.color,
+//             },
+//           ],
 //           //   platformId: new Types.ObjectId(),
 //         },
 //       });
@@ -625,9 +634,9 @@
 //       await insertPlatforms([platformOne, platformTwo, platformThree]);
 //       await insertGuildMembers(
 //         [discordGuildMember1, discordGuildMember2, discordGuildMember3, discordGuildMember4],
-//         connection,
+//         guildConnection,
 //       );
-//       await insertRoles([discordRole1, discordRole2, discordRole3, discordRole4], connection);
+//       await insertRoles([discordRole1, discordRole2, discordRole3, discordRole4], guildConnection);
 
 //       const res1 = await request(app)
 //         .patch(`/api/v1/communities/${communityOne._id}`)
@@ -639,18 +648,19 @@
 //         .patch(`/api/v1/communities/${communityOne._id}`)
 //         .set('Authorization', `Bearer ${userTwoAccessToken}`)
 //         .send({
-//           roles: [{
-//             roleType: 'admin',
-//             source: {
-//               platform: 'discord',
-//               identifierType: 'member',
-//               identifierValues: [userOne.discordId],
-//               platformId: platformOne._id,
+//           roles: [
+//             {
+//               roleType: 'admin',
+//               source: {
+//                 platform: 'discord',
+//                 identifierType: 'member',
+//                 identifierValues: [userOne.discordId],
+//                 platformId: platformOne._id,
+//               },
 //             },
-//           },]
+//           ],
 //         })
 //         .expect(httpStatus.BAD_REQUEST);
-
 //     });
 
 //     test('should return 400 error if communityId is not a valid mongo id', async () => {

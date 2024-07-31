@@ -20,7 +20,7 @@ const logger = parentLogger.child({ module: 'DiscordCoreService' });
  * @returns {Promise<IDiscordOAuth2EchangeCode>}
  */
 async function getPropertyHandler(req: IAuthAndPlatform) {
-  const connection = await DatabaseManager.getInstance().getTenantDb(req.platform?.metadata?.id);
+  const guildConnection = await DatabaseManager.getInstance().getGuildDb(req.platform?.metadata?.id);
 
   if (req.query.property === 'role') {
     const filter = pick(req.query, ['name']);
@@ -33,7 +33,7 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
     filter.deletedAt = null;
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
 
-    return await roleService.queryRoles(connection, filter, options);
+    return await roleService.queryRoles(guildConnection, filter, options);
   } else if (req.query.property === 'channel') {
     const filter = pick(req.query, ['name']);
     if (filter.name) {
@@ -46,7 +46,7 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
     if (req.body.channelIds) {
       filter.channelId = { $in: req.body.channelIds };
     }
-    const channels: any = await channelService.getChannels(connection, filter);
+    const channels: any = await channelService.getChannels(guildConnection, filter);
     for (let i = 0; i < channels.length; i++) {
       const canReadMessageHistoryAndViewChannel = await channelService.checkBotPermissions(
         req.platform?.metadata?.id,
@@ -90,7 +90,7 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
     const filter = pick(req.query, ['ngu']);
     filter.deletedAt = null;
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
-    const guildMembers = await guildMemberService.queryGuildMembers(connection, filter, options);
+    const guildMembers = await guildMemberService.queryGuildMembers(guildConnection, filter, options);
     guildMembers.results.forEach((guildMember: any) => {
       guildMember.ngu = guildMemberService.getNgu(guildMember);
       guildMember.username = guildMemberService.getUsername(guildMember);

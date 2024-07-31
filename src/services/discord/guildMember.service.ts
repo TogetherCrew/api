@@ -22,7 +22,8 @@ type Options = {
 };
 /**
  *  Query guild members with a filter and options.
- * @param {Connection} connection - The MongoDB connection.
+ * @param {Connection} platformConnection - The MongoDB connection.
+ * @param {Connection} guildConnection - The MongoDB connection.
  * @param {Filter} filter - The filter object with fields like 'roles' and 'username'.
  * @param {Options} options - The options object with fields like 'sortBy', 'limit' and 'page'.
  * @param {any} memberActivity - The document containing the last member activity.
@@ -30,7 +31,8 @@ type Options = {
  * @returns {Promise<QueryResult>} - An object with the query results and other information like 'limit', 'page', 'totalPages', 'totalResults'.
  */
 async function queryGuildMembersForTables(
-  connection: Connection,
+  platformConnection: Connection,
+  guildConnection: Connection,
   filter: Filter,
   options: Options,
   memberActivity: any,
@@ -46,7 +48,7 @@ async function queryGuildMembersForTables(
     let matchStage: any = {};
     let allActivityIds: string[] = [];
 
-    const memberActivityDocument = await connection.models.MemberActivity.findOne()
+    const memberActivityDocument = await platformConnection.models.MemberActivity.findOne()
       .sort({ date: -1 })
       .select({ date: 1, _id: 0 });
 
@@ -96,9 +98,9 @@ async function queryGuildMembersForTables(
       matchStage.joinedAt = { $lte: date };
     }
 
-    const totalResults = await connection.models.GuildMember.countDocuments(matchStage);
+    const totalResults = await guildConnection.models.GuildMember.countDocuments(matchStage);
 
-    const results = await connection.models.GuildMember.aggregate([
+    const results = await guildConnection.models.GuildMember.aggregate([
       {
         $match: matchStage,
       },
@@ -137,7 +139,15 @@ async function queryGuildMembersForTables(
     };
   } catch (error) {
     logger.error(
-      { database: connection.name, filter, options, memberActivity, activityCompostionsTypes, error },
+      {
+        guildConnection: guildConnection.name,
+        platformConnection: platformConnection.name,
+        filter,
+        options,
+        memberActivity,
+        activityCompostionsTypes,
+        error,
+      },
       'Failed to query guild members',
     );
     return {
@@ -153,18 +163,18 @@ async function queryGuildMembersForTables(
 /**
  * Get an array of Discord IDs based on the usernames present in the guild member's data.
  *
- * @param {Connection} connection - Mongoose connection object for the database.
+ * @param {Connection} guildConnection - Mongoose connection object for the database.
  * @param {string[]} usernames - An array of usernames to match against the guild member's usernames.
  * @returns {Promise<string[]>} - A promise that resolves to an array of Discord IDs.
  */
-async function getDiscordIdsFromUsernames(connection: Connection, usernames: string[]): Promise<string[]> {
-  const guildMembers = await connection.models.GuildMember.find({ username: { $in: usernames } });
+async function getDiscordIdsFromUsernames(guildConnection: Connection, usernames: string[]): Promise<string[]> {
+  const guildMembers = await guildConnection.models.GuildMember.find({ username: { $in: usernames } });
 
   return guildMembers.map((guildMember: IGuildMember) => guildMember.discordId);
 }
 
-async function getGuildMemberInfoFromDiscordIds(connection: Connection, discordIds: string[]) {
-  const guildMembers = await connection.models.GuildMember.find({ discordId: { $in: discordIds } });
+async function getGuildMemberInfoFromDiscordIds(guildConnection: Connection, discordIds: string[]) {
+  const guildMembers = await guildConnection.models.GuildMember.find({ discordId: { $in: discordIds } });
 
   const userInfo = guildMembers.map((guildMember: IGuildMember) => ({
     discordId: guildMember.discordId,
@@ -207,12 +217,12 @@ function getUsername(guildMember: IGuildMember): string {
 
 /**
  * Get a guild member from the database based on the filter criteria.
- * @param {Connection} connection - Mongoose connection object for the database.
+ * @param {Connection} guildConnection - Mongoose connection object for the database.
  * @param {object} filter - An object specifying the filter criteria to match the desired guild member entry.
  * @returns {Promise<IGuildMember | null>} - A promise that resolves to the matching guild member object or null if not found.
  */
-async function getGuildMember(connection: Connection, filter: object): Promise<IGuildMember | null> {
-  return await connection.models.GuildMember.findOne(filter);
+async function getGuildMember(guildConnection: Connection, filter: object): Promise<IGuildMember | null> {
+  return await guildConnection.models.GuildMember.findOne(filter);
 }
 
 /**
@@ -223,7 +233,7 @@ async function getGuildMember(connection: Connection, filter: object): Promise<I
  * @param {number} [options.limit] - Maximum number of results per page (default = 10)
  * @param {number} [options.page] - Current page (default = 1)
  */
-const queryGuildMembers = async (connection: any, filter: any, options: Options) => {
+const queryGuildMembers = async (guildConnection: any, filter: any, options: Options) => {
   try {
     const { ngu } = filter;
     const { sortBy } = options;
@@ -241,9 +251,9 @@ const queryGuildMembers = async (connection: any, filter: any, options: Options)
       ];
     }
 
-    const totalResults = await connection.models.GuildMember.countDocuments(matchStage);
+    const totalResults = await guildConnection.models.GuildMember.countDocuments(matchStage);
 
-    const results = await connection.models.GuildMember.aggregate([
+    const results = await guildConnection.models.GuildMember.aggregate([
       {
         $match: matchStage,
       },
@@ -279,7 +289,7 @@ const queryGuildMembers = async (connection: any, filter: any, options: Options)
       totalResults,
     };
   } catch (error) {
-    logger.error({ database: connection.name, filter, options, error }, 'Failed to query guild members');
+    logger.error({ guildConnection: guildConnection.name, filter, options, error }, 'Failed to query guild members');
     return {
       results: [],
       limit: 10,
@@ -290,8 +300,8 @@ const queryGuildMembers = async (connection: any, filter: any, options: Options)
   }
 };
 
-const getAllDiscordIdsInLastedMemberActivity = async (connection: Connection, memberActivities: string[]) => {
-  const memberActivity = await connection.models.MemberActivity.findOne().sort({ date: -1 });
+const getAllDiscordIdsInLastedMemberActivity = async (platformConnection: Connection, memberActivities: string[]) => {
+  const memberActivity = await platformConnection.models.MemberActivity.findOne().sort({ date: -1 });
   const allDiscordIds = new Set<string>();
 
   memberActivities.forEach((activity) => {
@@ -303,17 +313,17 @@ const getAllDiscordIdsInLastedMemberActivity = async (connection: Connection, me
 
 /**
  * Get guildMembers by filter
- * @param {Connection} connection - Mongoose connection object for the database.
+ * @param {Connection} guildConnection - Mongoose connection object for the database.
  * @param {Object} filter - Mongo filter
  * @param {Object} select - Selete fields
  * @returns {Promise<HydratedDocument<IGuildMember>[] | []>}
  */
 const getGuildMembers = async (
-  connection: Connection,
+  guildConnection: Connection,
   filter: object,
   select?: object,
 ): Promise<HydratedDocument<IGuildMember>[] | []> => {
-  return connection.models.GuildMember.find(filter).select(select);
+  return guildConnection.models.GuildMember.find(filter).select(select);
 };
 
 export default {

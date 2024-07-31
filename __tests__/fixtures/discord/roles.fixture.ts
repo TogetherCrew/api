@@ -29,8 +29,8 @@ export const discordRole4: IRole = {
   deletedAt: new Date(),
 };
 
-export const insertRoles = async function <Type>(roles: Array<Type>, connection: Connection) {
+export const insertRoles = async function <Type>(roles: Array<Type>, guildConnection: Connection) {
   for (const role of roles) {
-    await connection.models.Role.create(role);
+    await guildConnection.models.Role.create(role);
   }
 };

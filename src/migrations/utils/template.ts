@@ -16,8 +16,8 @@ const connectToMongoDB = async () => {
 export const up = async () => {
   // Connect to MongoDB
   await connectToMongoDB();
-  const connection = await DatabaseManager.getInstance().getTenantDb('database');
-  await connection.createCollection('my_collection');
+  const guildConnection = await DatabaseManager.getInstance().getPlatformDb('database');
+  await guildConnection.createCollection('my_collection');
 };
 
 export const down = async () => {
