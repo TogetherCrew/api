@@ -56,7 +56,7 @@ app.use('/admin/queues', bullBoardServerAdapter.getRouter());
 
 // send back a 404 error for any unknown api request
 app.use((req, res, next) => {
-  next(new ApiError(httpStatus.NOT_FOUND, 'Not found'));
+  next(new ApiError(httpStatus.NOT_FOUND, 'Not found!'));
 });
 
 sentry.InitSentryErrorHandler(app);
