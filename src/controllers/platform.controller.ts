@@ -18,6 +18,7 @@ import httpStatus from 'http-status';
 import querystring from 'querystring';
 import parentLogger from '../config/logger';
 import { IPlatform, PlatformNames } from '@togethercrew.dev/db';
+import { DatabaseManager } from '@togethercrew.dev/db';
 
 const logger = parentLogger.child({ module: 'PlatformController' });
 
@@ -347,6 +348,9 @@ const deletePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Re
   } else if (req.body.deleteType === 'hard') {
     await platformService.deletePlatform(req.platform);
     if (req.platform.name === PlatformNames.Discord) {
+      const dbManager = DatabaseManager.getInstance();
+      const platformConnection = await dbManager.getPlatformDb(req.platform?.id);
+      await dbManager.deleteDatabase(platformConnection);
       await discordServices.coreService.leaveBotFromGuild(req.platform.metadata?.id);
     }
   }
