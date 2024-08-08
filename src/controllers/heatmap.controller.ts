@@ -10,6 +10,7 @@ const heatmapChart = catchAsync(async function (req: IAuthAndPlatform, res: Resp
     return res.send(charts.fillHeatmapChart([]));
   }
   const platformConnection = await DatabaseManager.getInstance().getPlatformDb(req.platform?.id);
+  console.log(await platformConnection.models.HeatMap.find({}));
   let heatmaps = await heatmapService.getHeatmapChart(platformConnection, req.body);
   const timeZoneOffset = parseInt(moment().tz(req.body.timeZone).format('Z'));
 
@@ -22,6 +23,7 @@ const heatmapChart = catchAsync(async function (req: IAuthAndPlatform, res: Resp
 
 const lineGraph = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
   const platformConnection = await DatabaseManager.getInstance().getPlatformDb(req.platform?.id);
+  console.log(await platformConnection.models.HeatMap.find({}));
   let lineGraph = await heatmapService.lineGraph(platformConnection, req.body.startDate, req.body.endDate);
   lineGraph = charts.fillHeatmapLineGraph(lineGraph, req.body.startDate, req.body.endDate);
   res.send(lineGraph);
