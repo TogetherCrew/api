@@ -23,7 +23,7 @@ async function getHeatmapChart(platformConnection: Connection, body: IHeatmapCha
           lone_messages: 1,
           thr_messages: 1,
           replier: 1,
-          channelId: 1,
+          channel_id: 1,
         },
       },
 
@@ -34,7 +34,7 @@ async function getHeatmapChart(platformConnection: Connection, body: IHeatmapCha
             { date: { $gte: new Date(startDate) } },
             { date: { $lte: new Date(endDate) } },
             {
-              $or: [{ channelId: { $in: channelIds } }, { $expr: { $eq: [channelIds, []] } }],
+              $or: [{ channel_id: { $in: channelIds } }, { $expr: { $eq: [channelIds, []] } }],
             },
           ],
         },
