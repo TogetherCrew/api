@@ -944,9 +944,9 @@ async function getMembersInteractionsNetworkGraph(
   const usersInNetworkGraph: string[] = [];
   // userInteraction
   const usersInteractionsQuery = `
-    MATCH () -[r:INTERACTED_WITH {platformId: ${platformId}}]-()
+    MATCH () -[r:INTERACTED_WITH {platformId: "${platformId}"}]-()
     WITH max(r.date) as latest_date
-    MATCH (a:DiscordMember)-[r:INTERACTED_WITH {platformId: ${platformId}, date: latest_date}]->(b:DiscordMember)
+    MATCH (a:DiscordMember)-[r:INTERACTED_WITH {platformId: "${platformId}", date: latest_date}]->(b:DiscordMember)
     RETURN a, r, b`;
   const neo4jUsersInteractionsData = await Neo4j.read(usersInteractionsQuery);
   const { records: neo4jUsersInteractions } = neo4jUsersInteractionsData;
@@ -974,9 +974,9 @@ async function getMembersInteractionsNetworkGraph(
 
   // userRadius
   const userRadiusQuery = `
-    MATCH () -[r:INTERACTED_WITH {platformId: ${platformId}}]-()
+    MATCH () -[r:INTERACTED_WITH {platformId: "${platformId}"}]-()
     WITH max(r.date) as latest_date
-    MATCH (a:DiscordMember) -[r:INTERACTED_WITH {date: latest_date, platformId :${platformId}}]-(:DiscordMember)
+    MATCH (a:DiscordMember) -[r:INTERACTED_WITH {date: latest_date, platformId :"${platformId}"}]-(:DiscordMember)
     WITH a, r 
     RETURN a.id as userId, SUM(r.weight) as radius`;
   const neo4jUserRadiusData = await Neo4j.read(userRadiusQuery);
@@ -992,9 +992,9 @@ async function getMembersInteractionsNetworkGraph(
 
   // userStatus
   const userStatusQuery = `
-    MATCH () -[r:INTERACTED_IN]-(g:DiscordPlatform {id: ${platformId}})
+    MATCH () -[r:INTERACTED_IN]-(g:DiscordPlatform {id: "${platformId}"})
     WITH max(r.date) as latest_date
-    MATCH (a:DiscordMember)-[r:INTERACTED_IN {date: latest_date}]->(g:DiscordPlatform {id: ${platformId}})
+    MATCH (a:DiscordMember)-[r:INTERACTED_IN {date: latest_date}]->(g:DiscordPlatform {id: "${platformId}"})
     RETURN a.id as userId, r.status as status`;
   const neo4jUserStatusData = await Neo4j.read(userStatusQuery);
   const { records: neo4jUserStatus } = neo4jUserStatusData;
@@ -1058,9 +1058,9 @@ async function getFragmentationScore(platformId: string): Promise<fragmentationS
   const fragmentationScale = 200;
   const fragmentationScoreRange = { minimumFragmentationScore: 0, maximumFragmentationScore: fragmentationScale };
   const fragmentationScoreQuery = `
-    MATCH ()-[r:INTERACTED_WITH {platformId: ${platformId}}]-()
+    MATCH ()-[r:INTERACTED_WITH {platformId: "${platformId}"}]-()
     WITH max(r.date) as latest_date
-    MATCH (g:DiscordPlatform {id: ${platformId}})-[r:HAVE_METRICS {date: latest_date}]->(g)
+    MATCH (g:DiscordPlatform {id: "${platformId}"})-[r:HAVE_METRICS {date: latest_date}]->(g)
     RETURN ((r.louvainModularityScore - (-1)) / 2) * 200 as fragmentation_score;
     `;
 
