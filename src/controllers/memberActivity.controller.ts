@@ -70,19 +70,19 @@ const membersInteractionsNetworkGraph = catchAsync(async function (req: IAuthAnd
   const guildConnection = await DatabaseManager.getInstance().getGuildDb(req.platform?.metadata?.id);
 
   const networkGraphData = await memberActivityService.getMembersInteractionsNetworkGraph(
-    req.platform?.metadata?.id,
+    req.platform.id,
     guildConnection,
   );
   res.send(networkGraphData);
 });
 
 const decentralisationScore = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
-  const decentralizationScoreData = await memberActivityService.getDecentralisationScore(req.platform?.metadata?.id);
+  const decentralizationScoreData = await memberActivityService.getDecentralisationScore(req.platform.id);
   res.send(decentralizationScoreData);
 });
 
 const fragmentationScore = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
-  const fragmentationScoreData = await memberActivityService.getFragmentationScore(req.platform?.metadata?.id);
+  const fragmentationScoreData = await memberActivityService.getFragmentationScore(req.platform.id);
   res.send(fragmentationScoreData);
 });
 
