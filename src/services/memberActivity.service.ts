@@ -972,6 +972,7 @@ async function getMembersInteractionsNetworkGraph(
     return interaction;
   });
 
+  console.log('neo4jUsersInteractionsData'), neo4jUsersInteractionsData;
   // userRadius
   const userRadiusQuery = `
     MATCH () -[r:INTERACTED_WITH {platformId: "${platformId}"}]-()
@@ -989,6 +990,7 @@ async function getMembersInteractionsNetworkGraph(
 
     return { userId, radius };
   });
+  console.log('neo4jUserRadiusData'), neo4jUserRadiusData;
 
   // userStatus
   const userStatusQuery = `
@@ -1008,6 +1010,8 @@ async function getMembersInteractionsNetworkGraph(
 
     return { userId, stats };
   });
+
+  console.log('neo4jUserStatusData'), neo4jUserStatusData;
 
   // usersInfo
   const usersInfo = await guildConnection.models.GuildMember.find({ discordId: { $in: usersInNetworkGraph } });
