@@ -957,9 +957,9 @@ async function getMembersInteractionsNetworkGraph(
     const r = _fields[_fieldLookup['r']];
     const b = _fields[_fieldLookup['b']];
 
-    const aUserId = a?.properties?.userId as string;
+    const aUserId = a?.properties?.id as string;
     const rWeeklyInteraction = r?.properties?.weight as number;
-    const bUserId = b?.properties?.userId as string;
+    const bUserId = b?.properties?.id as string;
 
     usersInNetworkGraph.push(aUserId);
     usersInNetworkGraph.push(bUserId);
