@@ -300,7 +300,7 @@ const sendPrivateMessageToUser = async (saga: any) => {
     });
     const community = await communityService.getCommunityByFilter({ _id: platform?.community });
     const guildConnection = await DatabaseManager.getInstance().getGuildDb(platform?.metadata?.id);
-
+    const platformConnection = await DatabaseManager.getInstance().getPlatformDb(platform?.id);
     const userIds = options?.userIds;
     const roleIds = options?.roleIds;
     const categories = options?.engagementCategories;
@@ -317,25 +317,30 @@ const sendPrivateMessageToUser = async (saga: any) => {
       const allDiscordIds = new Set<string>();
 
       if (userIds) {
+        console.log('if-userId');
         userIds.forEach((discordId: string) => {
           allDiscordIds.add(discordId);
         });
       }
       if (roleIds) {
+        console.log('if-roleIds');
         const discordIds = await discordService.roleService.getDiscordIdsFromRoleIds(guildConnection, roleIds);
         discordIds.forEach((discordId: string) => {
           allDiscordIds.add(discordId);
         });
       }
       if (categories) {
+        console.log('if-categories');
         const discordIds = await discordService.guildMemberService.getAllDiscordIdsInLastedMemberActivity(
-          guildConnection,
+          platformConnection,
           categories,
         );
         discordIds.forEach((discordId: string) => {
           allDiscordIds.add(discordId);
         });
       }
+
+      console.log('allDiscordIds', allDiscordIds);
 
       allDiscordIds.forEach((discordId: string) => {
         const safetyMessageLink = `https://discord.com/channels/${safetyMessageRefrence.guildId}/${safetyMessageRefrence.channelId}/${safetyMessageRefrence.messageId}`;
@@ -350,6 +355,7 @@ const sendPrivateMessageToUser = async (saga: any) => {
     }
   }
 
+  console.log('haha :D');
   saga.data = {
     ...saga.data,
     info: dataForSendingToDiscordBot,
