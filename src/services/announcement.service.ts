@@ -305,32 +305,21 @@ const sendPrivateMessageToUser = async (saga: any) => {
     const roleIds = options?.roleIds;
     const categories = options?.engagementCategories;
 
-    console.log('sagaData', sagaData);
-    console.log('community', community);
-    console.log('platform', platform);
-    console.log('platformId', platformId);
-    console.log('userIds', userIds);
-    console.log('roleIds', roleIds);
-    console.log('categories', categories);
-
     if (userIds || roleIds || categories) {
       const allDiscordIds = new Set<string>();
 
       if (userIds) {
-        console.log('if-userId');
         userIds.forEach((discordId: string) => {
           allDiscordIds.add(discordId);
         });
       }
       if (roleIds) {
-        console.log('if-roleIds');
         const discordIds = await discordService.roleService.getDiscordIdsFromRoleIds(guildConnection, roleIds);
         discordIds.forEach((discordId: string) => {
           allDiscordIds.add(discordId);
         });
       }
       if (categories) {
-        console.log('if-categories');
         const discordIds = await discordService.guildMemberService.getAllDiscordIdsInLastedMemberActivity(
           platformConnection,
           categories,
@@ -340,22 +329,17 @@ const sendPrivateMessageToUser = async (saga: any) => {
         });
       }
 
-      console.log('allDiscordIds', allDiscordIds);
-
       allDiscordIds.forEach((discordId: string) => {
         const safetyMessageLink = `https://discord.com/channels/${safetyMessageRefrence.guildId}/${safetyMessageRefrence.channelId}/${safetyMessageRefrence.messageId}`;
         const safetyMessage = `\n*This message was sent to you because you’re part of ${community?.name}.\nTo verify the legitimacy of this message,\nsee the instruction sent to you inside the community's server to verify the bot ID: ${safetyMessageLink}`;
-
         const templateHandlebars = Handlebars.compile(template);
         const compiledTemplate = templateHandlebars({ username: `<@${discordId}>` });
         const message = `${compiledTemplate}\n${safetyMessage}`;
-
         dataForSendingToDiscordBot.push({ discordId, message, useFallback: true });
       });
     }
   }
 
-  console.log('haha :D');
   saga.data = {
     ...saga.data,
     info: dataForSendingToDiscordBot,
