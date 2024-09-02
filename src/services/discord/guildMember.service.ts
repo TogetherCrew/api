@@ -289,7 +289,7 @@ const queryGuildMembers = async (guildConnection: any, filter: any, options: Opt
       totalResults,
     };
   } catch (error) {
-    logger.error({ guildConnection: guildConnection.name, filter, options, error }, 'Failed to query guild members');
+    logger.error(error, 'Failed to query guild members');
     return {
       results: [],
       limit: 10,
@@ -307,7 +307,6 @@ const getAllDiscordIdsInLastedMemberActivity = async (platformConnection: Connec
   memberActivities.forEach((activity) => {
     memberActivity[activity].forEach((discordId: string) => allDiscordIds.add(discordId));
   });
-
   return allDiscordIds;
 };
 

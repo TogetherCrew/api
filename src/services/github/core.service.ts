@@ -24,7 +24,7 @@ async function generateAppAccessToken() {
     var token = jwt.sign(payload, privateKey, { algorithm: 'RS256' });
     return token;
   } catch (error) {
-    logger.error({ error }, 'Failed to create access token for github app');
+    logger.error(error, 'Failed to create access token for github app');
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to create access token for github app');
   }
 }
@@ -48,11 +48,10 @@ async function getInstallationAccessToken(appAccessToken: string, installationId
       return await response.json();
     } else {
       const errorResponse = await response.text();
-      logger.error({ error: errorResponse }, 'Failed to get installation access token');
-      throw new Error(`Failed to get installation access token: ${errorResponse}`);
+      throw new Error(errorResponse);
     }
   } catch (error) {
-    logger.error({ installationId, error }, 'Failed to get installation access token');
+    logger.error(error, 'Failed to get installation access token');
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to get installation access token');
   }
 }
@@ -76,11 +75,10 @@ async function getInstallationRepos(installationAccessToken: string, installatio
       return await response.json();
     } else {
       const errorResponse = await response.text();
-      logger.error({ error: errorResponse }, 'Failed to get installation repos');
-      throw new Error(`Failed to get installation repos: ${errorResponse}`);
+      throw new Error(errorResponse);
     }
   } catch (error) {
-    logger.error({ installationId, error }, 'Failed to get installation repos');
+    logger.error(error, 'Failed to get installation repos');
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to get installation repos');
   }
 }
@@ -104,11 +102,10 @@ async function getInstallationDetails(appAccessToken: string, installationId: st
       return await response.json();
     } else {
       const errorResponse = await response.text();
-      logger.error({ error: errorResponse }, 'Failed to get installation details');
-      throw new Error(`Failed to get installation details: ${errorResponse}`);
+      throw new Error(errorResponse);
     }
   } catch (error) {
-    logger.error({ installationId, error }, 'Failed to get installation details');
+    logger.error(error, 'Failed to get installation details');
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to get installation details');
   }
 }

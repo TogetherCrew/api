@@ -69,11 +69,10 @@ async function getUserProfile(accessToken: string) {
       return await response.json();
     } else {
       const errorResponse = await response.text();
-      logger.error({ error: errorResponse }, 'Failed to get user profile');
-      throw new Error(`Failed to get user profile: ${errorResponse}`);
+      throw new Error(errorResponse);
     }
   } catch (error) {
-    logger.error({ error }, 'Failed to get user profile');
+    logger.error(error, 'Failed to get user profile');
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to get user profile');
   }
 }

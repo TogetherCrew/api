@@ -31,11 +31,10 @@ async function exchangeCode(code: string) {
       return await response.json();
     } else {
       const errorResponse = await response.text();
-      logger.error({ error: errorResponse }, 'Failed to exchange notion code');
-      throw new Error(`Failed to exchange notion code: ${errorResponse}`);
+      throw new Error(errorResponse);
     }
   } catch (error) {
-    logger.error({ redirect_uri: config.oAuth2.notion.callbackURI.connect, error }, 'Failed to exchange notion code');
+    logger.error(error, 'Failed to exchange notion code');
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to exchange notion code');
   }
 }

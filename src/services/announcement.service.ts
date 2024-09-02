@@ -7,8 +7,9 @@ import config from '../config';
 import sagaService from './saga.service';
 import platformService from './platform.service';
 import Handlebars from 'handlebars';
-import logger from '../config/logger';
+import parentLogger from '../config/logger';
 import communityService from './community.service';
+const logger = parentLogger.child({ module: 'AnnouncementService' });
 
 const createDraftAnnouncement = async (announcementData: IAnnouncement) => {
   if (announcementData.draft === false) throw new Error('Cannot create a draft announcement with draft set to false');
@@ -37,6 +38,7 @@ const createScheduledAnnouncement = async (announcementData: IAnnouncement) => {
     await session.commitTransaction();
     return announcement;
   } catch (error) {
+    logger.error(error, 'Failed to create announcement');
     await session.abortTransaction();
     throw error;
   } finally {
@@ -69,6 +71,7 @@ const updateAndRescheduleAnnouncement = async (
     await session.commitTransaction();
     return newAnnouncement;
   } catch (error) {
+    logger.error(error, 'Failed to update and reschedule announcement');
     await session.abortTransaction();
     throw error;
   } finally {
@@ -98,6 +101,7 @@ const updateAnnouncementAndRemoveJob = async (
     await session.commitTransaction();
     return newAnnouncement;
   } catch (error) {
+    logger.error(error, 'Failed to update announcement and remove job');
     await session.abortTransaction();
     throw error;
   } finally {
@@ -128,6 +132,7 @@ const updateAnnouncementAndAddJob = async (
     await session.commitTransaction();
     return newAnnouncement;
   } catch (error) {
+    logger.error(error, 'Failed to update announcement and add job');
     await session.abortTransaction();
     throw error;
   } finally {
@@ -235,7 +240,7 @@ const bullMQTriggeredAnnouncement = async (job: Job) => {
     await mongoose.connect(config.mongoose.serverURL);
     logger.info('Setuped Message Broker connection!');
   } catch (error) {
-    logger.fatal('Failed to setup to Message Broker!!');
+    logger.fatal(error, 'Failed to setup to Message Broker!!');
   }
 
   const announcement = await Announcement.findById(announcementId);
