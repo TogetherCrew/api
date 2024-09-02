@@ -91,7 +91,7 @@ async function checkBotPermissions(
     }
     return false;
   } catch (error) {
-    logger.error({ error }, 'Failed to check bot permissions');
+    logger.error(error, 'Failed to check bot permissions');
     return false;
   }
 }

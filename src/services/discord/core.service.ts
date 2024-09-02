@@ -151,11 +151,10 @@ async function exchangeCode(code: string, redirect_uri: string): Promise<IDiscor
       return await response.json();
     } else {
       const errorResponse = await response.text();
-      logger.error({ error: errorResponse }, 'Failed to exchange discord code');
-      throw new Error(`Failed to exchange discord code: ${errorResponse}`);
+      throw new Error(errorResponse);
     }
-  } catch (error) {
-    logger.error({ redirect_uri: config.oAuth2.discord.callbackURI.connect, error }, 'Failed to exchange discord code');
+  } catch (error: any) {
+    logger.error(error, 'Failed to exchange discord code');
     throw new ApiError(590, 'Can not fetch from discord API');
   }
 }
@@ -179,7 +178,7 @@ async function getUserFromDiscordAPI(accessToken: string): Promise<IDiscordUser>
       throw new Error(`Failed to get user from Discord API: ${errorResponse}`);
     }
   } catch (error) {
-    logger.error({ error }, 'Failed to get user from Discord API');
+    logger.error(error, 'Failed to get user from Discord API');
     throw new ApiError(590, 'Can not fetch from discord API');
   }
 }
@@ -203,7 +202,7 @@ async function getBotFromDiscordAPI(): Promise<IDiscordUser> {
       throw new Error(`Failed to get bot from Discord API: ${errorResponse}`);
     }
   } catch (error) {
-    logger.error({ error }, 'Failed to get bot from Discord API');
+    logger.error(error, 'Failed to get bot from Discord API');
     throw new ApiError(590, 'Can not fetch from discord API');
   }
 }
@@ -220,7 +219,7 @@ async function getBotPermissions(guildId: Snowflake): Promise<Array<string>> {
     const member = await guild.members.fetch(config.oAuth2.discord.clientId);
     return member.permissions.toArray();
   } catch (error) {
-    logger.error({ error }, 'Failed to get list of permissions that bot has in a specific guild');
+    logger.error(error, 'Failed to get list of permissions that bot has in a specific guild');
     throw new ApiError(590, 'Failed to get list of permissions that bot has in a specific guild');
   }
 }
@@ -337,7 +336,7 @@ async function refreshAuth(refreshToken: string): Promise<IDiscordOAuth2EchangeC
       throw new Error();
     }
   } catch (error) {
-    logger.error({ error }, 'Failed to refresh discord auth');
+    logger.error(error, 'Failed to refresh discord auth');
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Can not fetch from discord API');
   }
 }
