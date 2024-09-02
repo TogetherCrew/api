@@ -305,6 +305,13 @@ const sendPrivateMessageToUser = async (saga: any) => {
     const roleIds = options?.roleIds;
     const categories = options?.engagementCategories;
 
+    logger.info(community, 'community');
+    logger.info(platform, 'platform');
+    logger.info(platformId, 'platformId');
+    logger.info(userIds, 'userIds');
+    logger.info(roleIds, 'roleIds');
+    logger.info(categories, 'categories');
+
     if (userIds || roleIds || categories) {
       const allDiscordIds = new Set<string>();
 
