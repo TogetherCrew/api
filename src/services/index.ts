@@ -13,6 +13,8 @@ import moduleService from './module.service';
 import googleService from './google';
 import githubService from './github';
 import notionService from './notion';
+import discourseService from './discourse';
+
 export {
   userService,
   authService,
@@ -29,4 +31,5 @@ export {
   googleService,
   githubService,
   notionService,
+  discourseService,
 };

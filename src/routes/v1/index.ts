@@ -10,6 +10,7 @@ import platformRoute from './platform.route';
 import announcementRoute from './announcement.route';
 import categoryRoute from './category.route';
 import moduleRoute from './module.route';
+import discourseRoute from './discourse.route';
 const router = express.Router();
 
 const defaultRoutes = [
@@ -57,6 +58,10 @@ const defaultRoutes = [
   {
     path: '/modules',
     route: moduleRoute,
+  },
+  {
+    path: '/discourse',
+    route: discourseRoute,
   },
 ];
 
