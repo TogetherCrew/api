@@ -1062,7 +1062,7 @@ async function getFragmentationScore(
   const fragmentationScoreQuery = `
     MATCH ()-[r:INTERACTED_WITH {platformId: "${platformId}"}]-()
     WITH max(r.date) as latest_date
-    MATCH (g:"${NEO4J_PLATFORM_INFO[platformName].platform}" {id: "${platformId}"})-[r:HAVE_METRICS {date: latest_date}]->(g)
+    MATCH (g:${NEO4J_PLATFORM_INFO[platformName].platform} {id: "${platformId}"})-[r:HAVE_METRICS {date: latest_date}]->(g)
     RETURN ((r.louvainModularityScore - (-1)) / 2) * 200 as fragmentation_score;
     `;
 
@@ -1110,13 +1110,9 @@ async function getDecentralisationScore(
 ): Promise<decentralisationScoreResponseType> {
   const decentralisationScoreRange = { minimumDecentralisationScore: 0, maximumDecentralisationScore: 200 };
   const decentralisationScoreQuery = `
-    MATCH (g:"${NEO4J_PLATFORM_INFO[platformName].platform}" {id: "${platformId}"})-[r:HAVE_METRICS]->(g)
+    MATCH (g:${NEO4J_PLATFORM_INFO[platformName].platform} {id: "${platformId}"})-[r:HAVE_METRICS]->(g)
     RETURN r.decentralizationScore as decentralization_score ORDER BY r.date DESC LIMIT 1;
     `;
-  // const decentralisationScoreQuery = `
-  //   MATCH (g:DiscordPlatform {id: "${platformId}"})-[r:HAVE_METRICS]->(g)
-  //   RETURN r.decentralizationScore as decentralization_score ORDER BY r.date DESC LIMIT 1;
-  //   `;
   const neo4jData = await Neo4j.read(decentralisationScoreQuery);
   const { records } = neo4jData;
   if (records.length == 0) return { decentralisationScore: null, decentralisationScoreRange, scoreStatus: null };

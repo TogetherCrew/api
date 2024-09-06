@@ -3,7 +3,7 @@ paths:
     post:
       tags:
         - [Heatmap]
-      summary: Get data for heatmap chart - discord only 
+      summary: Get data for heatmap chart - discord only
       security:
         - bearerAuth: []
       parameters:
@@ -22,47 +22,47 @@ paths:
               properties:
                 startDate:
                   type: string
-                  format: date-time     
+                  format: date-time
                 endDate:
                   type: string
-                  format: date-time  
+                  format: date-time
                 timeZone:
-                  type: string      
+                  type: string
                 channelIds:
                   type: array
                   items:
-                    type: string  
+                    type: string
               example:
-                startDate: "2023-01-17T13:02:10.911+00:00"
-                endDate: "2023-01-29T10:50:01.513Z"
-                timeZone: "America/Fortaleza"
-                channelIds: ["1012430565959553148"]
+                startDate: '2023-01-17T13:02:10.911+00:00'
+                endDate: '2023-01-29T10:50:01.513Z'
+                timeZone: 'America/Fortaleza'
+                channelIds: ['1012430565959553148']
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 type: array
-                items: 
+                items:
                   type: array
                   items:
                     type: number
-                example: [[6,5,28],[7,10,28]]
-        "400":
+                example: [[6, 5, 28], [7, 10, 28]]
+        '400':
           description: Bad Request
-          $ref: "#/components/responses/BadRequest"
-        "401":
+          $ref: '#/components/responses/BadRequest'
+        '401':
           description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-        "404":
+          $ref: '#/components/responses/Unauthorized'
+        '404':
           description: NotFound
-          $ref: "#/components/responses/NotFound"
+          $ref: '#/components/responses/NotFound'
   /api/v1/heatmaps/{platformId}/line-graph:
     post:
       tags:
         - [Heatmap]
-      summary: Get data for line graph - discord only 
+      summary: Get data for line graph - discord only
       security:
         - bearerAuth: []
       parameters:
@@ -81,15 +81,15 @@ paths:
               properties:
                 startDate:
                   type: string
-                  format: date-time     
+                  format: date-time
                 endDate:
                   type: string
-                  format: date-time        
+                  format: date-time
               example:
-                startDate: "2023-01-17T13:02:10.911+00:00"
-                endDate: "2023-01-29T10:50:01.513Z"
+                startDate: '2023-01-17T13:02:10.911+00:00'
+                endDate: '2023-01-29T10:50:01.513Z'
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -119,12 +119,12 @@ paths:
                     type: number
                   msgPercentageChange:
                     type: number
-        "400":
+        '400':
           description: Bad Request
-          $ref: "#/components/responses/BadRequest"
-        "401":
+          $ref: '#/components/responses/BadRequest'
+        '401':
           description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-        "404":
+          $ref: '#/components/responses/Unauthorized'
+        '404':
           description: NotFound
-          $ref: "#/components/responses/NotFound"
+          $ref: '#/components/responses/NotFound'
