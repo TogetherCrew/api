@@ -7,6 +7,7 @@ import communityValidation from './community.validation';
 import platformValidation from './platform.validation';
 import announcementValidation from './announcement.validation';
 import moduleValidation from './module.validation';
+import discourseValidation from './discourse.validation';
 export {
   authValidation,
   guildValidation,
@@ -17,4 +18,5 @@ export {
   platformValidation,
   announcementValidation,
   moduleValidation,
+  discourseValidation,
 };

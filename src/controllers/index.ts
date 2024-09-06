@@ -8,6 +8,7 @@ import platformController from './platform.controller';
 import announcementController from './announcement.controller';
 import categoryController from './category.controller';
 import moduleController from './module.controller';
+import discourseController from './discourse.controller';
 export {
   authController,
   userController,
@@ -19,4 +20,5 @@ export {
   announcementController,
   categoryController,
   moduleController,
+  discourseController,
 };
