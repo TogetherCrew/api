@@ -28,15 +28,10 @@ paths:
                   format: date-time  
                 timeZone:
                   type: string      
-                channelIds:
-                  type: array
-                  items:
-                    type: string  
               example:
                 startDate: "2023-01-17T13:02:10.911+00:00"
                 endDate: "2023-01-29T10:50:01.513Z"
                 timeZone: "America/Fortaleza"
-                channelIds: ["1012430565959553148"]
       responses:
         "200":
           description: OK
