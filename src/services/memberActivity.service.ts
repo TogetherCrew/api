@@ -2,13 +2,14 @@ import { Connection } from 'mongoose';
 import { date, math } from '../utils';
 import ScoreStatus from '../utils/enums/scoreStatus.enum';
 import NodeStats from '../utils/enums/nodeStats.enum';
-import { IGuildMember, IRole } from '@togethercrew.dev/db';
+import { IGuildMember, IRole, PlatformNames } from '@togethercrew.dev/db';
 import * as Neo4j from '../neo4j';
 import roleService from './discord/role.service';
 import guildMemberService from './discord/guildMember.service';
 import { Snowflake } from 'discord.js';
 import parentLogger from '../config/logger';
-
+import { NEO4J_PLATFORM_INFO } from '../constants/neo4j.constant';
+import { SupportedNeo4jPlatforms } from '../types/neo4j.type';
 const logger = parentLogger.child({ module: 'MemberActivityService' });
 
 /**
@@ -1052,13 +1053,16 @@ type fragmentationScoreResponseType = {
   fragmentationScoreRange: { minimumFragmentationScore: number; maximumFragmentationScore: number };
   scoreStatus: ScoreStatus | null;
 };
-async function getFragmentationScore(platformId: string): Promise<fragmentationScoreResponseType> {
+async function getFragmentationScore(
+  platformId: string,
+  platformName: SupportedNeo4jPlatforms,
+): Promise<fragmentationScoreResponseType> {
   const fragmentationScale = 200;
   const fragmentationScoreRange = { minimumFragmentationScore: 0, maximumFragmentationScore: fragmentationScale };
   const fragmentationScoreQuery = `
     MATCH ()-[r:INTERACTED_WITH {platformId: "${platformId}"}]-()
     WITH max(r.date) as latest_date
-    MATCH (g:DiscordPlatform {id: "${platformId}"})-[r:HAVE_METRICS {date: latest_date}]->(g)
+    MATCH (g:"${NEO4J_PLATFORM_INFO[platformName].platform}" {id: "${platformId}"})-[r:HAVE_METRICS {date: latest_date}]->(g)
     RETURN ((r.louvainModularityScore - (-1)) / 2) * 200 as fragmentation_score;
     `;
 
@@ -1100,12 +1104,19 @@ type decentralisationScoreResponseType = {
   decentralisationScoreRange: { minimumDecentralisationScore: number; maximumDecentralisationScore: number };
   scoreStatus: ScoreStatus | null;
 };
-async function getDecentralisationScore(platformId: string): Promise<decentralisationScoreResponseType> {
+async function getDecentralisationScore(
+  platformId: string,
+  platformName: SupportedNeo4jPlatforms,
+): Promise<decentralisationScoreResponseType> {
   const decentralisationScoreRange = { minimumDecentralisationScore: 0, maximumDecentralisationScore: 200 };
   const decentralisationScoreQuery = `
-    MATCH (g:DiscordPlatform {id: "${platformId}"})-[r:HAVE_METRICS]->(g)
+    MATCH (g:"${NEO4J_PLATFORM_INFO[platformName].platform}" {id: "${platformId}"})-[r:HAVE_METRICS]->(g)
     RETURN r.decentralizationScore as decentralization_score ORDER BY r.date DESC LIMIT 1;
     `;
+  // const decentralisationScoreQuery = `
+  //   MATCH (g:DiscordPlatform {id: "${platformId}"})-[r:HAVE_METRICS]->(g)
+  //   RETURN r.decentralizationScore as decentralization_score ORDER BY r.date DESC LIMIT 1;
+  //   `;
   const neo4jData = await Neo4j.read(decentralisationScoreQuery);
   const { records } = neo4jData;
   if (records.length == 0) return { decentralisationScore: null, decentralisationScoreRange, scoreStatus: null };

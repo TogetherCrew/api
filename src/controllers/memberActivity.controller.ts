@@ -5,6 +5,7 @@ import { catchAsync, charts } from '../utils';
 import { DatabaseManager } from '@togethercrew.dev/db';
 import { pick } from '../utils';
 import { activityCompostionsTypes } from '../config/memberBreakDownTables';
+import { SupportedNeo4jPlatforms } from '../types/neo4j.type';
 
 const activeMembersCompositionLineGraph = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
   const platformConnection = await DatabaseManager.getInstance().getPlatformDb(req.platform?.id);
@@ -77,12 +78,18 @@ const membersInteractionsNetworkGraph = catchAsync(async function (req: IAuthAnd
 });
 
 const decentralisationScore = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
-  const decentralizationScoreData = await memberActivityService.getDecentralisationScore(req.platform.id);
+  const decentralizationScoreData = await memberActivityService.getDecentralisationScore(
+    req.platform.id,
+    req.platform.name as SupportedNeo4jPlatforms,
+  );
   res.send(decentralizationScoreData);
 });
 
 const fragmentationScore = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
-  const fragmentationScoreData = await memberActivityService.getFragmentationScore(req.platform.id);
+  const fragmentationScoreData = await memberActivityService.getFragmentationScore(
+    req.platform.id,
+    req.platform.name as SupportedNeo4jPlatforms,
+  );
   res.send(fragmentationScoreData);
 });
 
