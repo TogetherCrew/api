@@ -12,8 +12,9 @@ const logger = parentLogger.child({ module: 'DiscourseCategoryService' });
 
 /**
  * get list of categories
- * @param {string} refreshToken
- * @returns {Promise<IDiscordOAuth2EchangeCode>}
+ * @param {string} filters
+ * @param {options} filters
+ * @returns {Promise<any>}
  */
 async function getCategoriesByEndPoint(filters: any, options: any): Promise<any> {
   const { endPoint, name } = filters;
