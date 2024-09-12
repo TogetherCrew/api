@@ -1,10 +1,5 @@
-import fetch from 'node-fetch';
-import { Client, GatewayIntentBits, Snowflake, Guild } from 'discord.js';
-import config from '../../config';
-import { DatabaseManager } from '@togethercrew.dev/db';
-import { ApiError, pick, sort } from '../../utils';
+import { ApiError } from '../../utils';
 import parentLogger from '../../config/logger';
-import { IAuthAndPlatform, IDiscordOAuth2EchangeCode, IDiscordUser } from '../../interfaces';
 import httpStatus from 'http-status';
 import * as Neo4j from '../../neo4j';
 
@@ -22,7 +17,6 @@ async function getCategoriesByEndPoint(filters: any, options: any): Promise<any>
   limit = limit && parseInt(limit, 10) > 0 ? parseInt(limit, 10) : 10;
   page = page && parseInt(page, 10) > 0 ? parseInt(page, 10) : 1;
   skip = (page - 1) * limit;
-  console.log(endPoint, name, limit, page, skip, sortBy);
   const query = `
   MATCH (forum:DiscourseForum {endpoint: "${endPoint}"})
   MATCH (dc:DiscourseCategory {forumUuid: forum.uuid})
