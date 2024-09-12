@@ -376,14 +376,14 @@ paths:
         - name: property
           in: query
           required: true
-          description: The type of property to retrieve (e.g., 'channel' or 'role' for Discord platform - 'category' for discoruse platform).
+          description: The type of property to retrieve (e.g., 'channel' or 'role' for Discord platform and'category' for discoruse platform).
           schema:
             type: string
             enum: ['channel', 'role', 'guildMember', 'category']
         - name: name
           in: query
           required: false
-          description: Name of the role (supported for 'discord-role' property) - Name of the category (supported for 'discourse-category' property).
+          description: Name of the role (supported for 'discord-role' and 'discourse-category' properties).
           schema:
             type: string
         - name: ngu
@@ -395,7 +395,7 @@ paths:
         - name: sortBy
           in: query
           required: false
-          description: The parameter to sort by (supported for 'discord-role', 'discord-guildMember', and 'discourse-category' properties). for the 'discourse-category' the format is like 'dc.name'
+          description: The parameter to sort by (supported for 'discord-role', 'discord-guildMember', and 'discourse-category' (example dc.name) properties).
           schema:
             type: string
         - name: limit
