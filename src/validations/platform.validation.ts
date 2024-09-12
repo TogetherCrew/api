@@ -232,12 +232,38 @@ const discordProperties = (req: Request, property: string) => {
   }
 };
 
+const discourseProperties = (req: Request, property: string) => {
+  switch (property) {
+    case 'category': {
+      return {
+        params: Joi.object().keys({
+          platformId: Joi.required().custom(objectId),
+        }),
+        query: Joi.object()
+          .required()
+          .keys({
+            property: Joi.string().valid('category'),
+            name: Joi.string().default(null),
+            sortBy: Joi.string(),
+            limit: Joi.number().integer(),
+            page: Joi.number().integer(),
+          }),
+      };
+    }
+    default:
+      req.allowInput = false;
+      return {};
+  }
+};
 const dynamicPlatformProperty = (req: Request) => {
   const platformName = req.platform?.name;
   const property = req.query.property as string;
   switch (platformName) {
     case PlatformNames.Discord: {
       return discordProperties(req, property);
+    }
+    case PlatformNames.Discourse: {
+      return discourseProperties(req, property);
     }
     default:
       req.allowInput = false;

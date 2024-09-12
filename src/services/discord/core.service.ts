@@ -13,12 +13,6 @@ import httpStatus from 'http-status';
 
 const logger = parentLogger.child({ module: 'DiscordCoreService' });
 
-/**
- * exchange discord code with access token
- * @param {string} code
-   @param {string} redirect_uri
- * @returns {Promise<IDiscordOAuth2EchangeCode>}
- */
 async function getPropertyHandler(req: IAuthAndPlatform) {
   const guildConnection = await DatabaseManager.getInstance().getGuildDb(req.platform?.metadata?.id);
 

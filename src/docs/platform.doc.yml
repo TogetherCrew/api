@@ -15,7 +15,7 @@ paths:
             enum:
               - discord
               - google
-              - twitter  
+              - twitter
               - github
               - notion
         - name: userId
@@ -35,9 +35,9 @@ paths:
               enum: ['googleDrive']
 
       responses:
-        "302":
+        '302':
           description: Found - Redirects to the OAuth2 authorization page appropriate to the selected platform.
-          $ref: "#/components/responses/Found"
+          $ref: '#/components/responses/Found'
 
   /api/v1/platforms/:
     post:
@@ -124,7 +124,7 @@ paths:
                             id:
                               type: string
                             avatarUrl:
-                              type: string 
+                              type: string
                       description: Metadata for Github.
                     - type: object
                       required: [userId, workspace_id, workspace_name, bot_id, request_id, owner]
@@ -159,31 +159,31 @@ paths:
                                 name:
                                   type: string
                                 avatar_url:
-                                  type: string                                                                
+                                  type: string
                       description: Metadata for Notion.
                     - type: object
-                      required: [baseURL , path]
+                      required: [baseURL, path]
                       properties:
                         baseURL:
-                          type: string        
-                        path: 
                           type: string
-                          default: /w/api.php                                                   
+                        path:
+                          type: string
+                          default: /w/api.php
                       description: Metadata for MediaWiki.
       responses:
-        "201":
+        '201':
           description: Platform created successfully.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Platform"
-        "400":
+                $ref: '#/components/schemas/Platform'
+        '400':
           description: Bad Request
-          $ref: "#/components/responses/BadRequest"
-        "401":
+          $ref: '#/components/responses/BadRequest'
+        '401':
           description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-        
+          $ref: '#/components/responses/Unauthorized'
+
     get:
       tags:
         - Platform
@@ -207,7 +207,7 @@ paths:
           schema:
             type: string
             format: objectId
-          description: 
+          description:
           required: true
         - in: query
           name: sortBy
@@ -229,7 +229,7 @@ paths:
             default: 1
           description: Page number
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -239,7 +239,7 @@ paths:
                   results:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Platform"
+                      $ref: '#/components/schemas/Platform'
                   page:
                     type: integer
                     example: 1
@@ -252,9 +252,9 @@ paths:
                   totalResults:
                     type: integer
                     example: 1
-        "401":
+        '401':
           description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
+          $ref: '#/components/responses/Unauthorized'
 
   /api/v1/platforms/{platformId}:
     get:
@@ -271,18 +271,18 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Platform details retrieved successfully.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Platform"
-        "401":
+                $ref: '#/components/schemas/Platform'
+        '401':
           description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-        "404":
+          $ref: '#/components/responses/Unauthorized'
+        '404':
           description: NotFound
-          $ref: "#/components/responses/NotFound"
+          $ref: '#/components/responses/NotFound'
 
     patch:
       tags:
@@ -310,18 +310,18 @@ paths:
                   additionalProperties: true
               minProperties: 1
       responses:
-        "200":
+        '200':
           description: Platform updated successfully.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Platform"
-        "401":
+                $ref: '#/components/schemas/Platform'
+        '401':
           description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-        "404":
+          $ref: '#/components/responses/Unauthorized'
+        '404':
           description: NotFound
-          $ref: "#/components/responses/NotFound"
+          $ref: '#/components/responses/NotFound'
 
     delete:
       tags:
@@ -345,18 +345,18 @@ paths:
               properties:
                 deleteType:
                   type: string
-                  required: true   
-                  enum: ['soft','hard']        
-                  example: soft 
+                  required: true
+                  enum: ['soft', 'hard']
+                  example: soft
       responses:
-        "204":
+        '204':
           description: Platform deleted successfully.
-        "401":
+        '401':
           description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-        "404":
+          $ref: '#/components/responses/Unauthorized'
+        '404':
           description: NotFound
-          $ref: "#/components/responses/NotFound"
+          $ref: '#/components/responses/NotFound'
 
   /api/v1/platforms/{platformId}/properties:
     post:
@@ -376,14 +376,14 @@ paths:
         - name: property
           in: query
           required: true
-          description: The type of property to retrieve (e.g., 'channel' or 'role' for Discord platform).
+          description: The type of property to retrieve (e.g., 'channel' or 'role' for Discord platform and'category' for discoruse platform).
           schema:
             type: string
-            enum: ['channel','role','guildMember']
+            enum: ['channel', 'role', 'guildMember', 'category']
         - name: name
           in: query
           required: false
-          description: Name of the role (supported for 'discord-role' property).
+          description: Name of the role (supported for 'discord-role' and 'discourse-category' properties).
           schema:
             type: string
         - name: ngu
@@ -395,7 +395,7 @@ paths:
         - name: sortBy
           in: query
           required: false
-          description: The parameter to sort by (supported for 'discord-role' and 'discord-guildMember' properties).
+          description: The parameter to sort by (supported for 'discord-role', 'discord-guildMember', and 'discourse-category' (example dc.name) properties).
           schema:
             type: string
         - name: limit
@@ -422,85 +422,85 @@ paths:
                     type: string
                   description: Array of channel IDs (required if 'property' is 'channel').
       responses:
-        "200":
+        '200':
           description: Platformx properties retrieved successfully.
           content:
             application/json:
               schema:
                 oneOf:
-                - schema:
-                  type: object
-                  properties:
-                    results:
-                      type: array
-                      items:
-                        $ref: "#/components/schemas/Role"
-                    page:
-                      type: integer
-                      example: 1
-                    limit:
-                      type: integer
-                      example: 10
-                    totalPages:
-                      type: integer
-                      example: 1
-                    totalResults:
-                      type: integer
-                      example: 1
-                - schema:
-                  type: array
-                  items: 
+                  - schema:
                     type: object
-                    properties: 
-                      channelId: 
-                        type: string
-                        format: Snowflake
-                      title: 
-                        type: string
-                      subChannels: 
+                    properties:
+                      results:
                         type: array
                         items:
-                          type: object
-                          properties:
-                            channelId: 
-                              type: Snowflake
-                            name: 
-                              type: string
-                            parentId: 
-                              type: Snowflake
-                            canReadMessageHistoryAndViewChannel: 
-                              type: boolean
-                            announcementAccess: 
-                              type: boolean   
-                            type:
-                              type: integer
-                - schema:
-                  type: array
-                  items: 
-                    type: object
-                    properties: 
-                      discordId: 
-                        type: string
-                        format: Snowflake
-                      nickname: 
-                        type: string
-                      globalName: 
-                        type: string
-                      username: 
-                        type: string
-                      ngu: 
-                        type: string
-                      discriminator: 
-                        type: integer                    
-        "400":
+                          $ref: '#/components/schemas/Role'
+                      page:
+                        type: integer
+                        example: 1
+                      limit:
+                        type: integer
+                        example: 10
+                      totalPages:
+                        type: integer
+                        example: 1
+                      totalResults:
+                        type: integer
+                        example: 1
+                  - schema:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        channelId:
+                          type: string
+                          format: Snowflake
+                        title:
+                          type: string
+                        subChannels:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              channelId:
+                                type: Snowflake
+                              name:
+                                type: string
+                              parentId:
+                                type: Snowflake
+                              canReadMessageHistoryAndViewChannel:
+                                type: boolean
+                              announcementAccess:
+                                type: boolean
+                              type:
+                                type: integer
+                  - schema:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        discordId:
+                          type: string
+                          format: Snowflake
+                        nickname:
+                          type: string
+                        globalName:
+                          type: string
+                        username:
+                          type: string
+                        ngu:
+                          type: string
+                        discriminator:
+                          type: integer
+        '400':
           description: Bad Request
-          $ref: "#/components/responses/BadRequest"
-        "401":
+          $ref: '#/components/responses/BadRequest'
+        '401':
           description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-        "404":
+          $ref: '#/components/responses/Unauthorized'
+        '404':
           description: Not Found
-          $ref: "#/components/responses/NotFound"
+          $ref: '#/components/responses/NotFound'
   /api/v1/platforms/request-access/{platform}/{module}/{id}:
     get:
       tags:
@@ -531,6 +531,6 @@ paths:
           schema:
             type: string
       responses:
-        "302":
+        '302':
           description: Found - Redirect to Discord OAuth2 page if conditions are met.
-          $ref: "#/components/responses/Found"
+          $ref: '#/components/responses/Found'
