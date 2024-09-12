@@ -8,6 +8,7 @@ import {
   tokenService,
   githubService,
   notionService,
+  discourseService,
 } from '../services';
 import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync, pick, ApiError } from '../utils';
@@ -17,7 +18,7 @@ import config from '../config';
 import httpStatus from 'http-status';
 import querystring from 'querystring';
 import parentLogger from '../config/logger';
-import { IPlatform, PlatformNames } from '@togethercrew.dev/db';
+import { PlatformNames } from '@togethercrew.dev/db';
 import { DatabaseManager } from '@togethercrew.dev/db';
 
 const logger = parentLogger.child({ module: 'PlatformController' });
@@ -362,6 +363,8 @@ const getProperties = catchAsync(async function (req: IAuthAndPlatform, res: Res
   let result;
   if (platform?.name === PlatformNames.Discord) {
     result = await discordServices.coreService.getPropertyHandler(req);
+  } else if (platform?.name === PlatformNames.Discourse) {
+    result = await discourseService.coreService.getPropertyHandler(req);
   }
   res.status(httpStatus.OK).send(result);
 });
