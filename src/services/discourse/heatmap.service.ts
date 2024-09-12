@@ -11,25 +11,36 @@ const logger = parentLogger.child({ module: 'DiscourseHeatmapService' });
  * @param {IHeatmapChartRequestBody} body
  * @returns {Array<Array<number>>}
  */
-async function getHeatmapChart(platformConnection: Connection, body: IHeatmapChartRequestBody) {
-  const { startDate, endDate } = body;
+async function getHeatmapChart(platformConnection: Connection, body: any) {
+  const { startDate, endDate, allCategories, include, exclude } = body;
   try {
+    let matchStage: any = {
+      $and: [{ date: { $gte: new Date(startDate) } }, { date: { $lte: new Date(endDate) } }],
+    };
+
+    if (allCategories === false) {
+      if (include && include.length > 0) {
+        matchStage.category_id = { $in: include.map(Number) };
+      } else if (exclude && exclude.length > 0) {
+        matchStage.category_id = { $nin: exclude.map(Number) };
+      }
+    }
+
     const heatmaps = await platformConnection.models.HeatMap.aggregate([
       // Stage1 : convert date from string to date type and extract needed data
       {
         $project: {
           _id: 0,
           date: { $convert: { input: '$date', to: 'date' } },
+          category_id: 1,
           category_messages: 1,
           replier: 1,
         },
       },
 
-      // Stage2: find heatmaps between startDate and endDate
+      // Stage2: find heatmaps between startDate and endDate and apply category filter
       {
-        $match: {
-          $and: [{ date: { $gte: new Date(startDate) } }, { date: { $lte: new Date(endDate) } }],
-        },
+        $match: matchStage,
       },
 
       // Stage3 : provide one document for each element of interactions array
@@ -51,7 +62,7 @@ async function getHeatmapChart(platformConnection: Connection, body: IHeatmapCha
         },
       },
 
-      // Stage5 : group documents base on day and hour
+      // Stage5 : group documents based on day and hour
       {
         $group: {
           _id: { dayOfWeek: '$dayOfWeek', hour: '$hour' },
