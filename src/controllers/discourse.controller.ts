@@ -2,8 +2,15 @@ import { Response } from 'express';
 import { discourseService } from '../services';
 import { IAuthAndPlatform } from '../interfaces/Request.interface';
 import { catchAsync, date, charts } from '../utils';
-import { DatabaseManager } from '@togethercrew.dev/db';
+import { DatabaseManager, Platform } from '@togethercrew.dev/db';
 import moment from 'moment-timezone';
+import { SupportedNeo4jPlatforms } from '../types/neo4j.type';
+import passport, { use } from 'passport';
+import httpStatus from 'http-status';
+import { ApiError, roleUtil, pick } from '../utils';
+import { communityService, platformService, moduleService } from '../services';
+import { Types } from 'mongoose';
+import { UserRole } from '../interfaces';
 
 const heatmapChart = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
   const platformConnection = await DatabaseManager.getInstance().getPlatformDb(req.platform?.id);
@@ -28,7 +35,19 @@ const lineGraph = catchAsync(async function (req: IAuthAndPlatform, res: Respons
   res.send(lineGraph);
 });
 
+const membersInteractionsNetworkGraph = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
+  const platform = await platformService.getPlatformById(new Types.ObjectId(req.params.platformId));
+  console.log(platform);
+
+  const networkGraphData = await discourseService.memberActivityService.getMembersInteractionsNetworkGraph(
+    platform?.id,
+    platform?.name as SupportedNeo4jPlatforms,
+  );
+  res.send(networkGraphData);
+});
+
 export default {
   heatmapChart,
   lineGraph,
+  membersInteractionsNetworkGraph,
 };

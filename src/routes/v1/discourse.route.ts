@@ -19,4 +19,11 @@ router.post(
   discourseController.lineGraph,
 );
 
+router.post(
+  '/member-activity/:platformId/members-interactions-network-graph',
+  // auth('admin', 'view'),
+  validate(discourseValidation.membersInteractionsNetworkGraph),
+  discourseController.membersInteractionsNetworkGraph,
+);
+
 export default router;

@@ -68,9 +68,12 @@ export default {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
   mongoose: {
-    serverURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}/${envVars.DB_NAME}?authSource=admin`,
-    botURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}?authSource=admin`,
-    dbURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}?authSource=admin`,
+    // serverURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}/${envVars.DB_NAME}?authSource=admin`,
+    // botURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}?authSource=admin`,
+    // dbURL: `mongodb://${envVars.DB_USER}:${envVars.DB_PASSWORD}@${envVars.DB_HOST}:${envVars.DB_PORT}?authSource=admin`,
+    serverURL: `mongodb://tcmongo:T0g3th3rCr3wM0ng0P55@3.122.238.21:37017/Core?directConnection=true`,
+    botURL: `mongodb://tcmongo:T0g3th3rCr3wM0ng0P55@3.122.238.21:37017/?directConnection=true`,
+    dbURL: `mongodb://tcmongo:T0g3th3rCr3wM0ng0P55@3.122.238.21:37017/?directConnection=true`,
   },
   redis: {
     host: envVars.REDIS_HOST,

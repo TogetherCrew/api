@@ -33,7 +33,7 @@ router.post(
 router.post(
   '/:platformId/members-interactions-network-graph',
   auth('admin', 'view'),
-  validate(memberActivityValidation.memberInteractionsGraph),
+  validate(memberActivityValidation.membersInteractionsNetworkGraph),
   memberActivityController.membersInteractionsNetworkGraph,
 );
 router.get(

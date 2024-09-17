@@ -10,7 +10,7 @@ import { Snowflake } from 'discord.js';
 import parentLogger from '../config/logger';
 import { NEO4J_PLATFORM_INFO } from '../constants/neo4j.constant';
 import { SupportedNeo4jPlatforms } from '../types/neo4j.type';
-const logger = parentLogger.child({ module: 'MemberActivityService' });
+const logger = parentLogger.child({ module: 'DiscordMemberActivityService' });
 
 /**
  * active members composition line graph
