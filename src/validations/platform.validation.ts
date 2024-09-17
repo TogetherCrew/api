@@ -74,6 +74,15 @@ const mediaWikiMetadata = () => {
   });
 };
 
+const discourseMetadata = () => {
+  return Joi.object().keys({
+    id: Joi.string().required(),
+    period: Joi.date().required(),
+    analyzerStartedAt: Joi.date().required(),
+    resources: Joi.array().items(Joi.number().empty()).required(),
+  });
+};
+
 const createPlatform = {
   body: Joi.object().keys({
     name: Joi.string()
@@ -105,6 +114,10 @@ const createPlatform = {
         {
           is: PlatformNames.MediaWiki,
           then: mediaWikiMetadata(),
+        },
+        {
+          is: PlatformNames.Discourse,
+          then: discourseMetadata(),
         },
       ],
     }).required(),

@@ -150,6 +150,8 @@ function getMetadataKey(platformName: string): string {
       return 'workspace_id';
     case PlatformNames.MediaWiki:
       return 'baseURL';
+    case PlatformNames.Discourse:
+      return 'id';
     default:
       throw new Error('Unsupported platform');
   }
