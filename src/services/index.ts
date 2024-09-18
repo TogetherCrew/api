@@ -14,7 +14,6 @@ import googleService from './google';
 import githubService from './github';
 import notionService from './notion';
 import discourseService from './discourse';
-import airflowService from './airflow.service';
 export {
   userService,
   authService,
@@ -32,5 +31,4 @@ export {
   githubService,
   notionService,
   discourseService,
-  airflowService,
 };
