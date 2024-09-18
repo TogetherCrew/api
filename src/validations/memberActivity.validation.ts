@@ -49,7 +49,7 @@ const inactiveMembersLineGraph = {
   }),
 };
 
-const memberInteractionsGraph = {
+const membersInteractionsNetworkGraph = {
   params: Joi.object()
     .required()
     .keys({
@@ -178,7 +178,7 @@ export default {
   activeMembersOnboardingLineGraph,
   disengagedMembersCompositionLineGraph,
   inactiveMembersLineGraph,
-  memberInteractionsGraph,
+  membersInteractionsNetworkGraph,
   decentralisationScore,
   fragmentationScore,
   activeMembersCompositionTable,

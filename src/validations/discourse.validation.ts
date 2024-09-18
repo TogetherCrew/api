@@ -31,7 +31,16 @@ const lineGraph = {
   }),
 };
 
+const membersInteractionsNetworkGraph = {
+  params: Joi.object()
+    .required()
+    .keys({
+      platformId: Joi.string().custom(objectId),
+    }),
+};
+
 export default {
   heatmapChart,
   lineGraph,
+  membersInteractionsNetworkGraph,
 };
