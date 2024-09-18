@@ -151,4 +151,9 @@ export default {
   session: {
     secret: envVars.SESSION_SECRET,
   },
+  airflow: {
+    baseURL: envVars.AIRFLOW_BASE_URL,
+    username: envVars.AIRFLOW_USERNAME,
+    password: envVars.AIRFLOW_PASSWORD,
+  },
 };

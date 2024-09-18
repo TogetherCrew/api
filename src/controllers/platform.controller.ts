@@ -9,6 +9,7 @@ import {
   githubService,
   notionService,
   discourseService,
+  airflowService,
 } from '../services';
 import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync, pick, ApiError } from '../utils';
@@ -18,14 +19,14 @@ import config from '../config';
 import httpStatus from 'http-status';
 import querystring from 'querystring';
 import parentLogger from '../config/logger';
-import { PlatformNames } from '@togethercrew.dev/db';
-import { DatabaseManager } from '@togethercrew.dev/db';
+import { PlatformNames, DatabaseManager } from '@togethercrew.dev/db';
 
 const logger = parentLogger.child({ module: 'PlatformController' });
 
 const createPlatform = catchAsync(async function (req: IAuthRequest, res: Response) {
   const community = req.community;
   const platform = await platformService.managePlatformConnection(community?.id, req.body);
+  await airflowService.triggerDag(platform);
   res.status(httpStatus.CREATED).send(platform);
 });
 
