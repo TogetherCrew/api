@@ -26,7 +26,7 @@ const logger = parentLogger.child({ module: 'PlatformController' });
 const createPlatform = catchAsync(async function (req: IAuthRequest, res: Response) {
   const community = req.community;
   const platform = await platformService.managePlatformConnection(community?.id, req.body);
-  await airflowService.triggerDag(platform);
+  // await airflowService.triggerDag(platform);
   res.status(httpStatus.CREATED).send(platform);
 });
 
