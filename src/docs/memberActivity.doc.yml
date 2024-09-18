@@ -3,7 +3,7 @@ paths:
     post:
       tags:
         - [Member-Activity]
-      summary: Get data for active members composition line graph - discord only 
+      summary: Get data for active members composition line graph - discord only
       security:
         - bearerAuth: []
       parameters:
@@ -22,15 +22,15 @@ paths:
               properties:
                 startDate:
                   type: string
-                  format: date-time     
+                  format: date-time
                 endDate:
                   type: string
-                  format: date-time        
+                  format: date-time
               example:
-                startDate: "2023-01-17T13:02:10.911+00:00"
-                endDate: "2023-01-29T10:50:01.513Z"
+                startDate: '2023-01-17T13:02:10.911+00:00'
+                endDate: '2023-01-29T10:50:01.513Z'
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -72,21 +72,21 @@ paths:
                     type: number
                   becameDisengagedPercentageChange:
                     type: number
-                  
-        "400":
+
+        '400':
           description: Bad Request
-          $ref: "#/components/responses/BadRequest"
-        "401":
+          $ref: '#/components/responses/BadRequest'
+        '401':
           description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-        "404":
+          $ref: '#/components/responses/Unauthorized'
+        '404':
           description: NotFound
-          $ref: "#/components/responses/NotFound"
+          $ref: '#/components/responses/NotFound'
   /api/v1/member-activity/{platformId}/disengaged-members-composition-line-graph:
     post:
       tags:
         - [Member-Activity]
-      summary: Get data for disengaged memebres composition line graph - discord only 
+      summary: Get data for disengaged memebres composition line graph - discord only
       security:
         - bearerAuth: []
       parameters:
@@ -105,15 +105,15 @@ paths:
               properties:
                 startDate:
                   type: string
-                  format: date-time     
+                  format: date-time
                 endDate:
                   type: string
-                  format: date-time        
+                  format: date-time
               example:
-                startDate: "2023-01-17T13:02:10.911+00:00"
-                endDate: "2023-01-29T10:50:01.513Z"
+                startDate: '2023-01-17T13:02:10.911+00:00'
+                endDate: '2023-01-29T10:50:01.513Z'
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -151,20 +151,20 @@ paths:
                     type: number
                   wereVitalMembersPercentageChange:
                     type: number
-        "400":
+        '400':
           description: Bad Request
-          $ref: "#/components/responses/BadRequest"
-        "401":
+          $ref: '#/components/responses/BadRequest'
+        '401':
           description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-        "404":
+          $ref: '#/components/responses/Unauthorized'
+        '404':
           description: NotFound
-          $ref: "#/components/responses/NotFound"
+          $ref: '#/components/responses/NotFound'
   /api/v1/member-activity/{platformId}/inactive-members-line-graph:
     post:
       tags:
         - [Member-Activity]
-      summary: Get data for inactive members line graph - discord only 
+      summary: Get data for inactive members line graph - discord only
       security:
         - bearerAuth: []
       parameters:
@@ -183,15 +183,15 @@ paths:
               properties:
                 startDate:
                   type: string
-                  format: date-time     
+                  format: date-time
                 endDate:
                   type: string
-                  format: date-time        
+                  format: date-time
               example:
-                startDate: "2023-01-17T13:02:10.911+00:00"
-                endDate: "2023-01-29T10:50:01.513Z"
+                startDate: '2023-01-17T13:02:10.911+00:00'
+                endDate: '2023-01-29T10:50:01.513Z'
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -216,20 +216,20 @@ paths:
                   returned:
                     type: number
                   returnedPercentageChange:
-        "400":
+        '400':
           description: Bad Request
-          $ref: "#/components/responses/BadRequest"
-        "401":
+          $ref: '#/components/responses/BadRequest'
+        '401':
           description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-        "404":
+          $ref: '#/components/responses/Unauthorized'
+        '404':
           description: NotFound
-          $ref: "#/components/responses/NotFound"
+          $ref: '#/components/responses/NotFound'
   /api/v1/member-activity/{platformId}/members-interactions-network-graph:
     post:
       tags:
         - [Member-Activity]
-      summary: Get data for active members interactions graph - discord only 
+      summary: Get data for active members interactions graph - discord only
       security:
         - bearerAuth: []
       parameters:
@@ -240,7 +240,7 @@ paths:
             type: string
           description: Platform Id
       responses:
-        "200":
+        '200':
           description: Successful operation
           content:
             application/json:
@@ -254,21 +254,19 @@ paths:
                       properties:
                         id:
                           type: string
-                        discordId:
-                          type: string
                         radius:
                           type: integer
                         username:
                           type: string
-                        stats: 
+                        stats:
                           type: string
                         avatar:
                           type: string
-                          example: "b50adff099924dd5e6b72d13f77eb9d7"
+                          example: 'b50adff099924dd5e6b72d13f77eb9d7'
                         joinedAt:
                           type: string
                           format: date-time
-                          example: "2022-05-30T15:46:52.924+00:00"
+                          example: '2022-05-30T15:46:52.924+00:00'
                         roles:
                           type: array
                           items:
@@ -276,37 +274,35 @@ paths:
                             properties:
                               roleId:
                                 type: string
-                                example: "discordRoleId1"
+                                example: 'discordRoleId1'
                               name:
                                 type: string
-                                example: "role1"
+                                example: 'role1'
                               color:
                                 type: string
-                                example: "#000000" 
+                                example: '#000000'
                         ngu:
                           type: string
-                          example: "HajBehzadTalast"
-                        
+                          example: 'HajBehzadTalast'
+
                     to:
                       type: object
                       properties:
                         id:
                           type: string
-                        discordId:
-                          type: string
                         radius:
                           type: integer
                         username:
                           type: string
-                        stats: 
+                        stats:
                           type: string
                         avatar:
                           type: string
-                          example: "b50adff099924dd5e6b72d13f77eb9d7"
+                          example: 'b50adff099924dd5e6b72d13f77eb9d7'
                         joinedAt:
                           type: string
                           format: date-time
-                          example: "2022-05-30T15:46:52.924+00:00"
+                          example: '2022-05-30T15:46:52.924+00:00'
                         roles:
                           type: array
                           items:
@@ -314,30 +310,30 @@ paths:
                             properties:
                               roleId:
                                 type: string
-                                example: "discordRoleId1"
+                                example: 'discordRoleId1'
                               name:
                                 type: string
-                                example: "role1"
+                                example: 'role1'
                               color:
                                 type: string
-                                example: "#000000" 
+                                example: '#000000'
                         ngu:
                           type: string
-                          example: "HajBehzadTalast"
-                    
+                          example: 'HajBehzadTalast'
+
                     width:
                       type: integer
-        "401":
+        '401':
           description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-        "404":
+          $ref: '#/components/responses/Unauthorized'
+        '404':
           description: NotFound
-          $ref: "#/components/responses/NotFound"
+          $ref: '#/components/responses/NotFound'
   /api/v1/member-activity/{platformId}/fragmentation-score:
     get:
       tags:
         - [Member-Activity]
-      summary: Get data for fragmentation score - discord only 
+      summary: Get data for fragmentation score - discord only
       security:
         - bearerAuth: []
       parameters:
@@ -348,7 +344,7 @@ paths:
             type: string
           description: Platform Id
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -361,32 +357,32 @@ paths:
                   fragmentationScoreDate:
                     type: integer
                     example: 1
-                  scoreStatus: 
+                  scoreStatus:
                     type: integer
                     example: -1
                   fragmentationScoreRange:
                     type: object
-                    properties: 
+                    properties:
                       minimumFragmentationScore:
                         type: integer
                         example: 0
                       maximumFragmentationScore:
                         type: integer
                         example: 200
-        "400":
+        '400':
           description: Bad Request
-          $ref: "#/components/responses/BadRequest"
-        "401":
+          $ref: '#/components/responses/BadRequest'
+        '401':
           description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-        "404":
+          $ref: '#/components/responses/Unauthorized'
+        '404':
           description: NotFound
-          $ref: "#/components/responses/NotFound"
+          $ref: '#/components/responses/NotFound'
   /api/v1/member-activity/{platformId}/decentralisation-score:
     get:
       tags:
         - [Member-Activity]
-      summary: Get data for decentralisation score - discord only 
+      summary: Get data for decentralisation score - discord only
       security:
         - bearerAuth: []
       parameters:
@@ -397,7 +393,7 @@ paths:
             type: string
           description: Platform Id
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -410,32 +406,32 @@ paths:
                   decentralisationScoreDate:
                     type: integer
                     example: 1
-                  scoreStatus: 
+                  scoreStatus:
                     type: integer
                     example: -1
                   fragmentationScoreRange:
                     type: object
-                    properties: 
+                    properties:
                       minimumFragmentationScore:
                         type: integer
                         example: 0
                       maximumFragmentationScore:
                         type: integer
                         example: 200
-        "400":
+        '400':
           description: Bad Request
-          $ref: "#/components/responses/BadRequest"
-        "401":
+          $ref: '#/components/responses/BadRequest'
+        '401':
           description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-        "404":
+          $ref: '#/components/responses/Unauthorized'
+        '404':
           description: NotFound
-          $ref: "#/components/responses/NotFound"
+          $ref: '#/components/responses/NotFound'
   /api/v1/member-activity/{platformId}/active-members-onboarding-line-graph:
     post:
       tags:
         - [Member-Activity]
-      summary: Get data for active members onboarding line graph - discord only 
+      summary: Get data for active members onboarding line graph - discord only
       security:
         - bearerAuth: []
       parameters:
@@ -445,7 +441,7 @@ paths:
           schema:
             type: string
           description: Platform Id
-          
+
       requestBody:
         required: true
         content:
@@ -455,15 +451,15 @@ paths:
               properties:
                 startDate:
                   type: string
-                  format: date-time     
+                  format: date-time
                 endDate:
                   type: string
-                  format: date-time        
+                  format: date-time
               example:
-                startDate: "2023-01-17T13:02:10.911+00:00"
-                endDate: "2023-01-29T10:50:01.513Z"
+                startDate: '2023-01-17T13:02:10.911+00:00'
+                endDate: '2023-01-29T10:50:01.513Z'
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -501,20 +497,20 @@ paths:
                     type: number
                   joinedPercentageChange:
                     type: number
-        "400":
+        '400':
           description: Bad Request
-          $ref: "#/components/responses/BadRequest"
-        "401":
+          $ref: '#/components/responses/BadRequest'
+        '401':
           description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-        "404":
+          $ref: '#/components/responses/Unauthorized'
+        '404':
           description: NotFound
-          $ref: "#/components/responses/NotFound"
+          $ref: '#/components/responses/NotFound'
   /api/v1/member-activity/{platformId}/active-members-composition-table:
     post:
       tags:
         - [Member-Activity]
-      summary: Get data for active members composition table - discord only 
+      summary: Get data for active members composition table - discord only
       security:
         - bearerAuth: []
       description: for now sortBy just can apply for ngu and joinedAt(DaoMemberSince in UI)
@@ -532,19 +528,19 @@ paths:
             items:
               type: string
               enum: ['all_active', 'all_new_active', 'all_consistent', 'all_vital', 'all_new_disengaged', 'others']
-            example: ["all_active", "all_new_active"]
+            example: ['all_active', 'all_new_active']
         - in: query
           name: ngu
           required: false
           schema:
             type: string
-            example: "Nima"
+            example: 'Nima'
         - in: query
           name: sortBy
           required: false
           schema:
             type: string
-            example: "joinedAt:desc,ngu:asc"
+            example: 'joinedAt:desc,ngu:asc'
         - in: query
           name: limit
           required: false
@@ -572,19 +568,19 @@ paths:
                   default: true
                 include:
                   type: array
-                  items:  
+                  items:
                     type: string
-                    description: role id   
+                    description: role id
                 exclude:
                   type: array
-                  items:  
+                  items:
                     type: string
                     description: role id
               example:
                 allRoles: false
-                exclude: ["123456","654321"]
+                exclude: ['123456', '654321']
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -598,19 +594,19 @@ paths:
                       properties:
                         username:
                           type: string
-                          example: "Behzad_Rabiei"
+                          example: 'Behzad_Rabiei'
                         ngu:
                           type: string
-                          example: "Behzad"
+                          example: 'Behzad'
                         nickname:
                           type: string
-                          example: "Behzad"
+                          example: 'Behzad'
                         globalName:
                           type: string
-                          example: "Behzad"                        
+                          example: 'Behzad'
                         avatar:
                           type: string
-                          example: "b50adff099924dd5e6b72d13f77eb9d7"
+                          example: 'b50adff099924dd5e6b72d13f77eb9d7'
                         roles:
                           type: array
                           items:
@@ -618,22 +614,22 @@ paths:
                             properties:
                               roleId:
                                 type: string
-                                example: "discordRoleId1"
+                                example: 'discordRoleId1'
                               name:
                                 type: string
-                                example: "role1"
+                                example: 'role1'
                               color:
                                 type: string
-                                example: "#000000"                            
+                                example: '#000000'
                         activityComposition:
                           type: array
                           items:
                             type: string
-                          example: ["Newly active", "Vital"]
+                          example: ['Newly active', 'Vital']
                         joinedAt:
                           type: string
                           format: date-time
-                          example: "2022-05-30T15:46:52.924+00:00"
+                          example: '2022-05-30T15:46:52.924+00:00'
                   limit:
                     type: integer
                     example: 10
@@ -646,20 +642,20 @@ paths:
                   totalResults:
                     type: integer
                     example: 20
-        "400":
+        '400':
           description: Bad Request
-          $ref: "#/components/responses/BadRequest"
-        "401":
+          $ref: '#/components/responses/BadRequest'
+        '401':
           description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-        "404":
+          $ref: '#/components/responses/Unauthorized'
+        '404':
           description: NotFound
-          $ref: "#/components/responses/NotFound"
+          $ref: '#/components/responses/NotFound'
   /api/v1/member-activity/{platformId}/active-members-onboarding-table:
     post:
       tags:
         - [Member-Activity]
-      summary: Get data for active members onboarding table - discord only 
+      summary: Get data for active members onboarding table - discord only
       security:
         - bearerAuth: []
       description: for now sortBy just can apply for ngu and joinedAt(DaoMemberSince in UI)
@@ -677,19 +673,19 @@ paths:
             items:
               type: string
               enum: ['all_joined', 'all_new_active', 'all_still_active', 'all_dropped', 'others']
-            example: ["all_joined", "all_new_active"]
+            example: ['all_joined', 'all_new_active']
         - in: query
           name: ngu
           required: false
           schema:
             type: string
-            example: "Nima"
+            example: 'Nima'
         - in: query
           name: sortBy
           required: false
           schema:
             type: string
-            example: "joinedAt:desc,ngu:asc"
+            example: 'joinedAt:desc,ngu:asc'
         - in: query
           name: limit
           required: false
@@ -717,19 +713,19 @@ paths:
                   default: true
                 include:
                   type: array
-                  items:  
+                  items:
                     type: string
-                    description: role id   
+                    description: role id
                 exclude:
                   type: array
-                  items:  
+                  items:
                     type: string
                     description: role id
               example:
                 allRoles: false
-                exclude: ["123456","654321"]
+                exclude: ['123456', '654321']
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -743,19 +739,19 @@ paths:
                       properties:
                         username:
                           type: string
-                          example: "Behzad_Rabiei"
+                          example: 'Behzad_Rabiei'
                         ngu:
                           type: string
-                          example: "Behzad"
+                          example: 'Behzad'
                         nickname:
                           type: string
-                          example: "Behzad"
+                          example: 'Behzad'
                         globalName:
                           type: string
-                          example: "Behzad"  
+                          example: 'Behzad'
                         avatar:
                           type: string
-                          example: "b50adff099924dd5e6b72d13f77eb9d7"
+                          example: 'b50adff099924dd5e6b72d13f77eb9d7'
                         roles:
                           type: array
                           items:
@@ -763,22 +759,22 @@ paths:
                             properties:
                               roleId:
                                 type: string
-                                example: "discordRoleId1"
+                                example: 'discordRoleId1'
                               name:
                                 type: string
-                                example: "role1"
+                                example: 'role1'
                               color:
                                 type: string
-                                example: "#000000"                            
+                                example: '#000000'
                         activityComposition:
                           type: array
                           items:
                             type: string
-                          example: ["Newly active", "Dropped"]
+                          example: ['Newly active', 'Dropped']
                         joinedAt:
                           type: string
                           format: date-time
-                          example: "2022-05-30T15:46:52.924+00:00"
+                          example: '2022-05-30T15:46:52.924+00:00'
                   limit:
                     type: integer
                     example: 10
@@ -791,20 +787,20 @@ paths:
                   totalResults:
                     type: integer
                     example: 20
-        "400":
+        '400':
           description: Bad Request
-          $ref: "#/components/responses/BadRequest"
-        "401":
+          $ref: '#/components/responses/BadRequest'
+        '401':
           description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-        "404":
+          $ref: '#/components/responses/Unauthorized'
+        '404':
           description: NotFound
-          $ref: "#/components/responses/NotFound"
+          $ref: '#/components/responses/NotFound'
   /api/v1/member-activity/{platformId}/disengaged-members-composition-table:
     post:
       tags:
         - [Member-Activity]
-      summary: Get data for disengaged members composition table - discord only 
+      summary: Get data for disengaged members composition table - discord only
       security:
         - bearerAuth: []
       description: for now sortBy just can apply for ngu and joinedAt(DaoMemberSince in UI)
@@ -821,8 +817,15 @@ paths:
             type: array
             items:
               type: string
-              enum: ['all_new_disengaged', 'all_disengaged_were_newly_active', 'all_disengaged_were_consistenly_active', 'all_disengaged_were_vital', 'others']
-            example: ["all_new_disengaged", "all_disengaged_were_newly_active"]
+              enum:
+                [
+                  'all_new_disengaged',
+                  'all_disengaged_were_newly_active',
+                  'all_disengaged_were_consistenly_active',
+                  'all_disengaged_were_vital',
+                  'others',
+                ]
+            example: ['all_new_disengaged', 'all_disengaged_were_newly_active']
           style: form
           explode: true
         - in: query
@@ -830,13 +833,13 @@ paths:
           required: false
           schema:
             type: string
-            example: "Nima"
+            example: 'Nima'
         - in: query
           name: sortBy
           required: false
           schema:
             type: string
-            example: "joinedAt:desc,ngu:asc"
+            example: 'joinedAt:desc,ngu:asc'
         - in: query
           name: limit
           required: false
@@ -864,19 +867,19 @@ paths:
                   default: true
                 include:
                   type: array
-                  items:  
+                  items:
                     type: string
-                    description: role id   
+                    description: role id
                 exclude:
                   type: array
-                  items:  
+                  items:
                     type: string
                     description: role id
               example:
                 allRoles: false
-                exclude: ["123456","654321"]
+                exclude: ['123456', '654321']
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -890,19 +893,19 @@ paths:
                       properties:
                         username:
                           type: string
-                          example: "Behzad_Rabiei"
+                          example: 'Behzad_Rabiei'
                         ngu:
                           type: string
-                          example: "Behzad"
+                          example: 'Behzad'
                         nickname:
                           type: string
-                          example: "Behzad"
+                          example: 'Behzad'
                         globalName:
                           type: string
-                          example: "Behzad"  
+                          example: 'Behzad'
                         avatar:
                           type: string
-                          example: "b50adff099924dd5e6b72d13f77eb9d7"
+                          example: 'b50adff099924dd5e6b72d13f77eb9d7'
                         roles:
                           type: array
                           items:
@@ -910,22 +913,22 @@ paths:
                             properties:
                               roleId:
                                 type: string
-                                example: "discordRoleId1"
+                                example: 'discordRoleId1'
                               name:
                                 type: string
-                                example: "role1"
+                                example: 'role1'
                               color:
                                 type: string
-                                example: "#000000"                            
+                                example: '#000000'
                         activityComposition:
                           type: array
                           items:
                             type: string
-                          example: ["Were vital members", "Were newly active"]
+                          example: ['Were vital members', 'Were newly active']
                         joinedAt:
                           type: string
                           format: date-time
-                          example: "2022-05-30T15:46:52.924+00:00"
+                          example: '2022-05-30T15:46:52.924+00:00'
                   limit:
                     type: integer
                     example: 10
@@ -938,12 +941,12 @@ paths:
                   totalResults:
                     type: integer
                     example: 20
-        "400":
+        '400':
           description: Bad Request
-          $ref: "#/components/responses/BadRequest"
-        "401":
+          $ref: '#/components/responses/BadRequest'
+        '401':
           description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-        "404":
+          $ref: '#/components/responses/Unauthorized'
+        '404':
           description: NotFound
-          $ref: "#/components/responses/NotFound"
+          $ref: '#/components/responses/NotFound'
