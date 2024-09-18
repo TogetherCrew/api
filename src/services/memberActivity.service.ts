@@ -910,7 +910,6 @@ function getActivityComposition(guildMember: IGuildMember, memberActivity: any, 
 }
 
 type networkGraphUserInformationType = {
-  discordId: Snowflake;
   username: string;
   avatar: string | null | undefined;
   joinedAt: Date | null;
@@ -918,7 +917,6 @@ type networkGraphUserInformationType = {
   ngu: string;
 };
 function getUserInformationForNetworkGraph(user: IGuildMember, guildRoles: IRole[]): networkGraphUserInformationType {
-  const discordId = user?.discordId;
   const fullUsername = guildMemberService.getUsername(user);
   const avatar = user?.avatar;
   const joinedAt = user?.joinedAt;
@@ -926,7 +924,6 @@ function getUserInformationForNetworkGraph(user: IGuildMember, guildRoles: IRole
   const ngu = guildMemberService.getNgu(user);
 
   return {
-    discordId,
     username: fullUsername,
     avatar,
     joinedAt,

@@ -36,12 +36,9 @@ const lineGraph = catchAsync(async function (req: IAuthAndPlatform, res: Respons
 });
 
 const membersInteractionsNetworkGraph = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
-  const platform = await platformService.getPlatformById(new Types.ObjectId(req.params.platformId));
-  console.log(platform);
-
   const networkGraphData = await discourseService.memberActivityService.getMembersInteractionsNetworkGraph(
-    platform?.id,
-    platform?.name as SupportedNeo4jPlatforms,
+    req.platform.id,
+    req.platform?.name as SupportedNeo4jPlatforms,
   );
   res.send(networkGraphData);
 });

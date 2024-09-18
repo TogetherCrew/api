@@ -21,7 +21,7 @@ router.post(
 
 router.post(
   '/member-activity/:platformId/members-interactions-network-graph',
-  // auth('admin', 'view'),
+  auth('admin', 'view'),
   validate(discourseValidation.membersInteractionsNetworkGraph),
   discourseController.membersInteractionsNetworkGraph,
 );
