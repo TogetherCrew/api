@@ -1,6 +1,11 @@
 import Joi from 'joi';
 import { objectId } from './custom.validation';
-import { PlatformNames, ModuleNames, HivemindPlatformNames } from '@togethercrew.dev/db';
+import {
+  PlatformNames,
+  ModuleNames,
+  HivemindPlatformNames,
+  ViolationDetectionPlatformNames,
+} from '@togethercrew.dev/db';
 
 const createModule = {
   body: Joi.object().keys({
@@ -110,6 +115,37 @@ const hivemindOptions = () => {
   });
 };
 
+const violationDetectionMetadata = () => {
+  return Joi.object().keys({
+    selectedEmails: Joi.array().items(Joi.string().email()),
+    fromDate: Joi.date(),
+    toDate: Joi.date().valid(null),
+    selectedResources: Joi.array().items(Joi.number().empty()),
+  });
+};
+
+const violationDetectionOptions = () => {
+  return Joi.object().keys({
+    platforms: Joi.array().items(
+      Joi.object().keys({
+        name: Joi.string()
+          .required()
+          .valid(...Object.values(ViolationDetectionPlatformNames)),
+        platform: Joi.string().custom(objectId).required(),
+        metadata: Joi.when('name', {
+          switch: [
+            {
+              is: PlatformNames.Discourse,
+              then: violationDetectionMetadata(),
+            },
+          ],
+          otherwise: Joi.any().forbidden(),
+        }).required(),
+      }),
+    ),
+  });
+};
+
 const dynamicModuleUpdate = (req: any) => {
   const moduleName = req.module?.name;
   const paramsOption = {
@@ -124,6 +160,13 @@ const dynamicModuleUpdate = (req: any) => {
       bodyOption = {
         body: Joi.object().required().keys({
           options: hivemindOptions(),
+        }),
+      };
+      break;
+    case ModuleNames.ViolationDetection:
+      bodyOption = {
+        body: Joi.object().required().keys({
+          options: violationDetectionOptions(),
         }),
       };
       break;

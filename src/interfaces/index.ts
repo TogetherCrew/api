@@ -5,3 +5,4 @@ export * from './Channel.interface';
 export * from './Guild.interface';
 export * from './Twitter.interface';
 export * from './Role.interface';
+export * from './Airflow.interface';

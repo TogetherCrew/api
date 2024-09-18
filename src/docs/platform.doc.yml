@@ -67,6 +67,7 @@ paths:
                     - github
                     - notion
                     - mediaWiki
+                    - discourse
                   description: Name of the platform to create. Must be one of the supported platforms.
                 community:
                   type: string
@@ -170,6 +171,21 @@ paths:
                           type: string
                           default: /w/api.php
                       description: Metadata for MediaWiki.
+                    - type: object
+                      required: [id, period, analyzerStartedAt, resources]
+                      properties:
+                        id:
+                          type: string
+                          example: gov.optimism.io
+                        period:
+                          type: date
+                        analyzerStartedAt:
+                          type: date
+                        resources:
+                          type: array
+                          items:
+                            type: integer
+                      description: Metadata for Discourse.
       responses:
         '201':
           description: Platform created successfully.
