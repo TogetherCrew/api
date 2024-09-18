@@ -3,7 +3,7 @@ import { IHeatmapChartRequestBody } from '../interfaces/Request.interface';
 import { date, math } from '../utils';
 import parentLogger from '../config/logger';
 
-const logger = parentLogger.child({ module: 'HeatmapService' });
+const logger = parentLogger.child({ module: 'DiscordHeatmapService' });
 
 /**
  * get heatmap chart
