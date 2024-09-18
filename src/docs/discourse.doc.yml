@@ -138,3 +138,106 @@ paths:
         '404':
           description: NotFound
           $ref: '#/components/responses/NotFound'
+  /api/v1/discourse/member-activity/{platformId}/members-interactions-network-graph:
+    post:
+      tags:
+        - [Discourse]
+      summary: Get data for active members interactions graph
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: platformId
+          required: true
+          schema:
+            type: string
+          description: Platform Id
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    from:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        radius:
+                          type: integer
+                        username:
+                          type: string
+                        stats:
+                          type: string
+                        avatar:
+                          type: string
+                          example: 'b50adff099924dd5e6b72d13f77eb9d7'
+                        joinedAt:
+                          type: string
+                          format: date-time
+                          example: '2022-05-30T15:46:52.924+00:00'
+                        roles:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              roleId:
+                                type: string
+                              name:
+                                type: string
+                                example: 'role1'
+                              color:
+                                type: string
+                                example: '#000000'
+                        ngu:
+                          type: string
+                          example: 'HajBehzadTalast'
+
+                    to:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        radius:
+                          type: integer
+                        username:
+                          type: string
+                        stats:
+                          type: string
+                        avatar:
+                          type: string
+                          example: 'b50adff099924dd5e6b72d13f77eb9d7'
+                        joinedAt:
+                          type: string
+                          format: date-time
+                          example: '2022-05-30T15:46:52.924+00:00'
+                        roles:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              roleId:
+                                type: string
+                                example: 'discordRoleId1'
+                              name:
+                                type: string
+                                example: 'role1'
+                              color:
+                                type: string
+                                example: '#000000'
+                        ngu:
+                          type: string
+                          example: 'HajBehzadTalast'
+
+                    width:
+                      type: integer
+        '401':
+          description: Unauthorized
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: NotFound
+          $ref: '#/components/responses/NotFound'
