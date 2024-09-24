@@ -185,6 +185,8 @@ paths:
                           type: array
                           items:
                             type: integer
+                        isInProgress:
+                          type: boolean
                       description: Metadata for Discourse.
       responses:
         '201':

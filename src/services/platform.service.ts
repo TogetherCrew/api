@@ -3,6 +3,7 @@ import httpStatus from 'http-status';
 import { Platform, IPlatform } from '@togethercrew.dev/db';
 import ApiError from '../utils/ApiError';
 import sagaService from './saga.service';
+import discourseService from './discourse';
 import { Snowflake } from 'discord.js';
 import { analyzerAction, analyzerWindow } from '../config/analyzer.statics';
 import { PlatformNames } from '@togethercrew.dev/db';
@@ -13,7 +14,7 @@ import { PlatformNames } from '@togethercrew.dev/db';
  * @returns {Promise<HydratedDocument<IPlatform>>}
  */
 const createPlatform = async (PlatformBody: IPlatform): Promise<HydratedDocument<IPlatform>> => {
-  if (PlatformBody.name === PlatformNames.Discord) {
+  if (PlatformBody.name === PlatformNames.Discord || PlatformBody.name === PlatformNames.Discourse) {
     if (PlatformBody.metadata) {
       PlatformBody.metadata = {
         action: analyzerAction,
@@ -22,11 +23,13 @@ const createPlatform = async (PlatformBody: IPlatform): Promise<HydratedDocument
       };
     }
   }
-
   const platform = await Platform.create(PlatformBody);
   if (PlatformBody.name === PlatformNames.Discord) {
     await sagaService.createAndStartFetchMemberSaga(platform._id);
   }
+  // if (PlatformBody.name === PlatformNames.Discourse) {
+  //   await discourseService.coreService.createDiscourseForum(platform.metadata?.id);
+  // }
   return platform;
 };
 

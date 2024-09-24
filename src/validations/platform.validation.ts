@@ -80,6 +80,7 @@ const discourseMetadata = () => {
     period: Joi.date().required(),
     analyzerStartedAt: Joi.date().required(),
     resources: Joi.array().items(Joi.number().empty()).required(),
+    isInProgress: Joi.boolean().default(true),
   });
 };
 

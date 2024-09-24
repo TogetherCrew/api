@@ -1,3 +1,4 @@
+import { Connection } from 'mongoose';
 import NodeStats from '../../utils/enums/nodeStats.enum';
 import * as Neo4j from '../../neo4j';
 import parentLogger from '../../config/logger';
@@ -6,15 +7,8 @@ import { SupportedNeo4jPlatforms } from '../../types/neo4j.type';
 import { DatabaseManager } from '@togethercrew.dev/db';
 import { ApiError } from '../../utils';
 import httpStatus from 'http-status';
-const logger = parentLogger.child({ module: 'DiscourseMemberActivityService' });
 
-type networkGraphUserInformationType = {
-  username: string;
-  avatar: string | null | undefined;
-  joinedAt: Date | null;
-  roles: [];
-  ngu: string;
-};
+const logger = parentLogger.child({ module: 'DiscourseMemberActivityService' });
 
 function getNgu(user: any): string {
   if (user.options.name !== '') {
@@ -23,6 +17,14 @@ function getNgu(user: any): string {
     return user.options.username;
   }
 }
+
+type networkGraphUserInformationType = {
+  username: string;
+  avatar: string | null | undefined;
+  joinedAt: Date | null;
+  roles: [];
+  ngu: string;
+};
 
 function getUserInformationForNetworkGraph(user: any): networkGraphUserInformationType {
   return {
@@ -154,7 +156,115 @@ async function getMembersInteractionsNetworkGraph(
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to get discourse members interaction network graph');
   }
 }
+/**
+ * Constructs a projection stage object for MongoDB aggregation pipeline based on the provided activity composition fields.
+ *
+ * @param {Array<string>} fields - The activity composition fields to include in the projection. Each field corresponds to a property in the database documents.
+ * @returns {Stage} The projection stage object. It includes a '_id' field set to '0', an 'all' field with an empty '$setUnion', and additional fields based on the 'fields' parameter. Each additional field is prefixed with a '$'.
+ */
+function buildProjectStageBasedOnActivityComposition(fields: Array<string>) {
+  const initialStage: {
+    _id: string;
+    all: { $setUnion: Array<string> };
+    [key: string]: string | { $setUnion: Array<string> };
+  } = {
+    _id: '0',
+    all: { $setUnion: [] },
+  };
+
+  const finalStage = fields.reduce((stage, field) => {
+    stage[field] = `$${field}`;
+    stage.all.$setUnion.push(`$${field}`);
+    return stage;
+  }, initialStage);
+
+  return finalStage;
+}
+
+/**
+ * get activity composition fileds of active member onboarding table
+ * @returns {Object}
+ */
+function getActivityCompositionOfActiveMembersComposition() {
+  return ['all_active', 'all_new_active', 'all_consistent', 'all_vital', 'all_new_disengaged'];
+}
+
+/**
+ * get activity composition fileds of active member compostion table
+ * @returns {Object}
+ */
+function getActivityCompositionOfActiveMembersOnboarding() {
+  return ['all_joined', 'all_new_active', 'all_still_active', 'all_dropped'];
+}
+
+/**
+ * get activity composition fileds of disengaged member compostion table
+ * @returns {Object}
+ */
+function getActivityCompositionOfDisengagedComposition() {
+  return [
+    'all_new_disengaged',
+    'all_disengaged_were_newly_active',
+    'all_disengaged_were_consistently_active',
+    'all_disengaged_were_vital',
+  ];
+}
+
+/**
+ * get last member activity document for usage of member activity table
+ * @param {Connection} platformConnection
+ * @param {Any} activityComposition
+ * @returns {Object}
+ */
+async function getLastDocumentForTablesUsage(platformConnection: Connection, activityComposition: Array<string>) {
+  const projectStage = buildProjectStageBasedOnActivityComposition(activityComposition);
+  const lastDocument = await platformConnection.models.MemberActivity.aggregate([
+    { $sort: { date: -1 } },
+    { $limit: 1 },
+    { $project: projectStage },
+  ]);
+  return lastDocument[0];
+}
+
+function getActivityComposition(discourseMember: any, memberActivity: any, activityComposition: Array<string>) {
+  const activityTypes = [
+    { key: 'all_new_active', message: 'Newly active' },
+    { key: 'all_new_disengaged', message: 'Became disengaged' },
+    { key: 'all_active', message: 'Active members' },
+    { key: 'all_consistent', message: 'Consistently active' },
+    { key: 'all_vital', message: 'Vital member' },
+    { key: 'all_joined', message: 'Joined' },
+    { key: 'all_dropped', message: 'Dropped' },
+    { key: 'all_still_active', message: 'Still active' },
+    { key: 'all_disengaged_were_newly_active', message: 'Were newly active' },
+    { key: 'all_disengaged_were_consistently_active', message: 'Were consistenly active' },
+    { key: 'all_disengaged_were_vital', message: 'Were vital members' },
+  ];
+
+  const activityCompositions = [];
+
+  activityTypes.forEach((activityType) => {
+    if (
+      memberActivity[activityType.key] &&
+      memberActivity[activityType.key].includes(discourseMember.id) &&
+      (!activityComposition || activityComposition.length === 0 || activityComposition.includes(activityType.key))
+    ) {
+      activityCompositions.push(activityType.message);
+    }
+  });
+
+  if (activityCompositions.length === 0) {
+    activityCompositions.push('Others');
+  }
+
+  return activityCompositions;
+}
 
 export default {
   getMembersInteractionsNetworkGraph,
+  getLastDocumentForTablesUsage,
+  getActivityComposition,
+  getActivityCompositionOfActiveMembersComposition,
+  getActivityCompositionOfActiveMembersOnboarding,
+  getActivityCompositionOfDisengagedComposition,
 };
