@@ -26,4 +26,23 @@ router.post(
   discourseController.membersInteractionsNetworkGraph,
 );
 
+router.post(
+  '/member-activity/:platformId/active-members-composition-table',
+  auth('admin', 'view'),
+  validate(discourseValidation.activeMembersCompositionTable),
+  discourseController.activeMembersCompositionTable,
+);
+router.post(
+  '/member-activity/:platformId/active-members-onboarding-table',
+  auth('admin', 'view'),
+  validate(discourseValidation.activeMembersOnboardingTable),
+  discourseController.activeMembersOnboardingTable,
+);
+router.post(
+  '/member-activity/:platformId/disengaged-members-composition-table',
+  auth('admin', 'view'),
+  validate(discourseValidation.disengagedMembersCompositionTable),
+  discourseController.disengagedMembersCompositionTable,
+);
+
 export default router;

@@ -241,3 +241,328 @@ paths:
         '404':
           description: NotFound
           $ref: '#/components/responses/NotFound'
+  /api/v1/discourse/member-activity/{platformId}/active-members-composition-table:
+    post:
+      tags:
+        - [Discourse]
+      summary: Get data for active members composition table
+      security:
+        - bearerAuth: []
+      description: for now sortBy just can apply for ngu and joined_at(DaoMemberSince in UI)
+      parameters:
+        - in: path
+          name: platformId
+          required: true
+          schema:
+            type: string
+          description: Platform Id
+        - in: query
+          name: activityComposition
+          schema:
+            type: array
+            items:
+              type: string
+              enum: ['all_active', 'all_new_active', 'all_consistent', 'all_vital', 'all_new_disengaged', 'others']
+            example: ['all_active', 'all_new_active']
+        - in: query
+          name: ngu
+          required: false
+          schema:
+            type: string
+            example: 'Nima'
+        - in: query
+          name: sortBy
+          required: false
+          schema:
+            type: string
+            example: 'joined_at:desc,ngu:asc'
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            format: int32
+            example: 10
+            default: 10
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            format: int32
+            example: 2
+            default: 1
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        username:
+                          type: string
+                          example: 'Behzad_Rabiei'
+                        ngu:
+                          type: string
+                          example: 'Behzad'
+                        avatar:
+                          type: string
+                          example: 'b50adff099924dd5e6b72d13f77eb9d7'
+                        activityComposition:
+                          type: array
+                          items:
+                            type: string
+                          example: ['Newly active', 'Vital']
+                        joined_at:
+                          type: string
+                          format: date-time
+                          example: '2022-05-30T15:46:52.924+00:00'
+                  limit:
+                    type: integer
+                    example: 10
+                  page:
+                    type: integer
+                    example: 1
+                  totalPages:
+                    type: integer
+                    example: 2
+                  totalResults:
+                    type: integer
+                    example: 20
+        '400':
+          description: Bad Request
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: Unauthorized
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: NotFound
+          $ref: '#/components/responses/NotFound'
+  /api/v1/discourse/member-activity/{platformId}/active-members-onboarding-table:
+    post:
+      tags:
+        - [Discourse]
+      summary: Get data for active members onboarding table
+      security:
+        - bearerAuth: []
+      description: for now sortBy just can apply for ngu and joined_at(DaoMemberSince in UI)
+      parameters:
+        - in: path
+          name: platformId
+          required: true
+          schema:
+            type: string
+          description: Platform Id
+        - in: query
+          name: activityComposition
+          schema:
+            type: array
+            items:
+              type: string
+              enum: ['all_joined', 'all_new_active', 'all_still_active', 'all_dropped', 'others']
+            example: ['all_joined', 'all_new_active']
+        - in: query
+          name: ngu
+          required: false
+          schema:
+            type: string
+            example: 'Nima'
+        - in: query
+          name: sortBy
+          required: false
+          schema:
+            type: string
+            example: 'joined_at:desc,ngu:asc'
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            format: int32
+            example: 10
+            default: 10
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            format: int32
+            example: 2
+            default: 1
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        username:
+                          type: string
+                          example: 'Behzad_Rabiei'
+                        ngu:
+                          type: string
+                          example: 'Behzad'
+                        avatar:
+                          type: string
+                          example: 'b50adff099924dd5e6b72d13f77eb9d7'
+                        activityComposition:
+                          type: array
+                          items:
+                            type: string
+                          example: ['Newly active', 'Dropped']
+                        joined_at:
+                          type: string
+                          format: date-time
+                          example: '2022-05-30T15:46:52.924+00:00'
+                  limit:
+                    type: integer
+                    example: 10
+                  page:
+                    type: integer
+                    example: 1
+                  totalPages:
+                    type: integer
+                    example: 2
+                  totalResults:
+                    type: integer
+                    example: 20
+        '400':
+          description: Bad Request
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: Unauthorized
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: NotFound
+          $ref: '#/components/responses/NotFound'
+  /api/v1/discourse/member-activity/{platformId}/disengaged-members-composition-table:
+    post:
+      tags:
+        - [Discourse]
+      summary: Get data for disengaged members composition table
+      security:
+        - bearerAuth: []
+      description: for now sortBy just can apply for ngu and joined_at(DaoMemberSince in UI)
+      parameters:
+        - in: path
+          name: platformId
+          required: true
+          schema:
+            type: string
+          description: Platform Id
+        - in: query
+          name: activityComposition
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                [
+                  'all_new_disengaged',
+                  'all_disengaged_were_newly_active',
+                  'all_disengaged_were_consistenly_active',
+                  'all_disengaged_were_vital',
+                  'others',
+                ]
+            example: ['all_new_disengaged', 'all_disengaged_were_newly_active']
+          style: form
+          explode: true
+        - in: query
+          name: ngu
+          required: false
+          schema:
+            type: string
+            example: 'Nima'
+        - in: query
+          name: sortBy
+          required: false
+          schema:
+            type: string
+            example: 'joined_at:desc,ngu:asc'
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            format: int32
+            example: 10
+            default: 10
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            format: int32
+            example: 2
+            default: 1
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        username:
+                          type: string
+                          example: 'Behzad_Rabiei'
+                        ngu:
+                          type: string
+                          example: 'Behzad'
+                        avatar:
+                          type: string
+                          example: 'b50adff099924dd5e6b72d13f77eb9d7'
+                        activityComposition:
+                          type: array
+                          items:
+                            type: string
+                          example: ['Were vital members', 'Were newly active']
+                        joined_at:
+                          type: string
+                          format: date-time
+                          example: '2022-05-30T15:46:52.924+00:00'
+                  limit:
+                    type: integer
+                    example: 10
+                  page:
+                    type: integer
+                    example: 1
+                  totalPages:
+                    type: integer
+                    example: 2
+                  totalResults:
+                    type: integer
+                    example: 20
+        '400':
+          description: Bad Request
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: Unauthorized
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: NotFound
+          $ref: '#/components/responses/NotFound'

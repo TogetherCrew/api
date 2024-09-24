@@ -5,12 +5,8 @@ import { catchAsync, date, charts } from '../utils';
 import { DatabaseManager, Platform } from '@togethercrew.dev/db';
 import moment from 'moment-timezone';
 import { SupportedNeo4jPlatforms } from '../types/neo4j.type';
-import passport, { use } from 'passport';
-import httpStatus from 'http-status';
-import { ApiError, roleUtil, pick } from '../utils';
-import { communityService, platformService, moduleService } from '../services';
-import { Types } from 'mongoose';
-import { UserRole } from '../interfaces';
+import { pick } from '../utils';
+import { activityCompostionsTypes } from '../config/memberBreakDownTables';
 
 const heatmapChart = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
   const platformConnection = await DatabaseManager.getInstance().getPlatformDb(req.platform?.id);
@@ -43,8 +39,101 @@ const membersInteractionsNetworkGraph = catchAsync(async function (req: IAuthAnd
   res.send(networkGraphData);
 });
 
+const activeMembersCompositionTable = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
+  const filter = pick({ ...req.query, ...req.body }, ['activityComposition', 'ngu']);
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const platformConnection = await DatabaseManager.getInstance().getPlatformDb(req.platform?.id);
+  const activityCompostionFields =
+    discourseService.memberActivityService.getActivityCompositionOfActiveMembersComposition();
+  const memberActivity = await discourseService.memberActivityService.getLastDocumentForTablesUsage(
+    platformConnection,
+    activityCompostionFields,
+  );
+  const members = await discourseService.membersService.queryMembersForTables(
+    platformConnection,
+    filter,
+    options,
+    memberActivity,
+    activityCompostionsTypes.activeMembersComposition,
+  );
+  if (members) {
+    members.results.forEach((member) => {
+      member.ngu = discourseService.membersService.getNgu(member);
+      member.activityComposition = discourseService.memberActivityService.getActivityComposition(
+        member,
+        memberActivity,
+        filter.activityComposition,
+      );
+    });
+  }
+  res.send(members);
+});
+
+const activeMembersOnboardingTable = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
+  const filter = pick({ ...req.query, ...req.body }, ['activityComposition', 'ngu']);
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const platformConnection = await DatabaseManager.getInstance().getPlatformDb(req.platform?.id);
+  const activityCompostionFields =
+    discourseService.memberActivityService.getActivityCompositionOfActiveMembersOnboarding();
+  const memberActivity = await discourseService.memberActivityService.getLastDocumentForTablesUsage(
+    platformConnection,
+    activityCompostionFields,
+  );
+  const members = await discourseService.membersService.queryMembersForTables(
+    platformConnection,
+    filter,
+    options,
+    memberActivity,
+    activityCompostionsTypes.activeMembersOnboarding,
+  );
+  if (members) {
+    members.results.forEach((member) => {
+      member.ngu = discourseService.membersService.getNgu(member);
+      member.activityComposition = discourseService.memberActivityService.getActivityComposition(
+        member,
+        memberActivity,
+        filter.activityComposition,
+      );
+    });
+  }
+  res.send(members);
+});
+
+const disengagedMembersCompositionTable = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
+  const filter = pick({ ...req.query, ...req.body }, ['activityComposition', 'ngu']);
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const platformConnection = await DatabaseManager.getInstance().getPlatformDb(req.platform?.id);
+  const activityCompostionFields =
+    discourseService.memberActivityService.getActivityCompositionOfDisengagedComposition();
+  const memberActivity = await discourseService.memberActivityService.getLastDocumentForTablesUsage(
+    platformConnection,
+    activityCompostionFields,
+  );
+  const members = await discourseService.membersService.queryMembersForTables(
+    platformConnection,
+    filter,
+    options,
+    memberActivity,
+    activityCompostionsTypes.disengagedMembersCompostion,
+  );
+  if (members) {
+    members.results.forEach((member) => {
+      member.ngu = discourseService.membersService.getNgu(member);
+      member.activityComposition = discourseService.memberActivityService.getActivityComposition(
+        member,
+        memberActivity,
+        filter.activityComposition,
+      );
+    });
+  }
+  res.send(members);
+});
+
 export default {
   heatmapChart,
   lineGraph,
   membersInteractionsNetworkGraph,
+  activeMembersCompositionTable,
+  activeMembersOnboardingTable,
+  disengagedMembersCompositionTable,
 };
