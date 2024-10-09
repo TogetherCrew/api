@@ -27,7 +27,7 @@ async function runDiscourseExtraction(platformId: string): Promise<void> {
     console.log(data);
     const response = await fetch(config.discourse.extractionURL, {
       method: 'POST',
-      body: new URLSearchParams(data),
+      body: JSON.stringify(data),
       headers: { 'Content-Type': 'application/json' },
     });
     if (response.ok) {
