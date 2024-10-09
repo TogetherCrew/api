@@ -16,8 +16,8 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
 
 /**
  * run discourse extraction
- * @param {Strin} platformId
- * @returns {Promise<IDiscordUser>}
+ * @param {String} platformId
+ * @returns {Promise<Void>}
  */
 async function runDiscourseExtraction(platformId: string): Promise<void> {
   try {
