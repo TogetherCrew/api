@@ -64,6 +64,23 @@ const getPlatformById = async (id: Types.ObjectId): Promise<HydratedDocument<IPl
 };
 
 /**
+ * Call extraction app for the given platform
+ * @param {HydratedDocument<IPlatform>} platform
+ * @returns {Promise<Void>}
+ */
+const callExtractionApp = async (platform: HydratedDocument<IPlatform>): Promise<void> => {
+  switch (platform.name) {
+    case PlatformNames.Discourse: {
+      await discourseService.coreService.runDiscourseExtraction(platform.id as string);
+      return;
+    }
+    default: {
+      return;
+    }
+  }
+};
+
+/**
  * Update Platform by filter
  * @param {Object} filter - Mongo filter
  * @param {Partial<IPlatform>} updateBody
@@ -248,4 +265,5 @@ export default {
   deletePlatform,
   deletePlatformByFilter,
   managePlatformConnection,
+  callExtractionApp,
 };

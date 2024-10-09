@@ -55,6 +55,7 @@ const envVarsSchema = Joi.object()
     REDIS_HOST: Joi.string().required().description('Redis host'),
     REDIS_PORT: Joi.string().required().description('Redis port'),
     REDIS_PASSWORD: Joi.string().required().description('Reids password').allow(''),
+    DISCOURSE_EXTRACTION_URL: Joi.string().required().description('Discourse extraction url'),
   })
   .unknown();
 
@@ -153,5 +154,8 @@ export default {
   },
   session: {
     secret: envVars.SESSION_SECRET,
+  },
+  discourse: {
+    extractionURL: envVars.DISCOURSE_EXTRACTION_URL,
   },
 };
