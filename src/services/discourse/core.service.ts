@@ -22,7 +22,7 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
 async function runDiscourseExtraction(platformId: string): Promise<void> {
   try {
     const data = {
-      platformId,
+      platform_id: platformId,
     };
     console.log(data);
     const response = await fetch(config.discourse.extractionURL, {
