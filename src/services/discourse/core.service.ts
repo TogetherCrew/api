@@ -2,7 +2,8 @@ import parentLogger from '../../config/logger';
 import { IAuthAndPlatform } from '../../interfaces';
 import categoryService from './category.service';
 import { ApiError, pick, sort } from '../../utils';
-
+import { Types } from 'mongoose';
+import config from '../../config';
 const logger = parentLogger.child({ module: 'DiscourseCoreService' });
 
 async function getPropertyHandler(req: IAuthAndPlatform) {
@@ -14,20 +15,20 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
 }
 
 /**
- * create discourse forum
- * @param {String} endpoint
+ * run discourse extraction
+ * @param {Strin} platformId
  * @returns {Promise<IDiscordUser>}
  */
-async function createDiscourseForum(endpoint: string): Promise<void> {
+async function runDiscourseExtraction(platformId: string): Promise<void> {
   try {
     const data = {
-      endpoint,
+      platformId,
     };
     console.log(data);
-    const response = await fetch('http://discourse/forums', {
+    const response = await fetch(config.discourse.extractionURL, {
       method: 'POST',
       body: new URLSearchParams(data),
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      headers: { 'Content-Type': 'application/json' },
     });
     if (response.ok) {
       console.log(await response.json());
@@ -37,12 +38,12 @@ async function createDiscourseForum(endpoint: string): Promise<void> {
       logger.error({ error: errorResponse });
     }
   } catch (error) {
-    logger.error(error, 'Failed to create discourse forum');
-    throw new ApiError(590, 'Failed to create discourse forum');
+    logger.error(error, 'Failed to run discourse extraction discourse');
+    throw new ApiError(590, 'Failed to run discourse extraction discourse');
   }
 }
 
 export default {
   getPropertyHandler,
-  createDiscourseForum,
+  runDiscourseExtraction,
 };
