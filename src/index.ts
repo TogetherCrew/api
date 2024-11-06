@@ -1,21 +1,16 @@
 import mongoose from 'mongoose';
 import app from './app';
 import config from './config';
-import RabbitMQ, { MBConnection, Queue } from '@togethercrew.dev/tc-messagebroker';
+import { MBConnection, Queue } from '@togethercrew.dev/tc-messagebroker';
 import logger from './config/logger';
 import { announcementEmitter } from '@togethercrew.dev/db';
 import { announcementService } from './services';
-
+import rabbitMQClient from './rabbitmq/';
 mongoose.set('strictQuery', false);
 
 // Connect to RabbitMQ
 const connectToRabbitMQ = async () => {
-  try {
-    await RabbitMQ.connect(config.rabbitMQ.url, Queue.SERVER_API);
-    logger.info({ queue: Queue.SERVER_API }, 'Connected to RabbitMQ!');
-  } catch (error) {
-    logger.fatal({ queue: Queue.SERVER_API, error }, 'Failed to connect to RabbitMQ!');
-  }
+  await rabbitMQClient.connect();
 };
 
 // Connect to Message Broker DB
