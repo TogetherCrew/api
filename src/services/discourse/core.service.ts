@@ -24,14 +24,14 @@ async function runDiscourseExtraction(platformId: string): Promise<void> {
     const data = {
       platform_id: platformId,
     };
-    console.log(data);
+    logger.debug(data);
     const response = await fetch(config.discourse.extractionURL, {
       method: 'POST',
       body: JSON.stringify(data),
       headers: { 'Content-Type': 'application/json' },
     });
     if (response.ok) {
-      console.log(await response.json());
+      logger.debug(await response.json());
       return;
     } else {
       const errorResponse = await response.text();
