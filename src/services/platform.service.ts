@@ -27,9 +27,6 @@ const createPlatform = async (PlatformBody: IPlatform): Promise<HydratedDocument
   if (PlatformBody.name === PlatformNames.Discord) {
     await sagaService.createAndStartFetchMemberSaga(platform._id);
   }
-  // if (PlatformBody.name === PlatformNames.Discourse) {
-  //   await discourseService.coreService.createDiscourseForum(platform.metadata?.id);
-  // }
   return platform;
 };
 
@@ -68,10 +65,10 @@ const getPlatformById = async (id: Types.ObjectId): Promise<HydratedDocument<IPl
  * @param {HydratedDocument<IPlatform>} platform
  * @returns {Promise<Void>}
  */
-const callExtractionApp = async (platform: HydratedDocument<IPlatform>): Promise<void> => {
+const callExtractionApp = (platform: HydratedDocument<IPlatform>): void => {
   switch (platform.name) {
     case PlatformNames.Discourse: {
-      await discourseService.coreService.runDiscourseExtraction(platform.id as string);
+      discourseService.coreService.runDiscourseExtraction(platform.id as string);
       return;
     }
     default: {
