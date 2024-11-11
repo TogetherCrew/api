@@ -22,7 +22,7 @@ const connectToMB = async () => {
     await MBConnection.connect(config.mongoose.dbURL);
     logger.info('Setuped Message Broker connection!');
   } catch (error) {
-    logger.fatal({ error }, 'Failed to setup to Message Broker!!');
+    logger.fatal({ error }, 'Failed to setup to Message Broker!');
   }
 };
 
