@@ -19,6 +19,7 @@ paths:
                   enum:
                     - hivemind
                     - violationDetection
+                    - dynamicNft
                 community:
                   type: string
                   format: objectId
@@ -50,6 +51,7 @@ paths:
             enum:
               - hivemind
               - violationDetection
+              - dynamicNft
         - in: query
           name: community
           schema:
@@ -251,6 +253,13 @@ paths:
                                     items:
                                       type: integer
                                 description: Metadata for the violation detection module on Discourse.
+                              - type: object
+                                properties:
+                                  transactionHash:
+                                    type: string
+                                  tokenId:
+                                    type: string
+                                description: Metadata for the dynamicNft.
               minProperties: 1
       responses:
         '200':

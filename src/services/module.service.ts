@@ -1,7 +1,5 @@
-import { HydratedDocument, Types } from 'mongoose';
-import httpStatus from 'http-status';
+import { HydratedDocument, Types, FilterQuery } from 'mongoose';
 import { Module, IModule, IModuleUpdateBody } from '@togethercrew.dev/db';
-import ApiError from '../utils/ApiError';
 
 /**
  * Create a module
@@ -29,7 +27,7 @@ const queryModules = async (filter: object, options: object) => {
  * @param {Object} filter - Mongo filter
  * @returns {Promise<HydratedDocument<IModule> | null>}
  */
-const getModuleByFilter = async (filter: object): Promise<HydratedDocument<IModule> | null> => {
+const getModuleByFilter = async (filter: FilterQuery<IModule>): Promise<HydratedDocument<IModule> | null> => {
   return Module.findOne(filter);
 };
 

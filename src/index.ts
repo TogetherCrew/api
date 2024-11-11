@@ -1,21 +1,19 @@
 import mongoose from 'mongoose';
 import app from './app';
 import config from './config';
-import RabbitMQ, { MBConnection, Queue } from '@togethercrew.dev/tc-messagebroker';
+import RabbitMQ, { MBConnection, Queue, Event } from '@togethercrew.dev/tc-messagebroker';
 import logger from './config/logger';
 import { announcementEmitter } from '@togethercrew.dev/db';
 import { announcementService } from './services';
-
+import rabbitMQClient from './rabbitmq/';
+import initializeHandlers from './rabbitmq/handlers';
 mongoose.set('strictQuery', false);
-
 // Connect to RabbitMQ
-const connectToRabbitMQ = async () => {
-  try {
-    await RabbitMQ.connect(config.rabbitMQ.url, Queue.SERVER_API);
-    logger.info({ queue: Queue.SERVER_API }, 'Connected to RabbitMQ!');
-  } catch (error) {
-    logger.fatal({ queue: Queue.SERVER_API, error }, 'Failed to connect to RabbitMQ!');
-  }
+const setupRabbitMq = async () => {
+  // Establish connection
+  await rabbitMQClient.connect();
+  // Initialize all event handlers
+  initializeHandlers();
 };
 
 // Connect to Message Broker DB
@@ -24,7 +22,7 @@ const connectToMB = async () => {
     await MBConnection.connect(config.mongoose.dbURL);
     logger.info('Setuped Message Broker connection!');
   } catch (error) {
-    logger.fatal({ error }, 'Failed to setup to Message Broker!!');
+    logger.fatal({ error }, 'Failed to setup to Message Broker!');
   }
 };
 
@@ -39,10 +37,10 @@ const connectToMongoDB = async () => {
 };
 
 const handleAnnouncementRemoval = () => {
-  announcementEmitter.on('announcement:remove', (data) => {
+  announcementEmitter.on('announcement:remove', (data: any) => {
     announcementService.onDestroyAnnouncement(data?.jobId);
   });
-  announcementEmitter.on('announcement:softDelete', (data) => {
+  announcementEmitter.on('announcement:softDelete', (data: any) => {
     announcementService.onDestroyAnnouncement(data?.jobId);
   });
 };
@@ -51,7 +49,7 @@ const handleAnnouncementRemoval = () => {
 const initApp = async () => {
   handleAnnouncementRemoval();
   await connectToMB();
-  await connectToRabbitMQ();
+  await setupRabbitMq();
   await connectToMongoDB();
   app.listen(config.port, () => {
     logger.info(`Listening on ${config.port}`);
