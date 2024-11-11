@@ -146,6 +146,22 @@ const violationDetectionOptions = () => {
   });
 };
 
+const dynamicNftOptions = () => {
+  return Joi.object().keys({
+    platforms: Joi.array().items(
+      Joi.object()
+        .keys({
+          // name: Joi.string().default(null),
+          // platform: Joi.string().default(null),
+          metadata: Joi.object().keys({
+            transactionHash: Joi.string().required(),
+          }),
+        })
+        .required(),
+    ),
+  });
+};
+
 const dynamicModuleUpdate = (req: any) => {
   const moduleName = req.module?.name;
   const paramsOption = {
@@ -167,6 +183,13 @@ const dynamicModuleUpdate = (req: any) => {
       bodyOption = {
         body: Joi.object().required().keys({
           options: violationDetectionOptions(),
+        }),
+      };
+      break;
+    case ModuleNames.DynamicNft:
+      bodyOption = {
+        body: Joi.object().required().keys({
+          options: dynamicNftOptions(),
         }),
       };
       break;
