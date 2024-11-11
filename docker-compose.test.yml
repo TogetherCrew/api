@@ -1,4 +1,4 @@
-version: "3.9"
+version: '3.9'
 
 services:
   app:
@@ -49,56 +49,55 @@ services:
       - SESSION_SECRET=0%532345*edm@@u7v9+att-sdfed_l6(v*88h4$#h&o-i7awer3tv*yy
     volumes:
       - ./coverage:/project/coverage
-    depends_on:
-      redis:
-        condition: service_healthy
-      mongo:
-        condition: service_healthy
-      neo4j:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-  redis:
-    image: "redis:7.0.12-alpine"
-    healthcheck:
-      test: ["CMD", "redis-cli","ping"]
-      interval: 1m30s
-      timeout: 10s
-      retries: 2
-      start_period: 40s
-  mongo:
-    image: "mongo:5.0.10"
-    environment:
-      - MONGO_INITDB_DATABASE=RnDAO
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=pass
-    healthcheck:
-      test: echo 'db.stats().ok' | mongosh localhost:27017/test --quiet
-      interval: 60s
-      timeout: 10s
-      retries: 2
-      start_period: 40s
-  rabbitmq:
-    image: "rabbitmq:3-management-alpine"
-    environment:
-      - RABBITMQ_DEFAULT_USER=root
-      - RABBITMQ_DEFAULT_PASS=pass
-    healthcheck:
-      test: rabbitmq-diagnostics -q ping
-      interval: 30s
-      timeout: 30s
-      retries: 2
-      start_period: 40s
-  neo4j:
-    image: "neo4j:5.9.0"
-    environment:
-      - NEO4J_AUTH=neo4j/password
-      - NEO4J_PLUGINS=["apoc", "graph-data-science"]
-      - NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
-    healthcheck:
-      test: ["CMD" ,"wget", "http://localhost:7474"]
-      interval: 1m30s
-      timeout: 10s
-      retries: 2
-      start_period: 40s
-
+    # depends_on:
+    #   redis:
+    #     condition: service_healthy
+    #   mongo:
+    #     condition: service_healthy
+    #   neo4j:
+    #     condition: service_healthy
+    #   rabbitmq:
+    #     condition: service_healthy
+  # redis:
+  #   image: "redis:7.0.12-alpine"
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli","ping"]
+  #     interval: 1m30s
+  #     timeout: 10s
+  #     retries: 2
+  #     start_period: 40s
+  # mongo:
+  #   image: "mongo:5.0.10"
+  #   environment:
+  #     - MONGO_INITDB_DATABASE=RnDAO
+  #     - MONGO_INITDB_ROOT_USERNAME=root
+  #     - MONGO_INITDB_ROOT_PASSWORD=pass
+  #   healthcheck:
+  #     test: echo 'db.stats().ok' | mongosh localhost:27017/test --quiet
+  #     interval: 60s
+  #     timeout: 10s
+  #     retries: 2
+  #     start_period: 40s
+  # rabbitmq:
+  #   image: "rabbitmq:3-management-alpine"
+  #   environment:
+  #     - RABBITMQ_DEFAULT_USER=root
+  #     - RABBITMQ_DEFAULT_PASS=pass
+  #   healthcheck:
+  #     test: rabbitmq-diagnostics -q ping
+  #     interval: 30s
+  #     timeout: 30s
+  #     retries: 2
+  #     start_period: 40s
+  # neo4j:
+  #   image: "neo4j:5.9.0"
+  #   environment:
+  #     - NEO4J_AUTH=neo4j/password
+  #     - NEO4J_PLUGINS=["apoc", "graph-data-science"]
+  #     - NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
+  #   healthcheck:
+  #     test: ["CMD" ,"wget", "http://localhost:7474"]
+  #     interval: 1m30s
+  #     timeout: 10s
+  #     retries: 2
+  #     start_period: 40s
