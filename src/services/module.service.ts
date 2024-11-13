@@ -52,21 +52,27 @@ const updateModule = async (
 ): Promise<HydratedDocument<IModule>> => {
   // Check if `options.platforms` is in the updateBody
   if (updateBody.options && updateBody.options.platforms) {
-    // Iterate through each platform in the incoming update
-    for (const newPlatform of updateBody.options.platforms) {
-      const existingPlatform = module.options?.platforms.find((p) => p.name === newPlatform.name);
-
-      // If the platform already exists, update it
-      if (existingPlatform) {
-        existingPlatform.metadata = newPlatform.metadata;
-      } else {
-        // If the platform does not exist, add new
-        module.options?.platforms.push(newPlatform);
+    if (updateBody.options.platforms[0].name == undefined) {
+      {
+        const globalOption = module.options?.platforms[0];
+        console.log(globalOption);
+        if (globalOption) globalOption.metadata = updateBody.options.platforms[0].metadata;
+        else module.options?.platforms.push(updateBody.options.platforms[0]);
+      }
+    } else {
+      // Iterate through each platform in the incoming update
+      for (const newPlatform of updateBody.options.platforms) {
+        const existingPlatform = module.options?.platforms.find((p) => p.name === newPlatform.name);
+        if (existingPlatform) {
+          // If the platform already exists, update it
+          existingPlatform.metadata = newPlatform.metadata;
+        } else {
+          // If the platform does not exist, add new
+          module.options?.platforms.push(newPlatform);
+        }
       }
     }
   }
-
-  // Other update operations can be handled here
   return await module.save();
 };
 
