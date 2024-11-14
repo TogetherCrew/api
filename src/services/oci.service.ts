@@ -8,7 +8,7 @@ const logger = parentLogger.child({ module: 'OciService' });
 async function getProfiles(address: string, chainId: number) {
   try {
     logger.debug(`${config.ociBackendURL}/oci/profiles/${chainId}/${address}`);
-    const response = await fetch(`${config.ociBackendURL}/api/v1/oci/profiles/${chainId}/${address}`, {
+    const response = await fetch(`${config.ociBackendURL}/oci/profiles/${chainId}/${address}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     });
