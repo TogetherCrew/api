@@ -11,6 +11,7 @@ import announcementRoute from './announcement.route';
 import categoryRoute from './category.route';
 import moduleRoute from './module.route';
 import discourseRoute from './discourse.route';
+import nftRoute from './nft.route';
 const router = express.Router();
 
 const defaultRoutes = [
@@ -62,6 +63,10 @@ const defaultRoutes = [
   {
     path: '/discourse',
     route: discourseRoute,
+  },
+  {
+    path: '/nft',
+    route: nftRoute,
   },
 ];
 

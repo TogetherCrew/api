@@ -1,4 +1,4 @@
-import { HydratedDocument, Types } from 'mongoose';
+import { HydratedDocument, Types, FilterQuery } from 'mongoose';
 import httpStatus from 'http-status';
 import { Platform, IPlatform } from '@togethercrew.dev/db';
 import ApiError from '../utils/ApiError';
@@ -38,7 +38,7 @@ const createPlatform = async (PlatformBody: IPlatform): Promise<HydratedDocument
  * @param {number} [options.limit] - Maximum number of results per page (default = 10)
  * @param {number} [options.page] - Current page (default = 1)
  */
-const queryPlatforms = async (filter: object, options: object) => {
+const queryPlatforms = async (filter: FilterQuery<IPlatform>, options: object) => {
   return Platform.paginate(filter, options);
 };
 
@@ -47,7 +47,7 @@ const queryPlatforms = async (filter: object, options: object) => {
  * @param {Object} filter - Mongo filter
  * @returns {Promise<HydratedDocument<IPlatform> | null>}
  */
-const getPlatformByFilter = async (filter: object): Promise<HydratedDocument<IPlatform> | null> => {
+const getPlatformByFilter = async (filter: FilterQuery<IPlatform>): Promise<HydratedDocument<IPlatform> | null> => {
   return Platform.findOne(filter);
 };
 

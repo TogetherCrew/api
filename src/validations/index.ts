@@ -8,6 +8,8 @@ import platformValidation from './platform.validation';
 import announcementValidation from './announcement.validation';
 import moduleValidation from './module.validation';
 import discourseValidation from './discourse.validation';
+import nftValidation from './nft.validation';
+
 export {
   authValidation,
   guildValidation,
@@ -19,4 +21,5 @@ export {
   announcementValidation,
   moduleValidation,
   discourseValidation,
+  nftValidation,
 };
