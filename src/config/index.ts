@@ -56,6 +56,7 @@ const envVarsSchema = Joi.object()
     REDIS_PORT: Joi.string().required().description('Redis port'),
     REDIS_PASSWORD: Joi.string().required().description('Reids password').allow(''),
     DISCOURSE_EXTRACTION_URL: Joi.string().required().description('Discourse extraction url'),
+    OCI_BACKEND_URl: Joi.string().required().description('Oci Backend url'),
   })
   .unknown();
 
@@ -158,4 +159,5 @@ export default {
   discourse: {
     extractionURL: envVars.DISCOURSE_EXTRACTION_URL,
   },
+  ociBackendURL: envVars.OCI_BACKEND_URl,
 };

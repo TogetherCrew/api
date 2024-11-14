@@ -9,6 +9,8 @@ import announcementController from './announcement.controller';
 import categoryController from './category.controller';
 import moduleController from './module.controller';
 import discourseController from './discourse.controller';
+import nftController from './nft.controller';
+
 export {
   authController,
   userController,
@@ -21,4 +23,5 @@ export {
   categoryController,
   moduleController,
   discourseController,
+  nftController,
 };
