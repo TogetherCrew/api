@@ -28,17 +28,17 @@ const getReputationScore = catchAsync(async function (req: Request, res: Respons
       community: dynamicNftModule?.community,
     });
     logger.debug({ i, platform, supportedPlatforms: supportedPlatforms[i] });
-    // shouldPlatformExist(platform);
     for (let j = 0; j < profiles.length; j++) {
       const profile = profiles[j];
       logger.debug({ i, j, profile, supportedPlatforms: supportedPlatforms[i] });
+      const temp = platform?.name as SupportedNeo4jPlatforms;
       if (profile.profile.provider === supportedPlatforms[i]) {
         const reputationScoreQuery = `
-        MATCH (:${NEO4J_PLATFORM_INFO[platform?.name as SupportedNeo4jPlatforms].member} {id: "${profile.profile.id}"})-[r:HAVE_METRICS {platformId: "${platform?.id}"}]->(a)
+        MATCH (:${NEO4J_PLATFORM_INFO[temp].member} {id: "${profile.profile.id}"})-[r:HAVE_METRICS {platformId: "${platform?.id}"}]->(a)
         WITH r.date as metrics_date, r.closenessCentrality as memberScore
         ORDER BY metrics_date DESC
         LIMIT 1
-        MATCH (user:${NEO4J_PLATFORM_INFO[platform?.name as SupportedNeo4jPlatforms].member})-[user_r:HAVE_METRICS {platformId: "${platform?.id}", date: metrics_date}]->(user)
+        MATCH (user:${NEO4J_PLATFORM_INFO[temp].member})-[user_r:HAVE_METRICS {platformId: "${platform?.id}", date: metrics_date}]->(user)
         WITH memberScore, MAX(user_r.closenessCentrality) as maxScore
         RETURN memberScore / maxScore AS reputation_score
         `;
@@ -100,10 +100,3 @@ function shouldProfileExist(profile: any) {
 export default {
   getReputationScore,
 };
-
-// const platform = await platformService.getPlatformByFilter({
-//   name: platforms[i],
-//   community: dynamicNftModule?.community,
-// });
-// const profile = profiles.find((p: any) => p.profile.provider === platform);
-// // Do the Cypher || N/A ?? || drop-down for platforms
