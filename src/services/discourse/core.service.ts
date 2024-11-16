@@ -22,6 +22,7 @@ async function createDiscourseSchedule(platformId: string, endpoint: string): Pr
   try {
     const schedule = await temporalDiscourse.createSchedule(platformId, endpoint);
     logger.info(`Started schedule '${schedule.scheduleId}'`);
+    await schedule.trigger();
     return schedule.scheduleId;
   } catch (error) {
     logger.error(error, 'Failed to create discourse schedule');
