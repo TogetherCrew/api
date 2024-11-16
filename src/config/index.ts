@@ -55,8 +55,9 @@ const envVarsSchema = Joi.object()
     REDIS_HOST: Joi.string().required().description('Redis host'),
     REDIS_PORT: Joi.string().required().description('Redis port'),
     REDIS_PASSWORD: Joi.string().required().description('Reids password').allow(''),
-    DISCOURSE_EXTRACTION_URL: Joi.string().required().description('Discourse extraction url'),
     OCI_BACKEND_URL: Joi.string().required().description('Oci Backend url'),
+    TEMPORAL_URI: Joi.string().required().description('Temporal address'),
+    TEMPORAL_QUEUE_HEAVY: Joi.string().required().description('Queue for heavy workflows'),
   })
   .unknown();
 
@@ -156,8 +157,9 @@ export default {
   session: {
     secret: envVars.SESSION_SECRET,
   },
-  discourse: {
-    extractionURL: envVars.DISCOURSE_EXTRACTION_URL,
+  temporal: {
+    uri: envVars.TEMPORAL_URI,
+    heavyQueue: envVars.TEMPORAL_QUEUE_HEAVY,
   },
   ociBackendURL: envVars.OCI_BACKEND_URL,
 };

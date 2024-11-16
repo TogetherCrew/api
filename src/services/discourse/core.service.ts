@@ -1,9 +1,8 @@
 import parentLogger from '../../config/logger';
 import { IAuthAndPlatform } from '../../interfaces';
 import categoryService from './category.service';
-import { ApiError, pick, sort } from '../../utils';
-import { Types } from 'mongoose';
-import config from '../../config';
+import { ApiError, pick } from '../../utils';
+import temporalDiscourse from '../temporal/discourse.service'
 const logger = parentLogger.child({ module: 'DiscourseCoreService' });
 
 async function getPropertyHandler(req: IAuthAndPlatform) {
@@ -19,31 +18,18 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
  * @param {String} platformId
  * @returns {Promise<Void>}
  */
-async function runDiscourseExtraction(platformId: string): Promise<void> {
+async function createDiscourseSchedule(platformId: string, endpoint: string): Promise<string> {
   try {
-    const data = {
-      platform_id: platformId,
-    };
-    logger.debug(data);
-    const response = await fetch(config.discourse.extractionURL, {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: { 'Content-Type': 'application/json' },
-    });
-    if (response.ok) {
-      logger.debug(await response.json());
-      return;
-    } else {
-      const errorResponse = await response.text();
-      logger.error({ error: errorResponse });
-    }
+    const schedule = await temporalDiscourse.createSchedule(platformId, endpoint)
+    console.log(`Started schedule '${schedule.scheduleId}`)
+    return schedule.scheduleId
   } catch (error) {
-    logger.error(error, 'Failed to run discourse extraction discourse');
-    throw new ApiError(590, 'Failed to run discourse extraction discourse');
+    logger.error(error, 'Failed to create discourse schedule');
+    throw new ApiError(590, 'Failed to create discourse schedule');
   }
 }
 
 export default {
   getPropertyHandler,
-  runDiscourseExtraction,
+  createDiscourseSchedule,
 };
