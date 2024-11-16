@@ -21,7 +21,7 @@ async function getPropertyHandler(req: IAuthAndPlatform) {
 async function createDiscourseSchedule(platformId: string, endpoint: string): Promise<string> {
   try {
     const schedule = await temporalDiscourse.createSchedule(platformId, endpoint);
-    logger.info(`Started schedule '${schedule.scheduleId}`);
+    logger.info(`Started schedule '${schedule.scheduleId}'`);
     return schedule.scheduleId;
   } catch (error) {
     logger.error(error, 'Failed to create discourse schedule');
