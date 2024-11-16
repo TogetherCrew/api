@@ -1,6 +1,6 @@
 import { Client, ScheduleHandle, ScheduleOverlapPolicy } from '@temporalio/client';
 import { TemporalCoreService } from './core.service';
-import config from 'src/config';
+import config from '../../config';
 
 class TemporalDiscourseService extends TemporalCoreService {
   public async createSchedule(platformId: string, endpoint: string): Promise<ScheduleHandle> {
