@@ -13,7 +13,7 @@ const logger = parentLogger.child({ module: 'NftController' });
 
 const getReputationScore = catchAsync(async function (req: Request, res: Response) {
   const { tokenId, address } = req.params;
-  const supportedPlatforms = ['discord', 'discourse'];
+  const supportedPlatforms = ['discord'];
 
   let repuationScore;
   logger.debug(tokenId, address);
@@ -27,11 +27,15 @@ const getReputationScore = catchAsync(async function (req: Request, res: Respons
       name: supportedPlatforms[i],
       community: dynamicNftModule?.community,
     });
+    console.log(supportedPlatforms[i], dynamicNftModule?.community);
+
+    console.log(platform, platform?.name as SupportedNeo4jPlatforms, 'BBB');
     logger.debug({ i, platform, supportedPlatforms: supportedPlatforms[i] });
     for (let j = 0; j < profiles.length; j++) {
       const profile = profiles[j];
       logger.debug({ i, j, profile, supportedPlatforms: supportedPlatforms[i] });
       const temp = platform?.name as SupportedNeo4jPlatforms;
+      console.log(temp, 'HAHA');
       if (profile.profile.provider === supportedPlatforms[i]) {
         const reputationScoreQuery = `
         MATCH (:${NEO4J_PLATFORM_INFO[temp].member} {id: "${profile.profile.id}"})-[r:HAVE_METRICS {platformId: "${platform?.id}"}]->(a)
@@ -58,6 +62,7 @@ const getReputationScore = catchAsync(async function (req: Request, res: Respons
 
         repuationScore = _fields[_fieldLookup['reputation_score']];
         logger.debug(repuationScore);
+        console.log(repuationScore, _fieldLookup, _fields);
       }
     }
   }
