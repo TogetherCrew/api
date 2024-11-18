@@ -1,6 +1,6 @@
 import { HydratedDocument, Types } from 'mongoose';
 import httpStatus from 'http-status';
-import { IPlatform, IModule, PlatformNames } from '@togethercrew.dev/db';
+import { IPlatform, IModule, PlatformNames, ICommunity } from '@togethercrew.dev/db';
 import ApiError from '../utils/ApiError';
 import * as Neo4j from '../neo4j';
 import { NEO4J_PLATFORM_INFO } from '../constants/neo4j.constant';
@@ -9,6 +9,7 @@ import parentLogger from '../config/logger';
 import moduleService from './module.service';
 import platformService from './platform.service';
 import ociService from './oci.service';
+import communityService from './community.service';
 
 const logger = parentLogger.child({ module: 'NftService' });
 
@@ -23,6 +24,10 @@ const getReputationScore = async (tokenId: string, address: string) => {
   const dynamicNftModule = await moduleService.getModuleByFilter({ 'options.platforms.0.metadata.tokenId': tokenId });
   logger.debug(dynamicNftModule);
   throwErrorIfDynamicNftModuleDoesNotExist(dynamicNftModule);
+
+  const community = await communityService.getCommunityByFilter({ _id: dynamicNftModule?.community });
+  logger.debug(community);
+  throwErrorIfCommunityDoesNotExist(community);
 
   const profiles: Array<any> = await getProfiles(address);
   logger.debug(profiles);
@@ -42,8 +47,8 @@ const getReputationScore = async (tokenId: string, address: string) => {
     }
   }
   return {
-    reputationScore,
-    communintyId: dynamicNftModule?.community.id,
+    reputationScore: reputationScore * 100,
+    communityName: community?.name,
   };
 };
 
@@ -107,6 +112,11 @@ function throwErrorIfDynamicNftModuleDoesNotExist(dynamicNftModule: HydratedDocu
   }
 }
 
+function throwErrorIfCommunityDoesNotExist(community: HydratedDocument<ICommunity> | null) {
+  if (!community) {
+    throw new ApiError(400, 'There is no associated community for the dynamic NFT module.');
+  }
+}
 export default {
   getReputationScore,
 };

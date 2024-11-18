@@ -1,4 +1,4 @@
-import { HydratedDocument, Types } from 'mongoose';
+import { HydratedDocument, Types, FilterQuery } from 'mongoose';
 import httpStatus from 'http-status';
 import {
   Community,
@@ -39,7 +39,7 @@ const queryCommunities = async (filter: object, options: object) => {
  * @param {Object} filter - Mongo filter
  * @returns {Promise<HydratedDocument<ICommunity> | null>}
  */
-const getCommunityByFilter = async (filter: object): Promise<HydratedDocument<ICommunity> | null> => {
+const getCommunityByFilter = async (filter: FilterQuery<ICommunity>): Promise<HydratedDocument<ICommunity> | null> => {
   return Community.findOne(filter);
 };
 
