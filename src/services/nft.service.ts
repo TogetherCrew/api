@@ -43,7 +43,7 @@ const getReputationScore = async (tokenId: string, address: string) => {
   }
   return {
     reputationScore,
-    communintyId: dynamicNftModule?.id,
+    communintyId: dynamicNftModule?.community.id,
   };
 };
 
