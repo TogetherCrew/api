@@ -36,7 +36,7 @@ const getReputationScore = async (tokenId: string, address: string) => {
         community: dynamicNftModule?.community,
       });
       if (platform) {
-        reputationScore = await calculateReputationScoreForProfile(profile, platform);
+        reputationScore = (await calculateReputationScoreForProfile(profile, platform)) + reputationScore;
         logger.debug(`Reputation Score: ${reputationScore}`);
       }
     }
