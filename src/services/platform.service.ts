@@ -65,10 +65,15 @@ const getPlatformById = async (id: Types.ObjectId): Promise<HydratedDocument<IPl
  * @param {HydratedDocument<IPlatform>} platform
  * @returns {Promise<Void>}
  */
-const callExtractionApp = (platform: HydratedDocument<IPlatform>): void => {
+const callExtractionApp = async (platform: HydratedDocument<IPlatform>): Promise<void> => {
   switch (platform.name) {
     case PlatformNames.Discourse: {
-      discourseService.coreService.runDiscourseExtraction(platform.id as string);
+      const scheduleId = await discourseService.coreService.createDiscourseSchedule(
+        platform.id as string,
+        platform.metadata?.id as string,
+      );
+      platform.set('metadata.scheduleId', scheduleId);
+      await platform.save();
       return;
     }
     default: {
