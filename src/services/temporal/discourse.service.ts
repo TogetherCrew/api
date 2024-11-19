@@ -10,7 +10,7 @@ class TemporalDiscourseService extends TemporalCoreService {
         action: {
           type: 'startWorkflow',
           workflowType: 'DiscourseExtractWorkflow',
-          args: [endpoint, platformId],
+          args: [{ endpoint, platformId }],
           taskQueue: config.temporal.heavyQueue,
         },
         scheduleId: `discourse/${encodeURIComponent(endpoint)}`,
