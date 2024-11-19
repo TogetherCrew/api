@@ -1,0 +1,39 @@
+paths:
+  /api/v1/nft/{tokenId}/{address}/reputation-score:
+    get:
+      tags:
+        - Nft
+      summary: Retrieve reputation scores for given tokenId and address.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tokenId
+          in: path
+          required: true
+          description: The token Id which dynamic Nft module is assocated with.
+          schema:
+            type: string
+        - name: address
+          in: path
+          required: true
+          description: The user public address.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Module details retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reputationScore:
+                    type: string
+                  communintyId:
+                    type: string
+        '400':
+          description: Bad Request
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: NotFound
+          $ref: '#/components/responses/NotFound'

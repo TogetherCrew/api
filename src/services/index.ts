@@ -15,6 +15,8 @@ import githubService from './github';
 import notionService from './notion';
 import discourseService from './discourse';
 import ociService from './oci.service';
+import nftService from './nft.service';
+
 export {
   userService,
   authService,
@@ -33,4 +35,5 @@ export {
   notionService,
   discourseService,
   ociService,
+  nftService,
 };

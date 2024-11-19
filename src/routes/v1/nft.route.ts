@@ -5,7 +5,7 @@ import { validate } from '../../middlewares';
 const router = express.Router();
 
 // Routes
-router.post(
+router.get(
   '/:tokenId/:address/reputation-score',
   validate(nftValidation.getReputationScore),
   nftController.getReputationScore,
