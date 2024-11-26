@@ -26,6 +26,18 @@ class TemporalDiscourseService extends TemporalCoreService {
       throw new Error(`Failed to create Temporal schedule: ${(error as Error).message}`);
     }
   }
+
+  public async pauseSchedule(scheduleId: string): Promise<void> {
+    const client: Client = await this.getClient();
+    const handle = client.schedule.getHandle(scheduleId);
+    await handle.pause();
+  }
+
+  public async deleteSchedule(scheduleId: string): Promise<void> {
+    const client: Client = await this.getClient();
+    const handle = client.schedule.getHandle(scheduleId);
+    await handle.delete();
+  }
 }
 
 export default new TemporalDiscourseService();
