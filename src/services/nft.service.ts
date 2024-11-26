@@ -54,7 +54,7 @@ const getReputationScore = async (tokenId: string, address: string) => {
 
 async function getProfiles(address: string) {
   let profiles: Array<any> = [];
-  const supportedChainIds = [11155111];
+  const supportedChainIds = [84532, 42161];
   for (let i = 0; i < supportedChainIds.length; i++) {
     const chainProfiles = await ociService.getProfiles(address, supportedChainIds[i]);
     profiles = profiles.concat(chainProfiles);
