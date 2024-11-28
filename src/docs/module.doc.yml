@@ -259,6 +259,8 @@ paths:
                                     type: string
                                   tokenId:
                                     type: string
+                                  chainId:
+                                    type: number
                                 description: Metadata for the dynamicNft.
               minProperties: 1
       responses:
