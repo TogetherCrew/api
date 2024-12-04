@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { communityService, userService, platformService, discordServices } from '../services';
+import { communityService, userService, platformService, discordServices, moduleService } from '../services';
 import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync, pick, ApiError, roleUtil } from '../utils';
 import httpStatus from 'http-status';
