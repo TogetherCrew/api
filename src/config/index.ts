@@ -58,6 +58,7 @@ const envVarsSchema = Joi.object()
     OCI_BACKEND_URL: Joi.string().required().description('Oci Backend url'),
     TEMPORAL_URI: Joi.string().required().description('Temporal address'),
     TEMPORAL_QUEUE_HEAVY: Joi.string().required().description('Queue for heavy workflows'),
+    BLOCKCHAIN_NETWORK_MODE: Joi.string().valid('mainnet', 'testnet').required(),
   })
   .unknown();
 
@@ -162,4 +163,5 @@ export default {
     heavyQueue: envVars.TEMPORAL_QUEUE_HEAVY,
   },
   ociBackendURL: envVars.OCI_BACKEND_URL,
+  blockchainNetworkMode: envVars.BLOCKCHAIN_NETWORK_MODE,
 };
