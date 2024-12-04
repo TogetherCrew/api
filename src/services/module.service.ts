@@ -93,11 +93,6 @@ const updateModule = async (
 const deleteModule = async (module: HydratedDocument<IModule>): Promise<HydratedDocument<IModule>> => {
   return await module.remove();
 };
-
-interface communityWithModules extends IModule {
-  modules: string[];
-}
-
 export default {
   createModule,
   queryModules,
