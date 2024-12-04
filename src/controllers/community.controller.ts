@@ -40,7 +40,6 @@ const getCommunity = catchAsync(async function (req: IAuthRequest, res: Response
       select: '_id name metadata disconnectedAt',
     });
     community = await communityService.populateRoles(community);
-    community = await moduleService.getActiveModulesForCommunity(community);
   }
   res.send(community);
 });

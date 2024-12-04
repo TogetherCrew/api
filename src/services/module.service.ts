@@ -97,17 +97,7 @@ const deleteModule = async (module: HydratedDocument<IModule>): Promise<Hydrated
 interface communityWithModules extends IModule {
   modules: string[];
 }
-/**
- * Populate modules
- * @param {HydratedDocument<ICommunity>} community
- */
-const getActiveModulesForCommunity = async (community: any) => {
-  const modules = await getModulesByFilter({ community: community.id });
-  const moduleNames = [...new Set(modules.map((module) => module.name))];
-  const communityObj = community.toObject();
-  communityObj.modules = moduleNames;
-  return communityObj;
-};
+
 export default {
   createModule,
   queryModules,
@@ -115,5 +105,4 @@ export default {
   getModuleById,
   deleteModule,
   updateModule,
-  getActiveModulesForCommunity,
 };
