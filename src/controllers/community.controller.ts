@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { communityService, userService, platformService, discordServices } from '../services';
+import { communityService, userService, platformService, discordServices, moduleService } from '../services';
 import { IAuthRequest } from '../interfaces/Request.interface';
 import { catchAsync, pick, ApiError, roleUtil } from '../utils';
 import httpStatus from 'http-status';
@@ -40,6 +40,7 @@ const getCommunity = catchAsync(async function (req: IAuthRequest, res: Response
       select: '_id name metadata disconnectedAt',
     });
     community = await communityService.populateRoles(community);
+    community = await moduleService.getActiveModulesForCommunity(community);
   }
   res.send(community);
 });
