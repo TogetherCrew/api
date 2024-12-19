@@ -25,12 +25,22 @@ async function createDiscourseSchedule(platformId: string, endpoint: string): Pr
     await schedule.trigger();
     return schedule.scheduleId;
   } catch (error) {
-    logger.error(error, 'Failed to create discourse schedule');
-    throw new ApiError(590, 'Failed to create discourse schedule');
+    logger.error(error, 'Failed to create discourse schedule.');
+    throw new ApiError(590, 'Failed to create discourse schedule.');
+  }
+}
+
+async function deleteDiscourseSchedule(scheduleId: string): Promise<void> {
+  try {
+    await temporalDiscourse.deleteSchedule(scheduleId);
+  } catch (error) {
+    logger.error(error, 'Failed to delete discourse schedule.');
+    throw new ApiError(590, 'Failed to delete discourse schedule.');
   }
 }
 
 export default {
   getPropertyHandler,
   createDiscourseSchedule,
+  deleteDiscourseSchedule,
 };

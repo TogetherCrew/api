@@ -1,5 +1,5 @@
 import { HydratedDocument, Types, FilterQuery } from 'mongoose';
-import { Module, IModule, IModuleUpdateBody } from '@togethercrew.dev/db';
+import { Module, IModule, IModuleUpdateBody, ICommunity } from '@togethercrew.dev/db';
 
 /**
  * Create a module
@@ -29,6 +29,15 @@ const queryModules = async (filter: object, options: object) => {
  */
 const getModuleByFilter = async (filter: FilterQuery<IModule>): Promise<HydratedDocument<IModule> | null> => {
   return Module.findOne(filter);
+};
+
+/**
+ * Get modules by filter
+ * @param {Object} filter - Mongo filter
+ * @returns {Promise<HydratedDocument<IModule> | null>}
+ */
+const getModulesByFilter = async (filter: FilterQuery<IModule>): Promise<HydratedDocument<IModule>[]> => {
+  return Module.find(filter);
 };
 
 /**
@@ -84,7 +93,6 @@ const updateModule = async (
 const deleteModule = async (module: HydratedDocument<IModule>): Promise<HydratedDocument<IModule>> => {
   return await module.remove();
 };
-
 export default {
   createModule,
   queryModules,

@@ -144,6 +144,15 @@ const updatePlatform = async (
  * @returns {Promise<HydratedDocument<IPlatform>>}
  */
 const deletePlatform = async (platform: HydratedDocument<IPlatform>): Promise<HydratedDocument<IPlatform>> => {
+  switch (platform.name) {
+    case PlatformNames.Discourse: {
+      if (platform.metadata?.scheduleId) {
+        await discourseService.coreService.deleteDiscourseSchedule(platform.metadata.scheduleId);
+      }
+    }
+    default: {
+    }
+  }
   return await platform.remove();
 };
 
@@ -157,7 +166,7 @@ const deletePlatformByFilter = async (filter: object): Promise<HydratedDocument<
   if (!platform) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Platform not found');
   }
-  return await platform.remove();
+  return await deletePlatform(platform);
 };
 
 function getMetadataKey(platformName: string): string {

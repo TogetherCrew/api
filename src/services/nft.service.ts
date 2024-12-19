@@ -10,6 +10,8 @@ import moduleService from './module.service';
 import platformService from './platform.service';
 import ociService from './oci.service';
 import communityService from './community.service';
+import { MAINNET_CHAIN_IDS, TESTNET_CHAIN_IDS } from '../constants/chains.constant';
+import config from '../config';
 
 const logger = parentLogger.child({ module: 'NftService' });
 
@@ -54,9 +56,9 @@ const getReputationScore = async (tokenId: string, address: string) => {
 
 async function getProfiles(address: string) {
   let profiles: Array<any> = [];
-  const supportedChainIds = [11155111];
-  for (let i = 0; i < supportedChainIds.length; i++) {
-    const chainProfiles = await ociService.getProfiles(address, supportedChainIds[i]);
+  const supportedChainIds = config.blockchainNetworkMode === 'mainnet' ? MAINNET_CHAIN_IDS : TESTNET_CHAIN_IDS;
+  for (const chainId of supportedChainIds) {
+    const chainProfiles = await ociService.getProfiles(address, chainId);
     profiles = profiles.concat(chainProfiles);
   }
   return profiles;

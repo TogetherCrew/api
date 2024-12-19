@@ -155,6 +155,7 @@ const dynamicNftOptions = () => {
           // platform: Joi.string().default(null),
           metadata: Joi.object().keys({
             transactionHash: Joi.string().required(),
+            chainId: Joi.number().required(),
           }),
         })
         .required(),
