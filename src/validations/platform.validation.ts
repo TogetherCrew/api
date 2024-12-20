@@ -13,6 +13,14 @@ const discordCreateMetadata = () => {
   });
 };
 
+const telegramMetadata = () => {
+  return Joi.object()
+    .required()
+    .keys({
+      chat: Joi.object().unknown(true).required(),
+    });
+};
+
 const discordUpdateMetadata = () => {
   return Joi.object().keys({
     selectedChannels: Joi.array().items(Joi.string()),
@@ -119,6 +127,10 @@ const createPlatform = {
         {
           is: PlatformNames.Discourse,
           then: discourseMetadata(),
+        },
+        {
+          is: PlatformNames.Telegram,
+          then: telegramMetadata,
         },
       ],
     }).required(),

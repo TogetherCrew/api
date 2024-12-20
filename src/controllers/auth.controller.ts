@@ -73,9 +73,15 @@ const refreshTokens = catchAsync(async function (req: Request, res: Response) {
   res.send({ ...tokens });
 });
 
+const generateToken = catchAsync(async function (req: Request, res: Response) {
+  const token = await tokenService.generateTelegramVerificationToken(req.user.id, req.body.communityId);
+  res.send(token);
+});
+
 export default {
   discordAuthorize,
   discordAuthorizeCallback,
   refreshTokens,
   logout,
+  generateToken,
 };
