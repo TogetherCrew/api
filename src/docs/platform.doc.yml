@@ -68,6 +68,7 @@ paths:
                     - notion
                     - mediaWiki
                     - discourse
+                    - telegram
                   description: Name of the platform to create. Must be one of the supported platforms.
                 community:
                   type: string
@@ -188,6 +189,12 @@ paths:
                         isInProgress:
                           type: boolean
                       description: Metadata for Discourse.
+                    - type: object
+                      required: [chat]
+                      properties:
+                        chat:
+                          type: object
+                      description: Metadata for Telegram.
       responses:
         '201':
           description: Platform created successfully.
