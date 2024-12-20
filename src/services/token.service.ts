@@ -9,6 +9,8 @@ import { IToken, Token, IUser } from '@togethercrew.dev/db';
 import { IDiscordOAuth2EchangeCode, IAuthTokens } from 'src/interfaces';
 import { Auth } from 'googleapis';
 import discordServices from './discord';
+import crypto from 'crypto';
+import { verificationToken } from '../config/telegram';
 /**
  * Generate token
  * @param {IUser} user
@@ -42,6 +44,7 @@ async function saveToken(
   expires: moment.Moment,
   type: string,
   blacklisted = false,
+  community?: Types.ObjectId,
 ): Promise<IToken> {
   const tokenDoc: IToken = await Token.create({
     token,
@@ -49,6 +52,7 @@ async function saveToken(
     expires: expires.toDate(),
     type,
     blacklisted,
+    community,
   });
   return tokenDoc;
 }
@@ -187,6 +191,40 @@ async function saveNotionAccessToken(userId: Types.ObjectId, accessToken: string
   await saveToken(accessToken, userId, accessTokenExpires, TokenTypeNames.NOTION_ACCESS);
 }
 
+/**
+ * Generate a random verification code using crypto
+ * @param {number} length - Length of the code
+ * @param {string} allowedCharacters - Characters to choose from
+ * @returns {string}
+ */
+function generateRandomCode(length: number, allowedCharacters: string): string {
+  const charsLength = allowedCharacters.length;
+  const randomBytes = crypto.randomBytes(length);
+  let code = '';
+  for (let i = 0; i < length; i++) {
+    const randomIndex = randomBytes[i] % charsLength;
+    code += allowedCharacters.charAt(randomIndex);
+  }
+  return code;
+}
+
+/**
+ * Generate a Telegram verification token
+ * @param {Types.ObjectId} userId
+ * @param {Types.ObjectId} communityId
+ * @returns {Promise<{ value: string; expiresAt: Date }>}
+ */
+async function generateTelegramVerificationToken(userId: Types.ObjectId, communityId: Types.ObjectId) {
+  const { verificationCodeLength, allowedCharacters } = verificationToken;
+
+  const value = generateRandomCode(verificationCodeLength, allowedCharacters);
+  const expiresAt = moment().add(10, 'minutes');
+
+  await saveToken(value, userId, expiresAt, TokenTypeNames.TELEGRAM_VERIFICATION, false, communityId);
+
+  return { value, expiresAt: expiresAt.toDate() };
+}
+
 export default {
   generateToken,
   verifyToken,
@@ -196,4 +234,5 @@ export default {
   saveDiscordOAuth2Tokens,
   saveGoogleOAuth2Tokens,
   saveNotionAccessToken,
+  generateTelegramVerificationToken,
 };

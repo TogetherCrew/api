@@ -6,9 +6,9 @@ paths:
       summary: Discord OAuth2 Authorization
       description: Redirects the user to the Discord OAuth2 authorization page.
       responses:
-        "302":
+        '302':
           description: Found (Redirect to Discord OAuth2 page)
-          $ref: "#/components/responses/Found"
+          $ref: '#/components/responses/Found'
 
   /api/v1/auth/refresh-tokens:
     post:
@@ -28,7 +28,7 @@ paths:
               required:
                 - refreshToken
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -39,16 +39,16 @@ paths:
                     type: object
                     properties:
                       access:
-                        $ref: "#/components/schemas/Token"
+                        $ref: '#/components/schemas/Token'
                       refresh:
-                        $ref: "#/components/schemas/Token"
-        "400":
+                        $ref: '#/components/schemas/Token'
+        '400':
           description: Bad Request
-          $ref: "#/components/responses/BadRequest"
-        "401":
+          $ref: '#/components/responses/BadRequest'
+        '401':
           description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-          
+          $ref: '#/components/responses/Unauthorized'
+
   /api/v1/auth/logout:
     post:
       tags:
@@ -67,12 +67,57 @@ paths:
               required:
                 - refreshToken
       responses:
-        "204":
+        '204':
           description: No Content (Successfully logged out)
-          $ref: "#/components/responses/NoContent"
-        "400":
+          $ref: '#/components/responses/NoContent'
+        '400':
           description: Bad Request
-          $ref: "#/components/responses/BadRequest"
-        "404":
+          $ref: '#/components/responses/BadRequest'
+        '404':
           description: Not found (Invalid refresh token)
-          $ref: "#/components/responses/NotFound"
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/auth/generate-token:
+    post:
+      tags:
+        - Auth
+      summary: Generate token for verfication purpose.
+      description: Generate token for verfication purpose (telegram_verification) with specific requirements based on the token type.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum: ['telegram_verification']
+                  required: true
+                communityId:
+                  type: string
+                  format: objectId
+                  description: The communityId, required for telegram_verification.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: string
+                  expiresAt:
+                    type: date
+              example:
+                value: 'JK1NE'
+                expiresAt: '2024-12-20T07:28:57.718Z'
+        '400':
+          description: Bad Request
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: Unauthorized
+          $ref: '#/components/responses/Unauthorized'
