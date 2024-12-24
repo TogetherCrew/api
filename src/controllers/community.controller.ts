@@ -22,7 +22,7 @@ const getCommunities = catchAsync(async function (req: IAuthRequest, res: Respon
   }
   options.populate = {
     path: 'platforms',
-    select: '_id name metadata disconnectedAt',
+    select: '_id name metadata disconnectedAt createdAt updatedAt',
   };
 
   const communities = await communityService.getCommunities({});
