@@ -28,7 +28,7 @@
     "@notionhq/client": "^2.2.3",
     "@sentry/node": "^7.50.0",
     "@temporalio/client": "^1.11.3",
-    "@togethercrew.dev/db": "^3.0.78",
+    "@togethercrew.dev/db": "^3.0.79",
     "@togethercrew.dev/tc-messagebroker": "^0.0.50",
     "@types/express-session": "^1.17.7",
     "@types/morgan": "^1.9.5",
