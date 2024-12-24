@@ -37,7 +37,7 @@ const getCommunity = catchAsync(async function (req: IAuthRequest, res: Response
   if (community) {
     await community?.populate({
       path: 'platforms',
-      select: '_id name metadata disconnectedAt',
+      select: '_id name metadata disconnectedAt createdAt updatedAt',
     });
     community = await communityService.populateRoles(community);
   }
