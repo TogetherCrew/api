@@ -12,9 +12,9 @@ import NodeStats from '../../utils/enums/nodeStats.enum';
 
 const logger = parentLogger.child({ module: 'DiscourseMemberActivityService' });
 
-function getNgu(user:any): string {
+function getNgu(user: any): string {
   const { first_name, last_name, username } = user.options;
-  const combinedName = [first_name, last_name].filter(Boolean).join(" ");
+  const combinedName = [first_name, last_name].filter(Boolean).join(' ');
   return combinedName || username;
 }
 

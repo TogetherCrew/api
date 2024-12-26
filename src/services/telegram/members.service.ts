@@ -16,10 +16,9 @@ type Options = {
   page?: string;
 };
 
-
 function getNgu(user: any): string {
   const { firstName, lastName, username } = user;
-  const combinedName = [firstName, lastName].filter(Boolean).join(" ");
+  const combinedName = [firstName, lastName].filter(Boolean).join(' ');
   return combinedName || username;
 }
 /**
@@ -72,10 +71,7 @@ async function queryMembersForTables(
         // If 'others' was already handled, we combine conditions
         if (matchStage.id) {
           matchStage = {
-            $or: [
-              { id: { $in: specificActivityIds } },
-              matchStage,
-            ],
+            $or: [{ id: { $in: specificActivityIds } }, matchStage],
           };
         } else {
           matchStage.id = { $in: specificActivityIds };
@@ -94,10 +90,7 @@ async function queryMembersForTables(
       // If matchStage is already non-empty, combine with $and
       if (Object.keys(matchStage).length > 0) {
         matchStage = {
-          $and: [
-            matchStage,
-            { $or: orNgu },
-          ],
+          $and: [matchStage, { $or: orNgu }],
         };
       } else {
         // Otherwise, just set the or
@@ -110,18 +103,12 @@ async function queryMembersForTables(
       const date = new Date(memberActivityDocument.date);
       date.setHours(23, 59, 59, 999);
 
-      const orJoinedAt = [
-        { joined_at: null },
-        { joined_at: { $lte: date } },
-      ];
+      const orJoinedAt = [{ joined_at: null }, { joined_at: { $lte: date } }];
 
       // Merge it with existing matchStage via $and
       if (Object.keys(matchStage).length > 0) {
         matchStage = {
-          $and: [
-            matchStage,
-            { $or: orJoinedAt },
-          ],
+          $and: [matchStage, { $or: orJoinedAt }],
         };
       } else {
         matchStage.$or = orJoinedAt;
@@ -129,10 +116,7 @@ async function queryMembersForTables(
     }
 
     // Count total documents
-    const totalResults = await platformConnection.db
-      .collection('rawmembers')
-      .countDocuments(matchStage);
-
+    const totalResults = await platformConnection.db.collection('rawmembers').countDocuments(matchStage);
 
     // Get the paginated results
     const results = await platformConnection.db

@@ -12,12 +12,11 @@ const logger = parentLogger.child({ module: 'DiscourseHeatmapService' });
  * @returns {Array<Array<number>>}
  */
 async function getHeatmapChart(platformConnection: Connection, body: any) {
-  const { startDate, endDate} = body;
+  const { startDate, endDate } = body;
   try {
     let matchStage: any = {
       $and: [{ date: { $gte: new Date(startDate) } }, { date: { $lte: new Date(endDate) } }],
     };
-
 
     const heatmaps = await platformConnection.models.HeatMap.aggregate([
       // Stage1 : convert date from string to date type and extract needed data
@@ -91,7 +90,6 @@ async function lineGraph(platformConnection: Connection, startDate: Date, endDat
           chat_messages: 1,
           replier: 1,
           reacter: 1,
-
         },
       },
 
