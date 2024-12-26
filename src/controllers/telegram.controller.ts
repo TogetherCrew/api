@@ -50,7 +50,6 @@ const activeMembersCompositionTable = catchAsync(async function (req: IAuthAndPl
     platformConnection,
     activityCompostionFields,
   );
-  console.log('memberActivity',memberActivity)
   const members = await telegramService.membersService.queryMembersForTables(
     platformConnection,
     filter,
@@ -58,7 +57,6 @@ const activeMembersCompositionTable = catchAsync(async function (req: IAuthAndPl
     memberActivity,
     activityCompostionsTypes.activeMembersComposition,
   );
-  console.log('members',members)
   if (members) {
     members.results.forEach((member) => {
       member.ngu = telegramService.membersService.getNgu(member);

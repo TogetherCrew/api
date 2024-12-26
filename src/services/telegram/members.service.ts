@@ -52,58 +52,89 @@ async function queryMembersForTables(
       .sort({ date: -1 })
       .select({ date: 1, _id: 0 });
 
-    if (activityComposition && activityComposition.length > 0) { 
-      // If 'others' is in activityComposition, we exclude all IDs that are part of other activities
+    // Handle activityComposition
+    if (activityComposition && activityComposition.length > 0) {
+      // If 'others' is in activityComposition, exclude all IDs that are part of other activities
       if (activityComposition.includes('others')) {
         allActivityIds = activityCompostionsTypes
           .filter((activity) => activity !== 'others')
           .flatMap((activity) => memberActivity[activity]);
 
         matchStage.id = { $nin: allActivityIds };
-        console.log('activityComposition.INCLUDE',matchStage)  
-
       }
 
-      // If specific activity compositions are mentioned along with 'others', we add them separately
+      // If specific activity compositions are mentioned (besides 'others'), include them
       if (activityComposition.some((activity) => activity !== 'others')) {
         const specificActivityIds = activityComposition
           .filter((activity) => activity !== 'others')
           .flatMap((activity) => memberActivity[activity]);
 
+        // If 'others' was already handled, we combine conditions
         if (matchStage.id) {
-          matchStage = { $or: [{ id: { $in: specificActivityIds } }, matchStage] };
+          matchStage = {
+            $or: [
+              { id: { $in: specificActivityIds } },
+              matchStage,
+            ],
+          };
         } else {
           matchStage.id = { $in: specificActivityIds };
         }
-        console.log('activityComposition.some',matchStage)  
-
       }
     }
 
+    // Handle NGU condition — we store it separately, then merge
     if (ngu) {
-      matchStage.$or = [
+      const orNgu = [
         { 'options.username': { $regex: ngu, $options: 'i' } },
         { 'options.first_name': { $regex: ngu, $options: 'i' } },
         { 'options.last_name': { $regex: ngu, $options: 'i' } },
       ];
-      console.log('ngu',matchStage)  
 
+      // If matchStage is already non-empty, combine with $and
+      if (Object.keys(matchStage).length > 0) {
+        matchStage = {
+          $and: [
+            matchStage,
+            { $or: orNgu },
+          ],
+        };
+      } else {
+        // Otherwise, just set the or
+        matchStage.$or = orNgu;
+      }
     }
 
+    // Handle joined_at condition from memberActivityDocument — also merge properly
     if (memberActivityDocument) {
       const date = new Date(memberActivityDocument.date);
       date.setHours(23, 59, 59, 999);
-      matchStage.$or = [
+
+      const orJoinedAt = [
         { joined_at: null },
-        { joined_at: { $lte: date } }
+        { joined_at: { $lte: date } },
       ];
-            console.log('memberActivityDocument',matchStage)  
+
+      // Merge it with existing matchStage via $and
+      if (Object.keys(matchStage).length > 0) {
+        matchStage = {
+          $and: [
+            matchStage,
+            { $or: orJoinedAt },
+          ],
+        };
+      } else {
+        matchStage.$or = orJoinedAt;
+      }
     }
 
+    // Count total documents
+    const totalResults = await platformConnection.db
+      .collection('rawmembers')
+      .countDocuments(matchStage);
 
-    const totalResults = await platformConnection.db.collection('rawmembers').countDocuments(matchStage);
 
-      console.log(1000,totalResults,matchStage)
+    // Get the paginated results
     const results = await platformConnection.db
       .collection('rawmembers')
       .aggregate([

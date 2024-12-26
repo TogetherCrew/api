@@ -1,5 +1,6 @@
-import { HydratedDocument, Types, FilterQuery } from 'mongoose';
-import { Module, IModule, IModuleUpdateBody, ICommunity } from '@togethercrew.dev/db';
+import { FilterQuery, HydratedDocument, Types } from 'mongoose';
+
+import { IModule, IModuleUpdateBody, Module } from '@togethercrew.dev/db';
 
 /**
  * Create a module
@@ -64,7 +65,6 @@ const updateModule = async (
     if (updateBody.options.platforms[0].name == undefined) {
       {
         const globalOption = module.options?.platforms[0];
-        console.log(globalOption);
         if (globalOption) globalOption.metadata = updateBody.options.platforms[0].metadata;
         else module.options?.platforms.push(updateBody.options.platforms[0]);
       }

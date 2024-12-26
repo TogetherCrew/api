@@ -52,7 +52,6 @@ async function getMembersInteractionsNetworkGraph(
     MATCH (a:${NEO4J_PLATFORM_INFO[platformName].member})-[r:INTERACTED_WITH {platformId: "${platformId}", date: latest_date}]->(b:${NEO4J_PLATFORM_INFO[platformName].member})
     RETURN a, r, b`;
 
-    console.log(usersInteractionsQuery)
     const neo4jUsersInteractionsData = await Neo4j.read(usersInteractionsQuery);
     const { records: neo4jUsersInteractions } = neo4jUsersInteractionsData;
     const usersInteractions = neo4jUsersInteractions.map((usersInteraction) => {
@@ -76,7 +75,6 @@ async function getMembersInteractionsNetworkGraph(
 
       return interaction;
     });
-    console.log(neo4jUsersInteractionsData,usersInteractions,NEO4J_PLATFORM_INFO[platformName].member,NEO4J_PLATFORM_INFO[platformName].platform, platformId )
 
     // userRadius
     const userRadiusQuery = `

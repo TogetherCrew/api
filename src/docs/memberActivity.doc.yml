@@ -821,7 +821,7 @@ paths:
                 [
                   'all_new_disengaged',
                   'all_disengaged_were_newly_active',
-                  'all_disengaged_were_consistenly_active',
+                  'all_disengaged_were_consistently_active',
                   'all_disengaged_were_vital',
                   'others',
                 ]
