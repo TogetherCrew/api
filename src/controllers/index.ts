@@ -10,6 +10,7 @@ import categoryController from './category.controller';
 import moduleController from './module.controller';
 import discourseController from './discourse.controller';
 import nftController from './nft.controller';
+import telegramController from './telegram.controller';
 
 export {
   authController,
@@ -24,4 +25,5 @@ export {
   moduleController,
   discourseController,
   nftController,
+  telegramController,
 };

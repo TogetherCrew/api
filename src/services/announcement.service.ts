@@ -1,14 +1,17 @@
-import { Announcement, DatabaseManager, IAnnouncement } from '@togethercrew.dev/db';
-import mongoose, { startSession } from 'mongoose';
-import { addJobToAnnouncementQueue, removeJobFromAnnouncementQueue } from '../bullmq';
-import discordService from './discord';
 import { Job } from 'bullmq';
-import config from '../config';
-import sagaService from './saga.service';
-import platformService from './platform.service';
 import Handlebars from 'handlebars';
+import mongoose, { startSession } from 'mongoose';
+
+import { Announcement, DatabaseManager, IAnnouncement } from '@togethercrew.dev/db';
+
+import { addJobToAnnouncementQueue, removeJobFromAnnouncementQueue } from '../bullmq';
+import config from '../config';
 import parentLogger from '../config/logger';
 import communityService from './community.service';
+import discordService from './discord';
+import platformService from './platform.service';
+import sagaService from './saga.service';
+
 const logger = parentLogger.child({ module: 'AnnouncementService' });
 
 const createDraftAnnouncement = async (announcementData: IAnnouncement) => {

@@ -1,9 +1,9 @@
 paths:
-  /api/v1/discourse/heatmaps/{platformId}/heatmap-chart:
+  /api/v1/telegram/heatmaps/{platformId}/heatmap-chart:
     post:
       tags:
-        - [Discourse]
-      summary: Get data for heatmap chart - discourse only
+        - [Telegram]
+      summary: Get data for heatmap chart - telegram only
       security:
         - bearerAuth: []
       parameters:
@@ -28,25 +28,10 @@ paths:
                   format: date-time
                 timeZone:
                   type: string
-                allCategories:
-                  type: boolean
-                  default: true
-                include:
-                  type: array
-                  items:
-                    type: string
-                    description: category id
-                exclude:
-                  type: array
-                  items:
-                    type: string
-                    description: category id
               example:
                 startDate: '2023-01-17T13:02:10.911+00:00'
                 endDate: '2023-01-29T10:50:01.513Z'
                 timeZone: 'America/Fortaleza'
-                allCategories: false
-                include: [123456, 654321]
       responses:
         '200':
           description: OK
@@ -68,11 +53,11 @@ paths:
         '404':
           description: NotFound
           $ref: '#/components/responses/NotFound'
-  /api/v1/discourse/heatmaps/{platformId}/line-graph:
+  /api/v1/telegram/heatmaps/{platformId}/line-graph:
     post:
       tags:
-        - [Discourse]
-      summary: Get data for line graph - discourse only
+        - [Telegram]
+      summary: Get data for line graph - telegram only
       security:
         - bearerAuth: []
       parameters:
@@ -138,10 +123,10 @@ paths:
         '404':
           description: NotFound
           $ref: '#/components/responses/NotFound'
-  /api/v1/discourse/member-activity/{platformId}/members-interactions-network-graph:
+  /api/v1/telegram/member-activity/{platformId}/members-interactions-network-graph:
     post:
       tags:
-        - [Discourse]
+        - [Telegram]
       summary: Get data for active members interactions graph
       security:
         - bearerAuth: []
@@ -241,10 +226,10 @@ paths:
         '404':
           description: NotFound
           $ref: '#/components/responses/NotFound'
-  /api/v1/discourse/member-activity/{platformId}/active-members-composition-table:
+  /api/v1/telegram/member-activity/{platformId}/active-members-composition-table:
     post:
       tags:
-        - [Discourse]
+        - [Telegram]
       summary: Get data for active members composition table
       security:
         - bearerAuth: []
@@ -346,10 +331,10 @@ paths:
         '404':
           description: NotFound
           $ref: '#/components/responses/NotFound'
-  /api/v1/discourse/member-activity/{platformId}/active-members-onboarding-table:
+  /api/v1/telegram/member-activity/{platformId}/active-members-onboarding-table:
     post:
       tags:
-        - [Discourse]
+        - [Telegram]
       summary: Get data for active members onboarding table
       security:
         - bearerAuth: []
@@ -452,10 +437,10 @@ paths:
         '404':
           description: NotFound
           $ref: '#/components/responses/NotFound'
-  /api/v1/discourse/member-activity/{platformId}/disengaged-members-composition-table:
+  /api/v1/telegram/member-activity/{platformId}/disengaged-members-composition-table:
     post:
       tags:
-        - [Discourse]
+        - [Telegram]
       summary: Get data for disengaged members composition table
       security:
         - bearerAuth: []

@@ -164,7 +164,7 @@ paths:
     post:
       tags:
         - [Member-Activity]
-      summary: Get data for inactive members line graph - discord only
+      summary: Get data for inactive members line graph - Discord, Discourse and Telegram 
       security:
         - bearerAuth: []
       parameters:
@@ -229,7 +229,7 @@ paths:
     post:
       tags:
         - [Member-Activity]
-      summary: Get data for active members interactions graph - discord only
+      summary: Get data for active members interactions graph - Discord, Discourse and Telegram 
       security:
         - bearerAuth: []
       parameters:
@@ -333,7 +333,7 @@ paths:
     get:
       tags:
         - [Member-Activity]
-      summary: Get data for fragmentation score - discord only
+      summary: Get data for fragmentation score - Discord, Discourse and Telegram 
       security:
         - bearerAuth: []
       parameters:
@@ -382,7 +382,7 @@ paths:
     get:
       tags:
         - [Member-Activity]
-      summary: Get data for decentralisation score - discord only
+      summary: Get data for decentralisation score - Discord, Discourse and Telegram 
       security:
         - bearerAuth: []
       parameters:
@@ -431,7 +431,7 @@ paths:
     post:
       tags:
         - [Member-Activity]
-      summary: Get data for active members onboarding line graph - discord only
+      summary: Get data for active members onboarding line graph - Discord, Discourse and Telegram 
       security:
         - bearerAuth: []
       parameters:
@@ -510,7 +510,7 @@ paths:
     post:
       tags:
         - [Member-Activity]
-      summary: Get data for active members composition table - discord only
+      summary: Get data for active members composition table - Discord, Discourse and Telegram 
       security:
         - bearerAuth: []
       description: for now sortBy just can apply for ngu and joinedAt(DaoMemberSince in UI)
@@ -655,7 +655,7 @@ paths:
     post:
       tags:
         - [Member-Activity]
-      summary: Get data for active members onboarding table - discord only
+      summary: Get data for active members onboarding table - Discord, Discourse and Telegram 
       security:
         - bearerAuth: []
       description: for now sortBy just can apply for ngu and joinedAt(DaoMemberSince in UI)
@@ -800,7 +800,7 @@ paths:
     post:
       tags:
         - [Member-Activity]
-      summary: Get data for disengaged members composition table - discord only
+      summary: Get data for disengaged members composition table - Discord, Discourse and Telegram 
       security:
         - bearerAuth: []
       description: for now sortBy just can apply for ngu and joinedAt(DaoMemberSince in UI)
@@ -821,7 +821,7 @@ paths:
                 [
                   'all_new_disengaged',
                   'all_disengaged_were_newly_active',
-                  'all_disengaged_were_consistenly_active',
+                  'all_disengaged_were_consistently_active',
                   'all_disengaged_were_vital',
                   'others',
                 ]
