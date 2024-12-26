@@ -12,6 +12,7 @@ import categoryRoute from './category.route';
 import moduleRoute from './module.route';
 import discourseRoute from './discourse.route';
 import nftRoute from './nft.route';
+import telegramRoute from './telegram.route';
 const router = express.Router();
 
 const defaultRoutes = [
@@ -67,6 +68,10 @@ const defaultRoutes = [
   {
     path: '/nft',
     route: nftRoute,
+  },
+  {
+    path: '/telegram',
+    route: telegramRoute,
   },
 ];
 

@@ -10,4 +10,8 @@ export const NEO4J_PLATFORM_INFO = {
     platform: 'DiscoursePlatform',
     member: 'DiscourseMember',
   },
+  [PlatformNames.Telegram]: {
+    platform: 'TelegramPlatform',
+    member: 'TelegramMember',
+  },
 };

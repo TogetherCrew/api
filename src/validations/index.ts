@@ -9,7 +9,7 @@ import announcementValidation from './announcement.validation';
 import moduleValidation from './module.validation';
 import discourseValidation from './discourse.validation';
 import nftValidation from './nft.validation';
-
+import telegramValidation from './telegram.validation';
 export {
   authValidation,
   guildValidation,
@@ -22,4 +22,5 @@ export {
   moduleValidation,
   discourseValidation,
   nftValidation,
+  telegramValidation,
 };

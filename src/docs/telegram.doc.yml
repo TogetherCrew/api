@@ -1,9 +1,63 @@
 paths:
-  /api/v1/member-activity/{platformId}/active-members-composition-line-graph:
+  /api/v1/telegram/heatmaps/{platformId}/heatmap-chart:
     post:
       tags:
-        - [Member-Activity]
-      summary: Get data for active members composition line graph - discord only
+        - [Telegram]
+      summary: Get data for heatmap chart - telegram only
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: platformId
+          required: true
+          schema:
+            type: string
+          description: Platform Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startDate:
+                  type: string
+                  format: date-time
+                endDate:
+                  type: string
+                  format: date-time
+                timeZone:
+                  type: string
+              example:
+                startDate: '2023-01-17T13:02:10.911+00:00'
+                endDate: '2023-01-29T10:50:01.513Z'
+                timeZone: 'America/Fortaleza'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: array
+                  items:
+                    type: number
+                example: [[6, 5, 28], [7, 10, 28]]
+        '400':
+          description: Bad Request
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: Unauthorized
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: NotFound
+          $ref: '#/components/responses/NotFound'
+  /api/v1/telegram/heatmaps/{platformId}/line-graph:
+    post:
+      tags:
+        - [Telegram]
+      summary: Get data for line graph - telegram only
       security:
         - bearerAuth: []
       parameters:
@@ -52,104 +106,13 @@ paths:
                           type: array
                           items:
                             type: number
-                  totActiveMembers:
+                  emojis:
                     type: number
-                  newlyActive:
+                  messages:
                     type: number
-                  consistentlyActive:
+                  emojiPercentageChange:
                     type: number
-                  vitalMembers:
-                    type: number
-                  becameDisengaged:
-                    type: number
-                  totActiveMembersPercentageChange:
-                    type: number
-                  newlyActivePercentageChange:
-                    type: number
-                  consistentlyActivePercentageChange:
-                    type: number
-                  vitalMembersPercentageChange:
-                    type: number
-                  becameDisengagedPercentageChange:
-                    type: number
-
-        '400':
-          description: Bad Request
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          description: Unauthorized
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          description: NotFound
-          $ref: '#/components/responses/NotFound'
-  /api/v1/member-activity/{platformId}/disengaged-members-composition-line-graph:
-    post:
-      tags:
-        - [Member-Activity]
-      summary: Get data for disengaged memebres composition line graph - discord only
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: platformId
-          required: true
-          schema:
-            type: string
-          description: Platform Id
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                startDate:
-                  type: string
-                  format: date-time
-                endDate:
-                  type: string
-                  format: date-time
-              example:
-                startDate: '2023-01-17T13:02:10.911+00:00'
-                endDate: '2023-01-29T10:50:01.513Z'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  categories:
-                    type: array
-                    items:
-                      type: string
-                  series:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        name:
-                          type: string
-                        data:
-                          type: array
-                          items:
-                            type: number
-                  becameDisengaged:
-                    type: number
-                  wereNewlyActive:
-                    type: number
-                  wereConsistentlyActive:
-                    type: number
-                  wereVitalMembers:
-                    type: number
-                  becameDisengagedPercentageChange:
-                    type: number
-                  wereNewlyActivePercentageChange:
-                    type: number
-                  wereConsistentlyActivePercentageChange:
-                    type: number
-                  wereVitalMembersPercentageChange:
+                  msgPercentageChange:
                     type: number
         '400':
           description: Bad Request
@@ -160,76 +123,11 @@ paths:
         '404':
           description: NotFound
           $ref: '#/components/responses/NotFound'
-  /api/v1/member-activity/{platformId}/inactive-members-line-graph:
+  /api/v1/telegram/member-activity/{platformId}/members-interactions-network-graph:
     post:
       tags:
-        - [Member-Activity]
-      summary: Get data for inactive members line graph - Discord, Discourse and Telegram 
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: platformId
-          required: true
-          schema:
-            type: string
-          description: Platform Id
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                startDate:
-                  type: string
-                  format: date-time
-                endDate:
-                  type: string
-                  format: date-time
-              example:
-                startDate: '2023-01-17T13:02:10.911+00:00'
-                endDate: '2023-01-29T10:50:01.513Z'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  categories:
-                    type: array
-                    items:
-                      type: string
-                  series:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        name:
-                          type: string
-                        data:
-                          type: array
-                          items:
-                            type: number
-                  returned:
-                    type: number
-                  returnedPercentageChange:
-        '400':
-          description: Bad Request
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          description: Unauthorized
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          description: NotFound
-          $ref: '#/components/responses/NotFound'
-  /api/v1/member-activity/{platformId}/members-interactions-network-graph:
-    post:
-      tags:
-        - [Member-Activity]
-      summary: Get data for active members interactions graph - Discord, Discourse and Telegram 
+        - [Telegram]
+      summary: Get data for active members interactions graph
       security:
         - bearerAuth: []
       parameters:
@@ -274,7 +172,6 @@ paths:
                             properties:
                               roleId:
                                 type: string
-                                example: 'discordRoleId1'
                               name:
                                 type: string
                                 example: 'role1'
@@ -329,191 +226,14 @@ paths:
         '404':
           description: NotFound
           $ref: '#/components/responses/NotFound'
-  /api/v1/member-activity/{platformId}/fragmentation-score:
-    get:
-      tags:
-        - [Member-Activity]
-      summary: Get data for fragmentation score - Discord, Discourse and Telegram 
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: platformId
-          required: true
-          schema:
-            type: string
-          description: Platform Id
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  fragmentationScore:
-                    type: float
-                    example: 0.77755
-                  fragmentationScoreDate:
-                    type: integer
-                    example: 1
-                  scoreStatus:
-                    type: integer
-                    example: -1
-                  fragmentationScoreRange:
-                    type: object
-                    properties:
-                      minimumFragmentationScore:
-                        type: integer
-                        example: 0
-                      maximumFragmentationScore:
-                        type: integer
-                        example: 200
-        '400':
-          description: Bad Request
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          description: Unauthorized
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          description: NotFound
-          $ref: '#/components/responses/NotFound'
-  /api/v1/member-activity/{platformId}/decentralisation-score:
-    get:
-      tags:
-        - [Member-Activity]
-      summary: Get data for decentralisation score - Discord, Discourse and Telegram 
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: platformId
-          required: true
-          schema:
-            type: string
-          description: Platform Id
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  decentralisationScore:
-                    type: float
-                    example: 5.775
-                  decentralisationScoreDate:
-                    type: integer
-                    example: 1
-                  scoreStatus:
-                    type: integer
-                    example: -1
-                  fragmentationScoreRange:
-                    type: object
-                    properties:
-                      minimumFragmentationScore:
-                        type: integer
-                        example: 0
-                      maximumFragmentationScore:
-                        type: integer
-                        example: 200
-        '400':
-          description: Bad Request
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          description: Unauthorized
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          description: NotFound
-          $ref: '#/components/responses/NotFound'
-  /api/v1/member-activity/{platformId}/active-members-onboarding-line-graph:
+  /api/v1/telegram/member-activity/{platformId}/active-members-composition-table:
     post:
       tags:
-        - [Member-Activity]
-      summary: Get data for active members onboarding line graph - Discord, Discourse and Telegram 
+        - [Telegram]
+      summary: Get data for active members composition table
       security:
         - bearerAuth: []
-      parameters:
-        - in: path
-          name: platformId
-          required: true
-          schema:
-            type: string
-          description: Platform Id
-
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                startDate:
-                  type: string
-                  format: date-time
-                endDate:
-                  type: string
-                  format: date-time
-              example:
-                startDate: '2023-01-17T13:02:10.911+00:00'
-                endDate: '2023-01-29T10:50:01.513Z'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  categories:
-                    type: array
-                    items:
-                      type: string
-                  series:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        name:
-                          type: string
-                        data:
-                          type: array
-                          items:
-                            type: number
-                  newlyActive:
-                    type: number
-                  stillActive:
-                    type: number
-                  dropped:
-                    type: number
-                  joined:
-                    type: number
-                  newlyActivePercentageChange:
-                    type: number
-                  stillActivePercentageChange:
-                    type: number
-                  droppedPercentageChange:
-                    type: number
-                  joinedPercentageChange:
-                    type: number
-        '400':
-          description: Bad Request
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          description: Unauthorized
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          description: NotFound
-          $ref: '#/components/responses/NotFound'
-  /api/v1/member-activity/{platformId}/active-members-composition-table:
-    post:
-      tags:
-        - [Member-Activity]
-      summary: Get data for active members composition table - Discord, Discourse and Telegram 
-      security:
-        - bearerAuth: []
-      description: for now sortBy just can apply for ngu and joinedAt(DaoMemberSince in UI)
+      description: for now sortBy just can apply for ngu and joined_at(DaoMemberSince in UI)
       parameters:
         - in: path
           name: platformId
@@ -540,7 +260,7 @@ paths:
           required: false
           schema:
             type: string
-            example: 'joinedAt:desc,ngu:asc'
+            example: 'joined_at:desc,ngu:asc'
         - in: query
           name: limit
           required: false
@@ -557,28 +277,6 @@ paths:
             format: int32
             example: 2
             default: 1
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                allRoles:
-                  type: boolean
-                  default: true
-                include:
-                  type: array
-                  items:
-                    type: string
-                    description: role id
-                exclude:
-                  type: array
-                  items:
-                    type: string
-                    description: role id
-              example:
-                allRoles: false
-                exclude: ['123456', '654321']
       responses:
         '200':
           description: OK
@@ -592,41 +290,23 @@ paths:
                     items:
                       type: object
                       properties:
+                        id:
+                          type: integer
                         username:
                           type: string
                           example: 'Behzad_Rabiei'
                         ngu:
                           type: string
                           example: 'Behzad'
-                        nickname:
-                          type: string
-                          example: 'Behzad'
-                        globalName:
-                          type: string
-                          example: 'Behzad'
                         avatar:
                           type: string
                           example: 'b50adff099924dd5e6b72d13f77eb9d7'
-                        roles:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              roleId:
-                                type: string
-                                example: 'discordRoleId1'
-                              name:
-                                type: string
-                                example: 'role1'
-                              color:
-                                type: string
-                                example: '#000000'
                         activityComposition:
                           type: array
                           items:
                             type: string
                           example: ['Newly active', 'Vital']
-                        joinedAt:
+                        joined_at:
                           type: string
                           format: date-time
                           example: '2022-05-30T15:46:52.924+00:00'
@@ -651,14 +331,14 @@ paths:
         '404':
           description: NotFound
           $ref: '#/components/responses/NotFound'
-  /api/v1/member-activity/{platformId}/active-members-onboarding-table:
+  /api/v1/telegram/member-activity/{platformId}/active-members-onboarding-table:
     post:
       tags:
-        - [Member-Activity]
-      summary: Get data for active members onboarding table - Discord, Discourse and Telegram 
+        - [Telegram]
+      summary: Get data for active members onboarding table
       security:
         - bearerAuth: []
-      description: for now sortBy just can apply for ngu and joinedAt(DaoMemberSince in UI)
+      description: for now sortBy just can apply for ngu and joined_at(DaoMemberSince in UI)
       parameters:
         - in: path
           name: platformId
@@ -685,7 +365,7 @@ paths:
           required: false
           schema:
             type: string
-            example: 'joinedAt:desc,ngu:asc'
+            example: 'joined_at:desc,ngu:asc'
         - in: query
           name: limit
           required: false
@@ -702,28 +382,7 @@ paths:
             format: int32
             example: 2
             default: 1
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                allRoles:
-                  type: boolean
-                  default: true
-                include:
-                  type: array
-                  items:
-                    type: string
-                    description: role id
-                exclude:
-                  type: array
-                  items:
-                    type: string
-                    description: role id
-              example:
-                allRoles: false
-                exclude: ['123456', '654321']
+
       responses:
         '200':
           description: OK
@@ -737,41 +396,23 @@ paths:
                     items:
                       type: object
                       properties:
+                        id:
+                          type: integer
                         username:
                           type: string
                           example: 'Behzad_Rabiei'
                         ngu:
                           type: string
                           example: 'Behzad'
-                        nickname:
-                          type: string
-                          example: 'Behzad'
-                        globalName:
-                          type: string
-                          example: 'Behzad'
                         avatar:
                           type: string
                           example: 'b50adff099924dd5e6b72d13f77eb9d7'
-                        roles:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              roleId:
-                                type: string
-                                example: 'discordRoleId1'
-                              name:
-                                type: string
-                                example: 'role1'
-                              color:
-                                type: string
-                                example: '#000000'
                         activityComposition:
                           type: array
                           items:
                             type: string
                           example: ['Newly active', 'Dropped']
-                        joinedAt:
+                        joined_at:
                           type: string
                           format: date-time
                           example: '2022-05-30T15:46:52.924+00:00'
@@ -796,14 +437,14 @@ paths:
         '404':
           description: NotFound
           $ref: '#/components/responses/NotFound'
-  /api/v1/member-activity/{platformId}/disengaged-members-composition-table:
+  /api/v1/telegram/member-activity/{platformId}/disengaged-members-composition-table:
     post:
       tags:
-        - [Member-Activity]
-      summary: Get data for disengaged members composition table - Discord, Discourse and Telegram 
+        - [Telegram]
+      summary: Get data for disengaged members composition table
       security:
         - bearerAuth: []
-      description: for now sortBy just can apply for ngu and joinedAt(DaoMemberSince in UI)
+      description: for now sortBy just can apply for ngu and joined_at(DaoMemberSince in UI)
       parameters:
         - in: path
           name: platformId
@@ -839,7 +480,7 @@ paths:
           required: false
           schema:
             type: string
-            example: 'joinedAt:desc,ngu:asc'
+            example: 'joined_at:desc,ngu:asc'
         - in: query
           name: limit
           required: false
@@ -856,28 +497,6 @@ paths:
             format: int32
             example: 2
             default: 1
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                allRoles:
-                  type: boolean
-                  default: true
-                include:
-                  type: array
-                  items:
-                    type: string
-                    description: role id
-                exclude:
-                  type: array
-                  items:
-                    type: string
-                    description: role id
-              example:
-                allRoles: false
-                exclude: ['123456', '654321']
       responses:
         '200':
           description: OK
@@ -891,41 +510,23 @@ paths:
                     items:
                       type: object
                       properties:
+                        id:
+                          type: integer
                         username:
                           type: string
                           example: 'Behzad_Rabiei'
                         ngu:
                           type: string
                           example: 'Behzad'
-                        nickname:
-                          type: string
-                          example: 'Behzad'
-                        globalName:
-                          type: string
-                          example: 'Behzad'
                         avatar:
                           type: string
                           example: 'b50adff099924dd5e6b72d13f77eb9d7'
-                        roles:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              roleId:
-                                type: string
-                                example: 'discordRoleId1'
-                              name:
-                                type: string
-                                example: 'role1'
-                              color:
-                                type: string
-                                example: '#000000'
                         activityComposition:
                           type: array
                           items:
                             type: string
                           example: ['Were vital members', 'Were newly active']
-                        joinedAt:
+                        joined_at:
                           type: string
                           format: date-time
                           example: '2022-05-30T15:46:52.924+00:00'
