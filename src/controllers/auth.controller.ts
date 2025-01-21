@@ -1,13 +1,13 @@
-import httpStatus from 'http-status';
 import { Request, Response } from 'express';
-import config from '../config';
-import { discord } from '../config/oAtuh2';
-import { userService, authService, tokenService, discordServices } from '../services';
-import { catchAsync } from '../utils';
+import httpStatus from 'http-status';
 import querystring from 'querystring';
-import { generateState } from '../config/oAtuh2';
-import { ISessionRequest } from '../interfaces';
+
+import config from '../config';
 import logger from '../config/logger';
+import { discord, generateState } from '../config/oAtuh2';
+import { ISessionRequest } from '../interfaces';
+import { authService, discordServices, tokenService, userService } from '../services';
+import { catchAsync } from '../utils';
 
 const discordAuthorize = catchAsync(async function (req: ISessionRequest, res: Response) {
   const state = generateState();
@@ -78,9 +78,14 @@ const generateToken = catchAsync(async function (req: Request, res: Response) {
   res.send(token);
 });
 
+const telegramAuthorizeCallback = catchAsync(async function (req: Request, res: Response) {
+  console.log(req.body, req.query, req.params);
+  res.send('Hi');
+});
 export default {
   discordAuthorize,
   discordAuthorizeCallback,
+  telegramAuthorizeCallback,
   refreshTokens,
   logout,
   generateToken,
