@@ -2,11 +2,13 @@ import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import querystring from 'querystring';
 
+import { PlatformNames } from '@togethercrew.dev/db';
+
 import config from '../config';
 import logger from '../config/logger';
 import { discord, generateState } from '../config/oAtuh2';
 import { ISessionRequest } from '../interfaces';
-import { authService, discordServices, tokenService, userService } from '../services';
+import { authService, discordServices, tokenService } from '../services';
 import { catchAsync } from '../utils';
 
 const discordAuthorize = catchAsync(async function (req: ISessionRequest, res: Response) {
@@ -18,47 +20,27 @@ const discordAuthorize = catchAsync(async function (req: ISessionRequest, res: R
 });
 
 const discordAuthorizeCallback = catchAsync(async function (req: ISessionRequest, res: Response) {
-  const STATUS_CODE_SINGIN = 1001;
-  const STATUS_CODE_LOGIN = 1002;
-  const STATUS_CODE_ERROR = 1003;
-  const code = req.query.code as string;
-  const returnedState = req.query.state as string;
-  const storedState = req.session.state;
-  let statusCode = STATUS_CODE_LOGIN;
   try {
-    if (!code || !returnedState || returnedState !== storedState) {
-      throw new Error('Invalid code or state mismatch');
-    }
-    const discordOathCallback = await discordServices.coreService.exchangeCode(
+    const code = req.query.code as string;
+    const returnedState = req.query.state as string;
+    const storedState = req.session.state;
+    const provider = PlatformNames.Discord;
+
+    const redirectUrl = await discordServices.authService.handleOAuthCallback(provider, {
       code,
-      config.oAuth2.discord.callbackURI.authorize,
-    );
-    const discordUser = await discordServices.coreService.getUserFromDiscordAPI(discordOathCallback.access_token);
-    let user = await userService.getUserByFilter({ discordId: discordUser.id });
+      state: returnedState,
+      storedState,
+    });
 
-    if (!user) {
-      user = await userService.createUser({ discordId: discordUser.id });
-      statusCode = STATUS_CODE_SINGIN;
-    }
-    tokenService.saveDiscordOAuth2Tokens(user.id, discordOathCallback);
-    const tokens = await tokenService.generateAuthTokens(user);
-    const params = {
-      statusCode: statusCode,
-      accessToken: tokens.access.token,
-      accessExp: tokens.access.expires.toString(),
-      refreshToken: tokens.refresh.token,
-      refreshExp: tokens.refresh.expires.toString(),
-    };
-    const query = querystring.stringify(params);
-    res.redirect(`${config.frontend.url}/callback?` + query);
+    res.redirect(redirectUrl);
   } catch (err) {
-    logger.error({ err }, 'Failed to authorize discord account');
+    logger.error({ err }, 'Failed to authorize Discord account');
 
     const params = {
-      statusCode: STATUS_CODE_ERROR,
+      statusCode: 1003,
     };
     const query = querystring.stringify(params);
-    res.redirect(`${config.frontend.url}/callback?` + query);
+    res.redirect(`${config.frontend.url}/callback?${query}`);
   }
 });
 

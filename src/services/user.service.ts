@@ -1,6 +1,8 @@
-import { HydratedDocument, Types } from 'mongoose';
 import httpStatus from 'http-status';
-import { User, IUser } from '@togethercrew.dev/db';
+import { HydratedDocument, Types } from 'mongoose';
+
+import { IIdentity, IUser, PlatformNames, User } from '@togethercrew.dev/db';
+
 import ApiError from '../utils/ApiError';
 
 /**
@@ -88,6 +90,67 @@ const addCommunityToUserById = async (userId: Types.ObjectId, communityId: Types
   return user;
 };
 
+/**
+ * Get user by provider and providerId
+ * @param {string} provider - The authentication provider (e.g., 'discord')
+ * @param {string} providerId - The unique ID from the provider
+ * @returns {Promise<HydratedDocument<IUser> | null>}
+ */
+const getUserByIdentity = async (provider: string, providerId: string): Promise<HydratedDocument<IUser> | null> => {
+  return User.findOne({
+    identities: {
+      $elemMatch: { provider, id: providerId },
+    },
+  });
+};
+
+/**
+ * Create a user with a specific identity
+ * @param {string} provider - The authentication provider (e.g., 'discord')
+ * @param {string} providerId - The unique ID from the provider
+ * @param {Partial<IUser>} additionalData - Any additional user data
+ * @returns {Promise<HydratedDocument<IUser>>}
+ */
+const createUserWithIdentity = async (
+  provider: PlatformNames,
+  userId: string,
+  additionalData: Partial<IUser> = {},
+): Promise<HydratedDocument<IUser>> => {
+  const userBody: IUser = {
+    identities: [
+      {
+        provider,
+        id: userId,
+      },
+    ],
+    ...additionalData,
+  };
+  return createUser(userBody);
+};
+
+/**
+ * Add a new identity to an existing user
+ * @param {Types.ObjectId} userId
+ * @param {IIdentity} identity
+ * @returns {Promise<HydratedDocument<IUser>>}
+ */
+const addIdentityToUser = async (userId: Types.ObjectId, identity: IIdentity): Promise<HydratedDocument<IUser>> => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  const existingIdentity = user.identities.find((id) => id.provider === identity.provider && id.id === identity.id);
+
+  if (existingIdentity) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Identity already exists for this user');
+  }
+
+  user.identities.push(identity);
+  await user.save();
+  return user;
+};
+
 export default {
   createUser,
   getUserById,
@@ -96,4 +159,7 @@ export default {
   updateUserById,
   deleteUserById,
   addCommunityToUserById,
+  getUserByIdentity,
+  createUserWithIdentity,
+  addIdentityToUser,
 };
