@@ -151,6 +151,16 @@ const addIdentityToUser = async (userId: Types.ObjectId, identity: IIdentity): P
   return user;
 };
 
+/**
+ * Get a specific identity from a user's identities by provider.
+ * @param {IIdentity[]} identities - The list of user identities.
+ * @param {PlatformNames} provider - The provider name to search for.
+ * @returns {IIdentity | undefined} - The matching identity or undefined if not found.
+ */
+const getIdentityByProvider = (identities: IIdentity[], provider: PlatformNames): IIdentity | undefined => {
+  return identities.find((identity) => identity.provider === provider);
+};
+
 export default {
   createUser,
   getUserById,
@@ -162,4 +172,5 @@ export default {
   getUserByIdentity,
   createUserWithIdentity,
   addIdentityToUser,
+  getIdentityByProvider,
 };

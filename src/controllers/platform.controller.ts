@@ -1,24 +1,26 @@
 import { Response } from 'express';
-import {
-  platformService,
-  twitterService,
-  discordServices,
-  googleService,
-  userService,
-  tokenService,
-  githubService,
-  notionService,
-  discourseService,
-} from '../services';
-import { IAuthRequest } from '../interfaces/Request.interface';
-import { catchAsync, pick, ApiError } from '../utils';
-import { generateState, generateCodeVerifier, generateCodeChallenge, twitter, discord, google } from '../config/oAtuh2';
-import { ISessionRequest, IAuthAndPlatform } from '../interfaces';
-import config from '../config';
 import httpStatus from 'http-status';
 import querystring from 'querystring';
+
+import { DatabaseManager, PlatformNames } from '@togethercrew.dev/db';
+
+import config from '../config';
 import parentLogger from '../config/logger';
-import { PlatformNames, DatabaseManager } from '@togethercrew.dev/db';
+import { discord, generateCodeChallenge, generateCodeVerifier, generateState, google, twitter } from '../config/oAtuh2';
+import { IAuthAndPlatform, ISessionRequest } from '../interfaces';
+import { IAuthRequest } from '../interfaces/Request.interface';
+import {
+  discordServices,
+  discourseService,
+  githubService,
+  googleService,
+  notionService,
+  platformService,
+  tokenService,
+  twitterService,
+  userService,
+} from '../services';
+import { ApiError, catchAsync, pick } from '../utils';
 
 const logger = parentLogger.child({ module: 'PlatformController' });
 
@@ -321,24 +323,14 @@ const getPlatform = catchAsync(async function (req: IAuthRequest, res: Response)
   res.send(platform);
 });
 const updatePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
-  if (
-    req.platform.name === PlatformNames.Discord &&
-    req.platform.metadata?.isInProgress &&
-    (req.body.metadata.selectedChannels || req.body.metadata.period)
-  ) {
-    throw new ApiError(
-      httpStatus.BAD_REQUEST,
-      'Updating channels or date period is not allowed during server analysis.',
-    );
+  validatePlatformUpdate(req.platform, req.body);
+  if (req.platform.name === PlatformNames.Discord) {
+    const discordIdentity = userService.getIdentityByProvider(req.user.identities, PlatformNames.Discord);
+    if (discordIdentity) {
+      await platformService.notifyDiscordUserImportComplete(req.platform.id, discordIdentity.id);
+    }
   }
-
-  if (req.platform.name === PlatformNames.Discord && req.platform.metadata?.isFetchingInitialData) {
-    throw new ApiError(
-      httpStatus.BAD_REQUEST,
-      'Updating channels or date periods is not allowed during the initial fetching of the server.',
-    );
-  }
-  const platform = await platformService.updatePlatform(req.platform, req.body, req.user.discordId);
+  const platform = await platformService.updatePlatform(req.platform, req.body);
   res.send(platform);
 });
 const deletePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
@@ -392,6 +384,23 @@ const requestAccess = catchAsync(async function (req: ISessionRequest, res: Resp
     res.redirect(discordUrl);
   }
 });
+const validatePlatformUpdate = (platform: IAuthAndPlatform['platform'], body: IAuthAndPlatform['body']) => {
+  if (platform.name !== PlatformNames.Discord) return;
+
+  if (platform.metadata?.isInProgress && (body.metadata?.selectedChannels || body.metadata?.period)) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      'Updating channels or date period is not allowed during server analysis.',
+    );
+  }
+
+  if (platform.metadata?.isFetchingInitialData && (body.metadata?.selectedChannels || body.metadata?.period)) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      'Updating channels or date periods is not allowed during the initial fetching of the server.',
+    );
+  }
+};
 
 export default {
   createPlatform,

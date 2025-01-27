@@ -1,12 +1,16 @@
-import { HydratedDocument, Types, FilterQuery } from 'mongoose';
-import httpStatus from 'http-status';
-import { Platform, IPlatform } from '@togethercrew.dev/db';
-import ApiError from '../utils/ApiError';
-import sagaService from './saga.service';
-import discourseService from './discourse';
 import { Snowflake } from 'discord.js';
+import httpStatus from 'http-status';
+import { FilterQuery, HydratedDocument, Types } from 'mongoose';
+
+import { IPlatform, Platform, PlatformNames } from '@togethercrew.dev/db';
+
 import { analyzerAction, analyzerWindow } from '../config/analyzer.statics';
-import { PlatformNames } from '@togethercrew.dev/db';
+import parentLogger from '../config/logger';
+import ApiError from '../utils/ApiError';
+import discourseService from './discourse';
+import sagaService from './saga.service';
+
+const logger = parentLogger.child({ module: 'PlatformService' });
 
 /**
  * Create a platform
@@ -116,22 +120,12 @@ const updatePlatformByFilter = async (
 const updatePlatform = async (
   platform: HydratedDocument<IPlatform>,
   updateBody: Partial<IPlatform>,
-  userDiscordId?: Snowflake,
 ): Promise<HydratedDocument<IPlatform>> => {
   if (updateBody.metadata) {
     updateBody.metadata = {
       ...platform.metadata,
       ...updateBody.metadata,
     };
-  }
-  if ((updateBody.metadata?.period || updateBody.metadata?.selectedChannels) && userDiscordId) {
-    await sagaService.createAndStartGuildSaga(platform._id, {
-      created: false,
-      discordId: userDiscordId,
-      message:
-        'Your data import into TogetherCrew is complete! See your insights on your dashboard https://app.togethercrew.com/. If you have questions send a DM to katerinabc (Discord) or k_bc0 (Telegram).',
-      useFallback: true,
-    });
   }
 
   Object.assign(platform, updateBody);
@@ -266,6 +260,32 @@ const managePlatformConnection = async (
   );
 };
 
+/**
+ * Sends a notification to the discord user upon successful data import.
+ *
+ * @param platformId - The ID of the platform.
+ * @param userDiscordId - The Discord ID of the user.
+ */
+const notifyDiscordUserImportComplete = async (platformId: Types.ObjectId, userDiscordId: Snowflake): Promise<void> => {
+  const IMPORT_COMPLETE_MESSAGE = `
+Your data import into TogetherCrew is complete! 
+See your insights on your dashboard: https://app.togethercrew.com/. 
+If you have questions, send a DM to katerinabc (Discord) or k_bc0 (Telegram).
+`;
+
+  try {
+    await sagaService.createAndStartGuildSaga(platformId, {
+      created: false,
+      discordId: userDiscordId,
+      message: IMPORT_COMPLETE_MESSAGE.trim(),
+      useFallback: true,
+    });
+    logger.info(`Notification sent to Discord ID: ${userDiscordId}`);
+  } catch (error) {
+    logger.error(error, `Failed to send notification to Discord ID: ${userDiscordId}`);
+  }
+};
+
 export default {
   createPlatform,
   getPlatformById,
@@ -277,4 +297,5 @@ export default {
   deletePlatformByFilter,
   managePlatformConnection,
   callExtractionApp,
+  notifyDiscordUserImportComplete,
 };
