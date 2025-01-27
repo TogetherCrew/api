@@ -1,19 +1,33 @@
-import { HydratedDocument, Types } from 'mongoose';
-import { ICommunity, IPlatform, IUser, PlatformNames, DatabaseManager } from '@togethercrew.dev/db';
-import { discordServices, platformService } from '../services';
+import { HydratedDocument } from 'mongoose';
+
+import { DatabaseManager, ICommunity, IUser, PlatformNames } from '@togethercrew.dev/db';
+
 import { UserRole } from '../interfaces';
+import { discordServices, platformService, userService } from '../services';
+
 /**
  * Get user roles in a community
  * @param {HydratedDocument<IUser>} user
- * @param {HydratedDocument<ICommunity>} communityId
- * @returns {Promise<HydratedDocument<IPlatform>>}
+ * @param {HydratedDocument<ICommunity>} community
+ * @returns {Promise<UserRole[]>}
  */
-async function getUserRolesForCommunity(user: HydratedDocument<IUser>, community: HydratedDocument<ICommunity>) {
+async function getUserRolesForCommunity(
+  user: HydratedDocument<IUser>,
+  community: HydratedDocument<ICommunity>,
+): Promise<UserRole[]> {
   let userRoles: UserRole[] = [];
+
+  const discordIdentity = userService.getIdentityByProvider(user.identities, PlatformNames.Discord);
+
   if (community !== null) {
     if (community.users.some((id) => id.equals(user.id))) {
       userRoles.push('admin');
+
+      if (!discordIdentity) {
+        return userRoles;
+      }
     }
+
     const connectedPlatformDoc = await platformService.getPlatformByFilter({
       community: community.id,
       disconnectedAt: null,
@@ -21,8 +35,13 @@ async function getUserRolesForCommunity(user: HydratedDocument<IUser>, community
     });
     if (connectedPlatformDoc !== null) {
       const guildConnection = await DatabaseManager.getInstance().getGuildDb(connectedPlatformDoc.metadata?.id);
+
+      if (!discordIdentity) {
+        return userRoles;
+      }
+
       const guildMemberDoc = await discordServices.guildMemberService.getGuildMember(guildConnection, {
-        discordId: user.discordId,
+        discordId: discordIdentity.id,
       });
       if (community.roles) {
         for (let i = 0; i < community.roles?.length; i++) {
