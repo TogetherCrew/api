@@ -2,13 +2,11 @@ import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import querystring from 'querystring';
 
-import { PlatformNames } from '@togethercrew.dev/db';
-
 import config from '../config';
 import logger from '../config/logger';
 import { discord, generateState } from '../config/oAtuh2';
-import { ISessionRequest } from '../interfaces';
-import { authService, discordServices, tokenService } from '../services';
+import { ISessionRequest, TelegramCallbackParams } from '../interfaces';
+import { authService, discordServices, telegramService, tokenService } from '../services';
 import { catchAsync } from '../utils';
 
 const discordAuthorize = catchAsync(async function (req: ISessionRequest, res: Response) {
@@ -24,9 +22,7 @@ const discordAuthorizeCallback = catchAsync(async function (req: ISessionRequest
     const code = req.query.code as string;
     const returnedState = req.query.state as string;
     const storedState = req.session.state;
-    const provider = PlatformNames.Discord;
-
-    const redirectUrl = await discordServices.authService.handleOAuthCallback(provider, {
+    const redirectUrl = await discordServices.authService.handleOAuthCallback({
       code,
       state: returnedState,
       storedState,
@@ -35,9 +31,25 @@ const discordAuthorizeCallback = catchAsync(async function (req: ISessionRequest
     res.redirect(redirectUrl);
   } catch (err) {
     logger.error({ err }, 'Failed to authorize Discord account');
-
     const params = {
       statusCode: 1003,
+    };
+    const query = querystring.stringify(params);
+    res.redirect(`${config.frontend.url}/callback?${query}`);
+  }
+});
+
+const telegramAuthorizeCallback = catchAsync(async function (req: Request, res: Response) {
+  try {
+    const params: TelegramCallbackParams = req.query as unknown as TelegramCallbackParams;
+
+    const redirectUrl = await telegramService.authService.handleOAuthCallback(params);
+    res.redirect(redirectUrl);
+  } catch (err) {
+    logger.error({ err }, 'Failed to authorize Telegram account');
+
+    const params = {
+      statusCode: 1012,
     };
     const query = querystring.stringify(params);
     res.redirect(`${config.frontend.url}/callback?${query}`);
@@ -60,10 +72,6 @@ const generateToken = catchAsync(async function (req: Request, res: Response) {
   res.send(token);
 });
 
-const telegramAuthorizeCallback = catchAsync(async function (req: Request, res: Response) {
-  console.log(req.body, req.query, req.params);
-  res.send('Hi');
-});
 export default {
   discordAuthorize,
   discordAuthorizeCallback,

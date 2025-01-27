@@ -16,7 +16,7 @@ interface OAuthCallbackParams {
   storedState: string;
 }
 
-const handleOAuthCallback = async (provider: PlatformNames, params: OAuthCallbackParams) => {
+const handleOAuthCallback = async (params: OAuthCallbackParams) => {
   const { code, state: returnedState, storedState } = params;
   let statusCode = STATUS_CODE_LOGIN;
 
@@ -28,9 +28,9 @@ const handleOAuthCallback = async (provider: PlatformNames, params: OAuthCallbac
   const discordUser = await coreService.getUserFromDiscordAPI(oauthCallbackData.access_token);
 
   const userId = discordUser.id;
-  let user = await userService.getUserByIdentity(provider, userId);
+  let user = await userService.getUserByIdentity(PlatformNames.Discord, userId);
   if (!user) {
-    user = await userService.createUserWithIdentity(provider, userId);
+    user = await userService.createUserWithIdentity(PlatformNames.Discord, userId);
     statusCode = STATUS_CODE_SIGNIN;
   }
   tokenService.saveDiscordOAuth2Tokens(user.id, oauthCallbackData);

@@ -13,6 +13,7 @@ const envVarsSchema = Joi.object()
     RABBIT_PORT: Joi.string().required().description('RabbitMQ port'),
     RABBIT_USER: Joi.string().required().description('RabbitMQ username'),
     RABBIT_PASSWORD: Joi.string().required().description('RabbitMQ password'),
+    TELEGRAM_BOT_TOKEN: Joi.string().required().description('Telegram bot token'),
     DISCORD_CLIENT_ID: Joi.string().required().description('Discord clinet id'),
     DISCORD_CLIENT_SECRET: Joi.string().required().description('Discord clinet secret'),
     DISCORD_BOT_TOKEN: Joi.string().required().description('Discord bot token'),
@@ -133,6 +134,9 @@ export default {
       callbackURI: {
         connect: envVars.NOTION_CONNECT_CALLBACK_URI,
       },
+    },
+    telegram: {
+      botToken: envVars.TELEGRAM_BOT_TOKEN,
     },
   },
   jwt: {

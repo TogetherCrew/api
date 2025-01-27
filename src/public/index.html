@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Telegram Login</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f4f4f4;
+      }
+      .container {
+        text-align: center;
+      }
+      h1 {
+        margin-bottom: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Login with Telegram</h1>
+      <p>Click the button below to log in using your Telegram account:</p>
+
+      <script
+        async
+        src="https://telegram.org/js/telegram-widget.js?22"
+        data-telegram-login="Togethercrew_Staging_Bot"
+        data-size="large"
+        data-auth-url="https://cruel-keys-wait.loca.lt/api/v1/auth/telegram/authorize/callback"
+        data-request-access="write"
+      ></script>
+    </div>
+  </body>
+</html>
