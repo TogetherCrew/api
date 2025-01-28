@@ -6,19 +6,14 @@ import { DatabaseManager, PlatformNames } from '@togethercrew.dev/db';
 
 import config from '../config';
 import parentLogger from '../config/logger';
-import { discord, generateCodeChallenge, generateCodeVerifier, generateState, google, twitter } from '../config/oAtuh2';
+import {
+    discord, generateCodeChallenge, generateCodeVerifier, generateState, google, twitter
+} from '../config/oAtuh2';
 import { IAuthAndPlatform, ISessionRequest } from '../interfaces';
 import { IAuthRequest } from '../interfaces/Request.interface';
 import {
-  discordServices,
-  discourseService,
-  githubService,
-  googleService,
-  notionService,
-  platformService,
-  tokenService,
-  twitterService,
-  userService,
+    discordServices, discourseService, githubService, googleService, notionService, platformService,
+    tokenService, twitterService, userService
 } from '../services';
 import { ApiError, catchAsync, pick } from '../utils';
 
@@ -327,7 +322,6 @@ const updatePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Re
   if (req.platform.name === PlatformNames.Discord) {
     const discordIdentity = userService.getIdentityByProvider(req.user.identities, PlatformNames.Discord);
     if (discordIdentity) {
-      console.log(req.platform.id, discordIdentity.id);
       await platformService.notifyDiscordUserImportComplete(req.platform.id, discordIdentity.id);
     }
   }

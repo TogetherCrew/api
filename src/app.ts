@@ -5,7 +5,6 @@ import session from 'express-session';
 import helmet from 'helmet';
 import httpStatus from 'http-status';
 import passport from 'passport';
-import path from 'path';
 
 import { bullBoardServerAdapter } from './bullmq';
 import config from './config';
@@ -45,8 +44,6 @@ app.use(
     saveUninitialized: true,
   }),
 );
-
-app.use(express.static(path.join(__dirname, 'public')));
 
 // jwt authentication
 app.use(passport.initialize());
