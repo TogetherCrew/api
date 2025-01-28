@@ -327,6 +327,7 @@ const updatePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Re
   if (req.platform.name === PlatformNames.Discord) {
     const discordIdentity = userService.getIdentityByProvider(req.user.identities, PlatformNames.Discord);
     if (discordIdentity) {
+      console.log(req.platform.id, discordIdentity.id);
       await platformService.notifyDiscordUserImportComplete(req.platform.id, discordIdentity.id);
     }
   }
