@@ -1,17 +1,18 @@
-import express, { Application } from 'express';
-import helmet from 'helmet';
 import compression from 'compression';
-import passport from 'passport';
-import { jwtStrategy } from './config/passport';
 import cors from 'cors';
-import httpStatus from 'http-status';
-import { error, sentry } from './middlewares';
-import { ApiError } from './utils';
-import routes from './routes/v1';
-import morgan from './config/morgan';
-import config from './config';
+import express, { Application } from 'express';
 import session from 'express-session';
+import helmet from 'helmet';
+import httpStatus from 'http-status';
+import passport from 'passport';
+
 import { bullBoardServerAdapter } from './bullmq';
+import config from './config';
+import morgan from './config/morgan';
+import { jwtStrategy } from './config/passport';
+import { error, sentry } from './middlewares';
+import routes from './routes/v1';
+import { ApiError } from './utils';
 
 const app: Application = express();
 

@@ -1,9 +1,9 @@
 {
-  "lastRun": "1720532975152-add-isfetchingintialdata.ts",
+  "lastRun": "1738072787796-update-user-documents-for-telegram-login.ts",
   "migrations": [
     {
-      "title": "1720532975152-add-isfetchingintialdata.ts",
-      "timestamp": 1720533282435
+      "title": "1738072787796-update-user-documents-for-telegram-login.ts",
+      "timestamp": 1738073593695
     }
   ]
 }

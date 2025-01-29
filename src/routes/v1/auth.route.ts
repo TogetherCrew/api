@@ -9,7 +9,7 @@ const router = express.Router();
 // Routes
 router.get('/discord/authorize', authController.discordAuthorize);
 router.get('/discord/authorize/callback', authController.discordAuthorizeCallback);
-router.get('/telegram/authorize/callback', authController.discordAuthorizeCallback);
+router.get('/telegram/authorize/callback', authController.telegramAuthorizeCallback);
 
 router.post('/generate-token', auth(), validate(authValidation.generateToken), authController.generateToken);
 router.post('/logout', validate(authValidation.logout), authController.logout);
