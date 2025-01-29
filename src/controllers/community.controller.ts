@@ -1,9 +1,11 @@
 import { Response } from 'express';
-import { communityService, userService, platformService, discordServices, moduleService } from '../services';
-import { IAuthRequest } from '../interfaces/Request.interface';
-import { catchAsync, pick, ApiError, roleUtil } from '../utils';
 import httpStatus from 'http-status';
+
 import { PlatformNames } from '@togethercrew.dev/db';
+
+import { IAuthRequest } from '../interfaces/Request.interface';
+import { communityService, discordServices, platformService, userService } from '../services';
+import { catchAsync, pick, roleUtil } from '../utils';
 
 const createCommunity = catchAsync(async function (req: IAuthRequest, res: Response) {
   const community = await communityService.createCommunity({ ...req.body, users: [req.user.id] });
@@ -13,6 +15,8 @@ const createCommunity = catchAsync(async function (req: IAuthRequest, res: Respo
 
 const getCommunities = catchAsync(async function (req: IAuthRequest, res: Response) {
   const filter = pick(req.query, ['name']);
+  const { includeAllCommunities } = req.query as { includeAllCommunities?: boolean };
+
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   if (filter.name) {
     filter.name = {
@@ -25,12 +29,37 @@ const getCommunities = catchAsync(async function (req: IAuthRequest, res: Respon
     select: '_id name metadata disconnectedAt createdAt updatedAt',
   };
 
-  const communities = await communityService.getCommunities({});
-  const userCommunities = await roleUtil.getUserCommunities(req.user, communities);
-  const communityIds = userCommunities.map((community) => community?.id);
-  filter._id = { $in: communityIds };
-  const result = await communityService.queryCommunities({ ...filter }, options);
-  res.send(result);
+  if (!includeAllCommunities) {
+    const allMatchedCommunities = await communityService.getCommunities(filter);
+
+    const userCommunities = await roleUtil.getUserCommunities(req.user, allMatchedCommunities);
+    const userCommunityIds = userCommunities.map((community) => community?.id);
+
+    filter._id = { $in: userCommunityIds };
+
+    const paginatedResult = await communityService.queryCommunities(filter, options);
+
+    paginatedResult.results = paginatedResult.results.map((communityDoc: any) => {
+      const docObj = communityDoc.toObject();
+      docObj.userHasAccess = true;
+      return docObj;
+    });
+
+    return res.status(httpStatus.OK).send(paginatedResult);
+  }
+
+  const paginatedAllCommunities = await communityService.queryCommunities(filter, options);
+
+  paginatedAllCommunities.results = await Promise.all(
+    paginatedAllCommunities.results.map(async (communityDoc: any) => {
+      const docObj = communityDoc.toObject();
+      const userRoles = await roleUtil.getUserRolesForCommunity(req.user, communityDoc);
+      docObj.userHasAccess = userRoles.length > 0;
+      return docObj;
+    }),
+  );
+
+  return res.status(httpStatus.OK).send(paginatedAllCommunities);
 });
 const getCommunity = catchAsync(async function (req: IAuthRequest, res: Response) {
   let community = req.community;
