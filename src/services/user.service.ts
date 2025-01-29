@@ -93,13 +93,13 @@ const addCommunityToUserById = async (userId: Types.ObjectId, communityId: Types
 /**
  * Get user by provider and providerId
  * @param {string} provider - The authentication provider (e.g., 'discord')
- * @param {string} providerId - The unique ID from the provider
+ * @param {string} userId - The unique ID from the provider
  * @returns {Promise<HydratedDocument<IUser> | null>}
  */
-const getUserByIdentity = async (provider: string, providerId: string): Promise<HydratedDocument<IUser> | null> => {
+const getUserByIdentity = async (provider: PlatformNames, userId: string): Promise<HydratedDocument<IUser> | null> => {
   return User.findOne({
     identities: {
-      $elemMatch: { provider, id: providerId },
+      $elemMatch: { provider, id: userId },
     },
   });
 };
@@ -107,7 +107,7 @@ const getUserByIdentity = async (provider: string, providerId: string): Promise<
 /**
  * Create a user with a specific identity
  * @param {string} provider - The authentication provider (e.g., 'discord')
- * @param {string} providerId - The unique ID from the provider
+ * @param {string} userId - The unique ID from the provider
  * @param {Partial<IUser>} additionalData - Any additional user data
  * @returns {Promise<HydratedDocument<IUser>>}
  */
