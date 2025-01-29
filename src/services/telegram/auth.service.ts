@@ -8,8 +8,8 @@ import { TelegramCallbackParams } from '../../interfaces';
 import tokenService from '../token.service';
 import userService from '../user.service';
 
-const STATUS_CODE_SIGNIN = 1010;
-const STATUS_CODE_LOGIN = 1011;
+const STATUS_CODE_SIGNIN = 1001;
+const STATUS_CODE_LOGIN = 1002;
 
 /**
  * Verifies the authorization hash provided by Telegram.

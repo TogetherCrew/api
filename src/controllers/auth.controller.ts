@@ -49,7 +49,7 @@ const telegramAuthorizeCallback = catchAsync(async function (req: Request, res: 
     logger.error({ err }, 'Failed to authorize Telegram account');
 
     const params = {
-      statusCode: 1012,
+      statusCode: 1003,
     };
     const query = querystring.stringify(params);
     res.redirect(`${config.frontend.url}/callback?${query}`);
