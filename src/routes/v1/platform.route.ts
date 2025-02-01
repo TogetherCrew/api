@@ -1,8 +1,9 @@
 import express from 'express';
+
 import { platformController } from '../../controllers';
+import { auth, validate } from '../../middlewares';
 import { platformValidation } from '../../validations';
 
-import { auth, validate } from '../../middlewares';
 const router = express.Router();
 
 // Routes
@@ -38,5 +39,12 @@ router
   .get(auth('admin', 'view'), validate(platformValidation.getPlatform), platformController.getPlatform)
   .patch(auth('admin'), validate(platformValidation.dynamicUpdatePlatform), platformController.updatePlatform)
   .delete(auth('admin'), validate(platformValidation.deletePlatform), platformController.deletePlatform);
+
+router.get(
+  '/:platformId/reputation-score',
+  auth(),
+  validate(platformValidation.getReputationScore),
+  platformController.getReputationScore,
+);
 
 export default router;

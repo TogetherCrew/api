@@ -1,18 +1,19 @@
 import express from 'express';
-import docsRoute from './docs.route';
-import authRoute from './auth.route';
-import userRoute from './user.route';
-import heatmapRoute from './heatmap.route';
-import notionRoute from './notion.route';
-import memberActivityRoute from './memberActivity.route';
-import communityRoute from './community.route';
-import platformRoute from './platform.route';
+
 import announcementRoute from './announcement.route';
+import authRoute from './auth.route';
 import categoryRoute from './category.route';
-import moduleRoute from './module.route';
+import communityRoute from './community.route';
 import discourseRoute from './discourse.route';
-import nftRoute from './nft.route';
+import docsRoute from './docs.route';
+import heatmapRoute from './heatmap.route';
+import memberActivityRoute from './memberActivity.route';
+import moduleRoute from './module.route';
+import notionRoute from './notion.route';
+import platformRoute from './platform.route';
 import telegramRoute from './telegram.route';
+import userRoute from './user.route';
+
 const router = express.Router();
 
 const defaultRoutes = [
@@ -64,10 +65,6 @@ const defaultRoutes = [
   {
     path: '/discourse',
     route: discourseRoute,
-  },
-  {
-    path: '/nft',
-    route: nftRoute,
   },
   {
     path: '/telegram',

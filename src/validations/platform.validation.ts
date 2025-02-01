@@ -1,9 +1,9 @@
-import Joi from 'joi';
 import { Request } from 'express';
-import { objectId } from './custom.validation';
-import { IAuthAndPlatform } from '../interfaces';
-import { Types } from 'mongoose';
+import Joi from 'joi';
+
 import { PlatformNames } from '@togethercrew.dev/db';
+
+import { objectId } from './custom.validation';
 
 const discordCreateMetadata = () => {
   return Joi.object().keys({
@@ -171,6 +171,12 @@ const getPlatform = {
   }),
 };
 
+const getReputationScore = {
+  params: Joi.object().keys({
+    platformId: Joi.string().custom(objectId),
+  }),
+};
+
 const deletePlatform = {
   params: Joi.object().keys({
     platformId: Joi.string().custom(objectId),
@@ -322,4 +328,5 @@ export default {
   dynamicUpdatePlatform,
   dynamicPlatformProperty,
   dynamicRequestAccess,
+  getReputationScore,
 };

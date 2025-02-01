@@ -1,17 +1,18 @@
 import { Snowflake } from 'discord.js';
 import httpStatus from 'http-status';
-import { FilterQuery, HydratedDocument, Types } from 'mongoose';
+import { FilterQuery, HydratedDocument, ObjectId, Types } from 'mongoose';
 
 import { IPlatform, Platform, PlatformNames } from '@togethercrew.dev/db';
 
 import { analyzerAction, analyzerWindow } from '../config/analyzer.statics';
 import parentLogger from '../config/logger';
+import { IAuthAndPlatform } from '../interfaces/Request.interface';
 import ApiError from '../utils/ApiError';
 import discourseService from './discourse';
+import reputationScoreService from './reputationScore.service';
 import sagaService from './saga.service';
 
 const logger = parentLogger.child({ module: 'PlatformService' });
-
 /**
  * Create a platform
  * @param {IPlatform} PlatformBody
@@ -285,7 +286,34 @@ If you have questions, send a DM to katerinabc (Discord) or k_bc0 (Telegram).
     logger.error(error, `Failed to send notification to Discord ID: ${userDiscordId}`);
   }
 };
+const validatePlatformUpdate = (platform: IAuthAndPlatform['platform'], body: IAuthAndPlatform['body']) => {
+  if (platform.name !== PlatformNames.Discord) return;
 
+  if (platform.metadata?.isInProgress && (body.metadata?.selectedChannels || body.metadata?.period)) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      'Updating channels or date period is not allowed during server analysis.',
+    );
+  }
+
+  if (platform.metadata?.isFetchingInitialData && (body.metadata?.selectedChannels || body.metadata?.period)) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      'Updating channels or date periods is not allowed during the initial fetching of the server.',
+    );
+  }
+};
+
+/**
+ * get reputation score
+ * @param {IPlatform} platform
+ * @param {IUser} user
+ */
+const getReputationScore = async (platform: HydratedDocument<IPlatform>, userId: ObjectId) => {
+  return {
+    reputationScore: (await reputationScoreService.calculateReputationScoreForUser(platform, userId)) * 100,
+  };
+};
 export default {
   createPlatform,
   getPlatformById,
@@ -298,4 +326,6 @@ export default {
   managePlatformConnection,
   callExtractionApp,
   notifyDiscordUserImportComplete,
+  validatePlatformUpdate,
+  getReputationScore,
 };
