@@ -42,7 +42,7 @@ router
 
 router.get(
   '/:platformId/reputation-score',
-  auth(),
+  auth('admin', 'view'),
   validate(platformValidation.getReputationScore),
   platformController.getReputationScore,
 );

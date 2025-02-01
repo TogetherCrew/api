@@ -1,10 +1,11 @@
-import passport, { use } from 'passport';
+import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
-import { ApiError, roleUtil, pick } from '../utils';
-import { Request, Response, NextFunction } from 'express';
-import { communityService, platformService, moduleService } from '../services';
 import { Types } from 'mongoose';
+import passport from 'passport';
+
 import { UserRole } from '../interfaces';
+import { communityService, moduleService, platformService } from '../services';
+import { ApiError, pick, roleUtil } from '../utils';
 
 const verifyCallback =
   (req: Request, resolve: Function, reject: Function, requiredRights: any) =>
