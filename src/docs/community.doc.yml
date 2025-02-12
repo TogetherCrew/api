@@ -20,28 +20,28 @@ paths:
                 tcaAt:
                   type: string
                   format: date-time
-                  description: term and condition accepted date 
+                  description: term and condition accepted date
               example:
                 name: community
                 avatarURL: path
                 tcaAt: 2023-10-31T12:48:55.432Z
       responses:
-        "201":
+        '201':
           description: Community created successfully.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Community"
-        "400":
+                $ref: '#/components/schemas/Community'
+        '400':
           description: Bad Request
-          $ref: "#/components/responses/BadRequest"
-        "401":
+          $ref: '#/components/responses/BadRequest'
+        '401':
           description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-        "404":
+          $ref: '#/components/responses/Unauthorized'
+        '404':
           description: NotFound
-          $ref: "#/components/responses/NotFound"
-        
+          $ref: '#/components/responses/NotFound'
+
     get:
       tags:
         - Community
@@ -55,6 +55,12 @@ paths:
           schema:
             type: string
           description: community name
+        - in: query
+          name: includeAllCommunities
+          schema:
+            type: boolean
+            default: false
+          description: to get all communities even user has no access to it
         - in: query
           name: sortBy
           schema:
@@ -75,7 +81,7 @@ paths:
             default: 1
           description: Page number
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -85,7 +91,7 @@ paths:
                   results:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Community"
+                      $ref: '#/components/schemas/Community'
                   page:
                     type: integer
                     example: 1
@@ -98,13 +104,12 @@ paths:
                   totalResults:
                     type: integer
                     example: 1
-        "400":
+        '400':
           description: Bad Request
-          $ref: "#/components/responses/BadRequest"
-        "401":
+          $ref: '#/components/responses/BadRequest'
+        '401':
           description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-
+          $ref: '#/components/responses/Unauthorized'
 
   /api/v1/communities/{communityId}:
     get:
@@ -121,23 +126,21 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Community details retrieved successfully.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Community"
-        "400":
+                $ref: '#/components/schemas/Community'
+        '400':
           description: Bad Request
-          $ref: "#/components/responses/BadRequest"
-        "401":
+          $ref: '#/components/responses/BadRequest'
+        '401':
           description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-        "404":
+          $ref: '#/components/responses/Unauthorized'
+        '404':
           description: NotFound
-          $ref: "#/components/responses/NotFound"
-
-
+          $ref: '#/components/responses/NotFound'
 
     patch:
       tags:
@@ -166,55 +169,53 @@ paths:
                 tcaAt:
                   type: string
                   format: date-time
-                  description: term and condition accepted date 
-                roles: 
-                    type: array
-                    description: Roles associated with the community for update.
-                    items:
-                      type: object
-                      properties:
-                        roleType:
-                          type: string
-                          enum: ['view', 'admin']
-                          description: Type of the role.
-                        source:
-                          type: object
-                          properties:
-                            platform:
+                  description: term and condition accepted date
+                roles:
+                  type: array
+                  description: Roles associated with the community for update.
+                  items:
+                    type: object
+                    properties:
+                      roleType:
+                        type: string
+                        enum: ['view', 'admin']
+                        description: Type of the role.
+                      source:
+                        type: object
+                        properties:
+                          platform:
+                            type: string
+                            enum: ['discord']
+                            description: Platform of the source.
+                          identifierType:
+                            type: string
+                            enum: ['member', 'role']
+                            description: Type of identifier used in the platform.
+                          identifierValues:
+                            type: array
+                            items:
                               type: string
-                              enum: ['discord']
-                              description: Platform of the source.
-                            identifierType:
-                              type: string
-                              enum: ['member', 'role']
-                              description: Type of identifier used in the platform.
-                            identifierValues:
-                              type: array
-                              items:
-                                type: string
-                              description: Values of the identifiers.
-                            platformId:
-                              type: string
-                              format: objectId
-                              description: ObjectId representing the platform ID.
+                            description: Values of the identifiers.
+                          platformId:
+                            type: string
+                            format: objectId
+                            description: ObjectId representing the platform ID.
       responses:
-        "200":
+        '200':
           description: Community updated successfully.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Community"
-        "400":
+                $ref: '#/components/schemas/Community'
+        '400':
           description: Bad Request
-          $ref: "#/components/responses/BadRequest"
-        "401":
+          $ref: '#/components/responses/BadRequest'
+        '401':
           description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-        "404":
+          $ref: '#/components/responses/Unauthorized'
+        '404':
           description: NotFound
-          $ref: "#/components/responses/NotFound"
-
-
+          $ref: '#/components/responses/NotFound'
 
     delete:
       tags:
@@ -230,13 +231,11 @@ paths:
           schema:
             type: string
       responses:
-        "204":
+        '204':
           description: Community deleted successfully.
-        "401":
+        '401':
           description: Unauthorized
-          $ref: "#/components/responses/Unauthorized"
-        "404":
+          $ref: '#/components/responses/Unauthorized'
+        '404':
           description: NotFound
-          $ref: "#/components/responses/NotFound"
-
-
+          $ref: '#/components/responses/NotFound'

@@ -64,6 +64,9 @@ components:
           type: string
           format: date-time
           description: disconnected date 
+        userHasAccess:
+          type: boolean
+          description: to determine the user access to the community
         roles:  
           type: array
           description: Roles associated with the community.

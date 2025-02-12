@@ -1,6 +1,8 @@
 import Joi from 'joi';
-import { objectId } from './custom.validation';
+
 import { PlatformNames } from '@togethercrew.dev/db';
+
+import { objectId } from './custom.validation';
 
 const createCommunity = {
   body: Joi.object().keys({
@@ -16,6 +18,7 @@ const getCommunities = {
     sortBy: Joi.string(),
     limit: Joi.number().integer(),
     page: Joi.number().integer(),
+    includeAllCommunities: Joi.boolean().default(false),
   }),
 };
 
