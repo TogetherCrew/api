@@ -6,19 +6,14 @@ import { DatabaseManager, PlatformNames } from '@togethercrew.dev/db';
 
 import config from '../config';
 import parentLogger from '../config/logger';
-import { discord, generateCodeChallenge, generateCodeVerifier, generateState, google, twitter } from '../config/oAtuh2';
+import {
+    discord, generateCodeChallenge, generateCodeVerifier, generateState, google, twitter
+} from '../config/oAtuh2';
 import { IAuthAndPlatform, ISessionRequest } from '../interfaces';
 import { IAuthRequest } from '../interfaces/Request.interface';
 import {
-  discordServices,
-  discourseService,
-  githubService,
-  googleService,
-  notionService,
-  platformService,
-  tokenService,
-  twitterService,
-  userService,
+    discordServices, discourseService, githubService, googleService, notionService, platformService,
+    tokenService, twitterService, userService
 } from '../services';
 import { catchAsync, pick } from '../utils';
 
@@ -26,7 +21,6 @@ const logger = parentLogger.child({ module: 'PlatformController' });
 
 const createPlatform = catchAsync(async function (req: IAuthRequest, res: Response) {
   const community = req.community;
-  console.log(req.body);
   const platform = await platformService.managePlatformConnection(community?.id, req.body);
   platformService.callExtractionApp(platform);
   res.status(httpStatus.CREATED).send(platform);

@@ -81,6 +81,15 @@ const callExtractionApp = async (platform: HydratedDocument<IPlatform>): Promise
       await platform.save();
       return;
     }
+    case PlatformNames.Website: {
+      const scheduleId = await discourseService.coreService.createDiscourseSchedule(
+        platform.id as string,
+        platform.metadata?.id as string,
+      );
+      platform.set('metadata.scheduleId', scheduleId);
+      await platform.save();
+      return;
+    }
     default: {
       return;
     }
