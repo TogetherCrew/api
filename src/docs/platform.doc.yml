@@ -69,6 +69,7 @@ paths:
                     - mediaWiki
                     - discourse
                     - telegram
+                    - website
                   description: Name of the platform to create. Must be one of the supported platforms.
                 community:
                   type: string
@@ -194,7 +195,17 @@ paths:
                       properties:
                         chat:
                           type: object
-                      description: Metadata for Telegram.
+                      description: Metadata for Website.
+                    - type: object
+                      required: [resources]
+                      properties:
+                        resources:
+                          type: array
+                          items:
+                            type: string
+                            format: uri
+                      description: Metadata for Website.
+
       responses:
         '201':
           description: Platform created successfully.
@@ -227,6 +238,8 @@ paths:
               - github
               - notion
               - mediaWiki
+              - telegram
+              - website
         - in: query
           name: community
           schema:
