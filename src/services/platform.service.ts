@@ -179,7 +179,7 @@ function getMetadataKey(platformName: string): string {
     case PlatformNames.Discourse:
       return 'id';
     default:
-      throw new Error('Unsupported platform');
+      return '';
   }
 }
 

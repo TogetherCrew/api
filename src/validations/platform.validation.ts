@@ -28,6 +28,12 @@ const discordUpdateMetadata = () => {
     analyzerStartedAt: Joi.date(),
   });
 };
+
+const websiteUpdateMetadata = () => {
+  return Joi.object().keys({
+    resources: Joi.array().items(Joi.string().uri({ scheme: ['http', 'https'] })),
+  });
+};
 const twitterMetadata = () => {
   return Joi.object().keys({
     id: Joi.string().required(),
@@ -92,6 +98,14 @@ const discourseMetadata = () => {
   });
 };
 
+const websiteMetadata = () => {
+  return Joi.object().keys({
+    resources: Joi.array()
+      .items(Joi.string().uri({ scheme: ['http', 'https'] }))
+      .required(),
+  });
+};
+
 const createPlatform = {
   body: Joi.object().keys({
     name: Joi.string()
@@ -131,6 +145,10 @@ const createPlatform = {
         {
           is: PlatformNames.Telegram,
           then: telegramMetadata,
+        },
+        {
+          is: PlatformNames.Website,
+          then: websiteMetadata,
         },
       ],
     }).required(),
@@ -198,6 +216,16 @@ const dynamicUpdatePlatform = (req: Request) => {
         }),
         body: Joi.object().required().keys({
           metadata: discordUpdateMetadata(),
+        }),
+      };
+    }
+    case PlatformNames.Website: {
+      return {
+        params: Joi.object().keys({
+          platformId: Joi.required().custom(objectId),
+        }),
+        body: Joi.object().required().keys({
+          metadata: websiteUpdateMetadata(),
         }),
       };
     }
