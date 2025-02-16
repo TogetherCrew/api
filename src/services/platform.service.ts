@@ -178,8 +178,10 @@ function getMetadataKey(platformName: string): string {
       return 'baseURL';
     case PlatformNames.Discourse:
       return 'id';
+    case PlatformNames.Website:
+      return 'resources';
     default:
-      return '';
+      throw new Error('Unsupported platform');
   }
 }
 
@@ -210,6 +212,7 @@ const managePlatformConnection = async (
   const activePlatformOtherCommunity = await Platform.findOne({
     community: { $ne: communityId },
     [`metadata.${metadataKey}`]: metadataId,
+    name: platformData.name,
   });
 
   if (activePlatformOtherCommunity) {

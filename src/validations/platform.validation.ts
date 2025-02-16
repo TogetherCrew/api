@@ -144,11 +144,11 @@ const createPlatform = {
         },
         {
           is: PlatformNames.Telegram,
-          then: telegramMetadata,
+          then: telegramMetadata(),
         },
         {
           is: PlatformNames.Website,
-          then: websiteMetadata,
+          then: websiteMetadata(),
         },
       ],
     }).required(),
