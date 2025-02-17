@@ -1,22 +1,22 @@
-import userService from './user.service';
+import announcementService from './announcement.service';
 import authService from './auth.service';
-import tokenService from './token.service';
+import communityService from './community.service';
+import discordServices from './discord';
+import discourseService from './discourse';
+import githubService from './github';
+import googleService from './google';
 import heatmapService from './heatmap.service';
 import memberActivityService from './memberActivity.service';
-import sagaService from './saga.service';
-import communityService from './community.service';
-import platformService from './platform.service';
-import twitterService from './twitter.service';
-import discordServices from './discord';
-import announcementService from './announcement.service';
 import moduleService from './module.service';
-import googleService from './google';
-import githubService from './github';
 import notionService from './notion';
-import discourseService from './discourse';
-import ociService from './oci.service';
-import nftService from './nft.service';
+import platformService from './platform.service';
+import reputationScoreService from './reputationScore.service';
+import sagaService from './saga.service';
 import telegramService from './telegram';
+import tokenService from './token.service';
+import twitterService from './twitter.service';
+import userService from './user.service';
+
 export {
   userService,
   authService,
@@ -34,7 +34,6 @@ export {
   githubService,
   notionService,
   discourseService,
-  ociService,
-  nftService,
   telegramService,
+  reputationScoreService,
 };

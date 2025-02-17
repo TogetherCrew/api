@@ -1,16 +1,15 @@
-import authController from './auth.controller';
-import userController from './user.controller';
-import heatmapController from './heatmap.controller';
-import notionController from './notion.controller';
-import memberActivityController from './memberActivity.controller';
-import communityController from './community.controller';
-import platformController from './platform.controller';
 import announcementController from './announcement.controller';
+import authController from './auth.controller';
 import categoryController from './category.controller';
-import moduleController from './module.controller';
+import communityController from './community.controller';
 import discourseController from './discourse.controller';
-import nftController from './nft.controller';
+import heatmapController from './heatmap.controller';
+import memberActivityController from './memberActivity.controller';
+import moduleController from './module.controller';
+import notionController from './notion.controller';
+import platformController from './platform.controller';
 import telegramController from './telegram.controller';
+import userController from './user.controller';
 
 export {
   authController,
@@ -24,6 +23,5 @@ export {
   categoryController,
   moduleController,
   discourseController,
-  nftController,
   telegramController,
 };

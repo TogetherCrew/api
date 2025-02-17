@@ -20,7 +20,7 @@ import {
   twitterService,
   userService,
 } from '../services';
-import { ApiError, catchAsync, pick } from '../utils';
+import { catchAsync, pick } from '../utils';
 
 const logger = parentLogger.child({ module: 'PlatformController' });
 
@@ -323,7 +323,7 @@ const getPlatform = catchAsync(async function (req: IAuthRequest, res: Response)
   res.send(platform);
 });
 const updatePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
-  validatePlatformUpdate(req.platform, req.body);
+  platformService.validatePlatformUpdate(req.platform, req.body);
   if (req.platform.name === PlatformNames.Discord) {
     const discordIdentity = userService.getIdentityByProvider(req.user.identities, PlatformNames.Discord);
     if (discordIdentity) {
@@ -384,23 +384,11 @@ const requestAccess = catchAsync(async function (req: ISessionRequest, res: Resp
     res.redirect(discordUrl);
   }
 });
-const validatePlatformUpdate = (platform: IAuthAndPlatform['platform'], body: IAuthAndPlatform['body']) => {
-  if (platform.name !== PlatformNames.Discord) return;
 
-  if (platform.metadata?.isInProgress && (body.metadata?.selectedChannels || body.metadata?.period)) {
-    throw new ApiError(
-      httpStatus.BAD_REQUEST,
-      'Updating channels or date period is not allowed during server analysis.',
-    );
-  }
-
-  if (platform.metadata?.isFetchingInitialData && (body.metadata?.selectedChannels || body.metadata?.period)) {
-    throw new ApiError(
-      httpStatus.BAD_REQUEST,
-      'Updating channels or date periods is not allowed during the initial fetching of the server.',
-    );
-  }
-};
+const getReputationScore = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
+  const reputationScore = await platformService.getReputationScore(req.platform, req.user.id);
+  res.send(reputationScore);
+});
 
 export default {
   createPlatform,
@@ -417,4 +405,5 @@ export default {
   getProperties,
   requestAccess,
   requestAccessCallback,
+  getReputationScore,
 };

@@ -448,7 +448,7 @@ paths:
                   description: Array of channel IDs (required if 'property' is 'channel').
       responses:
         '200':
-          description: Platformx properties retrieved successfully.
+          description: Platform properties retrieved successfully.
           content:
             application/json:
               schema:
@@ -559,3 +559,38 @@ paths:
         '302':
           description: Found - Redirect to Discord OAuth2 page if conditions are met.
           $ref: '#/components/responses/Found'
+  /api/v1/platforms/{platformId}/reputation-score:
+    get:
+      tags:
+        - Platform
+      summary: Retrieve reputation scores for given platformId.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: platformId
+          in: path
+          required: true
+          description: The ID of the platform
+          schema:
+            type: string
+            format: objectId
+      responses:
+        '200':
+          description: Platform created successfully.
+          content:
+            application/json:
+              schema:
+              type: object
+              properties:
+                reputationScore:
+                  type: integer
+                  example: 1
+        '400':
+          description: Bad Request
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: Unauthorized
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: NotFound
+          $ref: '#/components/responses/NotFound'
