@@ -1,6 +1,11 @@
+import parentLogger from 'src/config/logger';
+
 import { CalendarSpec, Client, ScheduleHandle, ScheduleOverlapPolicy } from '@temporalio/client';
-import { TemporalCoreService } from './core.service';
+
 import config from '../../config';
+import { TemporalCoreService } from './core.service';
+
+const logger = parentLogger.child({ module: 'DiscourseTemporalService' });
 
 class TemporalDiscourseService extends TemporalCoreService {
   public async createSchedule(platformId: string, endpoint: string): Promise<ScheduleHandle> {

@@ -1,42 +1,53 @@
+import { ObjectId } from 'mongoose';
+import parentLogger from 'src/config/logger';
+
 import { CalendarSpec, Client, ScheduleHandle, ScheduleOverlapPolicy } from '@temporalio/client';
 
 import config from '../../config';
 import { TemporalCoreService } from './core.service';
 
-class TemporalDiscourseService extends TemporalCoreService {
-  public async createSchedule(platformId: string, endpoint: string): Promise<ScheduleHandle> {
+const logger = parentLogger.child({ module: 'WebsiteTemporalService' });
+
+class TemporalWebsiteService extends TemporalCoreService {
+  public async createSchedule(platformId: ObjectId): Promise<ScheduleHandle> {
     const initiationTime = new Date();
+    const dayNumber = initiationTime.getUTCDay();
     const hour = initiationTime.getUTCHours();
     const minute = initiationTime.getUTCMinutes();
+    const DAY_NAMES = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'] as const;
+    const dayOfWeek = DAY_NAMES[dayNumber];
 
     const calendarSpec: CalendarSpec = {
+      dayOfWeek,
       hour,
       minute,
-      comment: `Daily schedule at ${hour}:${minute} UTC`,
+      comment: `Weekly schedule for ${dayOfWeek} at ${hour}:${minute} UTC`,
     };
 
     try {
       const client: Client = await this.getClient();
+
       return client.schedule.create({
+        scheduleId: `website/${platformId}`,
+        spec: {
+          calendars: [calendarSpec],
+        },
         action: {
           type: 'startWorkflow',
-          workflowType: 'DiscourseExtractWorkflow',
-          args: [{ endpoint, platformId }],
+          workflowType: 'WebsiteIngestionSchedulerWorkflow',
+          args: [{ platformId }],
           taskQueue: config.temporal.heavyQueue,
         },
-        scheduleId: `discourse/${encodeURIComponent(endpoint)}`,
         policies: {
           catchupWindow: '1 day',
           overlap: ScheduleOverlapPolicy.SKIP,
         },
-        spec: {
-          calendars: [calendarSpec],
-        },
       });
     } catch (error) {
-      throw new Error(`Failed to create Temporal schedule: ${(error as Error).message}`);
+      throw new Error(`Failed to create or update website ingestion schedule: ${(error as Error).message}`);
     }
   }
+
 
   public async pauseSchedule(scheduleId: string): Promise<void> {
     const client: Client = await this.getClient();
@@ -51,4 +62,4 @@ class TemporalDiscourseService extends TemporalCoreService {
   }
 }
 
-export default new TemporalDiscourseService();
+export default new TemporalWebsiteService();
