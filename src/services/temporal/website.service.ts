@@ -1,4 +1,4 @@
-import { ObjectId } from 'mongoose';
+import { Types } from 'mongoose';
 import parentLogger from 'src/config/logger';
 
 import { CalendarSpec, Client, ScheduleHandle, ScheduleOverlapPolicy } from '@temporalio/client';
@@ -9,7 +9,7 @@ import { TemporalCoreService } from './core.service';
 const logger = parentLogger.child({ module: 'WebsiteTemporalService' });
 
 class TemporalWebsiteService extends TemporalCoreService {
-  public async createSchedule(platformId: ObjectId): Promise<ScheduleHandle> {
+  public async createSchedule(platformId: Types.ObjectId): Promise<ScheduleHandle> {
     const initiationTime = new Date();
     const dayNumber = initiationTime.getUTCDay();
     const hour = initiationTime.getUTCHours();
@@ -47,7 +47,6 @@ class TemporalWebsiteService extends TemporalCoreService {
       throw new Error(`Failed to create or update website ingestion schedule: ${(error as Error).message}`);
     }
   }
-
 
   public async pauseSchedule(scheduleId: string): Promise<void> {
     const client: Client = await this.getClient();

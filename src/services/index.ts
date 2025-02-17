@@ -13,6 +13,7 @@ import platformService from './platform.service';
 import reputationScoreService from './reputationScore.service';
 import sagaService from './saga.service';
 import telegramService from './telegram';
+import websiteService from './temporal/website.service';
 import tokenService from './token.service';
 import twitterService from './twitter.service';
 import userService from './user.service';
@@ -36,4 +37,5 @@ export {
   discourseService,
   telegramService,
   reputationScoreService,
+  websiteService
 };
