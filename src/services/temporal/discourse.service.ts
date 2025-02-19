@@ -1,7 +1,7 @@
 import { CalendarSpec, Client, ScheduleHandle, ScheduleOverlapPolicy } from '@temporalio/client';
 
-import config from '../../config';
 import parentLogger from '../../config/logger';
+import { queues } from './configs/temporal.config';
 import { TemporalCoreService } from './core.service';
 
 const logger = parentLogger.child({ module: 'DiscourseTemporalService' });
@@ -25,7 +25,7 @@ class TemporalDiscourseService extends TemporalCoreService {
           type: 'startWorkflow',
           workflowType: 'DiscourseExtractWorkflow',
           args: [{ endpoint, platformId }],
-          taskQueue: config.temporal.heavyQueue,
+          taskQueue: queues.typescriptHeavy,
         },
         scheduleId: `discourse/${encodeURIComponent(endpoint)}`,
         policies: {
