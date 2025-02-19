@@ -1,5 +1,3 @@
-
-
 import { Types } from 'mongoose';
 
 import parentLogger from '../../config/logger';

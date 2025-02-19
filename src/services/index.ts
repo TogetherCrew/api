@@ -37,5 +37,5 @@ export {
   discourseService,
   telegramService,
   reputationScoreService,
-  websiteService
+  websiteService,
 };
