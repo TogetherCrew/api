@@ -315,7 +315,7 @@ const validatePlatformUpdate = (platform: IAuthAndPlatform['platform'], body: IA
 const getReputationScore = async (platform: HydratedDocument<IPlatform>, user: HydratedDocument<IUser>) => {
   const identity = user.identities.find((id) => id.provider === platform.name);
   if (!identity) {
-    throw new ApiError(httpStatus.BAD_REQUEST, `User need to login with the ${platform.name} account`);
+    throw new ApiError(httpStatus.NOT_FOUND, `User need to login with the ${platform.name} account`);
   }
   return {
     reputationScore: (await reputationScoreService.calculateReputationScoreForUser(platform, identity.id)) * 100,
