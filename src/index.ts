@@ -1,19 +1,21 @@
 import mongoose from 'mongoose';
+
+import { announcementEmitter } from '@togethercrew.dev/db';
+import RabbitMQ, { MBConnection } from '@togethercrew.dev/tc-messagebroker';
+
 import app from './app';
 import config from './config';
-import RabbitMQ, { MBConnection, Queue, Event } from '@togethercrew.dev/tc-messagebroker';
 import logger from './config/logger';
-import { announcementEmitter } from '@togethercrew.dev/db';
-import { announcementService } from './services';
 import rabbitMQClient from './rabbitmq/';
-import initializeHandlers from './rabbitmq/handlers';
+import { announcementService } from './services';
+
 mongoose.set('strictQuery', false);
 // Connect to RabbitMQ
 const setupRabbitMq = async () => {
   // Establish connection
   await rabbitMQClient.connect();
   // Initialize all event handlers
-  initializeHandlers();
+  // initializeHandlers();
 };
 
 // Connect to Message Broker DB
