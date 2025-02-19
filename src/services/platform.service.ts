@@ -2,7 +2,7 @@ import { Snowflake } from 'discord.js';
 import httpStatus from 'http-status';
 import { FilterQuery, HydratedDocument, ObjectId, Types } from 'mongoose';
 
-import { IPlatform, Platform, PlatformNames } from '@togethercrew.dev/db';
+import { IPlatform, IUser, Platform, PlatformNames } from '@togethercrew.dev/db';
 
 import { analyzerAction, analyzerWindow } from '../config/analyzer.statics';
 import parentLogger from '../config/logger';
@@ -309,9 +309,13 @@ const validatePlatformUpdate = (platform: IAuthAndPlatform['platform'], body: IA
  * @param {IPlatform} platform
  * @param {IUser} user
  */
-const getReputationScore = async (platform: HydratedDocument<IPlatform>, userId: ObjectId) => {
+const getReputationScore = async (platform: HydratedDocument<IPlatform>, user: HydratedDocument<IUser>) => {
+  const identity = user.identities.find((id) => id.provider === platform.name);
+  if (!identity) {
+    throw new ApiError(httpStatus.BAD_REQUEST, `User need to login with the ${platform.name} account`);
+  }
   return {
-    reputationScore: (await reputationScoreService.calculateReputationScoreForUser(platform, userId)) * 100,
+    reputationScore: (await reputationScoreService.calculateReputationScoreForUser(platform, identity.id)) * 100,
   };
 };
 export default {

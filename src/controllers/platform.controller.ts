@@ -386,7 +386,7 @@ const requestAccess = catchAsync(async function (req: ISessionRequest, res: Resp
 });
 
 const getReputationScore = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
-  const reputationScore = await platformService.getReputationScore(req.platform, req.user.id);
+  const reputationScore = await platformService.getReputationScore(req.platform, req.user);
   res.send(reputationScore);
 });
 

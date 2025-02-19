@@ -1,4 +1,4 @@
-import { HydratedDocument, ObjectId } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 
 import { IPlatform } from '@togethercrew.dev/db';
 
@@ -11,21 +11,20 @@ const logger = parentLogger.child({ module: 'ReputationScoreService' });
 
 async function calculateReputationScoreForUser(
   platform: HydratedDocument<IPlatform>,
-  userId: ObjectId,
+  identity: string,
 ): Promise<number> {
   const platformName = platform.name as SupportedNeo4jPlatforms;
   const memberLabel = NEO4J_PLATFORM_INFO[platformName].member;
   const platformId = platform.id;
 
-  const reputationScoreQuery = buildReputationScoreQuery(userId, platformId, memberLabel);
+  const reputationScoreQuery = buildReputationScoreQuery(identity, platformId, memberLabel);
   const neo4jData = await Neo4j.read(reputationScoreQuery);
-
   return extractReputationScoreFromNeo4jData(neo4jData);
 }
 
-function buildReputationScoreQuery(userId: ObjectId, platformId: string, memberLabel: string): string {
+function buildReputationScoreQuery(identity: string, platformId: string, memberLabel: string): string {
   return `
-    MATCH (:${memberLabel} {id: "${userId}"})-[r:HAVE_METRICS {platformId: "${platformId}"}]->(a)
+    MATCH (:${memberLabel} {id: "${identity}"})-[r:HAVE_METRICS {platformId: "${platformId}"}]->(a)
     WITH r.date as metrics_date, r.closenessCentrality as memberScore
     ORDER BY metrics_date DESC
     LIMIT 1
@@ -34,18 +33,13 @@ function buildReputationScoreQuery(userId: ObjectId, platformId: string, memberL
     RETURN memberScore / maxScore AS reputation_score
   `;
 }
-
 function extractReputationScoreFromNeo4jData(neo4jData: any): number {
   const { records } = neo4jData;
-  logger.debug(`Neo4j Records: ${JSON.stringify(records)}`);
-
   if (records.length === 0) {
     return 0;
   }
-
   const reputationScoreResponse = records[0];
   const reputationScore = reputationScoreResponse.get('reputation_score');
-
   return reputationScore || 0;
 }
 
