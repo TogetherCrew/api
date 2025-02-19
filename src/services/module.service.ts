@@ -1,6 +1,9 @@
-import { FilterQuery, HydratedDocument, Types } from 'mongoose';
+import { FilterQuery, HydratedDocument, ObjectId, Types } from 'mongoose';
 
-import { IModule, IModuleUpdateBody, Module } from '@togethercrew.dev/db';
+import { IModule, IModuleUpdateBody, Module, ModuleNames, PlatformNames } from '@togethercrew.dev/db';
+
+import platformService from './platform.service';
+import websiteService from './website';
 
 /**
  * Create a module
@@ -60,7 +63,6 @@ const updateModule = async (
   module: HydratedDocument<IModule>,
   updateBody: Partial<IModuleUpdateBody>,
 ): Promise<HydratedDocument<IModule>> => {
-  // Check if `options.platforms` is in the updateBody
   if (updateBody.options && updateBody.options.platforms) {
     if (updateBody.options.platforms[0].name == undefined) {
       {
@@ -69,15 +71,18 @@ const updateModule = async (
         else module.options?.platforms.push(updateBody.options.platforms[0]);
       }
     } else {
-      // Iterate through each platform in the incoming update
       for (const newPlatform of updateBody.options.platforms) {
         const existingPlatform = module.options?.platforms.find((p) => p.name === newPlatform.name);
         if (existingPlatform) {
-          // If the platform already exists, update it
           existingPlatform.metadata = newPlatform.metadata;
         } else {
-          // If the platform does not exist, add new
           module.options?.platforms.push(newPlatform);
+          if (module.name === ModuleNames.Hivemind && newPlatform.name === PlatformNames.Website) {
+            const scheduleId = await websiteService.coreService.createWebsiteSchedule(newPlatform.platform);
+            const platform = await platformService.getPlatformById(newPlatform.platform);
+            platform?.set('metadata.scheduleId', scheduleId);
+            await platform?.save();
+          }
         }
       }
     }

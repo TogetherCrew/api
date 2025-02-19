@@ -169,7 +169,8 @@ paths:
                           name:
                             type: string
                             description: Name of the platform.
-                            enum: ['discord', 'google', 'github', 'notion', 'mediaWiki', 'discourse']
+                            enum:
+                              ['discord', 'google', 'github', 'notion', 'mediaWiki', 'discourse', 'telegram', 'website']
                           metadata:
                             type: object
                             description: Metadata specific to the module and platform. Varies depending on the platform name and module name.
@@ -236,6 +237,8 @@ paths:
                                     items:
                                       type: string
                                 description: Metadata for the hivemind module on MediaWiki.
+                              - type: object
+                                description: Metadata for the hivemind module on website.
                               - type: object
                                 properties:
                                   selectedEmails:

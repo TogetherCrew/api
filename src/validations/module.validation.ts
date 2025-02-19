@@ -1,11 +1,13 @@
 import Joi from 'joi';
-import { objectId } from './custom.validation';
+
 import {
-  PlatformNames,
-  ModuleNames,
   HivemindPlatformNames,
+  ModuleNames,
+  PlatformNames,
   ViolationDetectionPlatformNames,
 } from '@togethercrew.dev/db';
+
+import { objectId } from './custom.validation';
 
 const createModule = {
   body: Joi.object().keys({
@@ -77,6 +79,9 @@ const hivemindMediaWikiMetadata = () => {
   });
 };
 
+const websiteMediaWikiMetadata = () => {
+  return Joi.object().keys({});
+};
 const hivemindOptions = () => {
   return Joi.object().keys({
     platforms: Joi.array().items(
@@ -106,6 +111,10 @@ const hivemindOptions = () => {
             {
               is: PlatformNames.MediaWiki,
               then: hivemindMediaWikiMetadata(),
+            },
+            {
+              is: PlatformNames.Website,
+              then: websiteMediaWikiMetadata(),
             },
           ],
           otherwise: Joi.any().forbidden(),
