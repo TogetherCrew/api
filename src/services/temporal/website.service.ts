@@ -2,8 +2,8 @@ import { Types } from 'mongoose';
 
 import { CalendarSpec, Client, ScheduleHandle, ScheduleOverlapPolicy } from '@temporalio/client';
 
-import config from '../../config';
 import parentLogger from '../../config/logger';
+import { queues } from './configs/temporal.config';
 import { TemporalCoreService } from './core.service';
 
 const logger = parentLogger.child({ module: 'WebsiteTemporalService' });
@@ -36,7 +36,7 @@ class TemporalWebsiteService extends TemporalCoreService {
           type: 'startWorkflow',
           workflowType: 'WebsiteIngestionSchedulerWorkflow',
           args: [{ platformId }],
-          taskQueue: config.temporal.heavyQueue,
+          taskQueue: queues.pythonHeavy,
         },
         policies: {
           catchupWindow: '1 day',

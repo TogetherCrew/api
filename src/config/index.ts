@@ -162,6 +162,5 @@ export default {
   },
   temporal: {
     uri: envVars.TEMPORAL_URI,
-    heavyQueue: envVars.TEMPORAL_QUEUE_HEAVY,
   },
 };
