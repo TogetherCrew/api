@@ -1,9 +1,9 @@
 import { Types } from 'mongoose';
-import parentLogger from 'src/config/logger';
 
 import { CalendarSpec, Client, ScheduleHandle, ScheduleOverlapPolicy } from '@temporalio/client';
 
 import config from '../../config';
+import parentLogger from '../../config/logger';
 import { TemporalCoreService } from './core.service';
 
 const logger = parentLogger.child({ module: 'WebsiteTemporalService' });
