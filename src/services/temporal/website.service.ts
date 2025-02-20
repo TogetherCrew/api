@@ -26,7 +26,7 @@ class TemporalWebsiteService extends TemporalCoreService {
 
     try {
       const client: Client = await this.getClient();
-
+      console.log('type', typeof platformId.toString());
       return client.schedule.create({
         scheduleId: `website/${platformId}`,
         spec: {
@@ -35,7 +35,7 @@ class TemporalWebsiteService extends TemporalCoreService {
         action: {
           type: 'startWorkflow',
           workflowType: 'WebsiteIngestionSchedulerWorkflow',
-          args: [platformId],
+          args: [platformId.toString()],
           taskQueue: queues.pythonHeavy,
         },
         policies: {
