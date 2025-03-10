@@ -1,10 +1,7 @@
 import Joi from 'joi';
 
 import {
-  HivemindPlatformNames,
-  ModuleNames,
-  PlatformNames,
-  ViolationDetectionPlatformNames,
+    HivemindPlatformNames, ModuleNames, PlatformNames, ViolationDetectionPlatformNames
 } from '@togethercrew.dev/db';
 
 import { objectId } from './custom.validation';
@@ -49,6 +46,7 @@ const hivemindDiscordMetadata = () => {
       selectedChannels: Joi.array().items(Joi.string()).required(),
       fromDate: Joi.date().required(),
     }),
+    activated: Joi.boolean(),
   });
 };
 
@@ -57,6 +55,7 @@ const hivemindGoogleMetadata = () => {
     driveIds: Joi.array().items(Joi.string()),
     folderIds: Joi.array().items(Joi.string()),
     fileIds: Joi.array().items(Joi.string()),
+    activated: Joi.boolean(),
   });
 };
 
@@ -70,17 +69,21 @@ const hivemindNotionMetadata = () => {
   return Joi.object().keys({
     pageIds: Joi.array().items(Joi.string()),
     databaseIds: Joi.array().items(Joi.string()),
+    activated: Joi.boolean(),
   });
 };
 
 const hivemindMediaWikiMetadata = () => {
   return Joi.object().keys({
     pageIds: Joi.array().items(Joi.string()),
+    activated: Joi.boolean(),
   });
 };
 
 const websiteMediaWikiMetadata = () => {
-  return Joi.object().keys({});
+  return Joi.object().keys({
+    activated: Joi.boolean(),
+  });
 };
 const hivemindOptions = () => {
   return Joi.object().keys({
@@ -130,6 +133,7 @@ const violationDetectionMetadata = () => {
     fromDate: Joi.date(),
     toDate: Joi.date().valid(null),
     selectedResources: Joi.array().items(Joi.number().empty()),
+    activated: Joi.boolean(),
   });
 };
 
@@ -165,6 +169,7 @@ const dynamicNftOptions = () => {
           metadata: Joi.object().keys({
             transactionHash: Joi.string().required(),
             chainId: Joi.number().required(),
+            activated: Joi.boolean(),
           }),
         })
         .required(),
