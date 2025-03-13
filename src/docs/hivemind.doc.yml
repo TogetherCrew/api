@@ -1,0 +1,30 @@
+paths:
+  /api/v1/hivemind/ask-question:
+    post:
+      tags:
+        - Hivemind
+      summary: Ask question from hivemind.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                communityId:
+                  type: string
+                question:
+                  type: string
+              example:
+                communityId: id
+                question: ask me
+      responses:
+        '200':
+          description: Answer responsed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Community'
+        '400':
+          description: Bad Request
+          $ref: '#/components/responses/BadRequest'

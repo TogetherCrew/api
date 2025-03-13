@@ -4,6 +4,7 @@ import categoryController from './category.controller';
 import communityController from './community.controller';
 import discourseController from './discourse.controller';
 import heatmapController from './heatmap.controller';
+import hivemindController from './hivemind.controller';
 import memberActivityController from './memberActivity.controller';
 import moduleController from './module.controller';
 import notionController from './notion.controller';
@@ -24,4 +25,5 @@ export {
   moduleController,
   discourseController,
   telegramController,
+  hivemindController,
 };

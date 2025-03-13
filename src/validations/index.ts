@@ -4,6 +4,7 @@ import communityValidation from './community.validation';
 import discourseValidation from './discourse.validation';
 import guildValidation from './guild.validation';
 import heatmapValidation from './heatmap.validation';
+import hivemindValidation from './hivemind.validation';
 import memberActivityValidation from './memberActivity.validation';
 import moduleValidation from './module.validation';
 import platformValidation from './platform.validation';
@@ -22,4 +23,5 @@ export {
   moduleValidation,
   discourseValidation,
   telegramValidation,
+  hivemindValidation,
 };
