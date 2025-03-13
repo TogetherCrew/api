@@ -1,6 +1,8 @@
-import error from './error';
 import auth from './auth';
-import validate from './validate';
-import sentry from './sentry';
+import error from './error';
 import platform from './platform';
-export { error, auth, validate, sentry, platform };
+import sentry from './sentry';
+import timeout from './timeout';
+import validate from './validate';
+
+export { error, auth, validate, sentry, platform, timeout };
