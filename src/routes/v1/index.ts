@@ -7,6 +7,7 @@ import communityRoute from './community.route';
 import discourseRoute from './discourse.route';
 import docsRoute from './docs.route';
 import heatmapRoute from './heatmap.route';
+import hivemindRoute from './hivemind.route';
 import memberActivityRoute from './memberActivity.route';
 import moduleRoute from './module.route';
 import notionRoute from './notion.route';
@@ -69,6 +70,10 @@ const defaultRoutes = [
   {
     path: '/telegram',
     route: telegramRoute,
+  },
+  {
+    path: '/hivemind',
+    route: hivemindRoute,
   },
 ];
 
