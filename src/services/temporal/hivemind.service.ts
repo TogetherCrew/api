@@ -36,12 +36,11 @@ class HivemindTemporalService extends TemporalCoreService {
     try {
       const hivemindTaskQueue = 'HIVEMIND_AGENT_QUEUE';
 
-      const workflowHandle = await client.workflow.start('AgenticHivemindTemporalWorkflow', {
+      const workflowHandle = await client.workflow.execute('AgenticHivemindTemporalWorkflow', {
         taskQueue: hivemindTaskQueue,
         args: [payload],
         workflowId: `hivemind-${communityId}-${Date.now()}`,
       });
-
       logger.info(`Started Hivemind workflow with ID: ${workflowHandle}`);
       return workflowHandle;
     } catch (error) {
