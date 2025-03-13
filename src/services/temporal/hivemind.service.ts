@@ -34,7 +34,7 @@ class HivemindTemporalService extends TemporalCoreService {
       enable_answer_skipping: enableAnswerSkipping,
     };
     try {
-      const hivemindTaskQueue = 'TEMPORAL_QUEUE_PYTHON_HEAVY';
+      const hivemindTaskQueue = 'HIVEMIND_AGENT_QUEUE';
 
       const workflowHandle = await client.workflow.start('AgenticHivemindTemporalWorkflow', {
         taskQueue: hivemindTaskQueue,
