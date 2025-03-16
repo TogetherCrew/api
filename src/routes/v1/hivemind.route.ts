@@ -7,6 +7,6 @@ import { hivemindValidation } from '../../validations';
 const router = express.Router();
 
 // Routes
-router.post('/ask-question', validate(hivemindValidation.askQuestion), hivemindController.askQuestion);
+router.post('/ask', validate(hivemindValidation.askQuestion), hivemindController.askQuestion);
 
 export default router;
