@@ -1,5 +1,5 @@
 paths:
-  /api/v1/hivemind/ask-question:
+  /api/v1/hivemind/ask:
     post:
       tags:
         - Hivemind
