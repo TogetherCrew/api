@@ -36,7 +36,7 @@ class TemporalWebsiteService extends TemporalCoreService {
           type: 'startWorkflow',
           workflowType: 'WebsiteIngestionSchedulerWorkflow',
           args: [platformId.toString()],
-          taskQueue: queues.pythonHeavy,
+          taskQueue: queues.TEMPORAL_QUEUE_PYTHON_HEAVY,
         },
         policies: {
           catchupWindow: '1 day',

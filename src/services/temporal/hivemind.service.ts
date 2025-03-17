@@ -1,6 +1,7 @@
 import { Client } from '@temporalio/client';
 
 import parentLogger from '../../config/logger';
+import { queues } from './configs/temporal.config';
 import { TemporalCoreService } from './core.service';
 
 const logger = parentLogger.child({ module: 'HivemindTemporalService' });
@@ -27,19 +28,16 @@ class HivemindTemporalService extends TemporalCoreService {
   public async triggerWorkflow(communityId: string, query: string, enableAnswerSkipping: boolean) {
     const client: Client = await this.getClient();
 
-    // // Construct the payload as specified
     const payload: HivemindPayload = {
       community_id: communityId,
       query: query,
       enable_answer_skipping: enableAnswerSkipping,
     };
     try {
-      const hivemindTaskQueue = 'HIVEMIND_AGENT_QUEUE';
-
       const workflowHandle = await client.workflow.execute('AgenticHivemindTemporalWorkflow', {
-        taskQueue: hivemindTaskQueue,
+        taskQueue: queues.HIVEMIND_AGENT_QUEUE,
         args: [payload],
-        workflowId: `hivemind-${communityId}-${Date.now()}`,
+        workflowId: `api:agnet-${communityId}`,
       });
       logger.info(`Started Hivemind workflow with ID: ${workflowHandle}`);
       return workflowHandle;

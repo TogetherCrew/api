@@ -25,7 +25,7 @@ class TemporalDiscourseService extends TemporalCoreService {
           type: 'startWorkflow',
           workflowType: 'DiscourseExtractWorkflow',
           args: [{ endpoint, platformId }],
-          taskQueue: queues.typescriptHeavy,
+          taskQueue: queues.TEMPORAL_QUEUE_HEAVY,
         },
         scheduleId: `discourse/${encodeURIComponent(endpoint)}`,
         policies: {
