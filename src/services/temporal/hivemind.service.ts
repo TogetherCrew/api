@@ -9,6 +9,7 @@ interface HivemindPayload {
   community_id: string;
   query: string;
   enable_answer_skipping: boolean;
+  chat_id: string;
 }
 
 class HivemindTemporalService extends TemporalCoreService {
@@ -24,7 +25,7 @@ class HivemindTemporalService extends TemporalCoreService {
    * @param enableAnswerSkipping - Flag indicating if answer skipping is enabled.
    * @returns The workflow ID of the started workflow.
    */
-  public async triggerWorkflow(communityId: string, query: string, enableAnswerSkipping: boolean) {
+  public async triggerWorkflow(communityId: string, query: string, enableAnswerSkipping: boolean, chatId: string = '') {
     const client: Client = await this.getClient();
 
     // // Construct the payload as specified
@@ -32,6 +33,7 @@ class HivemindTemporalService extends TemporalCoreService {
       community_id: communityId,
       query: query,
       enable_answer_skipping: enableAnswerSkipping,
+      chat_id: chatId,
     };
     try {
       const hivemindTaskQueue = 'HIVEMIND_AGENT_QUEUE';
