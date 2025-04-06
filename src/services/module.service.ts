@@ -1,8 +1,6 @@
 import { FilterQuery, HydratedDocument, ObjectId, Types } from 'mongoose';
 
-import {
-    IModule, IModuleUpdateBody, Module, ModuleNames, PlatformNames
-} from '@togethercrew.dev/db';
+import { IModule, IModuleUpdateBody, Module, ModuleNames, PlatformNames } from '@togethercrew.dev/db';
 
 import platformService from './platform.service';
 import websiteService from './website';
