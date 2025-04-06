@@ -107,12 +107,25 @@ const updateModule = async (
  * @param {Object} platform - Platform object
  */
 const handleHivemindWebsiteCase = async (platform: any) => {
-  const scheduleId = await websiteService.coreService.createWebsiteSchedule(platform.platform);
   const platformDoc = await platformService.getPlatformById(platform.platform);
 
-  if (platformDoc) {
-    platformDoc.set('metadata.scheduleId', scheduleId);
-    await platformDoc.save();
+  if (!platformDoc) return;
+
+  const isActivated = platform.metadata?.activated;
+  const existingScheduleId = platformDoc.get('metadata.scheduleId');
+
+  if (isActivated === true) {
+    if (!existingScheduleId) {
+      const scheduleId = await websiteService.coreService.createWebsiteSchedule(platform.platform);
+      platformDoc.set('metadata.scheduleId', scheduleId);
+      await platformDoc.save();
+    }
+  } else if (isActivated === false) {
+    if (existingScheduleId) {
+      await websiteService.coreService.deleteWebsiteSchedule(existingScheduleId);
+      platformDoc.set('metadata.scheduleId', null);
+      await platformDoc.save();
+    }
   }
 };
 
