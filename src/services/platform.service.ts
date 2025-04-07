@@ -8,10 +8,12 @@ import { analyzerAction, analyzerWindow } from '../config/analyzer.statics';
 import parentLogger from '../config/logger';
 import { IAuthAndPlatform } from '../interfaces/Request.interface';
 import ApiError from '../utils/ApiError';
+import { platformService } from './';
 import discourseService from './discourse';
 import moduleService from './module.service';
 import reputationScoreService from './reputationScore.service';
 import sagaService from './saga.service';
+import userService from './user.service';
 import websiteService from './website';
 
 const logger = parentLogger.child({ module: 'PlatformService' });
@@ -122,11 +124,18 @@ const updatePlatformByFilter = async (
  */
 const updatePlatform = async (
   platform: HydratedDocument<IPlatform>,
+  user: HydratedDocument<IUser>,
   updateBody: Partial<IPlatform>,
 ): Promise<HydratedDocument<IPlatform>> => {
   // Handle special cases based on platform type
   if (platform.name === PlatformNames.Website) {
     await handleWebsiteResourceChanges(platform, updateBody);
+  }
+  if (platform.name === PlatformNames.Discord) {
+    const discordIdentity = userService.getIdentityByProvider(user.identities, PlatformNames.Discord);
+    if (discordIdentity) {
+      await platformService.notifyDiscordUserImportComplete(platform.id, discordIdentity.id);
+    }
   }
 
   if (updateBody.metadata) {
