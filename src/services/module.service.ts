@@ -92,7 +92,10 @@ const updateModule = async (
       existingPlatform.metadata = newPlatform.metadata;
     } else {
       module.options.platforms.push(newPlatform);
+      console.log('A1', module.name, newPlatform.name);
       if (module.name === ModuleNames.Hivemind && newPlatform.name === PlatformNames.Website) {
+        console.log('A2');
+
         await handleHivemindWebsiteCase(newPlatform);
       }
     }
@@ -106,22 +109,28 @@ const updateModule = async (
  */
 const handleHivemindWebsiteCase = async (platform: any) => {
   const platformDoc = await platformService.getPlatformById(platform.platform);
+  console.log('A3');
 
   if (!platformDoc) return;
 
   const isActivated = platform.metadata?.activated;
   const existingScheduleId = platformDoc.get('metadata.scheduleId');
+  console.log('A4', isActivated, existingScheduleId);
 
   if (isActivated === true) {
     if (!existingScheduleId) {
       const scheduleId = await websiteService.coreService.createWebsiteSchedule(platform.platform);
       platformDoc.set('metadata.scheduleId', scheduleId);
+      console.log('A5', platformDoc);
+
       await platformDoc.save();
     }
   } else if (isActivated === false) {
     if (existingScheduleId) {
       await websiteService.coreService.deleteWebsiteSchedule(existingScheduleId);
       platformDoc.set('metadata.scheduleId', null);
+      console.log('A6', platformDoc);
+
       await platformDoc.save();
     }
   }
