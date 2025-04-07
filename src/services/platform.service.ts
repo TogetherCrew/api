@@ -127,6 +127,8 @@ const updatePlatform = async (
   user: HydratedDocument<IUser>,
   updateBody: Partial<IPlatform>,
 ): Promise<HydratedDocument<IPlatform>> => {
+  console.log('123', updateBody.metadata);
+
   // Handle special cases based on platform type
   if (platform.name === PlatformNames.Website) {
     await handleWebsiteResourceChanges(platform, updateBody);
@@ -138,6 +140,7 @@ const updatePlatform = async (
     }
   }
 
+  console.log('321', updateBody.metadata);
   if (updateBody.metadata) {
     updateBody.metadata = {
       ...platform.metadata,
@@ -364,12 +367,15 @@ const handleWebsiteResourceChanges = async (
   platform: HydratedDocument<IPlatform>,
   updateBody: Partial<IPlatform>,
 ): Promise<void> => {
+  console.log('updateBody.metadata?.resources', updateBody.metadata?.resources, platform.metadata?.resources);
+
   if (!updateBody.metadata?.resources || !platform.metadata?.resources) {
     return;
   }
   const oldResources = JSON.stringify(platform.metadata.resources.sort());
   const newResources = JSON.stringify(updateBody.metadata.resources.sort());
 
+  console.log('oldResources', oldResources, newResources);
   if (oldResources !== newResources) {
     const existingScheduleId = platform.metadata.scheduleId;
 
@@ -391,6 +397,7 @@ const handleWebsiteResourceChanges = async (
 
     const hivemindModule = await moduleService.getModuleByFilter(moduleFilter);
 
+    console.log('hivemindModule', hivemindModule);
     if (hivemindModule) {
       const scheduleId = await websiteService.coreService.createWebsiteSchedule(platform._id);
       updateBody.metadata.scheduleId = scheduleId;
