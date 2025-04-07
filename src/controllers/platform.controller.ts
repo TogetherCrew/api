@@ -324,13 +324,7 @@ const getPlatform = catchAsync(async function (req: IAuthRequest, res: Response)
 });
 const updatePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
   platformService.validatePlatformUpdate(req.platform, req.body);
-  if (req.platform.name === PlatformNames.Discord) {
-    const discordIdentity = userService.getIdentityByProvider(req.user.identities, PlatformNames.Discord);
-    if (discordIdentity) {
-      await platformService.notifyDiscordUserImportComplete(req.platform.id, discordIdentity.id);
-    }
-  }
-  const platform = await platformService.updatePlatform(req.platform, req.body);
+  const platform = await platformService.updatePlatform(req.platform, req.user, req.body);
   res.send(platform);
 });
 const deletePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Response) {

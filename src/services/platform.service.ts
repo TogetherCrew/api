@@ -2,15 +2,19 @@ import { Snowflake } from 'discord.js';
 import httpStatus from 'http-status';
 import { FilterQuery, HydratedDocument, ObjectId, Types } from 'mongoose';
 
-import { IPlatform, IUser, Platform, PlatformNames } from '@togethercrew.dev/db';
+import { IPlatform, IUser, ModuleNames, Platform, PlatformNames } from '@togethercrew.dev/db';
 
 import { analyzerAction, analyzerWindow } from '../config/analyzer.statics';
 import parentLogger from '../config/logger';
 import { IAuthAndPlatform } from '../interfaces/Request.interface';
 import ApiError from '../utils/ApiError';
+import { platformService } from './';
 import discourseService from './discourse';
+import moduleService from './module.service';
 import reputationScoreService from './reputationScore.service';
 import sagaService from './saga.service';
+import userService from './user.service';
+import websiteService from './website';
 
 const logger = parentLogger.child({ module: 'PlatformService' });
 /**
@@ -120,8 +124,20 @@ const updatePlatformByFilter = async (
  */
 const updatePlatform = async (
   platform: HydratedDocument<IPlatform>,
+  user: HydratedDocument<IUser>,
   updateBody: Partial<IPlatform>,
 ): Promise<HydratedDocument<IPlatform>> => {
+  // Handle special cases based on platform type
+  if (platform.name === PlatformNames.Website) {
+    await handleWebsiteResourceChanges(platform, updateBody);
+  }
+  if (platform.name === PlatformNames.Discord) {
+    const discordIdentity = userService.getIdentityByProvider(user.identities, PlatformNames.Discord);
+    if (discordIdentity) {
+      await platformService.notifyDiscordUserImportComplete(platform.id, discordIdentity.id);
+    }
+  }
+
   if (updateBody.metadata) {
     updateBody.metadata = {
       ...platform.metadata,
@@ -139,15 +155,7 @@ const updatePlatform = async (
  * @returns {Promise<HydratedDocument<IPlatform>>}
  */
 const deletePlatform = async (platform: HydratedDocument<IPlatform>): Promise<HydratedDocument<IPlatform>> => {
-  switch (platform.name) {
-    case PlatformNames.Discourse: {
-      if (platform.metadata?.scheduleId) {
-        await discourseService.coreService.deleteDiscourseSchedule(platform.metadata.scheduleId);
-      }
-    }
-    default: {
-    }
-  }
+  await handlePlatformCleanup(platform);
   return await platform.remove();
 };
 
@@ -321,6 +329,75 @@ const getReputationScore = async (platform: HydratedDocument<IPlatform>, user: H
     reputationScore: (await reputationScoreService.calculateReputationScoreForUser(platform, identity.id)) * 100,
   };
 };
+
+/**
+ * Handle platform-specific cleanup during deletion
+ * @param {HydratedDocument<IPlatform>} platform - Platform document
+ * @returns {Promise<void>}
+ */
+const handlePlatformCleanup = async (platform: HydratedDocument<IPlatform>): Promise<void> => {
+  switch (platform.name) {
+    case PlatformNames.Discourse: {
+      if (platform.metadata?.scheduleId) {
+        await discourseService.coreService.deleteDiscourseSchedule(platform.metadata.scheduleId);
+      }
+      break;
+    }
+    case PlatformNames.Website: {
+      if (platform.metadata?.scheduleId) {
+        await websiteService.coreService.deleteWebsiteSchedule(platform.metadata.scheduleId);
+      }
+      break;
+    }
+    default:
+      break;
+  }
+};
+
+/**
+ * Handle Website platform resource changes
+ * @param {HydratedDocument<IPlatform>} platform - Platform document
+ * @param {Partial<IPlatform>} updateBody - Update body
+ * @returns {Promise<void>}
+ */
+const handleWebsiteResourceChanges = async (
+  platform: HydratedDocument<IPlatform>,
+  updateBody: Partial<IPlatform>,
+): Promise<void> => {
+  if (!updateBody.metadata?.resources || !platform.metadata?.resources) {
+    return;
+  }
+  const oldResources = JSON.stringify(platform.metadata.resources.sort());
+  const newResources = JSON.stringify(updateBody.metadata.resources.sort());
+
+  if (oldResources !== newResources) {
+    const existingScheduleId = platform.metadata.scheduleId;
+
+    if (existingScheduleId) {
+      await websiteService.coreService.deleteWebsiteSchedule(existingScheduleId);
+      updateBody.metadata.scheduleId = null;
+    }
+
+    const moduleFilter = {
+      name: ModuleNames.Hivemind,
+      'options.platforms': {
+        $elemMatch: {
+          name: PlatformNames.Website,
+          platform: platform._id,
+          'metadata.activated': true,
+        },
+      },
+    };
+
+    const hivemindModule = await moduleService.getModuleByFilter(moduleFilter);
+
+    if (hivemindModule) {
+      const scheduleId = await websiteService.coreService.createWebsiteSchedule(platform._id);
+      updateBody.metadata.scheduleId = scheduleId;
+    }
+  }
+};
+
 export default {
   createPlatform,
   getPlatformById,

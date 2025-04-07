@@ -9,7 +9,12 @@ const askQuestion = catchAsync(async function (req: IAuthRequest, res: Response)
   console.debug('Body', req.body.communityId, req.body.question, req.body.chatId);
   req.setTimeout(6 * 60 * 1000);
   res.setTimeout(6 * 60 * 1000);
-  const answer = await HivemindTemporalService.triggerWorkflow(req.body.communityId, req.body.question, false, req.body.chatId);
+  const answer = await HivemindTemporalService.triggerWorkflow(
+    req.body.communityId,
+    req.body.question,
+    false,
+    req.body.chatId,
+  );
   res.status(httpStatus.OK).send({ answer });
 });
 

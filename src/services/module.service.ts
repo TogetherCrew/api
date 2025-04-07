@@ -63,31 +63,68 @@ const updateModule = async (
   module: HydratedDocument<IModule>,
   updateBody: Partial<IModuleUpdateBody>,
 ): Promise<HydratedDocument<IModule>> => {
-  if (updateBody.options && updateBody.options.platforms) {
-    if (updateBody.options.platforms[0].name == undefined) {
-      {
-        const globalOption = module.options?.platforms[0];
-        if (globalOption) globalOption.metadata = updateBody.options.platforms[0].metadata;
-        else module.options?.platforms.push(updateBody.options.platforms[0]);
-      }
+  if (!updateBody.options?.platforms?.length) {
+    return module.save();
+  }
+
+  if (!module.options) {
+    module.options = { platforms: [] };
+  } else if (!module.options.platforms) {
+    module.options.platforms = [];
+  }
+
+  const platforms = updateBody.options.platforms;
+
+  if (platforms[0].name === undefined) {
+    const globalOption = module.options.platforms[0];
+    if (globalOption) {
+      globalOption.metadata = platforms[0].metadata;
     } else {
-      for (const newPlatform of updateBody.options.platforms) {
-        const existingPlatform = module.options?.platforms.find((p) => p.name === newPlatform.name);
-        if (existingPlatform) {
-          existingPlatform.metadata = newPlatform.metadata;
-        } else {
-          module.options?.platforms.push(newPlatform);
-          if (module.name === ModuleNames.Hivemind && newPlatform.name === PlatformNames.Website) {
-            const scheduleId = await websiteService.coreService.createWebsiteSchedule(newPlatform.platform);
-            const platform = await platformService.getPlatformById(newPlatform.platform);
-            platform?.set('metadata.scheduleId', scheduleId);
-            await platform?.save();
-          }
-        }
+      module.options.platforms.push(platforms[0]);
+    }
+    return module.save();
+  }
+
+  for (const newPlatform of platforms) {
+    const existingPlatform = module.options.platforms.find((p) => p.name === newPlatform.name);
+
+    if (existingPlatform) {
+      existingPlatform.metadata = newPlatform.metadata;
+    } else {
+      module.options.platforms.push(newPlatform);
+      if (module.name === ModuleNames.Hivemind && newPlatform.name === PlatformNames.Website) {
+        await handleHivemindWebsiteCase(newPlatform);
       }
     }
   }
-  return await module.save();
+  return module.save();
+};
+
+/**
+ * Handle special case for Hivemind module with Website platform
+ * @param {Object} platform - Platform object
+ */
+const handleHivemindWebsiteCase = async (platform: any) => {
+  const platformDoc = await platformService.getPlatformById(platform.platform);
+
+  if (!platformDoc) return;
+
+  const isActivated = platform.metadata?.activated;
+  const existingScheduleId = platformDoc.get('metadata.scheduleId');
+
+  if (isActivated === true) {
+    if (!existingScheduleId) {
+      const scheduleId = await websiteService.coreService.createWebsiteSchedule(platform.platform);
+      platformDoc.set('metadata.scheduleId', scheduleId);
+      await platformDoc.save();
+    }
+  } else if (isActivated === false) {
+    if (existingScheduleId) {
+      await websiteService.coreService.deleteWebsiteSchedule(existingScheduleId);
+      platformDoc.set('metadata.scheduleId', null);
+      await platformDoc.save();
+    }
+  }
 };
 
 /**
