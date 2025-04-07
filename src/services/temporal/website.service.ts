@@ -1,4 +1,5 @@
 import { Types } from 'mongoose';
+import { v4 as uuidv4 } from 'uuid';
 
 import { CalendarSpec, Client, ScheduleHandle, ScheduleOverlapPolicy } from '@temporalio/client';
 
@@ -28,7 +29,7 @@ class TemporalWebsiteService extends TemporalCoreService {
       const client: Client = await this.getClient();
       console.log('type', typeof platformId.toString());
       return client.schedule.create({
-        scheduleId: `website/${platformId}`,
+        scheduleId: `website/${uuidv4()}`,
         spec: {
           calendars: [calendarSpec],
         },
