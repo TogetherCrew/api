@@ -64,8 +64,11 @@ class TemporalWebsiteService extends TemporalCoreService {
     console.log(workflowId);
     const client: Client = await this.getClient();
     const handle = client.workflow.getHandle(workflowId);
-    console.log(handle);
-    await handle.terminate();
+    const description = await handle.describe();
+    console.log(description);
+    if (description.status.name === 'TERMINATED') {
+      await handle.terminate();
+    }
   }
 }
 
