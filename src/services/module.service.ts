@@ -98,15 +98,15 @@ const updateModule = async (
     console.log('S4', existingPlatform);
 
     if (existingPlatform) {
-      existingPlatform.metadata = newPlatform.metadata;
-    } else {
-      module.options.platforms.push(newPlatform);
       console.log('A1', module.name, newPlatform.name);
       if (module.name === ModuleNames.Hivemind && newPlatform.name === PlatformNames.Website) {
         console.log('A2');
 
         await handleHivemindWebsiteCase(newPlatform);
       }
+      existingPlatform.metadata = newPlatform.metadata;
+    } else {
+      module.options.platforms.push(newPlatform);
     }
   }
   return module.save();
