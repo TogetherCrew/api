@@ -6,19 +6,14 @@ import { DatabaseManager, PlatformNames } from '@togethercrew.dev/db';
 
 import config from '../config';
 import parentLogger from '../config/logger';
-import { discord, generateCodeChallenge, generateCodeVerifier, generateState, google, twitter } from '../config/oAtuh2';
+import {
+    discord, generateCodeChallenge, generateCodeVerifier, generateState, google, twitter
+} from '../config/oAtuh2';
 import { IAuthAndPlatform, ISessionRequest } from '../interfaces';
 import { IAuthRequest } from '../interfaces/Request.interface';
 import {
-  discordServices,
-  discourseService,
-  githubService,
-  googleService,
-  notionService,
-  platformService,
-  tokenService,
-  twitterService,
-  userService,
+    discordServices, discourseService, githubService, googleService, notionService, platformService,
+    tokenService, twitterService, userService
 } from '../services';
 import { catchAsync, pick } from '../utils';
 
@@ -323,7 +318,10 @@ const getPlatform = catchAsync(async function (req: IAuthRequest, res: Response)
   res.send(platform);
 });
 const updatePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
+  console.log('Debug1');
   platformService.validatePlatformUpdate(req.platform, req.body);
+  console.log('Debug2');
+
   const platform = await platformService.updatePlatform(req.platform, req.user, req.body);
   res.send(platform);
 });
