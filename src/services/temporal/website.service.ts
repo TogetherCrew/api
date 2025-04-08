@@ -57,17 +57,16 @@ class TemporalWebsiteService extends TemporalCoreService {
   public async deleteSchedule(scheduleId: string): Promise<void> {
     const client: Client = await this.getClient();
     const handle = client.schedule.getHandle(scheduleId);
+
     await handle.delete();
   }
 
   public async terminateWorkflow(workflowId: string): Promise<void> {
-    console.log(workflowId);
     const client: Client = await this.getClient();
     const handle = client.workflow.getHandle(workflowId);
     const description = await handle.describe();
-    console.log(description);
-    if (description.status.name === 'TERMINATED') {
-      await handle.terminate();
+    if (description.status.name !== 'TERMINATED' && description.status.name !== 'COMPLETED') {
+      await handle.terminate('Terminated due to schedule deletion');
     }
   }
 }
