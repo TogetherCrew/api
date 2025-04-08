@@ -127,8 +127,6 @@ const updatePlatform = async (
   user: HydratedDocument<IUser>,
   updateBody: Partial<IPlatform>,
 ): Promise<HydratedDocument<IPlatform>> => {
-  console.log('123', updateBody.metadata);
-
   // Handle special cases based on platform type
   if (platform.name === PlatformNames.Website) {
     await handleWebsiteResourceChanges(platform, updateBody);
@@ -140,7 +138,6 @@ const updatePlatform = async (
     }
   }
 
-  console.log('321', updateBody.metadata);
   if (updateBody.metadata) {
     updateBody.metadata = {
       ...platform.metadata,
