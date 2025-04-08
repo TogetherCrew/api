@@ -27,7 +27,6 @@ class TemporalWebsiteService extends TemporalCoreService {
 
     try {
       const client: Client = await this.getClient();
-      console.log('type', typeof platformId.toString());
       return client.schedule.create({
         scheduleId: `website/${uuidv4()}`,
         spec: {
@@ -62,8 +61,10 @@ class TemporalWebsiteService extends TemporalCoreService {
   }
 
   public async terminateWorkflow(workflowId: string): Promise<void> {
+    console.log(workflowId);
     const client: Client = await this.getClient();
     const handle = client.workflow.getHandle(workflowId);
+    console.log(handle);
     await handle.terminate();
   }
 }
