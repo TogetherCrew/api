@@ -60,6 +60,17 @@ class TemporalWebsiteService extends TemporalCoreService {
     const handle = client.schedule.getHandle(scheduleId);
     await handle.delete();
   }
+
+  public async terminateWebsiteWorkflow(communityId: string): Promise<void> {
+    const workflowId = `website:ingestor:${communityId}`;
+    await this.terminateWorkflow(workflowId);
+  }
+
+  public async terminateWorkflow(workflowId: string): Promise<void> {
+    const client: Client = await this.getClient();
+    const handle = client.workflow.getHandle(workflowId);
+    await handle.terminate();
+  }
 }
 
 export default new TemporalWebsiteService();
