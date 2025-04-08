@@ -318,10 +318,7 @@ const getPlatform = catchAsync(async function (req: IAuthRequest, res: Response)
   res.send(platform);
 });
 const updatePlatform = catchAsync(async function (req: IAuthAndPlatform, res: Response) {
-  console.log('Debug1');
   platformService.validatePlatformUpdate(req.platform, req.body);
-  console.log('Debug2');
-
   const platform = await platformService.updatePlatform(req.platform, req.user, req.body);
   res.send(platform);
 });

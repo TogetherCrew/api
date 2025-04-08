@@ -1,6 +1,8 @@
 import { FilterQuery, HydratedDocument, ObjectId, Types } from 'mongoose';
 
-import { IModule, IModuleUpdateBody, Module, ModuleNames, PlatformNames } from '@togethercrew.dev/db';
+import {
+    IModule, IModuleUpdateBody, Module, ModuleNames, PlatformNames
+} from '@togethercrew.dev/db';
 
 import platformService from './platform.service';
 import websiteService from './website';
@@ -63,9 +65,13 @@ const updateModule = async (
   module: HydratedDocument<IModule>,
   updateBody: Partial<IModuleUpdateBody>,
 ): Promise<HydratedDocument<IModule>> => {
+  console.log('S1', module.name, updateBody.options?.platforms);
+
   if (!updateBody.options?.platforms?.length) {
     return module.save();
   }
+
+  console.log('S2', module.options);
 
   if (!module.options) {
     module.options = { platforms: [] };
@@ -74,6 +80,8 @@ const updateModule = async (
   }
 
   const platforms = updateBody.options.platforms;
+
+  console.log('S3', platforms[0].name);
 
   if (platforms[0].name === undefined) {
     const globalOption = module.options.platforms[0];
@@ -87,6 +95,7 @@ const updateModule = async (
 
   for (const newPlatform of platforms) {
     const existingPlatform = module.options.platforms.find((p) => p.name === newPlatform.name);
+    console.log('S4', existingPlatform);
 
     if (existingPlatform) {
       existingPlatform.metadata = newPlatform.metadata;
