@@ -27,7 +27,17 @@ async function deleteWebsiteSchedule(scheduleId: string): Promise<void> {
   }
 }
 
+async function terminateWebsiteWorkflow(workflowId: string): Promise<void> {
+  try {
+    await temporalWebsite.terminateWorkflow(workflowId);
+  } catch (error) {
+    logger.error(error, 'Failed to terminate website workflow.');
+    throw new ApiError(590, 'Failed to terminate website workflow.');
+  }
+}
+
 export default {
   createWebsiteSchedule,
   deleteWebsiteSchedule,
+  terminateWebsiteWorkflow,
 };
