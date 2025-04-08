@@ -137,6 +137,7 @@ const updatePlatform = async (
       await platformService.notifyDiscordUserImportComplete(platform.id, discordIdentity.id);
     }
   }
+  console.log('Main', updateBody);
 
   if (updateBody.metadata) {
     updateBody.metadata = {
@@ -372,11 +373,12 @@ const handleWebsiteResourceChanges = async (
   const oldResources = JSON.stringify(platform.metadata.resources.sort());
   const newResources = JSON.stringify(updateBody.metadata.resources.sort());
 
-  console.log('oldResources', oldResources, newResources);
+  console.log(oldResources, newResources);
   if (oldResources !== newResources) {
     const existingScheduleId = platform.metadata.scheduleId;
 
     if (existingScheduleId) {
+      console.log('removing');
       await websiteService.coreService.deleteWebsiteSchedule(existingScheduleId);
       updateBody.metadata.scheduleId = null;
     }
@@ -394,11 +396,11 @@ const handleWebsiteResourceChanges = async (
 
     const hivemindModule = await moduleService.getModuleByFilter(moduleFilter);
 
-    console.log('hivemindModule', hivemindModule);
     if (hivemindModule) {
       const scheduleId = await websiteService.coreService.createWebsiteSchedule(platform._id);
       updateBody.metadata.scheduleId = scheduleId;
     }
+    console.log('removed', updateBody);
   }
 };
 

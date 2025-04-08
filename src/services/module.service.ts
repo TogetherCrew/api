@@ -118,19 +118,16 @@ const updateModule = async (
  */
 const handleHivemindWebsiteCase = async (platform: any) => {
   const platformDoc = await platformService.getPlatformById(platform.platform);
-  console.log('A3');
 
   if (!platformDoc) return;
 
   const isActivated = platform.metadata?.activated;
   const existingScheduleId = platformDoc.get('metadata.scheduleId');
-  console.log('A4', isActivated, existingScheduleId);
 
   if (isActivated === true) {
     if (!existingScheduleId) {
       const scheduleId = await websiteService.coreService.createWebsiteSchedule(platform.platform);
       platformDoc.set('metadata.scheduleId', scheduleId);
-      console.log('A5', platformDoc);
 
       await platformDoc.save();
     }
@@ -138,7 +135,6 @@ const handleHivemindWebsiteCase = async (platform: any) => {
     if (existingScheduleId) {
       await websiteService.coreService.deleteWebsiteSchedule(existingScheduleId);
       platformDoc.set('metadata.scheduleId', null);
-      console.log('A6', platformDoc);
 
       await platformDoc.save();
     }
