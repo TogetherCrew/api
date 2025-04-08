@@ -374,7 +374,7 @@ const handleWebsiteResourceChanges = async (
   if (oldResources === newResources) return;
 
   if (platform.metadata.scheduleId) {
-    // await websiteService.coreService.deleteWebsiteSchedule(platform.metadata.scheduleId);
+    await websiteService.coreService.deleteWebsiteSchedule(platform.metadata.scheduleId);
     await websiteService.coreService.terminateWebsiteWorkflow(platform.community.toString());
     updateBody.metadata.scheduleId = null;
   }
