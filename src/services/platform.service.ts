@@ -347,6 +347,7 @@ const handlePlatformCleanup = async (platform: HydratedDocument<IPlatform>): Pro
     case PlatformNames.Website: {
       if (platform.metadata?.scheduleId) {
         await websiteService.coreService.deleteWebsiteSchedule(platform.metadata.scheduleId);
+        await websiteService.coreService.terminateWebsiteWorkflow(platform.community.toString());
       }
       break;
     }
@@ -373,7 +374,7 @@ const handleWebsiteResourceChanges = async (
   if (oldResources === newResources) return;
 
   if (platform.metadata.scheduleId) {
-    await websiteService.coreService.deleteWebsiteSchedule(platform.metadata.scheduleId);
+    // await websiteService.coreService.deleteWebsiteSchedule(platform.metadata.scheduleId);
     await websiteService.coreService.terminateWebsiteWorkflow(platform.community.toString());
     updateBody.metadata.scheduleId = null;
   }
