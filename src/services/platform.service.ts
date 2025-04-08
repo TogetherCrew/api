@@ -365,24 +365,21 @@ const handleWebsiteResourceChanges = async (
   platform: HydratedDocument<IPlatform>,
   updateBody: Partial<IPlatform>,
 ): Promise<void> => {
-  console.log('updateBody.metadata?.resources', updateBody.metadata?.resources, platform.metadata?.resources);
+  if (!updateBody.metadata?.resources || !platform.metadata?.resources) return;
 
-  if (!updateBody.metadata?.resources || !platform.metadata?.resources) {
-    return;
+  const oldResources = JSON.stringify([...platform.metadata.resources].sort());
+  const newResources = JSON.stringify([...updateBody.metadata.resources].sort());
+
+  if (oldResources === newResources) return;
+
+  if (platform.metadata.scheduleId) {
+    await websiteService.coreService.deleteWebsiteSchedule(platform.metadata.scheduleId);
+    updateBody.metadata.scheduleId = null;
   }
-  const oldResources = JSON.stringify(platform.metadata.resources.sort());
-  const newResources = JSON.stringify(updateBody.metadata.resources.sort());
 
-  console.log(oldResources, newResources);
-  if (oldResources !== newResources) {
-    const existingScheduleId = platform.metadata.scheduleId;
-
-    if (existingScheduleId) {
-      console.log('removing');
-      await websiteService.coreService.deleteWebsiteSchedule(existingScheduleId);
-      updateBody.metadata.scheduleId = null;
-    }
-
+  if (updateBody.metadata.resources.length === 0) {
+    updateBody.metadata.scheduleId = null;
+  } else {
     const moduleFilter = {
       name: ModuleNames.Hivemind,
       'options.platforms': {
@@ -395,12 +392,10 @@ const handleWebsiteResourceChanges = async (
     };
 
     const hivemindModule = await moduleService.getModuleByFilter(moduleFilter);
-
     if (hivemindModule) {
       const scheduleId = await websiteService.coreService.createWebsiteSchedule(platform._id);
       updateBody.metadata.scheduleId = scheduleId;
     }
-    console.log('removed', updateBody);
   }
 };
 
