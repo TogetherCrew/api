@@ -1,9 +1,9 @@
 {
-  "lastRun": "1738072787796-update-user-documents-for-telegram-login.ts",
+  "lastRun": "1738072787797-add-activated-field-to-modules.ts",
   "migrations": [
     {
-      "title": "1738072787796-update-user-documents-for-telegram-login.ts",
-      "timestamp": 1738073593695
+      "title": "1738072787797-add-activated-field-to-modules.ts",
+      "timestamp": 1744199444528
     }
   ]
 }

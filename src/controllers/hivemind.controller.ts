@@ -6,7 +6,6 @@ import HivemindTemporalService from '../services/temporal/hivemind.service';
 import { catchAsync } from '../utils';
 
 const askQuestion = catchAsync(async function (req: IAuthRequest, res: Response) {
-  console.debug('Body', req.body.communityId, req.body.question, req.body.chatId);
   req.setTimeout(6 * 60 * 1000);
   res.setTimeout(6 * 60 * 1000);
   const answer = await HivemindTemporalService.triggerWorkflow(
