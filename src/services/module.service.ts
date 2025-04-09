@@ -1,6 +1,6 @@
 import { FilterQuery, HydratedDocument, ObjectId, Types } from 'mongoose';
 
-import { IModule, IModuleUpdateBody, Module, ModuleNames, PlatformNames } from '@togethercrew.dev/db';
+import { IModule, IModuleUpdateBody, Module } from '@togethercrew.dev/db';
 
 import platformService from './platform.service';
 import websiteService from './website';
@@ -87,15 +87,11 @@ const updateModule = async (
 
   for (const newPlatform of platforms) {
     const existingPlatform = module.options.platforms.find((p) => p.name === newPlatform.name);
-    console.log('S4', existingPlatform);
 
     if (existingPlatform) {
-      console.log('A1', module.name, newPlatform.name);
-      if (module.name === ModuleNames.Hivemind && newPlatform.name === PlatformNames.Website) {
-        console.log('A2');
-
-        await handleHivemindWebsiteCase(newPlatform);
-      }
+      // if (module.name === ModuleNames.Hivemind && newPlatform.name === PlatformNames.Website) {
+      //   await handleHivemindWebsiteCase(newPlatform);
+      // }
       existingPlatform.metadata = newPlatform.metadata;
     } else {
       module.options.platforms.push(newPlatform);

@@ -137,7 +137,6 @@ const updatePlatform = async (
       await platformService.notifyDiscordUserImportComplete(platform.id, discordIdentity.id);
     }
   }
-  console.log('Main', updateBody);
 
   if (updateBody.metadata) {
     updateBody.metadata = {
