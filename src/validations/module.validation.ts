@@ -1,7 +1,10 @@
 import Joi from 'joi';
 
 import {
-    HivemindPlatformNames, ModuleNames, PlatformNames, ViolationDetectionPlatformNames
+  HivemindPlatformNames,
+  ModuleNames,
+  PlatformNames,
+  ViolationDetectionPlatformNames,
 } from '@togethercrew.dev/db';
 
 import { objectId } from './custom.validation';
@@ -12,6 +15,7 @@ const createModule = {
       .required()
       .valid(...Object.values(ModuleNames)),
     community: Joi.string().custom(objectId).required(),
+    activated: Joi.boolean().required(),
   }),
 };
 
@@ -202,6 +206,7 @@ const dynamicModuleUpdate = (req: any) => {
       bodyOption = {
         body: Joi.object().required().keys({
           options: hivemindOptions(),
+          activated: Joi.boolean(),
         }),
       };
       break;
@@ -209,6 +214,7 @@ const dynamicModuleUpdate = (req: any) => {
       bodyOption = {
         body: Joi.object().required().keys({
           options: violationDetectionOptions(),
+          activated: Joi.boolean(),
         }),
       };
       break;
@@ -216,6 +222,7 @@ const dynamicModuleUpdate = (req: any) => {
       bodyOption = {
         body: Joi.object().required().keys({
           options: dynamicNftOptions(),
+          activated: Joi.boolean(),
         }),
       };
       break;
