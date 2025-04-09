@@ -1,10 +1,7 @@
 import Joi from 'joi';
 
 import {
-  HivemindPlatformNames,
-  ModuleNames,
-  PlatformNames,
-  ViolationDetectionPlatformNames,
+    HivemindPlatformNames, ModuleNames, PlatformNames, ViolationDetectionPlatformNames
 } from '@togethercrew.dev/db';
 
 import { objectId } from './custom.validation';
@@ -83,11 +80,18 @@ const hivemindMediaWikiMetadata = () => {
   });
 };
 
+const hivemindTelegramMetadata = () => {
+  return Joi.object().keys({
+    activated: Joi.boolean(),
+  });
+};
+
 const websiteMediaWikiMetadata = () => {
   return Joi.object().keys({
     activated: Joi.boolean(),
   });
 };
+
 const hivemindOptions = () => {
   return Joi.object().keys({
     platforms: Joi.array().items(
@@ -121,6 +125,10 @@ const hivemindOptions = () => {
             {
               is: PlatformNames.Website,
               then: websiteMediaWikiMetadata(),
+            },
+            {
+              is: PlatformNames.Telegram,
+              then: hivemindTelegramMetadata(),
             },
           ],
           otherwise: Joi.any().forbidden(),
