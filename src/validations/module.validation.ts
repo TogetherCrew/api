@@ -199,7 +199,11 @@ const dynamicModuleUpdate = (req: any) => {
       moduleId: Joi.string().custom(objectId).required(),
     }),
   };
-  let bodyOption = {};
+  let bodyOption = {
+    body: Joi.object().required().keys({
+      activated: Joi.boolean(),
+    }),
+  };
 
   switch (moduleName) {
     case ModuleNames.Hivemind:
@@ -227,8 +231,8 @@ const dynamicModuleUpdate = (req: any) => {
       };
       break;
     default:
-      req.allowInput = false;
-      return {};
+      // Allow only activated field update for unknown module types
+      break;
   }
 
   return {
