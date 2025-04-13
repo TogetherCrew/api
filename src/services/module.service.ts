@@ -1,6 +1,6 @@
 import { FilterQuery, HydratedDocument, ObjectId, Types } from 'mongoose';
 
-import { IModule, IModuleUpdateBody, Module } from '@togethercrew.dev/db';
+import { IModule, IModuleUpdateBody, Module, PlatformNames, ModuleNames } from '@togethercrew.dev/db';
 
 import platformService from './platform.service';
 import websiteService from './website';
@@ -64,7 +64,9 @@ const updateModule = async (
   updateBody: Partial<IModuleUpdateBody>,
 ): Promise<HydratedDocument<IModule>> => {
   if (!updateBody.options?.platforms?.length) {
-    return module.save();
+    Object.assign(module, updateBody);
+
+    return await module.save();
   }
 
   if (!module.options) {

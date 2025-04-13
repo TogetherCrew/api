@@ -199,7 +199,11 @@ const dynamicModuleUpdate = (req: any) => {
       moduleId: Joi.string().custom(objectId).required(),
     }),
   };
-  let bodyOption = {};
+  let bodyOption = {
+    body: Joi.object().required().keys({
+      activated: Joi.boolean(),
+    }),
+  };
 
   switch (moduleName) {
     case ModuleNames.Hivemind:
