@@ -92,8 +92,6 @@ const updateModule = async (
 
     if (existingPlatform) {
       if (module.name === ModuleNames.Hivemind && newPlatform.name === PlatformNames.Website) {
-        console.log('A2');
-
         await handleHivemindWebsiteCase(newPlatform);
       }
       existingPlatform.metadata = newPlatform.metadata;
