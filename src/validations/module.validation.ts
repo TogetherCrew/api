@@ -1,7 +1,10 @@
 import Joi from 'joi';
 
 import {
-    HivemindPlatformNames, ModuleNames, PlatformNames, ViolationDetectionPlatformNames
+  HivemindPlatformNames,
+  ModuleNames,
+  PlatformNames,
+  ViolationDetectionPlatformNames,
 } from '@togethercrew.dev/db';
 
 import { objectId } from './custom.validation';
@@ -195,33 +198,31 @@ const dynamicModuleUpdate = (req: any) => {
       moduleId: Joi.string().custom(objectId).required(),
     }),
   };
-  let bodyOption = {};
+  let bodyOption = {
+    body: Joi.object().required().keys({
+      activated: Joi.boolean(),
+    }),
+  };
 
   switch (moduleName) {
     case ModuleNames.Hivemind:
-      bodyOption = {
-        body: Joi.object().required().keys({
-          options: hivemindOptions(),
-        }),
-      };
+      bodyOption.body = bodyOption.body.keys({
+        options: hivemindOptions(),
+      });
       break;
     case ModuleNames.ViolationDetection:
-      bodyOption = {
-        body: Joi.object().required().keys({
-          options: violationDetectionOptions(),
-        }),
-      };
+      bodyOption.body = bodyOption.body.keys({
+        options: violationDetectionOptions(),
+      });
       break;
     case ModuleNames.DynamicNft:
-      bodyOption = {
-        body: Joi.object().required().keys({
-          options: dynamicNftOptions(),
-        }),
-      };
+      bodyOption.body = bodyOption.body.keys({
+        options: dynamicNftOptions(),
+      });
       break;
     default:
-      req.allowInput = false;
-      return {};
+      // Allow only activated field update for unknown module types
+      break;
   }
 
   return {

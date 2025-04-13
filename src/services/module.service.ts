@@ -63,8 +63,11 @@ const updateModule = async (
   module: HydratedDocument<IModule>,
   updateBody: Partial<IModuleUpdateBody>,
 ): Promise<HydratedDocument<IModule>> => {
+  console.log(updateBody);
   if (!updateBody.options?.platforms?.length) {
-    return module.save();
+    Object.assign(module, updateBody);
+
+    return await module.save();
   }
 
   if (!module.options) {
