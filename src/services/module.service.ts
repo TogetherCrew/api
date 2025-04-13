@@ -91,9 +91,9 @@ const updateModule = async (
     const existingPlatform = module.options.platforms.find((p) => p.name === newPlatform.name);
 
     if (existingPlatform) {
-      if (module.name === ModuleNames.Hivemind && newPlatform.name === PlatformNames.Website) {
-        await handleHivemindWebsiteCase(newPlatform);
-      }
+      // if (module.name === ModuleNames.Hivemind && newPlatform.name === PlatformNames.Website) {
+      //   await handleHivemindWebsiteCase(newPlatform);
+      // }
       existingPlatform.metadata = newPlatform.metadata;
     } else {
       module.options.platforms.push(newPlatform);
