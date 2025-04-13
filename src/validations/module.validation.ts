@@ -231,8 +231,8 @@ const dynamicModuleUpdate = (req: any) => {
       };
       break;
     default:
-      // Allow only activated field update for unknown module types
-      break;
+      req.allowInput = false;
+      return {};
   }
 
   return {
