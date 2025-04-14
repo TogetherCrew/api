@@ -2,10 +2,6 @@
   "lastRun": "1744651967487-add-modules.ts",
   "migrations": [
     {
-      "title": "1738072787797-add-activated-field-to-modules.ts",
-      "timestamp": 1744652563680
-    },
-    {
       "title": "1744651967487-add-modules.ts",
       "timestamp": 1744652563722
     }
