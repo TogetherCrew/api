@@ -4,7 +4,6 @@ import { IModule, IModuleUpdateBody, Module, PlatformNames, ModuleNames } from '
 
 import platformService from './platform.service';
 import websiteService from './website';
-import mediawikiService from './mediawiki';
 
 /**
  * Create a module
@@ -92,13 +91,9 @@ const updateModule = async (
     const existingPlatform = module.options.platforms.find((p) => p.name === newPlatform.name);
 
     if (existingPlatform) {
-      if (module.name === ModuleNames.Hivemind) {
-        if (newPlatform.name === PlatformNames.Website) {
-          await handleHivemindWebsiteCase(newPlatform);
-        } else if (newPlatform.name === PlatformNames.MediaWiki) {
-          await handleHivemindMediaWikiCase(newPlatform);
-        }
-      }
+      // if (module.name === ModuleNames.Hivemind && newPlatform.name === PlatformNames.Website) {
+      //   await handleHivemindWebsiteCase(newPlatform);
+      // }
       existingPlatform.metadata = newPlatform.metadata;
     } else {
       module.options.platforms.push(newPlatform);
@@ -130,32 +125,6 @@ const handleHivemindWebsiteCase = async (platform: any) => {
     if (existingScheduleId) {
       await websiteService.coreService.deleteWebsiteSchedule(existingScheduleId);
       await websiteService.coreService.terminateWebsiteWorkflow(platformDoc.community.toString());
-      platformDoc.set('metadata.scheduleId', null);
-
-      await platformDoc.save();
-    }
-  }
-};
-
-const handleHivemindMediaWikiCase = async (platform: any) => {
-  const platformDoc = await platformService.getPlatformById(platform.platform);
-
-  if (!platformDoc) return;
-
-  const isActivated = platform.metadata?.activated;
-  const existingScheduleId = platformDoc.get('metadata.scheduleId');
-
-  if (isActivated === true) {
-    if (!existingScheduleId) {
-      const scheduleId = await mediawikiService.coreService.createMediaWikiSchedule(platform.platform);
-      platformDoc.set('metadata.scheduleId', scheduleId);
-
-      await platformDoc.save();
-    }
-  } else if (isActivated === false) {
-    if (existingScheduleId) {
-      await mediawikiService.coreService.deleteMediaWikiSchedule(existingScheduleId);
-      await mediawikiService.coreService.terminateMediaWikiWorkflow(platformDoc.community.toString());
       platformDoc.set('metadata.scheduleId', null);
 
       await platformDoc.save();
