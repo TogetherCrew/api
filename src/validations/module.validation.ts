@@ -230,6 +230,15 @@ const dynamicModuleUpdate = (req: any) => {
         }),
       };
       break;
+    case ModuleNames.CommunityInsights:
+    case ModuleNames.CommunityHealth:
+    case ModuleNames.Announcements:
+      bodyOption = {
+        body: Joi.object().required().keys({
+          activated: Joi.boolean(),
+        }),
+      };
+      break;
     default:
       req.allowInput = false;
       return {};

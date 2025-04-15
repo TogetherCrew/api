@@ -20,9 +20,15 @@ paths:
                     - hivemind
                     - violationDetection
                     - dynamicNft
+                    - communityInsights
+                    - communityHealth
+                    - announcements
                 community:
                   type: string
                   format: objectId
+                activated:
+                  type: boolean
+                  description: Activation status of the module. Determines whether the module is enabled.
       responses:
         '201':
           description: Module created successfully.
@@ -52,6 +58,9 @@ paths:
               - hivemind
               - violationDetection
               - dynamicNft
+              - communityInsights
+              - communityHealth
+              - announcements
         - in: query
           name: community
           schema:
@@ -263,6 +272,9 @@ paths:
                                   tokenId:
                                     type: string
                                 description: Metadata for the dynamicNft.
+                activated:
+                  type: boolean
+                  description: Activation status of the module. Required for all modules.
               minProperties: 1
       responses:
         '200':
@@ -300,3 +312,40 @@ paths:
         '404':
           description: NotFound
           $ref: '#/components/responses/NotFound'
+
+components:
+  schemas:
+    Module:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the module
+        name:
+          type: string
+          enum:
+            - hivemind
+            - violationDetection
+            - dynamicNft
+            - communityInsights
+            - communityHealth
+            - announcements
+          description: Name of the module
+        community:
+          type: string
+          format: objectId
+          description: ID of the community the module belongs to
+        options:
+          type: object
+          description: Module-specific configuration options, varies by module type
+        activated:
+          type: boolean
+          description: Indicates whether the module is currently activated
+        createdAt:
+          type: string
+          format: date-time
+          description: Date and time when the module was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: Date and time when the module was last updated
