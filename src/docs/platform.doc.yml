@@ -165,13 +165,16 @@ paths:
                                   type: string
                       description: Metadata for Notion.
                     - type: object
-                      required: [baseURL, path]
+                      required: [baseURL, path, namespace]
                       properties:
                         baseURL:
                           type: string
                         path:
                           type: string
-                          default: /w/api.php
+                        namespace:
+                          type: array 
+                          items:
+                            type: number
                       description: Metadata for MediaWiki.
                     - type: object
                       required: [id, period, analyzerStartedAt, resources]
