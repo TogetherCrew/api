@@ -34,6 +34,15 @@ const websiteUpdateMetadata = () => {
     resources: Joi.array().items(Joi.string().uri({ scheme: ['http', 'https'] })),
   });
 };
+
+const mediaWikiUpdateMetadata = () => {
+  return Joi.object().keys({
+    baseURL: Joi.string().required(),
+    path: Joi.string().required(),
+    namespace: Joi.array().items(Joi.number()).required(),
+  });
+};
+
 const twitterMetadata = () => {
   return Joi.object().keys({
     id: Joi.string().required(),
@@ -84,7 +93,8 @@ const notionMetadata = () => {
 const mediaWikiMetadata = () => {
   return Joi.object().keys({
     baseURL: Joi.string().required(),
-    path: Joi.string().required().valid('/w/api.php'),
+    path: Joi.string().required(),
+    namespace: Joi.array().items(Joi.number()).required(),
   });
 };
 
@@ -226,6 +236,16 @@ const dynamicUpdatePlatform = (req: Request) => {
         }),
         body: Joi.object().required().keys({
           metadata: websiteUpdateMetadata(),
+        }),
+      };
+    }
+    case PlatformNames.MediaWiki: {
+      return {
+        params: Joi.object().keys({
+          platformId: Joi.required().custom(objectId),
+        }),
+        body: Joi.object().required().keys({
+          metadata: mediaWikiUpdateMetadata(),
         }),
       };
     }
