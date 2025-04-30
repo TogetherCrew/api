@@ -39,7 +39,7 @@ const mediaWikiUpdateMetadata = () => {
   return Joi.object().keys({
     baseURL: Joi.string().required(),
     path: Joi.string().required(),
-    namespace: Joi.array().items(Joi.number()).required(),
+    namespaces: Joi.array().items(Joi.number()).required(),
   });
 };
 
