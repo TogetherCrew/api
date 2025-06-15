@@ -1,9 +1,17 @@
 {
-  "lastRun": "1744651967487-add-modules.ts",
+  "lastRun": "1749998690421-change-mediawiki-namespace-field.ts",
   "migrations": [
     {
+      "title": "1738072787797-add-activated-field-to-modules.ts",
+      "timestamp": 1750008625370
+    },
+    {
       "title": "1744651967487-add-modules.ts",
-      "timestamp": 1744652563722
+      "timestamp": 1750008625414
+    },
+    {
+      "title": "1749998690421-change-mediawiki-namespace-field.ts",
+      "timestamp": 1750008625431
     }
   ]
 }
