@@ -165,13 +165,13 @@ paths:
                                   type: string
                       description: Metadata for Notion.
                     - type: object
-                      required: [baseURL, path, namespace]
+                      required: [baseURL, path, namespaces]
                       properties:
                         baseURL:
                           type: string
                         path:
                           type: string
-                        namespace:
+                        namespaces:
                           type: array 
                           items:
                             type: number
