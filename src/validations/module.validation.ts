@@ -79,6 +79,7 @@ const hivemindNotionMetadata = () => {
 
 const hivemindMediaWikiMetadata = () => {
   return Joi.object().keys({
+    namespaces: Joi.array().items(Joi.number()).default([0]),
     activated: Joi.boolean(),
   });
 };

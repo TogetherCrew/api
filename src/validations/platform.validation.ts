@@ -39,7 +39,7 @@ const mediaWikiUpdateMetadata = () => {
   return Joi.object().keys({
     baseURL: Joi.string().required(),
     path: Joi.string().required(),
-    namespaces: Joi.array().items(Joi.number()).required(),
+    namespaces: Joi.array().items(Joi.number()).default([0]),
   });
 };
 
@@ -94,7 +94,7 @@ const mediaWikiMetadata = () => {
   return Joi.object().keys({
     baseURL: Joi.string().required(),
     path: Joi.string().required(),
-    namespaces: Joi.array().items(Joi.number()).required(),
+    namespaces: Joi.array().items(Joi.number()).default([0]),
   });
 };
 
