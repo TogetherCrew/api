@@ -241,10 +241,13 @@ paths:
                                 description: Metadata for the hivemind module on Notion.
                               - type: object
                                 properties:
-                                  pageIds:
+                                  namespaces:
                                     type: array
                                     items:
-                                      type: string
+                                      type: number
+                                    default: [0]
+                                  activated:
+                                    type: boolean
                                 description: Metadata for the hivemind module on MediaWiki.
                               - type: object
                                 description: Metadata for the hivemind module on website.

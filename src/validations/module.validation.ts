@@ -1,10 +1,7 @@
 import Joi from 'joi';
 
 import {
-  HivemindPlatformNames,
-  ModuleNames,
-  PlatformNames,
-  ViolationDetectionPlatformNames,
+    HivemindPlatformNames, ModuleNames, PlatformNames, ViolationDetectionPlatformNames
 } from '@togethercrew.dev/db';
 
 import { objectId } from './custom.validation';
@@ -79,6 +76,7 @@ const hivemindNotionMetadata = () => {
 
 const hivemindMediaWikiMetadata = () => {
   return Joi.object().keys({
+    namespaces: Joi.array().items(Joi.number()).default([0]),
     activated: Joi.boolean(),
   });
 };
