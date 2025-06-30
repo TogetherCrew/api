@@ -4,7 +4,7 @@ import { IModule, IModuleUpdateBody, Module, PlatformNames, ModuleNames } from '
 
 import platformService from './platform.service';
 import websiteService from './website';
-
+import temporalMediaWiki from './temporal/mediaWiki.service';
 /**
  * Create a module
  * @param {IModule} ModuleBody
@@ -94,6 +94,9 @@ const updateModule = async (
       // if (module.name === ModuleNames.Hivemind && newPlatform.name === PlatformNames.Website) {
       //   await handleHivemindWebsiteCase(newPlatform);
       // }
+      if (module.name === ModuleNames.Hivemind && newPlatform.name === PlatformNames.MediaWiki) {
+        await handleHivemindMediaWikiCase(newPlatform);
+      }
       existingPlatform.metadata = newPlatform.metadata;
     } else {
       module.options.platforms.push(newPlatform);
@@ -127,6 +130,27 @@ const handleHivemindWebsiteCase = async (platform: any) => {
       await websiteService.coreService.terminateWebsiteWorkflow(platformDoc.community.toString());
       platformDoc.set('metadata.scheduleId', null);
 
+      await platformDoc.save();
+    }
+  }
+};
+
+/**
+ * Handle special case for Hivemind module with MediaWiki platform
+ * @param {Object} platform - Platform object
+ */
+const handleHivemindMediaWikiCase = async (platform: any) => {
+  const platformDoc = await platformService.getPlatformById(platform.platform);
+
+  if (!platformDoc) return;
+
+  const isActivated = platform.metadata?.activated;
+  const existingWorkflowId = platformDoc.get('metadata.workflowId');
+
+  if (isActivated === true) {
+    if (!existingWorkflowId) {
+      const workflowId = await temporalMediaWiki.executeWorkflow(platform.platform);
+      platformDoc.set('metadata.workflowId', workflowId);
       await platformDoc.save();
     }
   }
