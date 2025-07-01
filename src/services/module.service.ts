@@ -140,6 +140,7 @@ const handleHivemindWebsiteCase = async (platform: any) => {
  * @param {Object} platform - Platform object
  */
 const handleHivemindMediaWikiCase = async (platform: any) => {
+  console.log('Handling Hivemind MediaWiki case for platform:', platform);
   const platformDoc = await platformService.getPlatformById(platform.platform);
 
   if (!platformDoc) return;
@@ -148,8 +149,11 @@ const handleHivemindMediaWikiCase = async (platform: any) => {
   const existingWorkflowId = platformDoc.get('metadata.workflowId');
 
   if (isActivated === true) {
+    console.log('Platform is activated, checking for existing workflow ID:', existingWorkflowId);
     if (!existingWorkflowId) {
+      console.log('No existing workflow ID found, executing new workflow for platform:', platform.platform);
       const workflowId = await temporalMediaWiki.executeWorkflow(platform.platform);
+      console.log('New workflow ID created:', workflowId);
       platformDoc.set('metadata.workflowId', workflowId);
       await platformDoc.save();
     }
