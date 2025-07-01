@@ -11,32 +11,27 @@ const logger = parentLogger.child({ module: 'MediaWikiTemporalService' });
 
 class TemporalMediaWikiService extends TemporalCoreService {
   public async executeWorkflow(platformId: Types.ObjectId) {
-    console.log('Executing MediaWiki workflow for platform ID:', platformId);
     const client: Client = await this.getClient();
-    const payload = {
-      platform_id: platformId,
-    };
+    const payload = platformId;
     try {
-      console.log('Triggering MediaWiki workflow with payload:', payload);
-      const workflowHandle = await client.workflow.execute('MediaWikiETLWorkflow', {
+      client.workflow.execute('MediaWikiETLWorkflow', {
         taskQueue: queues.TEMPORAL_QUEUE_PYTHON_HEAVY,
         args: [payload],
-        workflowId: `mediawiki/${platformId}/${uuidv4()}`,
+        workflowId: `api:mediawikietl:${platformId}`,
       });
-      logger.info(`Started MediaWiki workflow with ID: ${workflowHandle}`);
-      return workflowHandle;
     } catch (error) {
       logger.error(`Failed to trigger MediaWiki workflow: ${(error as Error).message}`);
       throw new Error(`Failed to trigger MediaWiki workflow: ${(error as Error).message}`);
     }
   }
 
-  public async terminateWorkflow(workflowId: string): Promise<void> {
+  public async terminateWorkflow(platformId: Types.ObjectId): Promise<void> {
     const client: Client = await this.getClient();
-    const handle = client.workflow.getHandle(workflowId);
-    const description = await handle.describe();
-    if (description.status.name !== 'TERMINATED' && description.status.name !== 'COMPLETED') {
-      await handle.terminate('Terminated due to schedule deletion');
+    try {
+      client.workflow.getHandle(`api:mediawikietl:${platformId}`).terminate();
+    } catch (error) {
+      logger.error(`Failed to terminate MediaWiki workflow: ${(error as Error).message}`);
+      throw new Error(`Failed to terminate MediaWiki workflow: ${(error as Error).message}`);
     }
   }
 }
