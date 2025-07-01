@@ -151,8 +151,8 @@ const handleHivemindMediaWikiCase = async (platform: any) => {
   if (isActivated === true) {
     console.log('Platform is activated, checking for existing workflow ID:', existingWorkflowId);
     if (!existingWorkflowId) {
-      console.log('No existing workflow ID found, executing new workflow for platform:', platform.platform);
-      const workflowId = await temporalMediaWiki.executeWorkflow(platform.platform);
+      console.log('No existing workflow ID found, executing new workflow for platform:', platformDoc.id);
+      const workflowId = await temporalMediaWiki.executeWorkflow(platformDoc.id);
       console.log('New workflow ID created:', workflowId);
       platformDoc.set('metadata.workflowId', workflowId);
       await platformDoc.save();

@@ -11,11 +11,13 @@ const logger = parentLogger.child({ module: 'MediaWikiTemporalService' });
 
 class TemporalMediaWikiService extends TemporalCoreService {
   public async executeWorkflow(platformId: Types.ObjectId) {
+    console.log('Executing MediaWiki workflow for platform ID:', platformId);
     const client: Client = await this.getClient();
     const payload = {
       platform_id: platformId,
     };
     try {
+      console.log('Triggering MediaWiki workflow with payload:', payload);
       const workflowHandle = await client.workflow.execute('MediaWikiETLWorkflow', {
         taskQueue: queues.TEMPORAL_QUEUE_PYTHON_HEAVY,
         args: [payload],
