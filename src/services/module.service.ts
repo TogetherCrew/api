@@ -1,10 +1,13 @@
 import { FilterQuery, HydratedDocument, ObjectId, Types } from 'mongoose';
 
-import { IModule, IModuleUpdateBody, Module, PlatformNames, ModuleNames } from '@togethercrew.dev/db';
+import {
+    IModule, IModuleUpdateBody, Module, ModuleNames, PlatformNames
+} from '@togethercrew.dev/db';
 
 import platformService from './platform.service';
-import websiteService from './website';
 import temporalMediaWiki from './temporal/mediaWiki.service';
+import websiteService from './website';
+
 /**
  * Create a module
  * @param {IModule} ModuleBody
@@ -91,9 +94,9 @@ const updateModule = async (
     const existingPlatform = module.options.platforms.find((p) => p.name === newPlatform.name);
 
     if (existingPlatform) {
-      // if (module.name === ModuleNames.Hivemind && newPlatform.name === PlatformNames.Website) {
-      //   await handleHivemindWebsiteCase(newPlatform);
-      // }
+      if (module.name === ModuleNames.Hivemind && newPlatform.name === PlatformNames.Website) {
+        await handleHivemindWebsiteCase(newPlatform);
+      }
       if (module.name === ModuleNames.Hivemind && newPlatform.name === PlatformNames.MediaWiki) {
         await handleHivemindMediaWikiCase(newPlatform);
       }
