@@ -15,7 +15,7 @@ const createModule = {
       .required()
       .valid(...Object.values(ModuleNames)),
     community: Joi.string().custom(objectId).required(),
-    activated: Joi.boolean().required(),
+    activated: Joi.boolean().default(true),
   }),
 };
 
